@@ -1,13 +1,11 @@
 # DOCKER-VERSION 0.3.4
-FROM    centos:6.4
+FROM    ubuntu:precise
 
-# Enable EPEL for Node.js
-RUN     rpm -Uvh
-http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
-# Install Node.js and npm
-RUN     yum install -y npm
+RUN apt-get install -y git
+RUN apt-get install -y curl
+# install nvm
+RUN curl https://raw.github.com/creationix/nvm/master/install.sh | sh
 
-# Bundle app source
-ADD . /src
+ADD . /app_src
 # Install app dependencies
-RUN cd /src; npm install
+RUN /bin/bash -c 'source .nvm/nvm.sh; cd /app_src; nvm install 0.10.10; npm install'

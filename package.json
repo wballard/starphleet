@@ -1,0 +1,23 @@
+{
+  "name": "starphleet",
+  "version": "0.0.1",
+  "description": "stuff",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wballard/starphleet.git"
+  },
+  "keywords": [
+    "awesome"
+  ],
+  "author": "Rear Admiral Ballard",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "3d11966f6a75ba67e39d71a5a8a03d2c36ed5944",
+  "bugs": {
+    "url": "https://github.com/wballard/starphleet/issues"
+  }
+}
