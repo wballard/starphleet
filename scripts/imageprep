@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+#This sets things into a known state of users and groups starting from
+#a base image
+
+sudo apt-get -y install git
+sudo groupadd docker
+sudo gpasswd -a vagrant docker
+sudo service docker restart
+sudo chmod 0777 /var/run/docker.sock
+
+sudo rm -rf /opt/starphleet
+sudo git clone https://github.com/wballard/starphleet.git /opt/starphleet
+cd /opt/starphleet
+docker build -t starphleet .
