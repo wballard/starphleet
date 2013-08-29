@@ -37,7 +37,7 @@ need are preloaded, and self updating from our git.
 SSH into your machine, and bootstrap it. Note the \<hostname\>.
 
 ```
-phleet join \<my git url\>
+phleet join <my git url>
 ```
 
 Now, we're going to clone that repository for you, and monitor it for
