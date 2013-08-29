@@ -1,12 +1,15 @@
 # Ship's Orders
 You give orders to the ships in your phleet with a simple config DSL.
-The commands are noted here.
+These orders are checked into your Headquarters repository, which each
+ship in the fleet contacts.
 
 # Commands
+The commands are noted here.
 
 ## AUTODEPLOY
 ## PUBLISH
 ## FORK
+## HEALTHCHECK
 
 # Using It
 Ships orders are filed, literally in files, with the Headquarters -- the

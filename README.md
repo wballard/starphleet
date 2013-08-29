@@ -32,7 +32,8 @@ Call that <my git url>. Get ready to paste that. Make sure you can get
 at this without any auth, this sample assume public access.
 
 Fire up a machine with our AMI image or VMWare image. All the tools you
-need are preloaded, and self updating from our git.
+need are preloaded, and self updating from our git. Any easy way to do
+this is with the `Vagrantfile` in this repository.
 
 SSH into your machine, and bootstrap it. Note the <hostname>.
 
