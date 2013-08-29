@@ -18,7 +18,7 @@ or virtual, into container hosts. It needs to:
 * aggregate metadata about networking and performance for each container
 
 # Getting Started
-You need a git repository that defines your <xxx>. Create a git
+You need a git repository that defines your \<xxx\>. Create a git
 repository, and create a single file that looks like this:
 
 **echo.orders**
@@ -28,14 +28,14 @@ PUBLISH 80 /
 ```
 
 Save it. Awesome. Add it. Commit it. Push it git somewhere you can see.
-Call that <my git url>. Get ready to paste that. Make sure you can get
+Call that \<my git url\>. Get ready to paste that. Make sure you can get
 at this without any auth, this sample assume public access.
 
 Fire up a machine with our AMI image or VMWare image. All the tools you
 need are preloaded, and self updating from our git. Any easy way to do
 this is with the `Vagrantfile` in this repository.
 
-SSH into your machine, and bootstrap it. Note the <hostname>.
+SSH into your machine, and bootstrap it. Note the \<hostname\>.
 
 ```
 phleet join <my git url>
