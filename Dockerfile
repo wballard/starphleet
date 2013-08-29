@@ -3,7 +3,7 @@ FROM ubuntu:precise
 
 RUN apt-get update
 RUN apt-get install -y git curl
-RUN apt-get install -y build-essential
+RUN apt-get install -y build-essential python
 RUN apt-get install -y openssl libssl-dev pkg-config
 
 RUN git clone https://github.com/joyent/node.git
