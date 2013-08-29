@@ -28,16 +28,16 @@ PUBLISH 80 /
 ```
 
 Save it. Awesome. Add it. Commit it. Push it git somewhere you can see.
-Call that <my git url>. Get ready to paste that. Make sure you can get
+Call that \<my git url\>. Get ready to paste that. Make sure you can get
 at this without any auth, this sample assume public access.
 
 Fire up a machine with our AMI image or VMWare image. All the tools you
 need are preloaded, and self updating from our git.
 
-SSH into your machine, and bootstrap it. Note the <hostname>.
+SSH into your machine, and bootstrap it. Note the \<hostname\>.
 
 ```
-phleet join <my git url>
+phleet join \<my git url\>
 ```
 
 Now, we're going to clone that repository for you, and monitor it for
