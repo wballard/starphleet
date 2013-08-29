@@ -18,7 +18,7 @@ or virtual, into container hosts. It needs to:
 * aggregate metadata about networking and performance for each container
 
 # Getting Started
-You need a git repository that defines your <xxx>. Create a git
+You need a git repository that defines your \<xxx\>. Create a git
 repository, and create a single file that looks like this:
 
 **echo.orders**
