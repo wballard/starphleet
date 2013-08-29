@@ -19,5 +19,8 @@
   "gitHead": "3d11966f6a75ba67e39d71a5a8a03d2c36ed5944",
   "bugs": {
     "url": "https://github.com/wballard/starphleet/issues"
+  },
+  "dependencies": {
+    "docopt": "~0.4.0"
   }
 }

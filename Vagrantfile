@@ -24,6 +24,7 @@ Vagrant::Config.run do |config|
     pkg_cmd << "apt-get update -qq; apt-get install -q -y python-software-properties; " \
       "add-apt-repository -y ppa:ubuntu-x-swat/r-lts-backport; " \
       "apt-get update -qq; apt-get install -q -y linux-image-3.8.0-19-generic; "
+
     # Add guest additions if local vbox VM
     is_vbox = true
     ARGV.each do |arg| is_vbox &&= !arg.downcase.start_with?("--provider") end
@@ -40,6 +41,14 @@ Vagrant::Config.run do |config|
         "echo 'Installation of VBox Guest Additions is proceeding in the background.'; " \
         "echo '\"vagrant reload\" can be used in about 2 minutes to activate the new guest additions.'; "
     end
+    pkg_cmd << "" \
+      "apt-get -y install git curl;" \
+      "groupadd docker;" \
+      "gpasswd -a vagrant docker;" \
+      "chmod 0777 /var/run/docker.sock;" \
+      "rm -rf /opt/starphleet;" \
+      "git clone https://github.com/wballard/starphleet.git /opt/starphleet;" \
+      "cd /opt/starphleet; docker build -t starphleet .;"
     # Activate new kernel
     pkg_cmd << "shutdown -r +1; "
     config.vm.provision :shell, :inline => pkg_cmd
