@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-docker run starphleet
+docker run -v /var/starphleet:/var/starphleet starphleet phleet $*

@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "docopt": "~0.4.0",
-    "coffee-script": "~1.6.3"
+    "coffee-script": "~1.6.3",
+    "shellscript": "~0.1.0"
   }
 }
