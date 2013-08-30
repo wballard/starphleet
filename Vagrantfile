@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider :vmware_fusion do |f, override|
     override.vm.box = BOX_NAME
     override.vm.box_url = VF_BOX_URI
-    override.vm.synced_folder ".", "/starphleet", disabled: true
+    override.vm.synced_folder ".", "/starphleet"
     f.vmx["displayName"] = "ship"
   end
 
@@ -23,6 +23,9 @@ Vagrant.configure("2") do |config|
   end
 
   pkg_cmd = "" \
+    "mkdir -p /var/starphleet;" \
+    "chmod 0777 /var/starphleet;" \
+    "cp -R /starphleet/overlay/* /;" \
     "apt-get -y install --force-yes git curl apt-transport-https;" \
     "curl http://get.docker.io/gpg | apt-key add -;" \
     "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list;" \
@@ -33,11 +36,8 @@ Vagrant.configure("2") do |config|
     "groupadd docker;" \
     "gpasswd -a vagrant docker;" \
     "chmod 0777 /var/run/docker.sock;" \
-    "mkdir -p /var/starphleet"; \
-    "chmod 0777 /var/starphleet;" \
-    "cp -R /starphleet/overlay/ /;" \
-    #"docker build -t starphleet github.com/wballard/starphleet;" \
-    "docker build -t starphleet /starphleet;" \
-    ""
+    "docker build -t node.v0.10.17 - < /starphleet/dockerfiles/node.v0.10.17;" \
+    "docker build -t starphleet - < /starphleet/dockerfiles/starphleet;" \
+    "echo *built*"
   config.vm.provision :shell, :inline => pkg_cmd
 end
