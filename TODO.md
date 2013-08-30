@@ -1,10 +1,12 @@
+DONE
 * Create a base image with Docker
 * Command line `phleet` program, script link to a Docker container with
   npm, run our command inside docker on the host
 * Make sure Docker is set to autorestart stuff
-
-
 * Program to tell a ship what where is the headquarters
+
+
+
 * Program to pull the headquarters and iterate all the orders
 * Program to take orders and generate the correct nginx include snip for
 the current version

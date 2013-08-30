@@ -21,3 +21,4 @@ This is the main command line interface.
     if options.join
       shell('rm -rf /var/starphleet/headquarters')
       shell("git clone #{options['<giturl>']} /var/starphleet/headquarters")
+      shell("touch /var/starphleet/headquarters.neworders")
