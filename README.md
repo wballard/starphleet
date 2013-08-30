@@ -18,13 +18,13 @@ or virtual, into container hosts. It needs to:
 * aggregate metadata about networking and performance for each container
 
 # Getting Started
-You need a git repository that defines your \<xxx\>. Create a git
-repository, and create a single file that looks like this:
+You need a git repository that defines your starphleet headquarters.
+Create a git repository, and create a single file that looks like this:
 
 **echo.orders**
 ```
-AUTODEPLOY https://github.com/<xxx>/echo.git
-PUBLISH 80 /
+AUTODEPLOY https://github.com/wballard/echo.git
+PUBLISH 80 /echo
 ```
 
 Save it. Awesome. Add it. Commit it. Push it git somewhere you can see.
@@ -35,20 +35,20 @@ Fire up a machine with our AMI image or VMWare image. All the tools you
 need are preloaded, and self updating from our git. Any easy way to do
 this is with the `Vagrantfile` in this repository.
 
-SSH into your machine, and bootstrap it. Note the \<hostname\>.
+SSH into your machine, and bootstrap it.
 
 ```
 phleet join <my git url>
 ```
 
 Now, we're going to clone that repository for you, and monitor it for
-changes. `echo.fleet` will then be used to start up a container. Take a
-peek inside that repository, you'll see a `Dockerfile`. This is
-mandatory and makes the container work at all. Our echo service isn't
-super exciting, but now:
+changes. `echo.orders` will then be used to start up a container, these
+are the orders to your fleet. Take a peek inside that repository, you'll
+see a `Dockerfile`. This is mandatory and makes the container work at
+all. Our echo service isn't super exciting, but now:
 
 ```
-curl http://<hostname>/Hi
+curl http://<hostname>/echo/Hi
 ```
 
 It's exciting, you'll get

@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider :vmware_fusion do |f, override|
     override.vm.box = BOX_NAME
     override.vm.box_url = VF_BOX_URI
-    override.vm.synced_folder ".", "/vagrant", disabled: true
+    override.vm.synced_folder ".", "/starphleet", disabled: true
     f.vmx["displayName"] = "ship"
   end
 
@@ -33,6 +33,8 @@ Vagrant.configure("2") do |config|
     "groupadd docker;" \
     "gpasswd -a vagrant docker;" \
     "chmod 0777 /var/run/docker.sock;" \
-    "docker build -t starphleet github.com/wballard/starphleet;"
+    #"docker build -t starphleet github.com/wballard/starphleet;" \
+    "docker build -t starphleet file:///starphleet;" \
+    "cp -R /starphleet/overlay /;"
   config.vm.provision :shell, :inline => pkg_cmd
 end
