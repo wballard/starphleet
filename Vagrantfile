@@ -22,22 +22,5 @@ Vagrant.configure("2") do |config|
     config.vm.box_url = BOX_URI
   end
 
-  pkg_cmd = "" \
-    "mkdir -p /var/starphleet;" \
-    "chmod 0777 /var/starphleet;" \
-    "cp -R /starphleet/overlay/* /;" \
-    "apt-get -y install --force-yes git curl apt-transport-https;" \
-    "curl http://get.docker.io/gpg | apt-key add -;" \
-    "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list;" \
-    "apt-get -y update;" \
-    "apt-get -y install --force-yes linux-image-extra-`uname -r`;" \
-    "apt-get -y install --force-yes lxc-docker;" \
-    "docker images;" \
-    "groupadd docker;" \
-    "gpasswd -a vagrant docker;" \
-    "chmod 0777 /var/run/docker.sock;" \
-    "docker build -t node.v0.10.17 - < /starphleet/dockerfiles/node.v0.10.17;" \
-    "/starphleet/scripts/rebuild_phleet;" \
-    "echo *built*"
-  config.vm.provision :shell, :inline => pkg_cmd
+  config.vm.provision :shell, :inline => "/starphleet/scripts/provision"
 end

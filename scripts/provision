@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+#headquarters will go here
+mkdir -p /var/starphleet
+chmod 0777 /var/starphleet
+
+#put in scripts and jobs
+cp -R /starphleet/overlay/* /
+
+#docker is on
+apt-get -y install --force-yes git curl apt-transport-https
+curl http://get.docker.io/gpg | apt-key add -
+echo "deb https://get.docker.io/ubuntu docker main" > /etc/apt/sources.list.d/docker.list
+apt-get -y update
+apt-get -y install --force-yes linux-image-extra-`uname -r`
+apt-get -y install --force-yes lxc-docker
+
+#hit it once, make the socket appear
+docker images
+groupadd docker
+gpasswd -a vagrant docker
+chmod 0777 /var/run/docker.sock
+
+#make our images
+docker build -t node.v0.10.17 - < /starphleet/dockerfiles/node.v0.10.17
+/starphleet/scripts/rebuild_phleet
+echo *built*
