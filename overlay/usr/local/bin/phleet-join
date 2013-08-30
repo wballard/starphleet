@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+rm -rf /var/starphleet/headquarters
+git clone "$1" /var/starphleet/headquarters
+touch /var/starphleet/headquarters.changed

@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+initctl emit new_headquarters_orders
