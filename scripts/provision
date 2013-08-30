@@ -6,6 +6,8 @@ chmod 0777 /var/starphleet
 
 #put in scripts and jobs
 cp -R /starphleet/overlay/* /
+stop docker
+start docker
 
 #docker is on
 apt-get -y install --force-yes git curl apt-transport-https
