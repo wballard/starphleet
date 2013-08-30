@@ -37,7 +37,7 @@ Vagrant.configure("2") do |config|
     "gpasswd -a vagrant docker;" \
     "chmod 0777 /var/run/docker.sock;" \
     "docker build -t node.v0.10.17 - < /starphleet/dockerfiles/node.v0.10.17;" \
-    "git clone /starphleet /starphleetbuild;" \
+    "rm -rf /starphleetbuild; git clone /starphleet /starphleetbuild;" \
     "docker build -t starphleet /starphleetbuild;" \
     "echo *built*"
   config.vm.provision :shell, :inline => pkg_cmd
