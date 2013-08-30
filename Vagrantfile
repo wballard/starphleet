@@ -33,8 +33,11 @@ Vagrant.configure("2") do |config|
     "groupadd docker;" \
     "gpasswd -a vagrant docker;" \
     "chmod 0777 /var/run/docker.sock;" \
+    "mkdir -p /var/starphleet"; \
+    "chmod 0777 /var/starphleet;" \
+    "cp -R /starphleet/overlay/ /;" \
     #"docker build -t starphleet github.com/wballard/starphleet;" \
-    "docker build -t starphleet file:///starphleet;" \
-    "cp -R /starphleet/overlay /;"
+    "docker build -t starphleet /starphleet;" \
+    ""
   config.vm.provision :shell, :inline => pkg_cmd
 end
