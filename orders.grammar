@@ -1,0 +1,57 @@
+start
+= _ statement*
+
+statement
+= autodeploy
+/ publish
+/ comment
+/ whiteline
+
+publish
+= "PUBLISH" _ port:port _ url:string _ "\n" { return {'publish': { "port": port, "url": url}};}
+/ "PUBLISH" _ port:port _ "\n" { return {'publish': { "port": port, "url": null}};}
+
+autodeploy
+= "AUTODEPLOY" _ url:string _ "\n" { return {"autodeploy": url};}
+
+comment
+= "#" comment:[^\n]* "\n" { return {"comment": comment.join("")}; }
+
+whiteline
+= _ "\n" { return {}; }
+
+port
+= int:int { return parseInt(int.join(""));}
+
+chars
+= chars:char+ { return chars.join(""); }
+
+string
+= '"' '"'             { return "";    }
+/ '"' chars:chars '"' { return chars; }
+/ chars:chars         { return chars; }
+
+char
+= [^"\\\0-\x1F\x7f]
+/ '\\"'  { return '"';  }
+/ "\\\\" { return "\\"; }
+/ "\\/"  { return "/";  }
+
+_ "whitespace"
+= whitespace*
+
+whitespace
+= [ \t\r]
+
+int
+= digits
+/ "-" digits
+
+digits
+= digit+
+
+digit
+= [0-9]
+
+digit19
+= [1-9]
