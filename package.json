@@ -4,7 +4,12 @@
   "description": "High speed containerized clusters",
   "main": "index.js",
   "bin": {
-    "phleet": "./scripts/phleet.litcoffee"
+    "docopt.py": "./scripts/docopt.py",
+    "docopts": "./scripts/docopts",
+    "tools": "./scripts/tools",
+    "phleet": "./scripts/phleet.litcoffee",
+    "headquarters": "./scripts/headquarters",
+    "monitor": "./scripts/monitor"
   },
   "repository": {
     "type": "git",
