@@ -8,6 +8,7 @@
     "docopts": "./scripts/docopts",
     "tools": "./scripts/tools",
     "phleet": "./scripts/phleet.litcoffee",
+    "generate": "./scripts/generate.litcoffee",
     "headquarters": "./scripts/headquarters",
     "monitor": "./scripts/monitor"
   },

@@ -1,4 +1,4 @@
-#!/usr/bin/env coffee
+#!/usr/bin/coffee --literate
 
 This is the main command line interface, all about code
 generation which is a lot easier here than in shell.
@@ -8,11 +8,11 @@ generation which is a lot easier here than in shell.
     path = require 'path'
     peg = require 'pegjs'
     _ = require 'lodash'
-    package_json = JSON.parse fs.readFileSync path.join(__dirname, './package.json')
+    pkg = require(path.join(__dirname, "../package.json"))
     grammar = String(fs.readFileSync path.join(__dirname, './orders.grammar'))
     parser = peg.buildParser grammar
     doc = """
-    #{package_json.description}
+    #{pkg.description}
 
     Usage:
       generate autodeploy <orderfile>
@@ -22,13 +22,15 @@ generation which is a lot easier here than in shell.
     Notes:
 
     """
-    options = docopt doc, version: package_json.version
+    options = docopt doc, version: pkg.version
 
     if options.autodeploy
-      console.log 'fuck off'
       source = String(fs.readFileSync options['<orderfile>'])
       statements = _.flatten(parser.parse(source))
-      console.log source, statements
-      console.log 'a', options['<orderfile>']
+      order = options['<orderfile>']
+      repo = _(statements)
+          .filter((x) -> x.autodeploy)
+          .last()?.autodeploy
+      console.log "initctl start starphleet_autodeploy order='#{order}' repository='#{repo}'"
     if options.publication
       console.log 'p', options['<orderfile>']
