@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-DIR=$(pwd "$(dirname "$(test -L "$0" && readlink "$0" || echo "$0")")")
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 set -e
 
@@ -14,13 +14,14 @@ set -e
 ### * the local has not yet been cloned
 ### * the local has a different origin <url>
 ### * the origin has changes to fetch that are not yet merged
+
 help=$(grep "^### " "$0" | cut -c 5-)
 version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 if [ ${check} = "true" ]; then
   if [ -d ${directory} ]; then
-    pushd "${directory}"
+    cd "${directory}"
     git rev-parse --git-dir >> /dev/null 2>&1 || fatal $directory is no repo
     FETCH_RESULTS=`git fetch --all` || fatal fetch error
     CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
@@ -29,22 +30,24 @@ if [ ${check} = "true" ]; then
     HAS_CHANGES=`git diff HEAD...origin/${CURRENT_BRANCH} --raw`
     if [ "${ORIGIN_URL}" != "${url}" ]; then
       info ${directory} is not from ${url}, recloning
-      popd
+      cd "${DIR}"
       rm -rf "${directory}"
       git clone "${url}" "${directory}"
-      exit 100
+      warn change
+      code 100
     fi
     if [ "${HAS_CHANGES}x" = "x" ]; then
       warn no change
-      exit 0
+      code 0
     else
       warn change
-      exit 100
+      code 100
     fi
   else
     info ${directory} not found, initial clone needed
     git clone "${url}" "${directory}"
-    exit 100
+    warn change
+    code 100
   fi
 fi
 

@@ -25,3 +25,8 @@ function warn() {
 function log() {
   echo -e "$NORMAL$*$NORMAL"
 }
+
+function code() {
+  echo -e "CODE$*"
+  exit $*
+}

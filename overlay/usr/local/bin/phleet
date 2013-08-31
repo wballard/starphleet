@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
-docker run -v /var/starphleet:/var/starphleet -i -t starphleet $*
+set -e
+docker run -v /var/starphleet:/var/starphleet -t starphleet $*
