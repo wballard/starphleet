@@ -22,5 +22,5 @@ Vagrant.configure("2") do |config|
     config.vm.box_url = BOX_URI
   end
 
-  config.vm.provision :shell, :inline => "/starphleet/scripts/provision"
+  config.vm.provision :shell, :inline => "/starphleet/provision/system"
 end

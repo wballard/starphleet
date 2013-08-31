@@ -38,7 +38,7 @@ this is with the `Vagrantfile` in this repository.
 SSH into your machine, and bootstrap it.
 
 ```
-phleet-join <my git url>
+phleet headquarters <my git url>
 ```
 
 Now, we're going to clone that repository for you, and monitor it for

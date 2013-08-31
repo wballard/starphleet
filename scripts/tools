@@ -1,0 +1,27 @@
+#Library of colorized logging functions, just source this
+NORMAL=$(tput sgr0)
+GREEN=$(tput setaf 2; tput bold)
+YELLOW=$(tput setaf 3)
+RED=$(tput setaf 1)
+FATAL=$(tput setaf 1; tput bold)
+
+function error() {
+  echo -e "$RED$*$NORMAL"
+}
+
+function fatal() {
+  echo -e "$FATAL$*$NORMAL"
+  exit 1
+}
+
+function info() {
+  echo -e "$GREEN$*$NORMAL"
+}
+
+function warn() {
+  echo -e "$YELLOW$*$NORMAL"
+}
+
+function log() {
+  echo -e "$NORMAL$*$NORMAL"
+}

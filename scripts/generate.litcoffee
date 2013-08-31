@@ -1,3 +1,4 @@
+#!/usr/bin/env coffee
 
 This is the main command line interface, all about code
 generation which is a lot easier here than in shell.
@@ -16,7 +17,7 @@ generation which is a lot easier here than in shell.
     Usage:
       generate autodeploy <orderfile>
       generate publication <orderfile>
-      phleet -h | --help | --version
+      generate -h | --help | --version
 
     Notes:
 

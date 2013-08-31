@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-rm -rf /starphleetbuild
-rsync -av --exclude='.vagrant' --exclude='.git' /starphleet/ /starphleetbuild
-docker build -t starphleet /starphleetbuild
-
