@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+set -e
+
+warn Deleting Headquarters, this will restart autodeploy
+warn Running containers will not be affected
+rm -rf /var/starphleet/headquarters.git
+

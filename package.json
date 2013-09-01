@@ -7,9 +7,10 @@
     "docopt.py": "./scripts/docopt.py",
     "docopts": "./scripts/docopts",
     "tools": "./scripts/tools",
-    "phleet": "./scripts/phleet.litcoffee",
+    "phleet": "./scripts/phleet",
     "generate": "./scripts/generate.litcoffee",
     "headquarters": "./scripts/headquarters",
+    "restart": "./scripts/restart",
     "monitor": "./scripts/monitor"
   },
   "repository": {

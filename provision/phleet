@@ -2,6 +2,8 @@
 #synch over to keep docker from trying to include the vagrant image itself
 #into the build -- which is shockingly slow!
 
+stop starphleet
+
 #headquarters will go here
 mkdir -p /var/starphleet
 chmod 0777 /var/starphleet
@@ -13,6 +15,4 @@ rm -rf /starphleetbuild
 rsync -av --exclude-from='/starphleet/.gitignore' --exclude='.git' /starphleet/ /starphleetbuild
 docker build -t starphleet /starphleetbuild
 
-#restarting docker kicks starphleet off
-stop docker
-start docker
+start starphleet

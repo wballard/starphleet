@@ -23,5 +23,4 @@ chmod 0777 /var/run/docker.sock
 docker build -t node.v0.10.17 - < /starphleet/dockerfiles/node.v0.10.17
 /starphleet/provision/phleet
 
-
 echo *built*
