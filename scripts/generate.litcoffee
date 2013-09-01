@@ -23,14 +23,15 @@ generation which is a lot easier here than in shell.
 
     """
     options = docopt doc, version: pkg.version
+    source = String(fs.readFileSync options['<orderfile>'])
+    statements = _.flatten(parser.parse(source))
+    order = options['<orderfile>']
 
     if options.autodeploy
-      source = String(fs.readFileSync options['<orderfile>'])
-      statements = _.flatten(parser.parse(source))
-      order = options['<orderfile>']
       repo = _(statements)
           .filter((x) -> x.autodeploy)
           .last()?.autodeploy
       console.log "initctl start starphleet_autodeploy order='#{order}' repository='#{repo}'"
     if options.publication
-      console.log 'p', options['<orderfile>']
+      publish = _.filter statements, (x) -> x.publish
+      console.log 'p', options['<orderfile>'], publish

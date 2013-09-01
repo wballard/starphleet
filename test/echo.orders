@@ -3,4 +3,5 @@
 
 AUTODEPLOY https://github.com/wballard/echo.git
 
-PUBLISH 80 /echo
+PUBLISH 3000 AS 80 /echo
+PUBLISH 3000 AS 3000

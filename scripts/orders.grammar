@@ -8,8 +8,9 @@ statement
 / whiteline
 
 publish
-= "PUBLISH" _ port:port _ url:string _ "\n" { return {'publish': { "port": port, "url": url}};}
-/ "PUBLISH" _ port:port _ "\n" { return {'publish': { "port": port, "url": null}};}
+= "PUBLISH" _ from:port _ "AS" _ to:port _ url:string _ "\n" { return {'publish': { "from": from, "to": to,  "url": url}};}
+/ "PUBLISH" _ from:port _ "AS" _ to:port _ "\n" { return {'publish': { "from":
+from, "to": to, "url": null}};}
 
 autodeploy
 = "AUTODEPLOY" _ url:string _ "\n" { return {"autodeploy": url};}

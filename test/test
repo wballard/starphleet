@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-cat ./test/echo.orders | ./node_modules/.bin/coffee generate.litcoffee

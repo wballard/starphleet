@@ -4,13 +4,15 @@
 #as root, with the starphleet source tree at /starphleet
 
 #get docker on
-apt-get -y install --force-yes git curl apt-transport-https
+apt-get -y install --force-yes git curl apt-transport-https python-software-properties software-properties-common
 curl http://get.docker.io/gpg | apt-key add -
 echo "deb https://get.docker.io/ubuntu docker main" \
   > /etc/apt/sources.list.d/docker.list
+add-apt-repository ppa:nginx/stable
 apt-get -y update
 apt-get -y install --force-yes linux-image-extra-`uname -r`
 apt-get -y install --force-yes lxc-docker
+apt-get -y install --force-yes nginx
 
 #hit docker once as root,
 #make the socket appear, and then loose up the permissions

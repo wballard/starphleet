@@ -24,7 +24,7 @@ Create a git repository, and create a single file that looks like this:
 **echo.orders**
 ```
 AUTODEPLOY https://github.com/wballard/echo.git
-PUBLISH 80 /echo
+PUBLISH 3000 AS 80 /echo
 ```
 
 Save it. Awesome. Add it. Commit it. Push it git somewhere you can see.
