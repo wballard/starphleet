@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+find /var/starphleet/containers/*.cid \
+| sed s%/var/starphleet/containers/%% \
+| sed s%.cid$%% \
+| xargs -I % stop starphleet_serve service=%
+
+find /var/starphleet/headquarters.git/ \
+| grep 'orders$' \
+| xargs -I % stop starphleet_autodeploy order=%
+
+stop starphleet_nginx

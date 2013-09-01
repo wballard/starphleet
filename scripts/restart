@@ -6,4 +6,6 @@ set -e
 warn Deleting Headquarters, this will restart autodeploy
 warn Running containers will not be affected
 rm -rf /var/starphleet/headquarters.git
+rm -rf /var/starphleet/current_orders
+rm -rf /var/starphleet/containers
 

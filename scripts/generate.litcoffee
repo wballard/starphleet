@@ -32,7 +32,7 @@ generation which is a lot easier here than in shell.
       repo = _(statements)
           .filter((x) -> x.autodeploy)
           .last()?.autodeploy
-      console.log "initctl start starphleet_autodeploy order='#{order}' repository='#{repo}'"
+      console.log "start starphleet_autodeploy order='#{order}' repository='#{repo}'"
     if options.servers
       template = """
       {{#each .}}
