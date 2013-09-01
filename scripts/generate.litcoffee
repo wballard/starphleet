@@ -38,7 +38,7 @@ generation which is a lot easier here than in shell.
       {{#each .}}
       server {
         listen {{this}};
-        include publications/{{this}}.*.conf
+        include publications/{{this}}.*.conf;
       }
       {{/each}}
       """
@@ -47,4 +47,4 @@ generation which is a lot easier here than in shell.
         .groupBy((x) -> x.publish.to)
         .keys()
         .value()
-      console.log 'p', options['<orderfile>'], servers, handlebars.compile(template)(servers)
+      console.log handlebars.compile(template)(servers)
