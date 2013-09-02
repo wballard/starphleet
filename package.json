@@ -10,8 +10,7 @@
     "phleet": "./scripts/phleet",
     "generate": "./scripts/generate.litcoffee",
     "headquarters": "./scripts/headquarters",
-    "restart": "./scripts/restart",
-    "monitor": "./scripts/monitor"
+    "restart": "./scripts/restart"
   },
   "repository": {
     "type": "git",

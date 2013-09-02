@@ -16,7 +16,7 @@ generation which is a lot easier here than in shell.
     #{pkg.description}
 
     Usage:
-      generate autodeploy <orderfile>
+      generate repository <orderfile>
       generate servers <orderfile>
       generate -h | --help | --version
 
@@ -28,11 +28,11 @@ generation which is a lot easier here than in shell.
     statements = _.flatten(parser.parse(source))
     order = options['<orderfile>']
 
-    if options.autodeploy
+    if options.repository
       repo = _(statements)
           .filter((x) -> x.autodeploy)
           .last()?.autodeploy
-      console.log "start starphleet_autodeploy order='#{order}' repository='#{repo}'"
+      process.stdout.write(repo)
     if options.servers
       template = """
       {{#each .}}

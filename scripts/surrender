@@ -9,4 +9,7 @@ find /var/starphleet/headquarters.git/ \
 | grep 'orders$' \
 | xargs -I % stop starphleet_autodeploy order=%
 
-stop starphleet_nginx
+rm -rf /var/starphleet/headquarters.git
+rm -rf /var/starphleet/containers
+rm -rf /var/starphleet/current_orders
+

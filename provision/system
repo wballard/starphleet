@@ -8,7 +8,7 @@ apt-get -y install --force-yes git curl apt-transport-https python-software-prop
 curl http://get.docker.io/gpg | apt-key add -
 echo "deb https://get.docker.io/ubuntu docker main" \
   > /etc/apt/sources.list.d/docker.list
-add-apt-repository ppa:nginx/stable
+add-apt-repository -y ppa:nginx/stable
 apt-get -y update
 apt-get -y install --force-yes linux-image-extra-`uname -r`
 apt-get -y install --force-yes lxc-docker
@@ -21,8 +21,13 @@ groupadd docker
 gpasswd -a vagrant docker
 chmod 0777 /var/run/docker.sock
 
-#starphleet itself, which is just a container, TURTLES!
-docker build -t node.v0.10.17 - < /starphleet/dockerfiles/node.v0.10.17
+#base images to have locally
+for dockerfile in $(ls /starphleet/dockerfiles)
+do
+  docker build -t $dockerfile  - < /starphleet/dockerfiles/$dockerfile
+done
+
+
 /starphleet/provision/phleet
 
 echo *built*
