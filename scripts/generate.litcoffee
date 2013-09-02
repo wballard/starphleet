@@ -18,6 +18,7 @@ generation which is a lot easier here than in shell.
     Usage:
       generate repository <orderfile>
       generate servers <orderfile>
+      generate info <orderfile> <infofile>
       generate -h | --help | --version
 
     Notes:
@@ -38,7 +39,7 @@ generation which is a lot easier here than in shell.
       {{#each .}}
       server {
         listen {{this}};
-        include publications/{{this}}.*.conf;
+        include {{this}}.*.conf;
       }
       {{/each}}
       """
@@ -48,3 +49,19 @@ generation which is a lot easier here than in shell.
         .keys()
         .value()
       console.log handlebars.compile(template)(servers)
+    if options.info
+      infos = JSON.parse(String(fs.readFileSync options['<infofile>']))
+      publications = _.filter(statements, (x) -> x.publish)
+      mapped = []
+      for info in infos
+        for from, to of (info?.NetworkSettings?.PortMapping?.Tcp or {})
+          from = parseInt(from)
+          to = parseInt(to)
+          for publication in publications
+            if publication.publish.from is from
+              mapped.push
+                container: info.ID
+                containerPort: to
+                hostPort: publication.publish.to
+                url: publication.publish.url
+      console.log mapped

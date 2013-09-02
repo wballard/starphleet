@@ -15,5 +15,4 @@ rsync -av --exclude-from='/starphleet/.gitignore' --exclude='.git' /starphleet/ 
 docker build -t starphleet /starphleetbuild
 
 initctl reload-configuration
-#stop starphleet
-#start starphleet
+start starphleet
