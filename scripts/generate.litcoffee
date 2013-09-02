@@ -19,6 +19,7 @@ generation which is a lot easier here than in shell.
       generate repository <orderfile>
       generate info <orderfile> <containerfile>
       generate servers <infofile>...
+      generate containers <infofile>...
       generate -h | --help | --version
 
     Notes:
@@ -34,6 +35,15 @@ generation which is a lot easier here than in shell.
           .filter((x) -> x.autodeploy)
           .last()?.autodeploy
       process.stdout.write(repo)
+    if options.containers
+      for infofile in options['<infofile>']
+        try
+          content = JSON.parse(String(fs.readFileSync(infofile)))
+          for c in content
+            console.log c.container
+        catch e
+          #eat this for now, docker is mixing streams
+          #console.error e
     if options.servers
       buffer = []
       for infofile in options['<infofile>']
