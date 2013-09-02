@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
+#This is the version that lets you pipe input to a docked process
 set -e
 docker run -v /var/starphleet:/var/starphleet -i starphleet $*
