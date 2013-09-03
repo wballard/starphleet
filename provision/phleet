@@ -14,5 +14,14 @@ cp -R /starphleet/overlay/* /
 rsync -av --exclude-from='/starphleet/.gitignore' --exclude='.git' /starphleet/ /starphleetbuild
 docker build -t starphleet /starphleetbuild
 
+ADMIRAL="admiral"
+ADMIRAL_HOME="/home/admiral"
+lastlog | grep ${ADMIRAL} > .admiralexist || true
+# If admiral user not found, create the user and add to sudoers
+if [ ! -s .admiralexist ]; then
+  useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
+  sudo adduser ${ADMIRAL} sudo
+fi
+
 initctl reload-configuration
 start starphleet
