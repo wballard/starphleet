@@ -9,6 +9,7 @@ mkdir -p /var/starphleet
 chmod 0777 /var/starphleet
 mkdir -p /var/starphleet/current_orders
 mkdir -p /var/starphleet/current_containers
+mkdir -p /var/starphleet/private_keys
 
 #put in the system overlay, gets all the files in place
 cp -R /starphleet/overlay/* /
