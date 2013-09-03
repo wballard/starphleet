@@ -22,5 +22,6 @@ useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
 sudo adduser ${ADMIRAL} sudo
 
 sudo chown ${ADMIRAL} /etc/init/starphleet*
+sudo chown ${ADMIRAL} /var/starphleet*
 initctl reload-configuration
 start starphleet
