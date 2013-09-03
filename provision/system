@@ -13,6 +13,7 @@ apt-get -y update
 apt-get -y install --force-yes linux-image-extra-`uname -r`
 apt-get -y install --force-yes lxc-docker
 apt-get -y install --force-yes nginx
+/etc/init.d/nginx stop
 
 #hit docker once as root,
 #make the socket appear, and then loose up the permissions
