@@ -1,0 +1,66 @@
+[{
+    "ID": "b2ad3ffcb81e2192a02457606dd37558ef939409ecd0acf7972a09145dc5c71e",
+    "Created": "2013-09-03T13:53:41.107163903-07:00",
+    "Path": "/bin/sh",
+    "Args": [
+        "-c",
+        "npm start"
+    ],
+    "Config": {
+        "Hostname": "b2ad3ffcb81e",
+        "User": "",
+        "Memory": 0,
+        "MemorySwap": 0,
+        "CpuShares": 0,
+        "AttachStdin": false,
+        "AttachStdout": true,
+        "AttachStderr": true,
+        "PortSpecs": [
+            "3000"
+        ],
+        "Tty": true,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+            "HOME=/",
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        ],
+        "Cmd": [],
+        "Dns": null,
+        "Image": "eca1dcf96a42b281db3420b0cd1a1ef2b06a85d7",
+        "Volumes": {},
+        "VolumesFrom": "",
+        "WorkingDir": "/src",
+        "Entrypoint": [
+            "/bin/sh",
+            "-c",
+            "npm start"
+        ],
+        "NetworkDisabled": false,
+        "Privileged": false
+    },
+    "State": {
+        "Running": true,
+        "Pid": 56538,
+        "ExitCode": 0,
+        "StartedAt": "2013-09-03T13:53:41.513884855-07:00",
+        "Ghost": false
+    },
+    "Image": "6cdfec51b0759cf02dc2a82302cf459333524a0c36f765617577229276c045bf",
+    "NetworkSettings": {
+        "IPAddress": "172.17.14.218",
+        "IPPrefixLen": 16,
+        "Gateway": "172.17.42.1",
+        "Bridge": "docker0",
+        "PortMapping": {
+            "Tcp": {
+                "3000": "49228"
+            },
+            "Udp": {}
+        }
+    },
+    "SysInitPath": "/usr/bin/docker",
+    "ResolvConfPath": "/etc/resolv.conf",
+    "Volumes": {},
+    "VolumesRW": {}
+}]

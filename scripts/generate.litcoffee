@@ -17,6 +17,7 @@ generation which is a lot easier here than in shell.
 
     Usage:
       generate repository <orderfile>
+      generate run <orderfile>
       generate info <orderfile> <containerfile>
       generate servers <infofile>...
       generate containers <infofile>...
@@ -27,14 +28,19 @@ generation which is a lot easier here than in shell.
     """
     options = docopt doc, version: pkg.version
 
-    if options.repository
+    statements = ->
       source = String(fs.readFileSync options['<orderfile>'])
-      statements = _.flatten(parser.parse(source))
-      order = options['<orderfile>']
-      repo = _(statements)
+      _.flatten(parser.parse(source))
+
+    if options.repository
+      process.stdout.write _(statements())
           .filter((x) -> x.autodeploy)
-          .last()?.autodeploy
-      process.stdout.write(repo)
+          .last()?.autodeploy or ''
+      process.stdout.write('--')
+    if options.run
+      process.stdout.write _(statements())
+          .filter((x) -> x.command)
+          .last()?.command or ''
     if options.containers
       for infofile in options['<infofile>']
         try
@@ -53,7 +59,7 @@ generation which is a lot easier here than in shell.
             buffer.push c
         catch e
           #eat this for now, docker is mixing streams
-          #console.error e
+          console.error e
       context = []
       for port, publications of _.groupBy(buffer, (x) -> x.hostPort)
         context.push
@@ -82,10 +88,8 @@ generation which is a lot easier here than in shell.
       """
       console.log handlebars.compile(template)(context)
     if options.info
-      source = String(fs.readFileSync options['<orderfile>'])
-      statements = _.flatten(parser.parse(source))
       infos = JSON.parse(String(fs.readFileSync options['<containerfile>']))
-      publications = _.filter(statements, (x) -> x.publish)
+      publications = _.filter(statements(), (x) -> x.publish)
       mapped = []
       for info in infos
         for from, to of (info?.NetworkSettings?.PortMapping?.Tcp or {})

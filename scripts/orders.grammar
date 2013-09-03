@@ -4,6 +4,7 @@ start
 statement
 = autodeploy
 / publish
+/ run
 / comment
 / whiteline
 
@@ -14,6 +15,9 @@ from, "to": to, "url": '/'}};}
 
 autodeploy
 = "AUTODEPLOY" _ url:string _ "\n" { return {"autodeploy": url};}
+
+run
+= "RUN" command:[^\n]* "\n" { return {"command": command.join("")}; }
 
 comment
 = "#" comment:[^\n]* "\n" { return {"comment": comment.join("")}; }
