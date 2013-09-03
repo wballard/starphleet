@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 #synch over to keep docker from trying to include the vagrant image itself
 #into the build -- which is shockingly slow!
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+BLUE_BOLD=$(tput setaf 4; tput bold)
+NORMAL=$(tput sgr0)
+
+function announce() {
+  echo -e "$BLUE_BOLD$*$NORMAL"
+}
 
 stop starphleet
 
@@ -26,3 +34,6 @@ sudo chown ${ADMIRAL} /etc/init/starphleet*
 sudo chown ${ADMIRAL} /var/starphleet*
 initctl reload-configuration
 start starphleet
+
+announce
+announce *Welcome to Starphleet*
