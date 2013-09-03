@@ -36,7 +36,6 @@ generation which is a lot easier here than in shell.
       process.stdout.write _(statements())
           .filter((x) -> x.autodeploy)
           .last()?.autodeploy or ''
-      process.stdout.write('--')
     if options.run
       process.stdout.write _(statements())
           .filter((x) -> x.command)
