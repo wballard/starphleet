@@ -23,5 +23,6 @@ if [ ! -s .admiralexist ]; then
   sudo adduser ${ADMIRAL} sudo
 fi
 
+sudo chown ${ADMIRAL} /etc/init/starphleet*
 initctl reload-configuration
 start starphleet
