@@ -40,7 +40,7 @@ generation which is a lot easier here than in shell.
         try
           content = JSON.parse(String(fs.readFileSync(infofile)))
           for c in content
-            console.log c.container
+            process.stdout.write c.container + ' '
         catch e
           #eat this for now, docker is mixing streams
           #console.error e
