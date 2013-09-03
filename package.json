@@ -9,8 +9,7 @@
     "tools": "./scripts/tools",
     "phleet": "./scripts/phleet",
     "generate": "./scripts/generate.litcoffee",
-    "headquarters": "./scripts/headquarters",
-    "restart": "./scripts/restart"
+    "headquarters": "./scripts/headquarters"
   },
   "repository": {
     "type": "git",
