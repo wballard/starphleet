@@ -13,6 +13,7 @@ apt-get -y update
 apt-get -y install --force-yes linux-image-extra-`uname -r`
 apt-get -y install --force-yes lxc-docker
 apt-get -y install --force-yes nginx
+apt-get -y install --force-yes man
 #initial apt package has nginx running. lame.
 /etc/init.d/nginx stop
 
