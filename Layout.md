@@ -14,6 +14,26 @@ Put in public key files here. Each key will be built into a normal
 way for whomever controls the headquarters to hand out keys to the
 ships for ssh access.
 
+## dockerfiles
+Put in dockerfiles to be built on your ships here. This is an alternate
+to using the docker registry, which we have found slow, particularly to
+upload. So, we added the ability to have local docker image builds on
+your ship.
+
+Each file in this directory has a `name`, that name will be used to
+create a docker image like:
+
+`docker build -t name:sha - < name`
+
+So, net is the name of the docker file is the name of the image, tagged
+with the sha from your headquarters, allowing revision of the image.
+
+Reference this in other dockerfiles with:
+
+```
+FROM name
+```
+
 # On Ship
 On ship, the main directory is `/var/starphleet` owned by `admiral`.
 

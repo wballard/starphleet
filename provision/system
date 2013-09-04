@@ -13,22 +13,8 @@ apt-get -y update
 apt-get -y install --force-yes linux-image-extra-`uname -r`
 apt-get -y install --force-yes lxc-docker
 apt-get -y install --force-yes nginx
+#initial apt package has nginx running. lame.
 /etc/init.d/nginx stop
-
-#hit docker once as root,
-#make the socket appear, and then loose up the permissions
-docker images
-groupadd docker
-gpasswd -a vagrant docker
-chmod 0777 /var/run/docker.sock
-
-#base images to have locally
-for dockerfile in $(ls /starphleet/dockerfiles)
-do
-  docker build -t $dockerfile  - < /starphleet/dockerfiles/$dockerfile
-done
-
 
 /starphleet/provision/phleet
 
-echo *built*
