@@ -22,16 +22,20 @@ mkdir -p /var/starphleet/private_keys
 #put in the system overlay, gets all the files in place
 cp -R /starphleet/overlay/* /
 
-rsync -av --exclude-from='/starphleet/.gitignore' --exclude='.git' /starphleet/ /starphleetbuild
-docker build -t starphleet /starphleetbuild
+#starphleet control scripts from the mount shared source
+cd /starphleet
+npm install -g coffee-script
+npm install -g
+cd /
 
+#someone has to be the admiral
 ADMIRAL="admiral"
 ADMIRAL_HOME="/home/admiral"
 useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
 adduser ${ADMIRAL} sudo
-
 chown -R ${ADMIRAL} /var/starphleet*
-initctl reload-configuration
+
+#good to go, start the phleet
 start starphleet
 
 announce
