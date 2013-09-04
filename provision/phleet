@@ -28,10 +28,9 @@ docker build -t starphleet /starphleetbuild
 ADMIRAL="admiral"
 ADMIRAL_HOME="/home/admiral"
 useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
-sudo adduser ${ADMIRAL} sudo
+adduser ${ADMIRAL} sudo
 
-sudo chown ${ADMIRAL} /etc/init/starphleet*
-sudo chown ${ADMIRAL} /var/starphleet*
+chown -R ${ADMIRAL} /var/starphleet*
 initctl reload-configuration
 start starphleet
 
