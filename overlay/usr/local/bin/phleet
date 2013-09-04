@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-#This is the version that just runs and expects no stdin
-set -e
-docker run -v /var/starphleet:/var/starphleet -t starphleet $*
