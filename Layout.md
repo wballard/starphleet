@@ -14,6 +14,16 @@ Put in public key files here. Each key will be built into a normal
 way for whomever controls the headquarters to hand out keys to the
 ships for ssh access.
 
+## config
+This is a friendly neightborhood config file, where you can tell your
+headquarters about some extra settings. Each one is described below.
+
+### PIG=true
+When set to true, local changes to the headquarters repository will be
+pushed back to the origin. This provides an ability to do locally
+generated dynamic orders which are then shared with other ships when
+they pull the headquarters on the normal order update cycle.
+
 ## dockerfiles
 Put in dockerfiles to be built on your ships here. This is an alternate
 to using the docker registry, which we have found slow, particularly to
@@ -33,6 +43,8 @@ Reference this in other dockerfiles with:
 ```
 FROM name
 ```
+
+
 
 # On Ship
 On ship, the main directory is `/var/starphleet` owned by `admiral`.
