@@ -19,6 +19,7 @@ generation which is a lot easier here than in shell.
       generate repository <orderfile>
       generate run <orderfile>
       generate info <orderfile> <containerfile>
+      generate containerPorts <containerfile>
       generate servers <infofile>...
       generate containers <infofile>...
       generate -h | --help | --version
@@ -86,6 +87,10 @@ generation which is a lot easier here than in shell.
       {{/each}}
       """
       console.log handlebars.compile(template)(context)
+    if options.containerPorts
+      infos = JSON.parse(String(fs.readFileSync options['<containerfile>']))
+      for info in infos
+        console.log info.containerPort
     if options.info
       infos = JSON.parse(String(fs.readFileSync options['<containerfile>']))
       publications = _.filter(statements(), (x) -> x.publish)
