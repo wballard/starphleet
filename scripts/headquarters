@@ -22,8 +22,8 @@ export CURRENT_ORDERS="/var/starphleet/current_orders"
 export NGINX_CONF="/var/starphleet/nginx"
 export ADMIRAL="admiral"
 export ADMIRAL_HOME="/home/admiral"
-if [ -s /var/starphleet/.starphleet ]; then
-  source /var/starphleet/.starphleet
+if [ -s /var/starphleet/headquarters/.starphleet ]; then
+  source /var/starphleet/headquarters/.starphleet
 fi
 
 EOF
