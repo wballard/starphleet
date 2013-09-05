@@ -14,15 +14,21 @@ Put in public key files here. Each key will be built into a normal
 way for whomever controls the headquarters to hand out keys to the
 ships for ssh access.
 
-## config
+## .starphleet
 This is a friendly neightborhood config file, where you can tell your
 headquarters about some extra settings. Each one is described below.
 
-### PIG=true
+### PUSH_HEADQUARTERS=yes
 When set to true, local changes to the headquarters repository will be
 pushed back to the origin. This provides an ability to do locally
 generated dynamic orders which are then shared with other ships when
 they pull the headquarters on the normal order update cycle.
+
+The way this works, you will need to either:
+* have the credentials in your git url you passed to `headquarters`
+* use a git/ssh url and put a file under `/var/starphleet/private_keys`
+
+You probably don't need to use this option.
 
 ## dockerfiles
 Put in dockerfiles to be built on your ships here. This is an alternate
