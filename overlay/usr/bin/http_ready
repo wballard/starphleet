@@ -15,4 +15,5 @@ done
 if [ -n "${DEBUG}" ]; then
   echo ${RESULT}
 fi
+echo "failed to get 200 back from ${1}"
 exit 1;
