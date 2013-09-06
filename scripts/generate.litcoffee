@@ -18,7 +18,7 @@ generation which is a lot easier here than in shell.
     Usage:
       generate repository <orderfile>
       generate run <orderfile>
-      generate info <orderfile> <containerfile>
+      generate info <name> <orderfile> <containerfile>
       generate containerPorts <containerfile>
       generate servers <infofile>...
       generate containers <infofile>...
@@ -106,4 +106,5 @@ generation which is a lot easier here than in shell.
                 containerPort: to
                 hostPort: publication.publish.to
                 url: publication.publish.url
+                name:  options['<name>']
       console.log JSON.stringify(mapped)
