@@ -9,15 +9,15 @@ statement
 / whiteline
 
 publish
-= "PUBLISH" _ from:port _ "AS" _ to:port _ url:string _ "\n" { return {'publish': { "from": from, "to": to,  "url": url}};}
-/ "PUBLISH" _ from:port _ "AS" _ to:port _ "\n" { return {'publish': { "from":
+= "PUBLISH"i _ from:port _ "AS"i _ to:port _ url:string _ "\n" { return {'publish': { "from": from, "to": to,  "url": url}};}
+/ "PUBLISH"i _ from:port _ "AS"i _ to:port _ "\n" { return {'publish': { "from":
 from, "to": to, "url": '/'}};}
 
 autodeploy
-= "AUTODEPLOY" _ url:string _ "\n" { return {"autodeploy": url};}
+= "AUTODEPLOY"i _ url:string _ "\n" { return {"autodeploy": url};}
 
 run
-= "RUN" command:[^\n]* "\n" { return {"command": command.join("")}; }
+= "RUN"i command:[^\n]* "\n" { return {"command": command.join("")}; }
 
 comment
 = "#" comment:[^\n]* "\n" { return {"comment": comment.join("")}; }
