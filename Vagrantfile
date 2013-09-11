@@ -1,14 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-BOX_NAME = ENV['BOX_NAME'] || "docker"
-BOX_URI = ENV['BOX_URI'] || "http://cloud-images.ubuntu.com/vagrant/raring/current/raring-server-cloudimg-amd64-vagrant-disk1.box"
-VF_BOX_URI = ENV['BOX_URI'] || "http://com_flyclops_bin.s3.amazonaws.com/ubuntu-13.04-vmware.box"
+BOX_NAME = ENV['BOX_NAME'] || "lxc"
+VF_BOX_URI = ENV['BOX_URI'] || "https://bitbucket.org/Wballard/boxes/src/876e5ac82d7ebd0d761fc148b887fd1051d99b29/VagrantUbuntuLXC.box?at=master"
 
 Vagrant.configure("2") do |config|
   config.vm.hostname = "ship"
   config.vm.network :public_network
-
 
   config.vm.provider :vmware_fusion do |f, override|
     override.vm.box = BOX_NAME
@@ -17,10 +15,7 @@ Vagrant.configure("2") do |config|
     f.vmx["displayName"] = "ship"
   end
 
-  config.vm.provider :virtualbox do |vb|
-    config.vm.box = BOX_NAME
-    config.vm.box_url = BOX_URI
-  end
+  #THERE IS NO VirtualBox support at the moment
 
   config.vm.provision :shell, :inline => "/starphleet/provision/system"
 end

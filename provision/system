@@ -5,26 +5,19 @@
 
 set -e
 
-#get docker on
-apt-get -y install --force-yes git curl apt-transport-https
+apt-get -y install --force-yes git curl apt-transport-https lsof
 apt-get -y install --force-yes software-properties-common
 apt-get -y install --force-yes python g++ make git
-curl http://get.docker.io/gpg | apt-key add -
-echo "deb https://get.docker.io/ubuntu docker main" \
-  > /etc/apt/sources.list.d/docker.list
 add-apt-repository -y ppa:nginx/stable
 add-apt-repository -y ppa:chris-lea/node.js
 apt-get -y update
-apt-get -y install --force-yes linux-image-extra-`uname -r`
-apt-get -y install --force-yes lxc-docker
+apt-get -y install --force-yes lxc
 apt-get -y install --force-yes nginx
 apt-get -y install --force-yes nodejs
 apt-get -y install --force-yes man
+
 #initial apt package has nginx running. lame.
 /etc/init.d/nginx stop
 
-#we will be using bash. period
-mv /bin/sh /bin/shold
-ln /bin/bash /bin/sh
-
+#now ready for the phleet
 /starphleet/provision/phleet
