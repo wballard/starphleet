@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+
+## reset 0.1.0
+### Usage:
+###    reset
+### --help
+###
+### Just blow things away and get back to an initial network state.
+help=$(grep "^### " "$0" | cut -c 5-)
+version=$(grep "^## "  "$0" | cut -c 4-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+iptables -F
+iptables -t nat -F
+iptables -t nat -N DOCKER
+

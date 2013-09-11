@@ -7,8 +7,10 @@
     "docopt.py": "./scripts/docopt.py",
     "docopts": "./scripts/docopts",
     "tools": "./scripts/tools",
-    "generate": "./scripts/generate.litcoffee",
-    "headquarters": "./scripts/headquarters"
+    "starphleet-generate": "./scripts/generate.litcoffee",
+    "starphleet-headquarters": "./scripts/headquarters",
+    "starphleet-expose": "./scripts/expose",
+    "starphleet-reset": "./scripts/reset",
   },
   "repository": {
     "type": "git",
