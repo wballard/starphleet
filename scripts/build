@@ -19,6 +19,12 @@ source ${DIR}/tools
 ### This script will be run as root on the container, so it is a great place
 ### to use apt-get to shove on packages. When it is all done, there will be a
 ### container ready to run for your repository.
+###
+### The container will have a layout with the following special directories:
+### /var/starphleet - This mounts back to /var/starphleet on the host
+###    read only
+### /local_repository - This is a copy of the source local repository, taking
+###    a snapshot so you cannot modify the source
 help=$(grep "^### " "$0" | cut -c 5-)
 version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
@@ -36,7 +42,15 @@ EXTRACTOR='
 '
 
 BUILDER=${TMPDIR-/tmp}/$$
-cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - > ${BUILDER}
+cat << EOF > ${BUILDER}
+#need to wait until the network is up
+until ping archive.ubuntu.com -c 1
+do
+  echo waiting for network
+  sleep 1
+done
+EOF
+cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - >> ${BUILDER}
 trap 'rm -rf ${BUILDER}' EXIT
 
 CONTAINER_NAME=$(cat "${BUILDER}" | md5sum | awk '{ print $1}')
@@ -51,7 +65,6 @@ EOF
 
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
-
 #all set up, now it is time to make a container, using a file name as a
 #kind of transaction with lxc
 
@@ -62,21 +75,22 @@ lxc-destroy --name ${CONTAINER_NAME}
 if lxc-ls | grep ${CONTAINER_NAME}; then
   info Already built
 else
-  flock "${CONTAINER_LOCK}" lxc-create -n ${CONTAINER_NAME} -t ubuntu -- --bindhome admiral
-  #provision
-  lxc-start --name ${CONTAINER_NAME} -d
-  lxc-wait --name ${CONTAINER_NAME} --state RUNNING
-  lxc-attach --name ${CONTAINER_NAME} -- mkdir /var/starphleet
-  lxc-stop --name ${CONTAINER_NAME}
-  lxc-wait --name ${CONTAINER_NAME} --state STOPPED
-
-  #configuration changes
+  flock "${CONTAINER_LOCK}" lxc-create -n ${CONTAINER_NAME} -t ubuntu
+  #mounts and files, always can see starphleet read only and copy in the src
+  #build repository
+  mkdir ${CONTAINER_ROOT}/var/starphleet
+  if btrfs subvolume snapshot ${local_repository} ${CONTAINER_ROOT}; then
+    info Used a snapshot
+  else
+    warn Used a copy
+    cp -R ${local_repository} ${CONTAINER_ROOT}/local_repository
+  fi
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
-  cat ${CONTAINER_ROOT}/../config
-
+  #build
+  cp ${BUILDER} ${CONTAINER_ROOT}/.build
   lxc-start --name ${CONTAINER_NAME} -d
   lxc-wait --name ${CONTAINER_NAME} --state RUNNING
-  lxc-attach --name ${CONTAINER_NAME} -- ls /var/starphleet
+  lxc-attach --name ${CONTAINER_NAME} -- bash /.build
   lxc-stop --name ${CONTAINER_NAME}
   lxc-wait --name ${CONTAINER_NAME} --state STOPPED
   info Built ${CONTAINER_NAME}
