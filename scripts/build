@@ -40,24 +40,45 @@ cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - > ${BUILDER}
 trap 'rm -rf ${BUILDER}' EXIT
 
 CONTAINER_NAME=$(cat "${BUILDER}" | md5sum | awk '{ print $1}')
+CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 CONTAINER_LOCK=${TMPDIR-/tmp}/${CONTAINER_NAME}
 trap 'rm -rf ${CONTAINER_LOCK}' EXIT
+
+CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
+cat << EOF > ${CONTAINER_CONF}
+lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/var/starphleet none bind,ro 0 0
+EOF
+
+trap 'rm -rf ${CONTAINER_CONF}' EXIT
+
 
 #all set up, now it is time to make a container, using a file name as a
 #kind of transaction with lxc
 
-#for starters, a nice template as a base image to clone from, saves space
-#compared to using the template each time
 #this is flocked-up since this can and will be called in parallel from multiple
 #different ordered services
+info Creating ${CONTAINER_NAME}
+lxc-destroy --name ${CONTAINER_NAME}
 if lxc-ls | grep ${CONTAINER_NAME}; then
   info Already built
 else
-  flock "${DIR}" lxc-create -n starphleet -t ubuntu
-  flock "${CONTAINER_LOCK}" lxc-clone -n $$ -o starphleet --snapshot
+  flock "${CONTAINER_LOCK}" lxc-create -n ${CONTAINER_NAME} -t ubuntu -- --bindhome admiral
   #provision
-  flock "${CONTAINER_LOCK}" lxc-clone -n ${CONTAINER_NAME} -o $$ --snapshot
-  lxc-destroy -n $$
+  lxc-start --name ${CONTAINER_NAME} -d
+  lxc-wait --name ${CONTAINER_NAME} --state RUNNING
+  lxc-attach --name ${CONTAINER_NAME} -- mkdir /var/starphleet
+  lxc-stop --name ${CONTAINER_NAME}
+  lxc-wait --name ${CONTAINER_NAME} --state STOPPED
+
+  #configuration changes
+  cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
+  cat ${CONTAINER_ROOT}/../config
+
+  lxc-start --name ${CONTAINER_NAME} -d
+  lxc-wait --name ${CONTAINER_NAME} --state RUNNING
+  lxc-attach --name ${CONTAINER_NAME} -- ls /var/starphleet
+  lxc-stop --name ${CONTAINER_NAME}
+  lxc-wait --name ${CONTAINER_NAME} --state STOPPED
   info Built ${CONTAINER_NAME}
 fi
 

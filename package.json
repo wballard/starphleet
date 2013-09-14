@@ -11,7 +11,7 @@
     "starphleet-headquarters": "./scripts/headquarters",
     "starphleet-expose": "./scripts/expose",
     "starphleet-reset": "./scripts/reset",
-    "starphleet-ready": "./scripts/ready",
+    "starphleet-ready": "./scripts/ready"
   },
   "repository": {
     "type": "git",

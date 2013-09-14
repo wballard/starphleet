@@ -3,5 +3,5 @@ description "This is a really simple container that will just run nginx"
 build script
   add-apt-repository -y ppa:nginx/stable
   apt-get -y update
-  apt-get -y install --force-yes nginx
+  apt-get -y install nginx
 end script

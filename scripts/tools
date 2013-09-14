@@ -37,3 +37,4 @@ function code() {
   echo -e "CODE$*"
   exit $*
 }
+
