@@ -18,13 +18,13 @@ or virtual, into container hosts. It needs to:
 * aggregate metadata about networking and performance for each container
 
 # Getting Started
-You need a git repository that defines your starphleet headquarters.
+You need a git repository that defines your **starphleet headquarters**.
 Create a git repository, and create a single file that looks like this:
 
 **echo.orders**
 ```
-AUTODEPLOY https://github.com/wballard/echo.git
-PUBLISH 3000 AS 80 /echo
+autodeploy https://github.com/wballard/echo.git
+expose 3000 AS 80 /echo
 ```
 
 Save it. Awesome. Add it. Commit it. Push it git somewhere you can see.
@@ -38,14 +38,15 @@ this is with the `Vagrantfile` in this repository.
 SSH into your machine, and bootstrap it.
 
 ```
-headquarters <my git url>
+starphleet-headquarters <my git url>
 ```
 
-Now, we're going to clone that repository for you, and monitor it for
-changes. `echo.orders` will then be used to start up a container, these
-are the orders to your fleet. Take a peek inside that repository, you'll
-see a `Dockerfile`. This is mandatory and makes the container work at
-all. Our echo service isn't super exciting, but now:
+Now, we're going to clone that repository for you on the virtual
+machine, which we call a *ship*, and monitor it for changes. That
+[echo.git](https://github.com/wballard/echo.git) will then be used to
+start up a container. Take a peek inside that repository, you'll see a
+`Starphleet`. This is mandatory and makes the container work at all. Our
+echo service isn't super exciting, but now:
 
 ```
 curl http://<hostname>/echo/Hi

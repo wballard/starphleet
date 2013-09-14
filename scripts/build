@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+
+## build 0.1.0
+### Usage:
+###    build <local_repository>
+### --help
+###
+### Given a local repository that is Starphleet enabled, build up a container
+### for it.
+### This looks for a file ./Starphleet in the repository, and then inside that
+### for:
+###
+### build script
+### ... your script here...
+### end script
+###
+### This script will be run as root on the container, so it is a great place
+### to use apt-get to shove on packages. When it is all done, there will be a
+### container ready to run for your repository.
+help=$(grep "^### " "$0" | cut -c 5-)
+version=$(grep "^## "  "$0" | cut -c 4-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+#setting up, get the script that will be used to create a container, and the
+#md5 of this script is a unique thumbprint for that container, sets you up
+#to use the 'same container' for multiple services, small time savings using
+#the git trick of content addressing
+#oh... how I love git inspired tricks
+
+EXTRACTOR='
+  /build script/ { in_it = 1; next;}
+  /end script/ {in_it = 0;}
+  {if (in_it) print $0;}
+'
+
+BUILDER=${TMPDIR-/tmp}/$$
+cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - > ${BUILDER}
+trap 'rm -rf ${BUILDER}' EXIT
+
+CONTAINER_NAME=$(cat "${BUILDER}" | md5sum | awk '{ print $1}')
+CONTAINER_LOCK=${TMPDIR-/tmp}/${CONTAINER_NAME}
+trap 'rm -rf ${CONTAINER_LOCK}' EXIT
+
+#all set up, now it is time to make a container, using a file name as a
+#kind of transaction with lxc
+
+#for starters, a nice template as a base image to clone from, saves space
+#compared to using the template each time
+#this is flocked-up since this can and will be called in parallel from multiple
+#different ordered services
+if lxc-ls | grep ${CONTAINER_NAME}; then
+  info Already built
+else
+  flock "${DIR}" lxc-create -n starphleet -t ubuntu
+  flock "${CONTAINER_LOCK}" lxc-clone -n $$ -o starphleet --snapshot
+  #provision
+  flock "${CONTAINER_LOCK}" lxc-clone -n ${CONTAINER_NAME} -o $$ --snapshot
+  lxc-destroy -n $$
+  info Built ${CONTAINER_NAME}
+fi
+
+cat $BUILDER
+echo $CONTAINER_NAME

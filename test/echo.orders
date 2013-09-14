@@ -1,8 +1,12 @@
+#sample orders file, this doesn't do much, but shows the basics of
+#ordering a starphleet service
 
-#sample grammar file
+#autodeploy tells starphleet where to look for a service this will be
+#monitored for changes, and automatically deployed as needed
+autodeploy https://github.com/wballard/echo.git
 
-AUTODEPLOY https://github.com/wballard/echo.git
+#expose a port from the container, in this case with http
+expose --private 3000 --public 80  --url /echo
 
-PUBLISH 3000 AS 80 /echo
-PUBLISH 3000 AS 3000
-RUN npm start
+#expose a port from the container as a raw port
+export --private 3000
