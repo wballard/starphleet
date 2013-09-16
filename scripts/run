@@ -4,10 +4,10 @@ source ${DIR}/tools
 
 ## run 0.1.0
 ### Usage:
-###    run <local_repository>
+###    run <local_repository> <ip_file>
 ### --help
 ###
-### Given a local repository that is Starphleet enabled, run it.
+### Given a <local_repository> that is Starphleet enabled, run it.
 ### This looks for a file ./Starphleet in the repository, and then inside that
 ### for:
 ###
@@ -15,8 +15,9 @@ source ${DIR}/tools
 ### ... your script here...
 ### end script
 ###
-### This script will be used to generate an upstart file, then used to run your
-### service in a container.
+### The local private IP address of the started container will be written
+### to <ip_file>. This will be used to generate port mapping configurations.
+### This will be written out before the *run* script starts.
 help=$(grep "^### " "$0" | cut -c 5-)
 version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
@@ -27,6 +28,18 @@ makeBuilder
 echo ${CONTAINER_NAME}
 INSTANCE_NAME="${CONTAINER_NAME}-$$"
 CONTAINER_ROOT=/var/lib/lxc/${INSTANCE_NAME}/rootfs
+
+#create the block script, this makes sure the network is up
+BLOCKER=${TMPDIR-/tmp}/$$.block
+cat << EOF > ${BLOCKER}
+#need to wait until the network is up
+until ifconfig | grep 'inet addr' | grep --invert '127.0.0.1'
+do
+  echo waiting for network
+  sleep 1
+done
+EOF
+trap 'rm -rf ${BLOCKER}' EXIT
 
 #create the 'run' script
 EXTRACTOR='
@@ -41,13 +54,25 @@ trap 'rm -rf ${RUNNER}' EXIT
 #clone up a new container for this run, start it, and do a blocking run
 #based on the script
 lxc-clone -o "${CONTAINER_NAME}" -n "${INSTANCE_NAME}" -s
+cp ${BLOCKER} ${CONTAINER_ROOT}/.block
 cp ${RUNNER} ${CONTAINER_ROOT}/.run
 
+#get running and make sure the network is up
 lxc-start --name ${INSTANCE_NAME} -d
 lxc-wait --name ${INSTANCE_NAME} --state RUNNING
+lxc-attach --name ${INSTANCE_NAME} -- bash /.block
+
+#now, capture the IP address
+IP_ADDRESS=$(lxc-ls --fancy | grep "${INSTANCE_NAME}" | awk '{ print $3; }')
+echo $IP_ADDRESS > ${ip_file}
+trap 'rm -rf ${ip_file}' EXIT
+
+#service is really running at this point
 #this ends up with a fork here, so pay attention when this gets put
 #in upstart to expect a fork
 lxc-attach --name ${INSTANCE_NAME} -- bash /.run
+#should have stayed blocked until that run exits or is killed, now
+#clear up all the container leftovers
 lxc-stop --name ${INSTANCE_NAME}
 lxc-wait --name ${INSTANCE_NAME} --state STOPPED
 lxc-destroy --name ${INSTANCE_NAME}

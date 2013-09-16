@@ -8,5 +8,8 @@ build script
 end script
 
 run script
+  #switch off the default daemon one
+  /etc/init.d/nginx stop
+  #use our interactive inline one
   nginx -g "daemon off; error_log /dev/stderr;"
 end script
