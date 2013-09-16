@@ -4,7 +4,7 @@ source ${DIR}/tools
 
 ## expose 0.1.0
 ### Usage:
-###    expose <container> <container_port> <host_port>
+###    expose <container_file> <container_port> <host_port>
 ### --help
 ###
 ### Export a port for a container via NAT through the host. Need some
@@ -13,9 +13,13 @@ help=$(grep "^### " "$0" | cut -c 5-)
 version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-CONTAINER_IP=$(lxc-ls --fancy | grep CN | awk '{print $3}')
+CONTAINER=$(cat ${container_file} | awk '{print $1}')
+CONTAINER_IP=$(cat ${container_file} | awk '{print $2}')
+#unfortunate -- there is a chain length limit
+CHAIN=$(echo ${CONTAINER} | awk '{ print substr($0,0,16) substr($0,index($0,"-"));}')
 
-iptables -t nat -A PREROUTING -m addrtype  --dst-type LOCAL  --jump STARPHLEET
-iptables -t nat -A STARPHLEET -p tcp --dport ${host_port} ! --in-interface lxcbr0 --jump DNAT --to-destination ${CONTAINER_IP}:${container_port}
-iptables -t nat -A OUTPUT -m addrtype --dst-type LOCAL -j STARPHLEET
+iptables -t nat --new-chain ${CHAIN}
+iptables -t nat -A PREROUTING -m addrtype  --dst-type LOCAL  --jump ${CHAIN}
+iptables -t nat -A ${CHAIN} -p tcp --dport ${host_port} ! --in-interface lxcbr0 --jump DNAT --to-destination ${CONTAINER_IP}:${container_port}
+iptables -t nat -A OUTPUT -m addrtype --dst-type LOCAL -j ${CHAIN}
 iptables -t nat -A POSTROUTING -s 10.0.3.0/24 -j MASQUERADE
