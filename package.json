@@ -9,6 +9,8 @@
     "tools": "./scripts/tools",
     "starphleet-generate": "./scripts/generate.litcoffee",
     "starphleet-headquarters": "./scripts/headquarters",
+    "starphleet-build": "./scripts/build",
+    "starphleet-run": "./scripts/run",
     "starphleet-expose": "./scripts/expose",
     "starphleet-reset": "./scripts/reset",
     "starphleet-ready": "./scripts/ready"

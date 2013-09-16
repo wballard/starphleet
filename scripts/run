@@ -39,7 +39,6 @@ do
   sleep 1
 done
 EOF
-trap 'rm -rf ${BLOCKER}' EXIT
 
 #create the 'run' script
 EXTRACTOR='
@@ -48,14 +47,24 @@ EXTRACTOR='
   {if (in_it) print $0;}
 '
 RUNNER=${TMPDIR-/tmp}/$$
-cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - > ${RUNNER}
-trap 'rm -rf ${RUNNER}' EXIT
+cat << EOF > ${RUNNER}
+#need to be in the directory for the source
+cd local_repository
+EOF
+cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - >> ${RUNNER}
 
 #clone up a new container for this run, start it, and do a blocking run
 #based on the script
 lxc-clone -o "${CONTAINER_NAME}" -n "${INSTANCE_NAME}" -s
 cp ${BLOCKER} ${CONTAINER_ROOT}/.block
 cp ${RUNNER} ${CONTAINER_ROOT}/.run
+#always able to see your own source
+if btrfs subvolume snapshot ${local_repository} ${CONTAINER_ROOT}; then
+  info Used a snapshot
+else
+  warn Used a copy
+  cp -R ${local_repository} ${CONTAINER_ROOT}/local_repository
+fi
 
 #get running and make sure the network is up
 lxc-start --name ${INSTANCE_NAME} -d
@@ -65,14 +74,22 @@ lxc-attach --name ${INSTANCE_NAME} -- bash /.block
 #now, capture the IP address
 IP_ADDRESS=$(lxc-ls --fancy | grep "${INSTANCE_NAME}" | awk '{ print $3; }')
 echo ${INSTANCE_NAME} ${IP_ADDRESS}> ${container_file}
-trap 'rm -rf ${container_file}' EXIT
+
+function clean_up {
+  rm "${RUNNER}"
+  rm "${BLOCKER}"
+  rm "${container_file}"
+  #should have stayed blocked until that run exits or is killed, now
+  #clear up all the container leftovers
+  lxc-stop --name ${INSTANCE_NAME}
+  lxc-wait --name ${INSTANCE_NAME} --state STOPPED
+  lxc-destroy --name ${INSTANCE_NAME}
+  exit
+}
+
+trap clean_up EXIT
 
 #service is really running at this point
 #this ends up with a fork here, so pay attention when this gets put
 #in upstart to expect a fork
 lxc-attach --name ${INSTANCE_NAME} -- bash /.run
-#should have stayed blocked until that run exits or is killed, now
-#clear up all the container leftovers
-lxc-stop --name ${INSTANCE_NAME}
-lxc-wait --name ${INSTANCE_NAME} --state STOPPED
-lxc-destroy --name ${INSTANCE_NAME}

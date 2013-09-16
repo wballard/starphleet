@@ -48,20 +48,12 @@ trap 'rm -rf ${CONTAINER_CONF}' EXIT
 #this is flocked-up since this can and will be called in parallel from multiple
 #different ordered services
 info Creating ${CONTAINER_NAME}
-lxc-destroy --name ${CONTAINER_NAME}
-if lxc-ls | grep ${CONTAINER_NAME}; then
+if lxc-ls | grep "${CONTAINER_NAME}$"; then
   info Already built
 else
   flock "${CONTAINER_LOCK}" lxc-create -n ${CONTAINER_NAME} -t ubuntu
-  #mounts and files, always can see starphleet read only and copy in the src
-  #build repository
+  #mounts and files, always can see starphleet read only
   mkdir ${CONTAINER_ROOT}/var/starphleet
-  if btrfs subvolume snapshot ${local_repository} ${CONTAINER_ROOT}; then
-    info Used a snapshot
-  else
-    warn Used a copy
-    cp -R ${local_repository} ${CONTAINER_ROOT}/local_repository
-  fi
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
   #build
   cp ${BUILDER} ${CONTAINER_ROOT}/.build

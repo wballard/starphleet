@@ -65,7 +65,11 @@ do
 done
 EOF
 
-  cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - >> ${BUILDER}
+  if [ -f "${local_repository}/Starphleet" ]; then
+    cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - >> ${BUILDER}
+  else
+    echo '' >> ${BUILDER}
+  fi
   trap 'rm -rf ${BUILDER}' EXIT
 
   CONTAINER_NAME=$(cat "${BUILDER}" | md5sum | awk '{ print $1}')
