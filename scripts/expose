@@ -22,4 +22,8 @@ iptables -t nat --new-chain ${CHAIN}
 iptables -t nat -A PREROUTING -m addrtype  --dst-type LOCAL  --jump ${CHAIN}
 iptables -t nat -A ${CHAIN} -p tcp --dport ${host_port} ! --in-interface lxcbr0 --jump DNAT --to-destination ${CONTAINER_IP}:${container_port}
 iptables -t nat -A OUTPUT -m addrtype --dst-type LOCAL -j ${CHAIN}
-iptables -t nat -A POSTROUTING -s 10.0.3.0/24 -j MASQUERADE
+if iptables -t nat --list | grep 'MASQUERADE.*10.0.3.0/24' > /dev/null; then
+  echo -n
+else
+  iptables -t nat -A POSTROUTING -s 10.0.3.0/24 -j MASQUERADE
+fi
