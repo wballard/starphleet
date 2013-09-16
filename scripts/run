@@ -4,7 +4,7 @@ source ${DIR}/tools
 
 ## run 0.1.0
 ### Usage:
-###    run <local_repository> <ip_file>
+###    run <local_repository> <container_file>
 ### --help
 ###
 ### Given a <local_repository> that is Starphleet enabled, run it.
@@ -16,7 +16,7 @@ source ${DIR}/tools
 ### end script
 ###
 ### The local private IP address of the started container will be written
-### to <ip_file>. This will be used to generate port mapping configurations.
+### to <container_file>. This will be used to generate port mapping configurations.
 ### This will be written out before the *run* script starts.
 help=$(grep "^### " "$0" | cut -c 5-)
 version=$(grep "^## "  "$0" | cut -c 4-)
@@ -64,8 +64,8 @@ lxc-attach --name ${INSTANCE_NAME} -- bash /.block
 
 #now, capture the IP address
 IP_ADDRESS=$(lxc-ls --fancy | grep "${INSTANCE_NAME}" | awk '{ print $3; }')
-echo $IP_ADDRESS > ${ip_file}
-trap 'rm -rf ${ip_file}' EXIT
+echo ${INSTANCE_NAME} ${IP_ADDRESS}> ${container_file}
+trap 'rm -rf ${container_file}' EXIT
 
 #service is really running at this point
 #this ends up with a fork here, so pay attention when this gets put

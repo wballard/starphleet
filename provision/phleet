@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-#synch over to keep docker from trying to include the vagrant image itself
-#into the build -- which is shockingly slow!
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 BLUE_BOLD=$(tput setaf 4; tput bold)
