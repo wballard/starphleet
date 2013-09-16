@@ -6,3 +6,7 @@ build script
   apt-get -y update
   apt-get -y install --force-yes nginx
 end script
+
+run script
+  nginx -g "daemon off; error_log /dev/stderr;"
+end script

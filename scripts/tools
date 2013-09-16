@@ -38,3 +38,35 @@ function code() {
   exit $*
 }
 
+#deal with a Starphleet file, this is shared here between multiple
+#scripts
+
+function makeBuilder() {
+  #setting up, get the script that will be used to create a container, and the
+  #md5 of this script is a unique thumbprint for that container, sets you up
+  #to use the 'same container' for multiple services, small time savings using
+  #the git trick of content addressing
+  #oh... how I love git inspired tricks
+
+  EXTRACTOR='
+    /build script/ { in_it = 1; next;}
+    /end script/ {in_it = 0;}
+    {if (in_it) print $0;}
+  '
+
+  BUILDER=${TMPDIR-/tmp}/$$
+#unindented on purpose to have the spacing what I want, plus there HEREDOC
+cat << EOF > ${BUILDER}
+#need to wait until the network is up
+until ping archive.ubuntu.com -c 1
+do
+  echo waiting for network
+  sleep 1
+done
+EOF
+
+  cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - >> ${BUILDER}
+  trap 'rm -rf ${BUILDER}' EXIT
+
+  CONTAINER_NAME=$(cat "${BUILDER}" | md5sum | awk '{ print $1}')
+}
