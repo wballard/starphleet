@@ -18,10 +18,7 @@ generation which is a lot easier here than in shell.
     Usage:
       generate repository <orderfile>
       generate run <orderfile>
-      generate info <name> <orderfile> <containerfile>
-      generate containerPorts <containerfile>
       generate servers <infofile>...
-      generate containers <infofile>...
       generate -h | --help | --version
 
     Notes:
@@ -41,15 +38,6 @@ generation which is a lot easier here than in shell.
       process.stdout.write _(statements())
           .filter((x) -> x.command)
           .last()?.command or ''
-    if options.containers
-      for infofile in options['<infofile>']
-        try
-          content = JSON.parse(String(fs.readFileSync(infofile)))
-          for c in content
-            process.stdout.write c.container + ' '
-        catch e
-          #eat this for now, docker is mixing streams
-          #console.error e
     if options.servers
       buffer = []
       for infofile in options['<infofile>']
@@ -87,24 +75,3 @@ generation which is a lot easier here than in shell.
       {{/each}}
       """
       console.log handlebars.compile(template)(context)
-    if options.containerPorts
-      infos = JSON.parse(String(fs.readFileSync options['<containerfile>']))
-      for info in infos
-        console.log info.containerPort
-    if options.info
-      infos = JSON.parse(String(fs.readFileSync options['<containerfile>']))
-      publications = _.filter(statements(), (x) -> x.publish)
-      mapped = []
-      for info in infos
-        for from, to of (info?.NetworkSettings?.PortMapping?.Tcp or {})
-          from = parseInt(from)
-          to = parseInt(to)
-          for publication in publications
-            if publication.publish.from is from
-              mapped.push
-                container: info.ID
-                containerPort: to
-                hostPort: publication.publish.to
-                url: publication.publish.url
-                name:  options['<name>']
-      console.log JSON.stringify(mapped)

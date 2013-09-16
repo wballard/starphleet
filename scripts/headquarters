@@ -10,6 +10,8 @@ set -e
 ###
 ### Set the headquarters <url>. This is where the phleet will look for
 ### orders.
+### The <url> can include a #branch on the end which will refer to that specific
+### branch rather than default master.
 help=$(grep "^### " "$0" | cut -c 5-)
 version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
@@ -17,7 +19,6 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 cat <<EOF > /var/starphleet/.headquarters
 export HEADQUARTERS_REMOTE="${url}"
 export HEADQUARTERS_LOCAL="/var/starphleet/headquarters"
-export CURRENT_CONTAINERS="/var/starphleet/current_containers"
 export CURRENT_ORDERS="/var/starphleet/current_orders"
 export NGINX_CONF="/var/starphleet/nginx"
 export ADMIRAL="admiral"

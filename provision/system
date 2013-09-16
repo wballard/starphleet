@@ -19,5 +19,9 @@ apt-get -y install --force-yes man
 #initial apt package has nginx running. lame.
 /etc/init.d/nginx stop
 
+#we will be using bash. period
+rm /bin/sh
+ln /bin/bash /bin/sh
+
 #now ready for the phleet
 /starphleet/provision/phleet

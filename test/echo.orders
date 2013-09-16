@@ -5,8 +5,5 @@
 #monitored for changes, and automatically deployed as needed
 autodeploy https://github.com/wballard/echo.git
 
-#expose a port from the container, in this case with http
-expose --private 3000 --public 80  --url /echo
-
-#expose a port from the container as a raw port
-export --private 3000
+#publish a port from the container, in this case with http
+publish --private 3000 --public 80  --url /echo
