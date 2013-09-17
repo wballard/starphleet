@@ -10,8 +10,8 @@
     "starphleet-generate": "./scripts/generate.litcoffee",
     "starphleet-headquarters": "./scripts/headquarters",
     "starphleet-build": "./scripts/build",
-    "starphleet-run": "./scripts/run",
     "starphleet-wait-network": "./scripts/wait-network",
+    "starphleet-run-script": "./scripts/run-script",
     "starphleet-expose": "./scripts/expose",
     "starphleet-reset": "./scripts/reset",
     "starphleet-ready": "./scripts/ready"

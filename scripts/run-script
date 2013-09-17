@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+## run-script 0.1.0
+### Usage:
+###    run-script <starphleet_file>
+### --help
+###
+### Generate the 'run' script from a Starphleet file.
+help=$(grep "^### " "$0" | cut -c 5-)
+version=$(grep "^## "  "$0" | cut -c 4-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+EXTRACTOR='
+  /run script/ { in_it = 1; next;}
+  /end script/ {in_it = 0;}
+  {if (in_it) print $0;}
+'
+cat << EOF
+#need to be in the directory for the source
+  cd local_repository
+#your run script code here...
+EOF
+cat "${starphleet_file}" | awk "${EXTRACTOR}" -
