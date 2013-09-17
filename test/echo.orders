@@ -1,9 +1,0 @@
-#sample orders file, this doesn't do much, but shows the basics of
-#ordering a starphleet service
-
-#autodeploy tells starphleet where to look for a service this will be
-#monitored for changes, and automatically deployed as needed
-autodeploy https://github.com/wballard/echo.git
-
-#publish a port from the container, in this case with http
-publish --private 3000 --public 80  --url /echo
