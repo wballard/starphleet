@@ -26,8 +26,7 @@ generation which is a lot easier here than in shell.
       for infofile in options['<infofile>']
         try
           content = JSON.parse(String(fs.readFileSync(infofile)))
-          for c in content
-            buffer.push c
+          buffer.push content
         catch e
           console.error e
       context = []
