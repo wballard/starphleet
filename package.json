@@ -11,6 +11,7 @@
     "starphleet-headquarters": "./scripts/headquarters",
     "starphleet-build": "./scripts/build",
     "starphleet-run": "./scripts/run",
+    "starphleet-wait-network": "./scripts/wait-network",
     "starphleet-expose": "./scripts/expose",
     "starphleet-reset": "./scripts/reset",
     "starphleet-ready": "./scripts/ready"

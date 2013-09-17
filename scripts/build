@@ -4,7 +4,7 @@ source ${DIR}/tools
 
 ## build 0.1.0
 ### Usage:
-###    build <local_repository>
+###    build <local_repository> <container_id_file>
 ### --help
 ###
 ### Given a local repository that is Starphleet enabled, build up a container
@@ -29,7 +29,38 @@ help=$(grep "^### " "$0" | cut -c 5-)
 version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-makeBuilder
+#setting up, get the script that will be used to create a container, and the
+#md5 of this script is a unique thumbprint for that container, sets you up
+#to use the 'same container' for multiple services, small time savings using
+#the git trick of content addressing
+#oh... how I love git inspired tricks
+
+EXTRACTOR='
+  /build script/ { in_it = 1; next;}
+  /end script/ {in_it = 0;}
+  {if (in_it) print $0;}
+'
+
+BUILDER=${TMPDIR-/tmp}/$$
+#unindented on purpose to have the spacing what I want, plus there HEREDOC
+cat << EOF > ${BUILDER}
+#need to wait until the network is up
+until ping archive.ubuntu.com -c 1
+do
+  echo waiting for network
+  sleep 1
+done
+EOF
+
+if [ -f "${local_repository}/Starphleet" ]; then
+  cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - >> ${BUILDER}
+else
+  echo '' >> ${BUILDER}
+fi
+trap 'rm -rf ${BUILDER}' EXIT
+
+CONTAINER_NAME=$(cat "${BUILDER}" | md5sum | awk '{ print $1}')
+
 
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 CONTAINER_LOCK=${TMPDIR-/tmp}/${CONTAINER_NAME}
@@ -48,8 +79,8 @@ trap 'rm -rf ${CONTAINER_CONF}' EXIT
 #this is flocked-up since this can and will be called in parallel from multiple
 #different ordered services
 info Creating ${CONTAINER_NAME}
-if lxc-ls | grep "${CONTAINER_NAME}$"; then
-  info Already built
+if lxc-ls | grep "${CONTAINER_NAME}$" > /dev/null; then
+  info Already built ${CONTAINER_NAME}
 else
   flock "${CONTAINER_LOCK}" lxc-create -n ${CONTAINER_NAME} -t ubuntu
   #mounts and files, always can see starphleet read only
@@ -64,3 +95,5 @@ else
   lxc-wait --name ${CONTAINER_NAME} --state STOPPED
   info Built ${CONTAINER_NAME}
 fi
+
+echo ${CONTAINER_NAME} > ${container_id_file}
