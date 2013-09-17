@@ -12,7 +12,7 @@
     "starphleet-build": "./scripts/build",
     "starphleet-wait-network": "./scripts/wait-network",
     "starphleet-run-script": "./scripts/run-script",
-    "starphleet-expose": "./scripts/expose",
+    "starphleet-publish": "./scripts/publish",
     "starphleet-reset": "./scripts/reset",
     "starphleet-ready": "./scripts/ready"
   },
@@ -33,11 +33,7 @@
   "dependencies": {
     "docopt": "~0.4.0",
     "coffee-script": "~1.6.3",
-    "pegjs": "~0.7.0",
     "lodash": "~1.3.1",
     "handlebars": "~1.0.12"
-  },
-  "devDependencies": {
-    "nodemon": "~0.7.10"
   }
 }
