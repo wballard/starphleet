@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-
 ## build 0.1.0
 ### Usage:
-###    build <local_repository> <container_id_file>
+###    build <local_repository>
 ### --help
 ###
 ### Given a local repository that is Starphleet enabled, build up a container
@@ -25,15 +22,16 @@ source ${DIR}/tools
 ###    read only
 ### /local_repository - This is a copy of the source local repository, taking
 ###    a snapshot so you cannot modify the source
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-#setting up, get the script that will be used to create a container, and the
-#md5 of this script is a unique thumbprint for that container, sets you up
-#to use the 'same container' for multiple services, small time savings using
-#the git trick of content addressing
-#oh... how I love git inspired tricks
+set +e
+
+#setting up, get the script that will be used to `build` a container, that
+#goes with the current commit sha of the repository.
 
 EXTRACTOR='
   /build script/ { in_it = 1; next;}
@@ -41,16 +39,10 @@ EXTRACTOR='
   {if (in_it) print $0;}
 '
 
+#Need to wait for the network to come up before we start the build
+#script, otherwise apt et al won't do so very much
 BUILDER=${TMPDIR-/tmp}/$$
-#unindented on purpose to have the spacing what I want, plus there HEREDOC
-cat << EOF > ${BUILDER}
-#need to wait until the network is up
-until ping archive.ubuntu.com -c 1
-do
-  echo waiting for network
-  sleep 1
-done
-EOF
+"${DIR}/starphleet-wait-network" > ${BUILDER}
 
 if [ -f "${local_repository}/Starphleet" ]; then
   cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - >> ${BUILDER}
@@ -59,41 +51,62 @@ else
 fi
 trap 'rm -rf ${BUILDER}' EXIT
 
-CONTAINER_NAME=$(cat "${BUILDER}" | md5sum | awk '{ print $1}')
-
-
+get_CURRENT_SHA "${local_repository}"
+CONTAINER_NAME="${CURRENT_SHA}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
-CONTAINER_LOCK=${TMPDIR-/tmp}/${CONTAINER_NAME}
-trap 'rm -rf ${CONTAINER_LOCK}' EXIT
 
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 cat << EOF > ${CONTAINER_CONF}
 lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/var/starphleet none bind,ro 0 0
 EOF
-
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
-#all set up, now it is time to make a container, using a file name as a
-#kind of transaction with lxc
+BASE_BUILD=${TMPDIR-/tmp}/basebuild
+cat << EOF > ${BASE_BUILD}
+  apt-get -y update
+  apt-get -y install --force-yes git curl
+  apt-get -y install --force-yes python g++ make
+  apt-get -y install --force-yes python-software-properties
+  apt-get -y install --force-yes software-properties-common
+EOF
+trap 'rm -rf ${BASE_BUILD}' EXIT
 
-#this is flocked-up since this can and will be called in parallel from multiple
-#different ordered services
 info Creating ${CONTAINER_NAME}
 if lxc-ls | grep "${CONTAINER_NAME}$" > /dev/null; then
   info Already built ${CONTAINER_NAME}
 else
-  flock "${CONTAINER_LOCK}" lxc-create -n ${CONTAINER_NAME} -t ubuntu
+  if lxc-ls | grep "starphleet-base$" > /dev/null; then
+    echo -n
+  else
+    BASE_CONTAINER_NAME="starphleet-base"
+    lxc-create -n "${BASE_CONTAINER_NAME}" -t ubuntu
+    starphleet-wait-network > "/var/lib/lxc/starphleet-base/rootfs/.block"
+    cat "${BASE_BUILD}" > "/var/lib/lxc/starphleet-base/rootfs/.build"
+    lxc-start --name ${BASE_CONTAINER_NAME} -d
+    lxc-wait --name ${BASE_CONTAINER_NAME} --state RUNNING --timeout 30
+    lxc-attach --name ${BASE_CONTAINER_NAME} -- bash /.block
+    lxc-attach --name ${BASE_CONTAINER_NAME} -- bash /.build
+    lxc-stop --name ${BASE_CONTAINER_NAME}
+    lxc-wait --name ${BASE_CONTAINER_NAME} --state STOPPED --timeout 30
+  fi
+  #clone on top of the base image, this is just to save disk space
+  lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s
   #mounts and files, always can see starphleet read only
   mkdir ${CONTAINER_ROOT}/var/starphleet
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
   #build
   cp ${BUILDER} ${CONTAINER_ROOT}/.build
   lxc-start --name ${CONTAINER_NAME} -d
-  lxc-wait --name ${CONTAINER_NAME} --state RUNNING
+  lxc-wait --name ${CONTAINER_NAME} --state RUNNING --timeout 30
+  #always able to see your own source
+  if btrfs subvolume snapshot "${order}/git" ${CONTAINER_ROOT}; then
+    echo Used a snapshot
+  else
+    echo Used a copy
+    cp -R "${order}/git" "${CONTAINER_ROOT}/local_repository"
+  fi
   lxc-attach --name ${CONTAINER_NAME} -- bash /.build
   lxc-stop --name ${CONTAINER_NAME}
-  lxc-wait --name ${CONTAINER_NAME} --state STOPPED
+  lxc-wait --name ${CONTAINER_NAME} --state STOPPED --timeout 30
   info Built ${CONTAINER_NAME}
 fi
-
-echo ${CONTAINER_NAME} > ${container_id_file}

@@ -30,7 +30,7 @@ cat << EOF
 {
   "name": "${NAME}",
   "containerIP": "${CONTAINER_IP}",
-  "container": "${CONTAINER}",
+  "container": "${CONTAINER_NAME}",
   "hostPort": "${public}",
   "containerPort": "${private}",
   "url": "${url}"
