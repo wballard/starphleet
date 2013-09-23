@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ## build 0.1.0
 ### Usage:
-###    build <local_repository>
+###    build <local_repository> <container_name>
 ### --help
 ###
 ### Given a local repository that is Starphleet enabled, build up a container
@@ -51,16 +51,21 @@ else
 fi
 trap 'rm -rf ${BUILDER}' EXIT
 
-get_CURRENT_SHA "${local_repository}"
-CONTAINER_NAME="${CURRENT_SHA}"
+CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 
+#configuration, this is the place to mount directories on the host computer
+#into the container
+#note: this takes effect after the initial create, which generates the
+#inital container configuration, and this is tacked on the end
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 cat << EOF > ${CONTAINER_CONF}
 lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/var/starphleet none bind,ro 0 0
 EOF
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
+#this is our base container, it is a time saving step as the compilers
+#will generally be needed, but are a lot larger install than say nodejs
 BASE_BUILD=${TMPDIR-/tmp}/basebuild
 cat << EOF > ${BASE_BUILD}
   apt-get -y update

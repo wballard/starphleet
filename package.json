@@ -9,7 +9,7 @@
     "tools": "./scripts/tools",
     "starphleet-generate": "./scripts/generate.litcoffee",
     "starphleet-headquarters": "./scripts/headquarters",
-    "starphleet-build": "./scripts/build",
+    "starphleet-build": "./scripts/starphleet-build",
     "starphleet-wait-network": "./scripts/starphleet-wait-network",
     "starphleet-run-script": "./scripts/run-script",
     "starphleet-publish": "./scripts/publish",
