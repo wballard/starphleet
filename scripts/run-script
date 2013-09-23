@@ -18,7 +18,7 @@ EXTRACTOR='
 '
 cat << EOF
 #need to be in the directory for the source
-  cd local_repository
+  cd /local_repository
 #your run script code here...
 EOF
 cat "${starphleet_file}" | awk "${EXTRACTOR}" -

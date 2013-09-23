@@ -43,6 +43,11 @@ EXTRACTOR='
 #script, otherwise apt et al won't do so very much
 BUILDER=${TMPDIR-/tmp}/$$
 "${DIR}/starphleet-wait-network" > ${BUILDER}
+cat << EOF >> ${BUILDER}
+#need to be in the directory for the source
+  cd /local_repository
+#your run script code here...
+EOF
 
 if [ -f "${local_repository}/Starphleet" ]; then
   cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - >> ${BUILDER}
@@ -64,36 +69,11 @@ lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/var/starphleet none bind,ro 
 EOF
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
-#this is our base container, it is a time saving step as the compilers
-#will generally be needed, but are a lot larger install than say nodejs
-BASE_BUILD=${TMPDIR-/tmp}/basebuild
-cat << EOF > ${BASE_BUILD}
-  apt-get -y update
-  apt-get -y install --force-yes git curl
-  apt-get -y install --force-yes python g++ make
-  apt-get -y install --force-yes python-software-properties
-  apt-get -y install --force-yes software-properties-common
-EOF
-trap 'rm -rf ${BASE_BUILD}' EXIT
 
 info Creating ${CONTAINER_NAME}
 if lxc-ls | grep "${CONTAINER_NAME}$" > /dev/null; then
   info Already built ${CONTAINER_NAME}
 else
-  if lxc-ls | grep "starphleet-base$" > /dev/null; then
-    echo -n
-  else
-    BASE_CONTAINER_NAME="starphleet-base"
-    lxc-create -n "${BASE_CONTAINER_NAME}" -t ubuntu
-    starphleet-wait-network > "/var/lib/lxc/starphleet-base/rootfs/.block"
-    cat "${BASE_BUILD}" > "/var/lib/lxc/starphleet-base/rootfs/.build"
-    lxc-start --name ${BASE_CONTAINER_NAME} -d
-    lxc-wait --name ${BASE_CONTAINER_NAME} --state RUNNING --timeout 30
-    lxc-attach --name ${BASE_CONTAINER_NAME} -- bash /.block
-    lxc-attach --name ${BASE_CONTAINER_NAME} -- bash /.build
-    lxc-stop --name ${BASE_CONTAINER_NAME}
-    lxc-wait --name ${BASE_CONTAINER_NAME} --state STOPPED --timeout 30
-  fi
   #clone on top of the base image, this is just to save disk space
   lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s
   #mounts and files, always can see starphleet read only
