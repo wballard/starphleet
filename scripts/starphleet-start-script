@@ -16,10 +16,12 @@ EXTRACTOR='
   /end script/ {in_it = 0;}
   {if (in_it) print $0;}
 '
-cat << EOF
-#need to be in the directory for the source
-  export HOME=/
+cat << "EOF"
+  export HOME=/app
+  [[ -f "/app/.env" ]] && . "/app/.env"
+  for file in /app/.profile.d/*; do source $file; done
+  hash -r
+  #need to be in the directory for the source
   cd /app
-#your run script code here...
 EOF
 cat "${starphleet_file}" | awk "${EXTRACTOR}" -
