@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+## starphleet-base-script 0.1.0
+### Usage:
+###    starphleet-base-script
+### --help
+###
+### Generate the a script to create a base image with buildpack support
+help=$(grep "^### " "$0" | cut -c 5-)
+version=$(grep "^## "  "$0" | cut -c 4-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+cat << "EOF"
+read -r -d '' PACKAGES << FFF
+autoconf
+bind9-host
+bison
+build-essential
+curl
+daemontools
+dnsutils
+ed
+git
+imagemagick
+iputils-tracepath
+libcurl4-openssl-dev
+libevent-dev
+libglib2.0-dev
+libjpeg-dev
+libjpeg62
+libpng12-0
+libpng12-dev
+libmagickcore-dev
+libmagickwand-dev
+libmysqlclient-dev
+libpq-dev
+libsqlite3-dev
+libssl-dev
+libssl0.9.8
+libxml2-dev
+libxslt-dev
+mercurial
+mysql-client
+netcat-openbsd
+nodejs
+openjdk-6-jdk
+openjdk-6-jre-headless
+openssh-client
+openssh-server
+python-dev
+ruby1.9.1-dev
+rubygems
+socat
+sqlite3
+telnet
+zlib1g-dev
+FFF
+
+EOF
+
+cat << "EOF"
+read -r -d '' BUILDPACKS << FFF
+https://github.com/heroku/heroku-buildpack-ruby.git
+https://github.com/heroku/heroku-buildpack-nodejs.git
+https://github.com/heroku/heroku-buildpack-java.git
+https://github.com/heroku/heroku-buildpack-play.git
+https://github.com/heroku/heroku-buildpack-python.git
+https://github.com/heroku/heroku-buildpack-php.git
+https://github.com/heroku/heroku-buildpack-clojure.git
+https://github.com/kr/heroku-buildpack-go.git
+https://github.com/miyagawa/heroku-buildpack-perl.git
+https://github.com/heroku/heroku-buildpack-scala
+https://github.com/igrigorik/heroku-buildpack-dart.git
+https://github.com/rhy-jot/buildpack-nginx.git
+https://github.com/Kloadut/heroku-buildpack-static-apache.git
+FFF
+
+EOF
+
+cat << "EOF"
+
+  #here we go, making a buildpack ready system
+  apt-get install -y --force-yes software-properties-common python-software-properties
+  add-apt-repository -y ppa:chris-lea/node.js
+  apt-get -y update
+  echo -n ${PACKAGES}  | tr ' ' '\n' | xargs -I % xargs apt-get install -y --force-yes %
+  apt-get clean
+
+  #load on all the buildpacks
+  mkdir -p /build/buildpacks
+  cd /build/buildpacks
+  echo -n ${BUILDPACKS}  | tr ' ' '\n' | xargs -I % git clone --depth 1 %
+
+  #ruby superstition
+  export HOME=/
+  gem install bundler
+  cd /build/buildpacks/heroku-buildpack-ruby && bundle install
+
+EOF

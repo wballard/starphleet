@@ -45,7 +45,7 @@ BUILDER=${TMPDIR-/tmp}/$$
 "${DIR}/starphleet-wait-network" > ${BUILDER}
 cat << EOF >> ${BUILDER}
 #need to be in the directory for the source
-  cd /local_repository
+  cd /app
 #your run script code here...
 EOF
 
@@ -84,11 +84,11 @@ else
   lxc-start --name ${CONTAINER_NAME} -d
   lxc-wait --name ${CONTAINER_NAME} --state RUNNING --timeout 30
   #always able to see your own source
-  if btrfs subvolume snapshot "${order}/git" ${CONTAINER_ROOT}; then
+  if btrfs subvolume snapshot "${order}/git" ${CONTAINER_ROOT}/app; then
     echo Used a snapshot
   else
     echo Used a copy
-    cp -R "${order}/git" "${CONTAINER_ROOT}/local_repository"
+    cp -R "${order}/git" "${CONTAINER_ROOT}/app"
   fi
   lxc-attach --name ${CONTAINER_NAME} -- bash /.build
   lxc-stop --name ${CONTAINER_NAME}

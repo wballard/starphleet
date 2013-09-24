@@ -32,17 +32,6 @@ useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
 adduser ${ADMIRAL} sudo
 chown -R ${ADMIRAL} /var/starphleet*
 
-#this is our base container, it is a time saving step as the compilers
-#will generally be needed, but are a lot larger install than say nodejs
-BASE_BUILD=${TMPDIR-/tmp}/basebuild
-cat << EOF > ${BASE_BUILD}
-  apt-get -y update
-  apt-get -y install --force-yes git curl
-  apt-get -y install --force-yes python g++ make
-  apt-get -y install --force-yes python-software-properties
-  apt-get -y install --force-yes software-properties-common
-EOF
-trap 'rm -rf ${BASE_BUILD}' EXIT
 
 #base ubuntu LXC image, get this on before we start anything
 BASE_CONTAINER_NAME="starphleet-base"
@@ -51,7 +40,7 @@ if lxc-ls | grep "${BASE_CONTAINER_NAME}$" > /dev/null; then
 else
   lxc-create -n "${BASE_CONTAINER_NAME}" -t ubuntu
   starphleet-wait-network > "/var/lib/lxc/starphleet-base/rootfs/.block"
-  cat "${BASE_BUILD}" > "/var/lib/lxc/starphleet-base/rootfs/.build"
+  starphleet-base-script > "/var/lib/lxc/starphleet-base/rootfs/.build"
   lxc-start --name ${BASE_CONTAINER_NAME} -d
   lxc-wait --name ${BASE_CONTAINER_NAME} --state RUNNING --timeout 30
   lxc-attach --name ${BASE_CONTAINER_NAME} -- bash /.block

@@ -18,7 +18,14 @@ EXTRACTOR='
 '
 cat << EOF
 #need to be in the directory for the source
-  cd /local_repository
+  export HOME=/
+  cd /app
 #your run script code here...
 EOF
-cat "${starphleet_file}" | awk "${EXTRACTOR}" -
+if [ -f "${starphleet_file}" ]; then
+  info using the Starphleet file
+  cat "${starphleet_file}" | awk "${EXTRACTOR}" -
+else
+  #no starphleet file? lets try a buildback!
+  info going for a buildpack
+fi
