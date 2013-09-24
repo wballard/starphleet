@@ -42,17 +42,15 @@ EXTRACTOR='
 #Need to wait for the network to come up before we start the build
 #script, otherwise apt et al won't do so very much
 BUILDER=${TMPDIR-/tmp}/$$
-"${DIR}/starphleet-wait-network" > ${BUILDER}
-cat << EOF >> ${BUILDER}
-#need to be in the directory for the source
-  cd /app
-#your run script code here...
-EOF
 
-if [ -f "${local_repository}/Starphleet" ]; then
+if grep 'build script' "${local_repository}/Starphleet"; then
+  info starphleet build
+  #need to be in the directory for the source
+  echo 'cd /app' > ${BUILDER}
   cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - >> ${BUILDER}
 else
-  echo '' >> ${BUILDER}
+  info buildpack build
+  cp "${DIR}/starphleet-buildpack-script" "${BUILDER}"
 fi
 trap 'rm -rf ${BUILDER}' EXIT
 
@@ -79,17 +77,20 @@ else
   #mounts and files, always can see starphleet read only
   mkdir ${CONTAINER_ROOT}/var/starphleet
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
+  #block script, makes sure we are on the air
+  starphleet-wait-network > "${CONTAINER_ROOT}/.block"
   #build
   cp ${BUILDER} ${CONTAINER_ROOT}/.build
   lxc-start --name ${CONTAINER_NAME} -d
   lxc-wait --name ${CONTAINER_NAME} --state RUNNING --timeout 30
   #always able to see your own source
-  if btrfs subvolume snapshot "${order}/git" ${CONTAINER_ROOT}/app; then
+  if btrfs subvolume snapshot "${local_repository}" ${CONTAINER_ROOT}/app; then
     echo Used a snapshot
   else
     echo Used a copy
-    cp -R "${order}/git" "${CONTAINER_ROOT}/app"
+    cp -R "${local_repository}" "${CONTAINER_ROOT}/app"
   fi
+  lxc-attach --name ${CONTAINER_NAME} -- bash /.block
   lxc-attach --name ${CONTAINER_NAME} -- bash /.build
   lxc-stop --name ${CONTAINER_NAME}
   lxc-wait --name ${CONTAINER_NAME} --state STOPPED --timeout 30

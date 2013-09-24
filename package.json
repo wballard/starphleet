@@ -11,10 +11,11 @@
     "starphleet-headquarters": "./scripts/headquarters",
     "starphleet-build": "./scripts/starphleet-build",
     "starphleet-wait-network": "./scripts/starphleet-wait-network",
-    "starphleet-run-script": "./scripts/starphleet-run-script",
+    "starphleet-start-script": "./scripts/starphleet-start-script",
     "starphleet-base-script": "./scripts/starphleet-base-script",
+    "starphleet-buildpack-script": "./scripts/starphleet-buildpack-script",
     "starphleet-publish": "./scripts/publish",
-    "starphleet-ready": "./scripts/ready"
+    "starphleet-ready": "./scripts/starphleet-ready"
   },
   "repository": {
     "type": "git",
