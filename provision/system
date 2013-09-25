@@ -35,5 +35,5 @@ apt-get clean
 if curl "http://169.254.169.254/latest/user-data/" --silent --connect-timeout 1; then
   cp /starphleet/provision/ec2/starphleet_install.conf /etc/init/starphleet_install.conf
   HEADQUARTERS=$(curl "http://169.254.169.254/latest/user-data/" --silent | sed -e's/%\([0-9A-F][0-9A-F]\)/\\\\\x\1/g' | xargs echo -e)
-  info Headquarters found from EC2 user data ${HEADQUARTERS}
+  starphleet-headquarters "${HEADQUARTERS}"
 fi
