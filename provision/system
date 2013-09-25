@@ -34,7 +34,6 @@ apt-get clean
 #if we are on EC2, install the self update job
 if curl "http://169.254.169.254/latest/user-data/" --connect-timeout 1; then
   cp /starphleet/provision/ec2/starphleet_install.conf /etc/init/starphleet_install.conf
-  start starphleet_install
   HEADQUARTERS=$(urldecode $(curl "http://169.254.169.253/latest/user-data/" --connect-timeout 1))
   info Headquarters found from EC2 user data ${HEADQUARTERS}
 fi
