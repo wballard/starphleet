@@ -50,7 +50,6 @@ else
 fi
 
 #good to go, start the phleet
-start starphleet
+#start starphleet
 
-announce
 announce *Welcome to Starphleet*
