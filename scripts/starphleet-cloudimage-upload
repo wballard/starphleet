@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+## starphleet-cloudimage-upload 0.1.0
+### Usage:
+###    starphleet-cloudimage-upload <imagefile>
+### --help
+###
+### Once you have an image build with starphleet-cloudimage, use this
+### to upload it. You will need all your AWS environment variables set.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+version=$(grep "^## "  "$0" | cut -c 4-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+set -e
+
+#ec2-bundle-image -i "${imagefile}" --cert "${AWS_CERTIFICATE}" --ec2cert "${AWS_CERTIFICATE}" --privatekey "${AWS_PRIVATE_KEY}" -u "${AWS_ACCOUNT_ID}" --arch x86_64
+
+#ec2-upload-bundle -b starphleet-images -m /tmp/${imagefile}.manifest.xml -a "${AWS_ACCESS_KEY_ID}" -s "${AWS_SECRET_ACCESS_KEY}"
+
+ec2-register  starphleet-images/${imagefile}.manifest.xml --architecture x86_64 --region "${AWS_DEFAULT_REGION}" --verbose

@@ -8,14 +8,13 @@ set -e
 apt-get -y update
 apt-get -y install --force-yes git curl apt-transport-https lsof ssh
 apt-get -y install --force-yes python g++ make git
+apt-get -y install --force-yes lxc man ec2-ami-tools ec2-api-tools
 apt-get -y install --force-yes software-properties-common
 add-apt-repository -y ppa:nginx/stable
 add-apt-repository -y ppa:chris-lea/node.js
 apt-get -y update
-apt-get -y install --force-yes lxc
 apt-get -y install --force-yes nginx
 apt-get -y install --force-yes nodejs
-apt-get -y install --force-yes man
 
 #initial apt package has nginx running. lame.
 /etc/init.d/nginx stop
@@ -27,3 +26,5 @@ ln /bin/bash /bin/sh
 
 #now ready for the phleet
 /starphleet/provision/phleet
+
+apt-get clean

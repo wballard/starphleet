@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
 ## starphleet-wait-network 0.1.0
 ### Usage:
 ###    starphleet-wait-network
@@ -8,6 +6,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ###
 ### Wait until it is obvious there is an address lease. This is a
 ### script generating script.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 help=$(grep "^### " "$0" | cut -c 5-)
 version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
