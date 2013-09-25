@@ -7,6 +7,8 @@ BLUE=$(tput setaf 4)
 BLUE_BOLD=$(tput setaf 4; tput bold)
 RED=$(tput setaf 1)
 FATAL=$(tput setaf 1; tput bold)
+alias urlencode='python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])"'
+alias urldecode='python -c "import sys, urllib as ul; print ul.unquote_plus(sys.argv[1])"'
 
 function error() {
   echo -e "$RED$*$NORMAL" 1>&2
