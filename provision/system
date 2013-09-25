@@ -10,7 +10,7 @@ source /starphleet/scripts/tools
 apt-get -y update
 apt-get -y install --force-yes git curl apt-transport-https lsof ssh
 apt-get -y install --force-yes python g++ make git
-apt-get -y install --force-yes lxc man ec2-ami-tools ec2-api-tools
+apt-get -y install --force-yes lxc man
 apt-get -y install --force-yes software-properties-common
 add-apt-repository -y ppa:nginx/stable
 add-apt-repository -y ppa:chris-lea/node.js
