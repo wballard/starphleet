@@ -17,3 +17,33 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 set -e
 
+#file system in an image
+[ -f "${imagefile}" ] && rm "${imagefile}"
+[ -d "${imagefile}.mount" ] && rm -rf "${imagefile}.mount"
+mkdir "${imagefile}.mount"
+dd if=/dev/zero of="${imagefile}" count=2000 bs=1M
+mkfs.btrfs "${imagefile}"
+
+mount -o loop "${imagefile}" "${imagefile}.mount"
+trap 'umount -l "${imagefile}.mount"' EXIT
+
+git clone /starphleet "${imagefile}.mount/starphleet"
+
+#make a script to be run chrooted
+cat << EOF > "${imagefile}.mount/configure"
+#!/usr/bin/env bash
+set -e
+mount -t proc proc /proc
+cd /dev
+MAKEDEV console
+MAKEDEV std
+echo -e 'auto lo\niface lo inet loopback\nauto eth0\niface eth0 inet dhcp' >> /etc/network/interfaces
+echo -e '/dev/sda1 / btrfs defaults 0 1' > /etc/fstab
+/starphleet/provision/system
+exit
+EOF
+chmod +x "${imagefile}.mount/configure"
+
+debootstrap raring "${imagefile}.mount"
+chroot "${imagefile}.mount" "/configure"
+

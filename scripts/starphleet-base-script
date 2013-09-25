@@ -81,7 +81,7 @@ EOF
 cat << "EOF"
 
   #here we go, making a buildpack ready system
-  apt-get install -y --force-yes software-properties-common python-software-properties
+  apt-get install -y --force-yes software-properties-common
   add-apt-repository -y ppa:chris-lea/node.js
   apt-get -y update
   echo -n ${PACKAGES}  | tr ' ' '\n' | xargs -I % xargs apt-get install -y --force-yes %
