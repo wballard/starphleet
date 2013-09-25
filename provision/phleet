@@ -42,11 +42,11 @@ else
   starphleet-wait-network > "/var/lib/lxc/starphleet-base/rootfs/.block"
   starphleet-base-script > "/var/lib/lxc/starphleet-base/rootfs/.build"
   lxc-start --name ${BASE_CONTAINER_NAME} -d
-  lxc-wait --name ${BASE_CONTAINER_NAME} --state RUNNING --timeout 30
+  starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
   lxc-attach --name ${BASE_CONTAINER_NAME} -- bash /.block
   lxc-attach --name ${BASE_CONTAINER_NAME} -- bash /.build
   lxc-stop --name ${BASE_CONTAINER_NAME}
-  lxc-wait --name ${BASE_CONTAINER_NAME} --state STOPPED --timeout 30
+  starphleet-wait-lxc ${CONTAINER_NAME} STOPPED
 fi
 
 #good to go, start the phleet

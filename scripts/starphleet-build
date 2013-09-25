@@ -82,7 +82,7 @@ else
   #build
   cp ${BUILDER} ${CONTAINER_ROOT}/.build
   lxc-start --name ${CONTAINER_NAME} -d
-  lxc-wait --name ${CONTAINER_NAME} --state RUNNING --timeout 30
+  starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
   #always able to see your own source
   if btrfs subvolume snapshot "${local_repository}" ${CONTAINER_ROOT}/app; then
     echo Used a snapshot
@@ -93,6 +93,6 @@ else
   lxc-attach --name ${CONTAINER_NAME} -- bash /.block
   lxc-attach --name ${CONTAINER_NAME} -- bash /.build
   lxc-stop --name ${CONTAINER_NAME}
-  lxc-wait --name ${CONTAINER_NAME} --state STOPPED --timeout 30
+  starphleet-wait-lxc ${CONTAINER_NAME} STOPPED
   info Built ${CONTAINER_NAME}
 fi
