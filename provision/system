@@ -20,7 +20,7 @@ apt-get -y install --force-yes nodejs
 
 #initial apt package has nginx running. lame.
 /etc/init.d/nginx stop
-find /etc/rc* && find /etc/rc* | grep nginx | xargs rm
+find /etc/rc* -name '*nginx' | grep nginx && find /etc/rc* -name 'nginx*' | xargs rm
 
 #we will be using bash. period
 rm /bin/sh
