@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-## build 0.1.0
+## starphleet-build 0.1.0
 ### Usage:
-###    build <local_repository> <container_name>
+###    starphleet-build <local_repository> <container_name>
 ### --help
 ###
 ### Given a local repository that is Starphleet enabled, build up a container

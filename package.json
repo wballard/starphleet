@@ -8,7 +8,7 @@
     "docopts": "./scripts/docopts",
     "tools": "./scripts/tools",
     "starphleet-generate": "./scripts/generate.litcoffee",
-    "starphleet-headquarters": "./scripts/headquarters",
+    "starphleet-headquarters": "./scripts/starphleet-headquarters",
     "starphleet-build": "./scripts/starphleet-build",
     "starphleet-wait-network": "./scripts/starphleet-wait-network",
     "starphleet-wait-lxc": "./scripts/starphleet-wait-lxc",

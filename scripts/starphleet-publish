@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-## publish-json 0.1.0
+## starphleet-publish 0.1.0
 ### Usage:
-###    publish-json [--private=<private>] [--public=<public>] [--url=<url>]
+###    starphleet-publish [--private=<private>] [--public=<public>] [--url=<url>]
 ### --help
 ###
 ### Specify the private (on container) and public (on host) ports, along with

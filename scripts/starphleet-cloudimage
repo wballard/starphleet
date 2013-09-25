@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+## starphleet-cloudimage 0.1.0
+### Usage:
+###    starphleet-cloudimage <imagefile>
+### --help
+###
+### Build a cloud ready image into the named imagefile, you can then upload
+### this to EC2 or other compatible could providers.
+###
+### This image will be an 'empty' base starphleet ship, ready to be launched
+### into a phleet.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+version=$(grep "^## "  "$0" | cut -c 4-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+set -e
+

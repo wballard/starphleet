@@ -20,6 +20,7 @@ apt-get -y install --force-yes man
 
 #initial apt package has nginx running. lame.
 /etc/init.d/nginx stop
+rm /etc/rc6.d/*nginx
 
 #we will be using bash. period
 rm /bin/sh
