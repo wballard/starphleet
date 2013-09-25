@@ -73,7 +73,7 @@ if lxc-ls | grep "${CONTAINER_NAME}$" > /dev/null; then
   info Already built ${CONTAINER_NAME}
 else
   #clone on top of the base image, this is just to save disk space
-  lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s
+  lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}"
   #mounts and files, always can see starphleet read only
   mkdir ${CONTAINER_ROOT}/var/starphleet
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
@@ -84,12 +84,7 @@ else
   lxc-start --name ${CONTAINER_NAME} -d
   starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
   #always able to see your own source
-  if btrfs subvolume snapshot "${local_repository}" ${CONTAINER_ROOT}/app; then
-    echo Used a snapshot
-  else
-    echo Used a copy
-    cp -R "${local_repository}" "${CONTAINER_ROOT}/app"
-  fi
+  cp -R "${local_repository}" "${CONTAINER_ROOT}/app"
   lxc-attach --name ${CONTAINER_NAME} -- bash /.block
   lxc-attach --name ${CONTAINER_NAME} -- bash /.build
   lxc-stop --name ${CONTAINER_NAME}
