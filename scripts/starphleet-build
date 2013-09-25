@@ -73,7 +73,7 @@ if lxc-ls | grep "${CONTAINER_NAME}$" > /dev/null; then
   info Already built ${CONTAINER_NAME}
 else
   #clone on top of the base image, this is just to save disk space
-  lxc-clone --orig "starphleet-base" --new "${CONTAINER_NAME}" --snapshot
+  lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s
   #mounts and files, always can see starphleet read only
   mkdir ${CONTAINER_ROOT}/var/starphleet
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
