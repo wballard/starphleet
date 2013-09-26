@@ -46,13 +46,13 @@ else
   #block script, makes sure we are on the air
   starphleet-wait-network > "${CONTAINER_ROOT}/block"
   #build script, uses buildpacks
-  cp "${DIR}/starphleet-buildpack-script" "${CONTAINER_ROOT}/build"
+  cp "${DIR}/starphleet-buildpack-script" "${CONTAINER_ROOT}/buildpack"
   lxc-start --name ${CONTAINER_NAME} -d
   starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
   #always able to see your own source, copy on a snapshot
   cp -R "${local_repository}" "${CONTAINER_ROOT}/app"
   lxc-attach --name ${CONTAINER_NAME} -- bash /block
-  lxc-attach --name ${CONTAINER_NAME} -- bash /build
+  lxc-attach --name ${CONTAINER_NAME} -- bash /buildpack
   lxc-stop --name ${CONTAINER_NAME}
   starphleet-wait-lxc ${CONTAINER_NAME} STOPPED
   info built ${CONTAINER_NAME}
