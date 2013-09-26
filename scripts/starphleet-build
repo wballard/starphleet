@@ -5,54 +5,20 @@
 ### --help
 ###
 ### Given a local repository that is Starphleet enabled, build up a container
-### for it.
-### This looks for a file ./Starphleet in the repository, and then inside that
-### for:
-###
-### build script
-### ... your script here...
-### end script
-###
-### This script will be run as root on the container, so it is a great place
-### to use apt-get to shove on packages. When it is all done, there will be a
-### container ready to run for your repository.
+### for it. This uses Heroku buildpacks, and will detect how to create your
+### container automatically.
 ###
 ### The container will have a layout with the following special directories:
 ### /var/starphleet - This mounts back to /var/starphleet on the host
 ###    read only
-### /local_repository - This is a copy of the source local repository, taking
-###    a snapshot so you cannot modify the source
+### /app - This is a copy of the source local repository, taking
+###    a snapshot so you cannot modify the source. The buildpack is run
+###    against this copy
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
-
-set +e
-
-#setting up, get the script that will be used to `build` a container, that
-#goes with the current commit sha of the repository.
-
-EXTRACTOR='
-  /build script/ { in_it = 1; next;}
-  /end script/ {in_it = 0;}
-  {if (in_it) print $0;}
-'
-
-#Need to wait for the network to come up before we start the build
-#script, otherwise apt et al won't do so very much
-BUILDER=${TMPDIR-/tmp}/$$
-
-if grep 'build script' "${local_repository}/Starphleet"; then
-  info starphleet build
-  #need to be in the directory for the source
-  echo 'cd /app' > ${BUILDER}
-  cat "${local_repository}/Starphleet" | awk "${EXTRACTOR}" - >> ${BUILDER}
-else
-  info buildpack build
-  cp "${DIR}/starphleet-buildpack-script" "${BUILDER}"
-fi
-trap 'rm -rf ${BUILDER}' EXIT
 
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
@@ -61,16 +27,16 @@ CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 #into the container
 #note: this takes effect after the initial create, which generates the
 #inital container configuration, and this is tacked on the end
+#so we are starting the container twice
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 cat << EOF > ${CONTAINER_CONF}
 lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/var/starphleet none bind,ro 0 0
 EOF
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
-
 info Creating ${CONTAINER_NAME}
 if lxc-ls | grep "${CONTAINER_NAME}$" > /dev/null; then
-  info Already built ${CONTAINER_NAME}
+  info already built ${CONTAINER_NAME}
 else
   #clone on top of the base image, this is just to save disk space
   lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s
@@ -78,16 +44,16 @@ else
   mkdir ${CONTAINER_ROOT}/var/starphleet
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
   #block script, makes sure we are on the air
-  starphleet-wait-network > "${CONTAINER_ROOT}/.block"
-  #build
-  cp ${BUILDER} ${CONTAINER_ROOT}/.build
+  starphleet-wait-network > "${CONTAINER_ROOT}/block"
+  #build script, uses buildpacks
+  cp "${DIR}/starphleet-buildpack-script" "${CONTAINER_ROOT}/build"
   lxc-start --name ${CONTAINER_NAME} -d
   starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
-  #always able to see your own source
+  #always able to see your own source, copy on a snapshot
   cp -R "${local_repository}" "${CONTAINER_ROOT}/app"
-  lxc-attach --name ${CONTAINER_NAME} -- bash /.block
-  lxc-attach --name ${CONTAINER_NAME} -- bash /.build
+  lxc-attach --name ${CONTAINER_NAME} -- bash /block
+  lxc-attach --name ${CONTAINER_NAME} -- bash /build
   lxc-stop --name ${CONTAINER_NAME}
   starphleet-wait-lxc ${CONTAINER_NAME} STOPPED
-  info Built ${CONTAINER_NAME}
+  info built ${CONTAINER_NAME}
 fi
