@@ -30,7 +30,17 @@ ADMIRAL="admiral"
 ADMIRAL_HOME="/home/admiral"
 useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
 adduser ${ADMIRAL} sudo
-chown -R ${ADMIRAL} /var/starphleet*
+
+# the target user should always have an ssh folder
+ADMIRALSSH="${ADMIRAL_HOME}/.ssh"
+if [ ! -d "${ADMIRALSSH}" ]; then
+  echo Make admiral ssh folder at ${ADMIRALSSH}
+  mkdir ${ADMIRALSSH}
+fi
+chmod 700 ${ADMIRALSSH}
+
+chown ${ADMIRAL}:${ADMIRAL} ${ADMIRALSSH}
+chown -R ${ADMIRAL}:${ADMIRAL} /var/starphleet*
 
 
 #base ubuntu LXC image, get this on before we start anything
