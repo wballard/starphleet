@@ -46,10 +46,3 @@ LXC_CONTAINER IP
 
 ### order
 The original `.order` file from the headquarters.
-
-## /var/starphleet/private_keys
-On occasion you will need to configure starphleet to use private git
-repositories over git+ssh. In order to facilitate this, you can put in
-private keys, one per file, into this directory. The `admiral`
-`~/.ssh/config` is automatically generated from this.
-

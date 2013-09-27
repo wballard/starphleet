@@ -13,8 +13,6 @@ stop starphleet
 #headquarters will go here
 mkdir -p /var/starphleet
 chmod 0777 /var/starphleet
-mkdir -p /var/starphleet/current_orders
-mkdir -p /var/starphleet/private_keys
 
 #put in the system overlay, gets all the files in place
 cp -R /starphleet/overlay/* /
@@ -40,8 +38,6 @@ fi
 chmod 700 ${ADMIRALSSH}
 
 chown ${ADMIRAL}:${ADMIRAL} ${ADMIRALSSH}
-chown -R ${ADMIRAL}:${ADMIRAL} /var/starphleet*
-
 
 #base ubuntu LXC image, get this on before we start anything
 BASE_CONTAINER_NAME="starphleet-base"
