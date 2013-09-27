@@ -5,7 +5,6 @@
 
 set -e
 
-source /starphleet/scripts/tools
 
 apt-get -y update
 apt-get -y install --force-yes git curl apt-transport-https lsof ssh
