@@ -20,6 +20,8 @@ help=$(grep "^### " "$0" | cut -c 5-)
 version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
+set -e
+
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 
