@@ -7,8 +7,16 @@
     "docopt.py": "./scripts/docopt.py",
     "docopts": "./scripts/docopts",
     "tools": "./scripts/tools",
-    "generate": "./scripts/generate.litcoffee",
-    "headquarters": "./scripts/headquarters"
+    "starphleet-generate": "./scripts/generate.litcoffee",
+    "starphleet-headquarters": "./scripts/starphleet-headquarters",
+    "starphleet-build": "./scripts/starphleet-build",
+    "starphleet-wait-network": "./scripts/starphleet-wait-network",
+    "starphleet-wait-lxc": "./scripts/starphleet-wait-lxc",
+    "starphleet-start-script": "./scripts/starphleet-start-script",
+    "starphleet-base-script": "./scripts/starphleet-base-script",
+    "starphleet-buildpack-script": "./scripts/starphleet-buildpack-script",
+    "starphleet-publish": "./scripts/starphleet-publish",
+    "starphleet-ready": "./scripts/starphleet-ready"
   },
   "repository": {
     "type": "git",
@@ -20,18 +28,13 @@
   "author": "Rear Admiral Ballard",
   "license": "BSD",
   "readmeFilename": "README.md",
-  "gitHead": "3d11966f6a75ba67e39d71a5a8a03d2c36ed5944",
   "bugs": {
     "url": "https://github.com/wballard/starphleet/issues"
   },
   "dependencies": {
     "docopt": "~0.4.0",
     "coffee-script": "~1.6.3",
-    "pegjs": "~0.7.0",
     "lodash": "~1.3.1",
     "handlebars": "~1.0.12"
-  },
-  "devDependencies": {
-    "nodemon": "~0.7.10"
   }
 }

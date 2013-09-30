@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+## starphleet-build 0.1.0
+### Usage:
+###    starphleet-build <local_repository> <container_name>
+### --help
+###
+### Given a local repository that is Starphleet enabled, build up a container
+### for it. This uses Heroku buildpacks, and will detect how to create your
+### container automatically.
+###
+### The container will have a layout with the following special directories:
+### /var/starphleet - This mounts back to /var/starphleet on the host
+###    read only
+### /app - This is a copy of the source local repository, taking
+###    a snapshot so you cannot modify the source. The buildpack is run
+###    against this copy
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+version=$(grep "^## "  "$0" | cut -c 4-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+set -e
+
+CONTAINER_NAME="${container_name}"
+CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
+
+#configuration, this is the place to mount directories on the host computer
+#into the container
+#note: this takes effect after the initial create, which generates the
+#inital container configuration, and this is tacked on the end
+#so we are starting the container twice
+CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
+cat << EOF > ${CONTAINER_CONF}
+lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/var/starphleet none bind,ro 0 0
+EOF
+trap 'rm -rf ${CONTAINER_CONF}' EXIT
+
+info Creating ${CONTAINER_NAME}
+if lxc-ls | grep "${CONTAINER_NAME}$" > /dev/null; then
+  info already built ${CONTAINER_NAME}
+else
+  #clone on top of the base image, this is just to save disk space
+  lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s
+  #mounts and files, always can see starphleet read only
+  mkdir ${CONTAINER_ROOT}/var/starphleet
+  cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
+  #block script, makes sure we are on the air
+  starphleet-wait-network > "${CONTAINER_ROOT}/block"
+  #build script, uses buildpacks
+  cp "${DIR}/starphleet-buildpack-script" "${CONTAINER_ROOT}/buildpack"
+  lxc-start --name ${CONTAINER_NAME} -d
+  starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
+  #always able to see your own source, copy on a snapshot
+  cp -R "${local_repository}" "${CONTAINER_ROOT}/app"
+  lxc-attach --name ${CONTAINER_NAME} -- bash /block
+  lxc-attach --name ${CONTAINER_NAME} -- bash /buildpack
+  lxc-stop --name ${CONTAINER_NAME}
+  starphleet-wait-lxc ${CONTAINER_NAME} STOPPED
+  info built ${CONTAINER_NAME}
+fi

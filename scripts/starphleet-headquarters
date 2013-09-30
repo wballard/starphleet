@@ -1,8 +1,4 @@
 #! /usr/bin/env bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-set -e
-
 ## headquarters 0.1.0
 ### Usage:
 ###    headquarters <url>
@@ -10,14 +6,18 @@ set -e
 ###
 ### Set the headquarters <url>. This is where the phleet will look for
 ### orders.
+### The <url> can include a #branch on the end which will refer to that specific
+### branch rather than default master.
 help=$(grep "^### " "$0" | cut -c 5-)
 version=$(grep "^## "  "$0" | cut -c 4-)
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+source "${DIR}/tools"
+set -e
 
 cat <<EOF > /var/starphleet/.headquarters
 export HEADQUARTERS_REMOTE="${url}"
 export HEADQUARTERS_LOCAL="/var/starphleet/headquarters"
-export CURRENT_CONTAINERS="/var/starphleet/current_containers"
 export CURRENT_ORDERS="/var/starphleet/current_orders"
 export NGINX_CONF="/var/starphleet/nginx"
 export ADMIRAL="admiral"
@@ -27,8 +27,6 @@ if [ -s /var/starphleet/headquarters/.starphleet ]; then
 fi
 
 EOF
-cat << 'EOF' >> /var/starphleet/.headquarters
-function get_CURRENT_SHA() {
-  export CURRENT_SHA=$(git --git-dir "$1/.git" --work-tree "$1" log -n 1 --no-merges --pretty=format:%H)
-}
-EOF
+cat "${DIR}/tools" >> /var/starphleet/.headquarters
+
+info Headquarters is ${url}

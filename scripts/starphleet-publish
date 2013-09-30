@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+## starphleet-publish 0.1.0
+### Usage:
+###    starphleet-publish [--private=<private>] [--public=<public>] [--url=<url>]
+### --help
+###
+### Specify the private (on container) and public (on host) ports, along with
+### and URL stem to publish an HTTP service.
+###
+### Nothing is stopping you from creating a configuration that is confusing and
+### redundant, specifically if you publish multiple services at the same URL.
+### Just try not to.
+###
+### This is looking for environment variables
+### CONTAINER
+### CONTAINER_IP
+### NAME
+
+help=$(grep "^### " "$0" | cut -c 5-)
+version=$(grep "^## "  "$0" | cut -c 4-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+private=${private:-80}
+public=${public:-80}
+url=${url:-/}
+
+cat << EOF
+{
+  "name": "${NAME}",
+  "containerIP": "${CONTAINER_IP}",
+  "container": "${CONTAINER_NAME}",
+  "hostPort": "${public}",
+  "containerPort": "${private}",
+  "url": "${url}"
+}
+EOF

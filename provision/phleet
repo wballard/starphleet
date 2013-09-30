@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-#synch over to keep docker from trying to include the vagrant image itself
-#into the build -- which is shockingly slow!
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 BLUE_BOLD=$(tput setaf 4; tput bold)
@@ -15,9 +13,6 @@ stop starphleet
 #headquarters will go here
 mkdir -p /var/starphleet
 chmod 0777 /var/starphleet
-mkdir -p /var/starphleet/current_orders
-mkdir -p /var/starphleet/current_containers
-mkdir -p /var/starphleet/private_keys
 
 #put in the system overlay, gets all the files in place
 cp -R /starphleet/overlay/* /
@@ -33,10 +28,34 @@ ADMIRAL="admiral"
 ADMIRAL_HOME="/home/admiral"
 useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
 adduser ${ADMIRAL} sudo
-chown -R ${ADMIRAL} /var/starphleet*
+
+# the target user should always have an ssh folder
+ADMIRALSSH="${ADMIRAL_HOME}/.ssh"
+if [ ! -d "${ADMIRALSSH}" ]; then
+  echo Make admiral ssh folder at ${ADMIRALSSH}
+  mkdir ${ADMIRALSSH}
+fi
+chmod 700 ${ADMIRALSSH}
+
+chown ${ADMIRAL}:${ADMIRAL} ${ADMIRALSSH}
+
+#base ubuntu LXC image, get this on before we start anything
+BASE_CONTAINER_NAME="starphleet-base"
+if lxc-ls | grep "${BASE_CONTAINER_NAME}$" > /dev/null; then
+  echo -n
+else
+  lxc-create -n "${BASE_CONTAINER_NAME}" -t ubuntu
+  starphleet-wait-network > "/var/lib/lxc/starphleet-base/rootfs/.block"
+  starphleet-base-script > "/var/lib/lxc/starphleet-base/rootfs/.build"
+  lxc-start --name ${BASE_CONTAINER_NAME} -d
+  starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
+  lxc-attach --name ${BASE_CONTAINER_NAME} -- bash /.block
+  lxc-attach --name ${BASE_CONTAINER_NAME} -- bash /.build
+  lxc-stop --name ${BASE_CONTAINER_NAME}
+  starphleet-wait-lxc ${CONTAINER_NAME} STOPPED
+fi
 
 #good to go, start the phleet
 start starphleet
 
-announce
 announce *Welcome to Starphleet*

@@ -9,31 +9,35 @@ RED=$(tput setaf 1)
 FATAL=$(tput setaf 1; tput bold)
 
 function error() {
-  echo -e "$RED$*$NORMAL"
+  echo -e "$RED$*$NORMAL" 1>&2
 }
 
 function announce() {
-  echo -e "$BLUE_BOLD$*$NORMAL"
+  echo -e "$BLUE_BOLD$*$NORMAL" 1>&2
 }
 
 function fatal() {
-  echo -e "$FATAL$*$NORMAL"
+  echo -e "$FATAL$*$NORMAL" 1>&2
   exit 1
 }
 
 function info() {
-  echo -e "$GREEN$*$NORMAL"
+  echo -e "$GREEN$*$NORMAL" 1>&2
 }
 
 function warn() {
-  echo -e "$YELLOW$*$NORMAL"
+  echo -e "$YELLOW$*$NORMAL" 1>&2
 }
 
 function log() {
-  echo -e "$NORMAL$*$NORMAL"
+  echo -e "$NORMAL$*$NORMAL" 1>&2
 }
 
 function code() {
   echo -e "CODE$*"
   exit $*
+}
+
+function get_CURRENT_SHA() {
+  export CURRENT_SHA=$(git --git-dir "$1/.git" --work-tree "$1" log -n 1 --no-merges --pretty=format:%h)
 }

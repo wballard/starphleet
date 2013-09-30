@@ -1,8 +1,0 @@
-
-#sample grammar file
-
-AUTODEPLOY https://github.com/wballard/echo.git
-
-PUBLISH 3000 AS 80 /echo
-PUBLISH 3000 AS 3000
-RUN npm start

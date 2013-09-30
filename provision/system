@@ -5,26 +5,34 @@
 
 set -e
 
-#get docker on
-apt-get -y install --force-yes git curl apt-transport-https
-apt-get -y install --force-yes software-properties-common
+
+apt-get -y update
+apt-get -y install --force-yes git curl apt-transport-https lsof ssh
 apt-get -y install --force-yes python g++ make git
-curl http://get.docker.io/gpg | apt-key add -
-echo "deb https://get.docker.io/ubuntu docker main" \
-  > /etc/apt/sources.list.d/docker.list
+apt-get -y install --force-yes lxc man
+apt-get -y install --force-yes software-properties-common
 add-apt-repository -y ppa:nginx/stable
 add-apt-repository -y ppa:chris-lea/node.js
 apt-get -y update
-apt-get -y install --force-yes linux-image-extra-`uname -r`
-apt-get -y install --force-yes lxc-docker
 apt-get -y install --force-yes nginx
 apt-get -y install --force-yes nodejs
-apt-get -y install --force-yes man
+
 #initial apt package has nginx running. lame.
 /etc/init.d/nginx stop
+find /etc/rc* -name '*nginx' | grep nginx | xargs rm
 
 #we will be using bash. period
-mv /bin/sh /bin/shold
+rm /bin/sh
 ln /bin/bash /bin/sh
 
+#now ready for the phleet
 /starphleet/provision/phleet
+
+apt-get clean
+
+#if we are on EC2, install the self update job
+if curl "http://169.254.169.254/latest/user-data/" --silent --connect-timeout 1; then
+  cp /starphleet/provision/ec2/starphleet_install.conf /etc/init/starphleet_install.conf
+  HEADQUARTERS=$(curl "http://169.254.169.254/latest/user-data/" --silent | sed -e's/%\([0-9A-F][0-9A-F]\)/\\\\\x\1/g' | xargs echo -e)
+  starphleet-headquarters "${HEADQUARTERS}"
+fi
