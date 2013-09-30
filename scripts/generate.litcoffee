@@ -1,7 +1,7 @@
-#!/usr/bin/coffee --literate
+#!/usr/bin/env coffee --literate
 
-This is the main command line interface, all about code
-generation which is a lot easier here than in shell.
+This script is used to generate nginx server configurations, in litcoffee just
+because I find this kind of task easier here than in shell.
 
     {docopt} = require 'docopt'
     fs = require 'fs'
