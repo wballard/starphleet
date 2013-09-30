@@ -82,7 +82,6 @@ which are run on shipts in a phleet.
       'ap-southest-2'
     ], (x) -> new AWS.EC2 {region: x, maxRetries: 15}
     zones = _.first(zones, 4)
-    zoneMap = _.zipObject _.map(zones, (x) -> x.config.region), zones
 
     isThereBadNews = (err) ->
       if err
@@ -96,25 +95,19 @@ be used by subsequent commands when creating ships.
       config =
         url: options['<headquarters_url>']
         public_key: new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')
-        key_name: md5(new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64'))
+        key_name: "starphleet-#{md5(new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64'))}"
       fs.writeFileSync '.starphleet', JSON.stringify(config)
-      key_readers = _.zipObject(_.map(zones, (x) -> x.config.region), _.map(zones, (zone) -> (callback) -> zone.describeKeyPairs({}, callback)))
-      async.parallel key_readers,
-        (err, results) ->
+      initZone = (zone, callback) ->
+        async.waterfall [
+          #checking if we already have the key
+          (nestedCallback) -> zone.describeKeyPairs({}, nestedCallback),
+          #adding if we lack the key
+          (keyFob, nestedCallback) -> zone.importKeyPair({KeyName: config.key_name, PublicKeyMaterial: config.public_key}, nestedCallback) unless _.some(keyFob.KeyPairs, (x) -> x.KeyName is config.key_name)
+        ], (err, results) ->
           isThereBadNews err
+          callback()
 
-Build up a list of requests to make for those zones that lack the key.
-
-          key_creates = {}
-          for zone, keyfob of results
-            if not _.some(keyfob.KeyPairs, (x) -> x.KeyName is config.key_name)
-              do ->
-                ec2 = zoneMap[zone]
-                key_creates[zone] =
-                  (callback) -> ec2.importKeyPair({KeyName: config.key_name, PublicKeyMaterial: config.public_key}, callback)
-          async.parallel key_creates,
-            (err, results) ->
-              isThereBadNews err
-              process.exit 0
-
+      async.each zones, initZone, (err) ->
+        isThereBadNews(err)
+        process.exit 0
 
