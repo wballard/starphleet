@@ -81,6 +81,9 @@ which are run on shipts in a phleet.
       'ap-southeast-1',
       'ap-southest-2'
     ], (x) -> new AWS.EC2 {region: x, maxRetries: 15}
+    zones = _.map zones, (zone) ->
+      zone.elb = new AWS.ELB {region: zone.config.region, maxRetries: 15}
+      zone
     zones = _.first(zones, 4)
 
     isThereBadNews = (err) ->
@@ -95,14 +98,37 @@ be used by subsequent commands when creating ships.
       config =
         url: options['<headquarters_url>']
         public_key: new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')
-        key_name: "starphleet-#{md5(new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64'))}"
+        hashname: "starphleet-#{md5(new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')).substr(0,8)}"
       fs.writeFileSync '.starphleet', JSON.stringify(config)
       initZone = (zone, callback) ->
         async.waterfall [
           #checking if we already have the key
           (nestedCallback) -> zone.describeKeyPairs({}, nestedCallback),
           #adding if we lack the key
-          (keyFob, nestedCallback) -> zone.importKeyPair({KeyName: config.key_name, PublicKeyMaterial: config.public_key}, nestedCallback) unless _.some(keyFob.KeyPairs, (x) -> x.KeyName is config.key_name)
+          (keyFob, nestedCallback) ->
+            if _.some(keyFob.KeyPairs, (x) -> x.KeyName is config.hashname)
+              nestedCallback()
+            else
+              zone.importKeyPair({KeyName: config.hashname, PublicKeyMaterial: config.public_key}, nestedCallback)
+          #check for an existing ELB
+          (nestedCallback) ->
+            zone.elb.describeLoadBalancers({}, nestedCallback)
+          (balancers, nestedCallback) ->
+            if _.some(balancers.LoadBalancerDescriptions, (x) -> x.LoadBalancerName is config.hashname)
+              nestedCallback()
+            else
+              zone.describeAvailabilityZones {}, (err, zones) ->
+                isThereBadNews err
+                zone.elb.createLoadBalancer
+                  LoadBalancerName: config.hashname
+                  Listeners: [
+                    #on purpose TCP to do web sockets
+                    Protocol: 'TCP'
+                    LoadBalancerPort: 80
+                    InstancePort: 80
+                  ]
+                  AvailabilityZones: _.map zones.AvailabilityZones, (x) -> x.ZoneName
+                , nestedCallback
         ], (err, results) ->
           isThereBadNews err
           callback()
