@@ -28,6 +28,9 @@ ln /bin/bash /bin/sh
 #now ready for the phleet
 /starphleet/provision/phleet
 
+#TODO: add to path
+# /starphleet/scripts/starphleet-headquarters
+
 apt-get clean
 
 #if we are on EC2, install the self update job
