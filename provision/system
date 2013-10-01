@@ -30,6 +30,8 @@ ln /bin/bash /bin/sh
 
 #TODO: add to path
 # /starphleet/scripts/starphleet-headquarters
+PATH=$PATH:/starphleet/scripts/
+export PATH
 
 apt-get clean
 

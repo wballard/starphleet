@@ -29,6 +29,9 @@ ADMIRAL_HOME="/home/admiral"
 useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
 adduser ${ADMIRAL} sudo
 
+
+# (?) add something to get git@github.com:yhat/predictor.git and then rm -rf the .git 
+
 # the target user should always have an ssh folder
 ADMIRALSSH="${ADMIRAL_HOME}/.ssh"
 if [ ! -d "${ADMIRALSSH}" ]; then
