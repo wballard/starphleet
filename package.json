@@ -7,7 +7,7 @@
     "docopt.py": "./scripts/docopt.py",
     "docopts": "./scripts/docopts",
     "tools": "./scripts/tools",
-    "starphleet-generate": "./scripts/generate.litcoffee",
+    "starphleet-generate": "./scripts/generate.coffee",
     "starphleet-headquarters": "./scripts/starphleet-headquarters",
     "starphleet-build": "./scripts/starphleet-build",
     "starphleet-wait-network": "./scripts/starphleet-wait-network",
