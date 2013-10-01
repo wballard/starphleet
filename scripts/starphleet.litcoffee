@@ -78,7 +78,7 @@ which are run on shipts in a phleet.
       'sa-east-1',
       'ap-northeast-1',
       'ap-southeast-1',
-      'ap-southest-2'
+      'ap-southeast-2'
     ], (x) -> new AWS.EC2 {region: x, maxRetries: 15}
     zones = _.map zones, (zone) ->
       zone.elb = new AWS.ELB {region: zone.config.region, maxRetries: 15}
