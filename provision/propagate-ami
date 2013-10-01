@@ -8,5 +8,8 @@ ZONES="us-east-1 us-west-1 eu-west-1 sa-east-1 ap-northeast-1 ap-southeast-1 ap-
 for zone in ${ZONES}
 do
   echo $zone
+  aws --region ${zone} ec2 describe-images --filters Name=name,Values=${NAME} \
+    | jq --raw-output '.Images[].ImageId' \
+    | xargs -I % aws --region ${zone} ec2 deregister-image --image-id %
   aws --region ${zone} ec2 copy-image --name ${NAME} --source-region us-west-2 --source-image-id ${IMAGE}
 done

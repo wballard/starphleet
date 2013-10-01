@@ -84,6 +84,7 @@ which are run on shipts in a phleet.
       zone.elb = new AWS.ELB {region: zone.config.region, maxRetries: 15}
       zone
     zones = _.first(zones, 4)
+    ami_name="starphleet-0.0.2"
 
     isThereBadNews = (err) ->
       if err
@@ -160,7 +161,8 @@ be used by subsequent commands when creating ships.
               async.each allowed_ports, grantIfNeeded, (err) ->
                 isThereBadNews err
                 nestedCallback()
-
+          #and now -- we are all set up and ready to run, but there are
+          #no instances started just yet
         ], (err, results) ->
           isThereBadNews err
           callback()
