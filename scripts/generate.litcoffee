@@ -1,4 +1,4 @@
-#!/usr/bin/env coffee --literate
+#!coffee --literate
 
 This script is used to generate nginx server configurations, in litcoffee just
 because I find this kind of task easier here than in shell.

@@ -171,3 +171,10 @@ be used by subsequent commands when creating ships.
         isThereBadNews err
         process.exit 0
 
+    if options.add and options.ship
+      console.log 'I give a ship', options['<zone>']
+      config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
+      zone = _.select(zones, (zone) -> zone.config.region is options['<zone>'])[0]
+      zone.describeImages {Filters: [{Name:"name", Values:[ami_name]}]}, (err, images) ->
+        isThereBadNews err
+        console.log images, config
