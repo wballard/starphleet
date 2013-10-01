@@ -13,7 +13,7 @@ version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 stop starphleet
-rm /var/log/upstart/starphleet*
+rm /var/log/upstart/*
 rm /var/starphleet/current
 rm /var/starphleet/running
 rm /var/starphleet/.headquarters
