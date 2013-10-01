@@ -3,8 +3,6 @@
 #this is a provisioning script, it is designed to be run under Vagrant
 #as root, with the starphleet source tree at /starphleet
 
-set -e
-
 
 apt-get -y update
 apt-get -y install --force-yes git curl apt-transport-https lsof ssh
