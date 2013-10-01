@@ -98,7 +98,8 @@ be used by subsequent commands when creating ships.
       config =
         url: options['<headquarters_url>']
         public_key: new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')
-        hashname: "starphleet-#{md5(new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')).substr(0,8)}"
+        keyname: "starphleet-#{md5(new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')).substr(0,8)}"
+        hashname: "starphleet-#{md5(options['<headquarters_url>']).substr(0,8)}"
       fs.writeFileSync '.starphleet', JSON.stringify(config)
       initZone = (zone, callback) ->
         async.waterfall [
@@ -106,13 +107,14 @@ be used by subsequent commands when creating ships.
           (nestedCallback) -> zone.describeKeyPairs({}, nestedCallback),
           #adding if we lack the key
           (keyFob, nestedCallback) ->
-            if _.some(keyFob.KeyPairs, (x) -> x.KeyName is config.hashname)
+            if _.some(keyFob.KeyPairs, (x) -> x.KeyName is config.keyname)
               nestedCallback()
             else
-              zone.importKeyPair({KeyName: config.hashname, PublicKeyMaterial: config.public_key}, nestedCallback)
+              zone.importKeyPair({KeyName: config.keyname, PublicKeyMaterial: config.public_key}, nestedCallback)
           #check for an existing ELB
           (nestedCallback) ->
             zone.elb.describeLoadBalancers({}, nestedCallback)
+          #build an ELB if we need it
           (balancers, nestedCallback) ->
             if _.some(balancers.LoadBalancerDescriptions, (x) -> x.LoadBalancerName is config.hashname)
               nestedCallback()
@@ -129,11 +131,44 @@ be used by subsequent commands when creating ships.
                   ]
                   AvailabilityZones: _.map zones.AvailabilityZones, (x) -> x.ZoneName
                 , nestedCallback
+          #check for the starphleet security group
+          (nestedCallback) ->
+            zone.describeSecurityGroups {}, nestedCallback
+          #and make the security group if needed
+          (groups, nestedCallback) ->
+            if _.some(groups.SecurityGroups, (x) -> x.GroupName is 'starphleet')
+              nestedCallback()
+            else
+              zone.createSecurityGroup {GroupName: 'starphleet', Description: 'Created by Starphleet'}, nestedCallback
+          #hook up all the ports into the security group
+          (nestedCallback) ->
+            zone.describeSecurityGroups {GroupNames: ['starphleet']}, (err, groups) ->
+              isThereBadNews err
+              allowed_ports = [22, 80, 443]
+              grantIfNeeded = (port, grantCallback) ->
+                console.log 'check port', port
+                if _.some(groups.SecurityGroups[0].IpPermissions, (x) -> (x.FromPort is port and x.ToPort is port))
+                  grantCallback()
+                else
+                  console.log 'autho'
+                  grant =
+                    GroupName: 'starphleet'
+                    IpPermissions: [
+                      IpProtocol: 'tcp'
+                      FromPort: port
+                      ToPort: port
+                      IpRanges: [{CidrIp: '0.0.0.0/0'}]
+                    ]
+                  zone.authorizeSecurityGroupIngress grant, grantCallback
+              async.each allowed_ports, grantIfNeeded, (err) ->
+                isThereBadNews err
+                nestedCallback()
+
         ], (err, results) ->
           isThereBadNews err
           callback()
 
       async.each zones, initZone, (err) ->
-        isThereBadNews(err)
+        isThereBadNews err
         process.exit 0
 
