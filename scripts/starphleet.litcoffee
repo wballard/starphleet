@@ -14,7 +14,6 @@ which are run on shipts in a phleet.
     AWS = require 'aws-sdk'
     pkg = require(path.join(__dirname, "../package.json"))
     colors = require 'colors'
-    require('shellscript').globalize()
     doc = """
     #{pkg.description}
 
