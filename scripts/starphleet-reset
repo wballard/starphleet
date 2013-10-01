@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+## starphleet-reset 0.1.0
+### Usage:
+###    starphleet-reset
+### --help
+###
+### Shut down and clean up the ship, this is useful for preparing an instance
+### to serve as a base image
+help=$(grep "^### " "$0" | cut -c 5-)
+version=$(grep "^## "  "$0" | cut -c 4-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+stop starphleet
+rm /var/log/upstart/starphleet*
+rm /var/starphleet/current
+rm /var/starphleet/running
+rm /var/starphleet/.headquarters

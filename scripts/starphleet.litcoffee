@@ -146,11 +146,9 @@ be used by subsequent commands when creating ships.
               isThereBadNews err
               allowed_ports = [22, 80, 443]
               grantIfNeeded = (port, grantCallback) ->
-                console.log 'check port', port
                 if _.some(groups.SecurityGroups[0].IpPermissions, (x) -> (x.FromPort is port and x.ToPort is port))
                   grantCallback()
                 else
-                  console.log 'autho'
                   grant =
                     GroupName: 'starphleet'
                     IpPermissions: [
