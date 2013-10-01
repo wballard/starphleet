@@ -176,9 +176,19 @@ if options.init
     process.exit 0
 
 if options.add and options.ship
-  console.log 'I give a ship', options['<zone>']
   config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
   zone = _.select(zones, (zone) -> zone.config.region is options['<zone>'])[0]
   zone.describeImages {Filters: [{Name:"name", Values:[ami_name]}]}, (err, images) ->
     isThereBadNews err
-    console.log images, config
+    ami = images.Images[0].ImageId
+    todo =
+      ImageId: ami
+      MinCount: 1
+      MaxCount: 1
+      KeyName: config.keyname
+      SecurityGroups: ['starphleet']
+      UserData: new Buffer(config.url).toString('base64')
+      InstanceType: 'm2.xlarge'
+    zone.runInstances todo, (err) ->
+      isThereBadNews err
+      system.exit 0
