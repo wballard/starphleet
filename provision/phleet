@@ -21,6 +21,7 @@ cp -R /starphleet/overlay/* /
 cd /starphleet
 npm install -g coffee-script
 npm install -g
+announce Node packages installed
 cd /
 
 #someone has to be the admiral
