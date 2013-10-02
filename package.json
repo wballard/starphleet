@@ -2,11 +2,11 @@
   "name": "starphleet",
   "version": "0.0.1",
   "description": "High speed containerized clusters",
-  "main": "index.js",
   "bin": {
     "docopt.py": "./scripts/docopt.py",
     "docopts": "./scripts/docopts",
     "tools": "./scripts/tools",
+    "starphleet": "./scripts/starphleet.coffee",
     "starphleet-generate": "./scripts/generate.coffee",
     "starphleet-headquarters": "./scripts/starphleet-headquarters",
     "starphleet-build": "./scripts/starphleet-build",
