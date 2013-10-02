@@ -206,7 +206,7 @@ if options.add and options.ship
       InstanceType: 'm2.xlarge'
     zone.runInstances todo, (err) ->
       isThereBadNews err
-      system.exit 0
+      process.exit 0
 
 if options.info
   config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
@@ -238,7 +238,7 @@ if options.info
       colWidths: [16, 56, 10]
     for zone in all
       for instance in zone
-        out.push [instance.Placement.AvailabilityZone, instance.PublicDnsName, instance.State.Name]
+        out.push ["#{instance.Placement.AvailabilityZone}", "#{instance.PublicDnsName}", "#{instance.State.Name}"]
     console.log out.toString()
     process.exit 0
 
