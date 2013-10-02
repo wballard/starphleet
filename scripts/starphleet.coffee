@@ -25,7 +25,7 @@ doc = """
 Usage:
   starphleet init <headquarters_url> <public_key_filename>
   starphleet info
-  starphleet add ship <zone>
+  starphleet add ship <region>
   starphleet remove ship <hostname>
   starphleet rolling reboot
   starphleet -h | --help | --version
@@ -199,7 +199,11 @@ if options.init
 
 if options.add and options.ship
   config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
-  zone = _.select(zones, (zone) -> zone.config.region is options['<zone>'])[0]
+  zone = _.select(zones, (zone) -> zone.config.region is options['<region>'])[0]
+  if not zone
+    console.error "You must pick a region from #{_.map(zones, (x) -> x.config.region)}".red
+    process.exit 1
+
   async.waterfall [
     (callback) ->
       zone.describeImages {Filters: [{Name:"name", Values:[ami_name]}]}, callback
