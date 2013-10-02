@@ -207,7 +207,7 @@ if options.add and options.ship
 
   async.waterfall [
     (callback) ->
-      zone.describeImages {Filters: [{Name:"name", Values:[ami_name]}]}, callback
+      zone.describeImages {Owners: ['925278656507'], Filters: [{Name:"name", Values:[ami_name]}]}, callback
     (images, callback) ->
       ami = images.Images[0].ImageId
       todo =
@@ -296,7 +296,7 @@ if options.info
           lb.push 'Hosts': hosts.toString()
           console.log lb.toString()
     else
-      console.log "do 'starphleet add ship [region]' to get started\n valid regions #{_.map(zones, (x) -> x.config.region)}".yellow
+      console.log "do 'starphleet add ship [region]' to get started\nvalid regions #{_.map(zones, (x) -> x.config.region)}".yellow
     process.exit 0
 
 if options.remove and options.ship
