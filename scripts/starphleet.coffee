@@ -305,10 +305,13 @@ if options.remove and options.ship
         callback undefined, instance_ids
       (instanceIds, callback) ->
         if instanceIds.length
+          options.removing = true
           zone.terminateInstances {InstanceIds: instanceIds}, callback
         else
-          callback "#{options['<hostname>']} not found"
+          callback()
     ], zoneCallback
   async.each zones, queryZone, (err) ->
     isThereBadNews err
+    if not options.removing
+      isThereBadNews "#{options['<hostname>']} not found"
     process.exit 0
