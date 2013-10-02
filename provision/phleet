@@ -45,6 +45,7 @@ BASE_CONTAINER_NAME="starphleet-base"
 if lxc-ls | grep "${BASE_CONTAINER_NAME}$" > /dev/null; then
   echo -n
 else
+  rm /var/starphleet/starphleet-base
   lxc-create -n "${BASE_CONTAINER_NAME}" -t ubuntu
   starphleet-wait-network > "/var/lib/lxc/starphleet-base/rootfs/.block"
   starphleet-base-script > "/var/lib/lxc/starphleet-base/rootfs/.build"
@@ -54,6 +55,7 @@ else
   lxc-attach --name ${BASE_CONTAINER_NAME} -- bash /.build
   lxc-stop --name ${BASE_CONTAINER_NAME}
   starphleet-wait-lxc ${CONTAINER_NAME} STOPPED
+  touch /var/starphleet/starphleet-base
 fi
 
 #good to go, start the phleet
