@@ -250,7 +250,8 @@ if options.info
           instances = []
           for reservation in balancer.Instances.Reservations
             for instance in reservation.Instances
-              instances.push instance
+              if instance.PublicDnsName
+                instances.push instance
           balancer.Instances = instances
           callback undefined, balancer
         else
