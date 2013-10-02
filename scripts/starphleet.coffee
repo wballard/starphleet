@@ -282,18 +282,21 @@ if options.info
 
   async.map zones, queryZone, (err, all) ->
     isThereBadNews err
-    for balancer in all
-      if balancer.Instances.length
-        hosts = new table
-          head: ['Hostname', 'Status']
-          colWidths: [60, 12]
-        for instance in balancer.Instances
-          hosts.push ["#{instance.PublicDnsName}", "#{instance.Status}"]
-        lb = new table()
-        lb.push Region: balancer.Region
-        lb.push 'Load Balancer': balancer.DNSName
-        lb.push 'Hosts': hosts.toString()
-        console.log lb.toString()
+    if _.any(all, (balancer) -> balancer.Instances.length)
+      for balancer in all
+        if balancer.Instances.length
+          hosts = new table
+            head: ['Hostname', 'Status']
+            colWidths: [60, 12]
+          for instance in balancer.Instances
+            hosts.push ["#{instance.PublicDnsName}", "#{instance.Status}"]
+          lb = new table()
+          lb.push Region: balancer.Region
+          lb.push 'Load Balancer': balancer.DNSName
+          lb.push 'Hosts': hosts.toString()
+          console.log lb.toString()
+    else
+      console.log "add some ships regions #{_.map(zones, (x) -> x.config.region)}".yellow
     process.exit 0
 
 if options.remove and options.ship
