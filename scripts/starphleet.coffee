@@ -159,8 +159,19 @@ if options.init
               ]
               AvailabilityZones: _.map zones.AvailabilityZones, (x) -> x.ZoneName
             , nestedCallback
-      #check for the starphleet security group
+      #set a realistic LB health policy
       (nestedCallback) ->
+        zone.elb.configureHealthCheck
+          LoadBalancerName: config.hashname
+          HealthCheck:
+            Target: 'TCP:80'
+            Interval: 5
+            Timeout: 2
+            UnhealthyThreshold: 2
+            HealthyThreshold: 2
+          , nestedCallback
+      #check for the starphleet security group
+      (ignore, nestedCallback) ->
         zone.describeSecurityGroups {}, nestedCallback
       #and make the security group if needed
       (groups, nestedCallback) ->

@@ -61,6 +61,8 @@ Hi
 # Karsten Notes
 Wasn't super clear that --port means your service.
 Need a check on the public key.
-
+Need a check that the load balancer is online, quicker health check
+Would be great to have a tarball of the base container and speed that up
+Message if you create a crap ordera nd thus bust nginx
 
 
