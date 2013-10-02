@@ -100,13 +100,14 @@ Slight twist on map, take an array mapping through a function, then
 store the resulting mapped values back on the original array members by
 extending them.
 ###
-async.join = (array, mapper, callback) ->
+async.join = (array, mapper, propertyName, callback) ->
   async.map array, mapper, (err, mapped) ->
     if err
       callback(err)
     else
       callback undefined, _.map _.zip(array, mapped), (x) ->
-        _.extend x[0], x[1]
+        x[0][propertyName] = x[1]
+        x[0]
 
 ###
 Init is all about setting up a .starphleet file with the key and url. This will
@@ -220,32 +221,38 @@ if options.info
   queryZone = (zone, zoneCallback) ->
     async.waterfall [
       (callback) ->
-        zone.describeInstances {Filters: [{Name:"group-name", Values:['starphleet']}]}, callback
-      (zoneInstances, callback) ->
-        instances = []
-        for reservation in zoneInstances.Reservations
-          for instance in reservation.Instances
-            instances.push instance
-        callback undefined, instances
-      (allInstances, callback) ->
-        async.join allInstances
-          , (instance, instanceCallback) ->
-            zone.describeInstanceAttribute {InstanceId: instance.InstanceId, Attribute: 'userData'}, instanceCallback
-          , callback
-      (allInstances, callback) ->
-        callback undefined, _.select allInstances, (x) ->
-          x.UserData.Value is UserData
+        zone.elb.describeLoadBalancers {LoadBalancerNames: [config.hashname]}, callback
+      (loadBalancers, callback) ->
+        getInstances = (balancer, balancerCallback) ->
+          instances = []
+          for instance in balancer.Instances
+            instances.push instance.InstanceId
+          if instances.length
+            zone.describeInstances {InstanceIds: instances}, balancerCallback
+          else
+            balancerCallback undefined, []
+        async.join loadBalancers.LoadBalancerDescriptions, getInstances, 'Instances', callback
+      (loadBalancers, callback) ->
+        #just one, since we are getting it by name
+        loadBalancers[0].Region = zone.config.region
+        callback undefined, loadBalancers[0]
     ], zoneCallback
 
   async.map zones, queryZone, (err, all) ->
     isThereBadNews err
-    out = new table
-      head: ['Zone', 'Hostname', 'Status']
-      colWidths: [16, 56, 10]
-    for zone in all
-      for instance in zone
-        out.push ["#{instance.Placement.AvailabilityZone}", "#{instance.PublicDnsName}", "#{instance.State.Name}"]
-    console.log out.toString()
+    for balancer in all
+      if balancer.Instances and balancer.Instances.Reservations
+        hosts = new table
+          head: ['Hostname', 'Status']
+          colWidths: [60, 12]
+        for reservation in balancer.Instances.Reservations
+          for instance in reservation.Instances
+            hosts.push ["#{instance.PublicDnsName}", "#{instance.State.Name}"]
+        lb = new table()
+        lb.push Region: balancer.Region
+        lb.push 'Load Balancer': balancer.DNSName
+        lb.push 'Hosts': hosts.toString()
+        console.log lb.toString()
     process.exit 0
 
 if options.remove and options.ship
