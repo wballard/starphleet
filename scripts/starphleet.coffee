@@ -17,6 +17,7 @@ AWS = require 'aws-sdk'
 pkg = require(path.join(__dirname, "../package.json"))
 colors = require 'colors'
 table = require 'cli-table'
+request = require 'request'
 
 doc = """
 #{pkg.description}
@@ -236,18 +237,47 @@ if options.info
         #just one, since we are getting it by name
         loadBalancers[0].Region = zone.config.region
         callback undefined, loadBalancers[0]
+      #flattening away reservations as I don't care
+      (balancer, callback) ->
+        if balancer?.Instances?.Reservations
+          instances = []
+          for reservation in balancer.Instances.Reservations
+            for instance in reservation.Instances
+              instances.push instance
+          balancer.Instances = instances
+          callback undefined, balancer
+        else
+          balancer.Instances = []
+          callback undefined, balancer
+      #now poke at the instances via http to lean starphleet specifics
+      (balancer, callback) ->
+        baseStatus = (instance, callback) ->
+          request {url: "http://#{instance.PublicDnsName}/starphleet/diagnostic/servers", timeout: 2000}, (err, res, body) ->
+            #eating errors
+            callback undefined, body
+        async.join balancer.Instances, baseStatus, 'BaseStatus', (err, instances) ->
+          callback err, balancer
+      #status relevant to starphleet, not raw EC2
+      (balancer, callback) ->
+        for instance in balancer.Instances
+          if instance.BaseStatus
+            instance.Status = 'ready'
+          else if instance.State.Name is 'running'
+            instance.Status = 'building'
+          else
+            instance.Status = 'offline'
+        callback undefined, balancer
     ], zoneCallback
 
   async.map zones, queryZone, (err, all) ->
     isThereBadNews err
     for balancer in all
-      if balancer.Instances and balancer.Instances.Reservations
+      if balancer.Instances.length
         hosts = new table
           head: ['Hostname', 'Status']
           colWidths: [60, 12]
-        for reservation in balancer.Instances.Reservations
-          for instance in reservation.Instances
-            hosts.push ["#{instance.PublicDnsName}", "#{instance.State.Name}"]
+        for instance in balancer.Instances
+          hosts.push ["#{instance.PublicDnsName}", "#{instance.Status}"]
         lb = new table()
         lb.push Region: balancer.Region
         lb.push 'Load Balancer': balancer.DNSName
