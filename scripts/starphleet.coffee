@@ -96,6 +96,11 @@ isThereBadNews = (err) ->
     console.error "#{err}".red
     process.exit 1
 
+for ev in  ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
+  if not process.env[ev]
+    console.error "#{ev} needs to be in your environment".red
+    process.exit 1
+
 ###
 Slight twist on map, take an array mapping through a function, then
 store the resulting mapped values back on the original array members by
