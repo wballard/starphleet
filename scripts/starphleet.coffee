@@ -193,20 +193,26 @@ if options.init
 if options.add and options.ship
   config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
   zone = _.select(zones, (zone) -> zone.config.region is options['<zone>'])[0]
-  zone.describeImages {Filters: [{Name:"name", Values:[ami_name]}]}, (err, images) ->
+  async.waterfall [
+    (callback) ->
+      zone.describeImages {Filters: [{Name:"name", Values:[ami_name]}]}, callback
+    (images, callback) ->
+      ami = images.Images[0].ImageId
+      todo =
+        ImageId: ami
+        MinCount: 1
+        MaxCount: 1
+        KeyName: config.keyname
+        SecurityGroups: ['starphleet']
+        UserData: new Buffer(config.url).toString('base64')
+        InstanceType: 'm2.xlarge'
+      zone.runInstances todo, callback
+    (ran, callback) ->
+      ids = _.map ran.Instances, (x) -> {InstanceId: x.InstanceId}
+      zone.elb.registerInstancesWithLoadBalancer {LoadBalancerName: config.hashname, Instances: ids}, callback
+  ], (err) ->
     isThereBadNews err
-    ami = images.Images[0].ImageId
-    todo =
-      ImageId: ami
-      MinCount: 1
-      MaxCount: 1
-      KeyName: config.keyname
-      SecurityGroups: ['starphleet']
-      UserData: new Buffer(config.url).toString('base64')
-      InstanceType: 'm2.xlarge'
-    zone.runInstances todo, (err) ->
-      isThereBadNews err
-      process.exit 0
+    process.exit 0
 
 if options.info
   config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
