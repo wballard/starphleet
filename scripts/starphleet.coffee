@@ -165,11 +165,11 @@ if options.init
       #and make the security group if needed
       (groups, nestedCallback) ->
         if _.some(groups.SecurityGroups, (x) -> x.GroupName is 'starphleet')
-          nestedCallback()
+          nestedCallback undefined, groups
         else
           zone.createSecurityGroup {GroupName: 'starphleet', Description: 'Created by Starphleet'}, nestedCallback
       #hook up all the ports into the security group
-      (nestedCallback) ->
+      (ignore, nestedCallback) ->
         zone.describeSecurityGroups {GroupNames: ['starphleet']}, (err, groups) ->
           isThereBadNews err
           allowed_ports = [22, 80, 443]
