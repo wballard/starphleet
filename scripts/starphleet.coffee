@@ -25,7 +25,7 @@ Usage:
   starphleet init <headquarters_url> <public_key_filename>
   starphleet info
   starphleet add ship <zone>
-  starphleet remove ship <name>
+  starphleet remove ship <hostname>
   starphleet rolling reboot
   starphleet -h | --help | --version
 
@@ -240,4 +240,25 @@ if options.info
       for instance in zone
         out.push [instance.Placement.AvailabilityZone, instance.PublicDnsName, instance.State.Name]
     console.log out.toString()
+    process.exit 0
+
+if options.remove and options.ship
+  queryZone = (zone, zoneCallback) ->
+    async.waterfall [
+      (callback) ->
+        zone.describeInstances {Filters: [{Name:"dns-name", Values:[options['<hostname>']]}]}, callback
+      (zoneInstances, callback) ->
+        instance_ids = []
+        for reservation in zoneInstances.Reservations
+          for instance in reservation.Instances
+            instance_ids.push instance.InstanceId
+        callback undefined, instance_ids
+      (instanceIds, callback) ->
+        if instanceIds.length
+          zone.terminateInstances {InstanceIds: instanceIds}, callback
+        else
+          callback()
+    ], zoneCallback
+  async.each zones, queryZone, (err) ->
+    isThereBadNews err
     process.exit 0
