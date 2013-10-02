@@ -24,14 +24,16 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 port=${port:-80}
 url=${url:-/}
+host=$(hostname)
 
 cat << EOF
 {
   "name": "${NAME}",
   "containerIP": "${CONTAINER_IP}",
   "container": "${CONTAINER_NAME}",
-  "hostPort": "80",
   "containerPort": "${port}",
-  "url": "${url}"
+  "url": "${url}",
+  "sha": "${CURRENT_SHA}",
+  "hostname": "${host}"
 }
 EOF

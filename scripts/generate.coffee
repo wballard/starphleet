@@ -31,21 +31,15 @@ if options.servers
       buffer.push content
     catch e
       console.error e
-  context = []
-  for port, publications of _.groupBy(buffer, (x) -> x.hostPort)
-    context.push
-      port: port
-      publications: publications
   template = """
   {{#each .}}
-  server {
-    listen {{port}};
-    {{#each publications}}
     location {{url}} {
       # Path rewriting to hide mount prefix
       rewrite {{url}}(.*) /$1 break;
       proxy_pass http://{{containerIP}}:{{containerPort}};
-      add_header X-DOCKER-CONTAINER {{container}};
+      add_header X-CODE-SHA {{sha}};
+      add_header X-CONTAINER {{container}};
+      add_header X-SHIP {{hostname}};
       # WebSocket support (nginx 1.4)
       proxy_http_version 1.1;
       proxy_set_header Upgrade $http_upgrade;
@@ -53,8 +47,6 @@ if options.servers
 
       proxy_redirect off;
     }
-    {{/each}}
-  }
   {{/each}}
   """
-  console.log handlebars.compile(template)(context)
+  console.log handlebars.compile(template)(buffer)
