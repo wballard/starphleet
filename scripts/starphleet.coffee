@@ -296,7 +296,7 @@ if options.info
           lb.push 'Hosts': hosts.toString()
           console.log lb.toString()
     else
-      console.log "add some ships regions #{_.map(zones, (x) -> x.config.region)}".yellow
+      console.log "do 'starphleet add ship [region]' to get started\n valid regions #{_.map(zones, (x) -> x.config.region)}".yellow
     process.exit 0
 
 if options.remove and options.ship
