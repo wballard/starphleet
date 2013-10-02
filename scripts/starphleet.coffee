@@ -16,6 +16,8 @@ md5 = require 'MD5'
 AWS = require 'aws-sdk'
 pkg = require(path.join(__dirname, "../package.json"))
 colors = require 'colors'
+table = require 'cli-table'
+
 doc = """
 #{pkg.description}
 
@@ -92,6 +94,19 @@ isThereBadNews = (err) ->
   if err
     console.error "#{err}".red
     process.exit 1
+
+###
+Slight twist on map, take an array mapping through a function, then
+store the resulting mapped values back on the original array members by
+extending them.
+###
+async.join = (array, mapper, callback) ->
+  async.map array, mapper, (err, mapped) ->
+    if err
+      callback(err)
+    else
+      callback undefined, _.map _.zip(array, mapped), (x) ->
+        _.extend x[0], x[1]
 
 ###
 Init is all about setting up a .starphleet file with the key and url. This will
@@ -192,3 +207,37 @@ if options.add and options.ship
     zone.runInstances todo, (err) ->
       isThereBadNews err
       system.exit 0
+
+if options.info
+  config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
+  UserData = new Buffer(config.url).toString('base64')
+  queryZone = (zone, zoneCallback) ->
+    async.waterfall [
+      (callback) ->
+        zone.describeInstances {Filters: [{Name:"group-name", Values:['starphleet']}]}, callback
+      (zoneInstances, callback) ->
+        instances = []
+        for reservation in zoneInstances.Reservations
+          for instance in reservation.Instances
+            instances.push instance
+        callback undefined, instances
+      (allInstances, callback) ->
+        async.join allInstances
+          , (instance, instanceCallback) ->
+            zone.describeInstanceAttribute {InstanceId: instance.InstanceId, Attribute: 'userData'}, instanceCallback
+          , callback
+      (allInstances, callback) ->
+        callback undefined, _.select allInstances, (x) ->
+          x.UserData.Value is UserData
+    ], zoneCallback
+
+  async.map zones, queryZone, (err, all) ->
+    isThereBadNews err
+    out = new table
+      head: ['Zone', 'Hostname', 'Status']
+      colWidths: [16, 56, 10]
+    for zone in all
+      for instance in zone
+        out.push [instance.Placement.AvailabilityZone, instance.PublicDnsName, instance.State.Name]
+    console.log out.toString()
+    process.exit 0
