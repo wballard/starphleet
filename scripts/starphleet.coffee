@@ -98,8 +98,7 @@ isThereBadNews = (err) ->
 
 for ev in  ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
   if not process.env[ev]
-    console.error "#{ev} needs to be in your environment".red
-    process.exit 1
+    isThereBadNews "#{ev} needs to be in your environment".red
 
 ###
 Slight twist on map, take an array mapping through a function, then
@@ -201,8 +200,7 @@ if options.add and options.ship
   config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
   zone = _.select(zones, (zone) -> zone.config.region is options['<region>'])[0]
   if not zone
-    console.error "You must pick a region from #{_.map(zones, (x) -> x.config.region)}".red
-    process.exit 1
+    isThereBadNews "You must pick a region from #{_.map(zones, (x) -> x.config.region)}".red
 
   async.waterfall [
     (callback) ->
@@ -309,7 +307,7 @@ if options.remove and options.ship
         if instanceIds.length
           zone.terminateInstances {InstanceIds: instanceIds}, callback
         else
-          callback()
+          callback "#{options['<hostname>']} not found"
     ], zoneCallback
   async.each zones, queryZone, (err) ->
     isThereBadNews err
