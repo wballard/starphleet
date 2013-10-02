@@ -56,3 +56,11 @@ It's exciting, you'll get
 ```
 Hi
 ```
+
+
+# Karsten Notes
+Wasn't super clear that --port means your service.
+Need a check on the public key.
+
+
+

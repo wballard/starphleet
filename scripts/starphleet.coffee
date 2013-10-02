@@ -120,6 +120,9 @@ be used by subsequent commands when creating ships.
 ###
 
 if options.init
+  key_content = fs.readFileSync(options['<public_key_filename>'], 'utf8')
+  if key_content.indexOf('ssh-rsa') isnt 0
+    isThereBadNews "The public key provided was not ssh-rsa"
   config =
     url: options['<headquarters_url>']
     public_key: new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')
