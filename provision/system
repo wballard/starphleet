@@ -5,7 +5,7 @@
 
 
 apt-get -y update
-apt-get -y install --force-yes git curl apt-transport-https lsof ssh
+apt-get -y install --force-yes git curl apt-transport-https lsof ssh sysstat
 apt-get -y install --force-yes python g++ make git
 apt-get -y install --force-yes lxc man
 apt-get -y install --force-yes software-properties-common
@@ -14,6 +14,7 @@ add-apt-repository -y ppa:chris-lea/node.js
 apt-get -y update
 apt-get -y install --force-yes nginx
 apt-get -y install --force-yes nodejs
+apt-get -y install --force-yes libfuse-dev
 
 #initial apt package has nginx running. lame.
 /etc/init.d/nginx stop
