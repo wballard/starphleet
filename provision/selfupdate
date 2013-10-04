@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+#this is a scritp to have /starphleet itself auto update
+
 REMOTE="https://github.com/wballard/starphleet.git"
 LOCAL="/starphleet"
 if [ -d "${LOCAL}" ]; then

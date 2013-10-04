@@ -7,7 +7,6 @@
     "docopts": "./scripts/docopts",
     "tools": "./scripts/tools",
     "starphleet": "./scripts/starphleet.coffee",
-    "starphleet-generate": "./scripts/generate.coffee",
     "starphleet-headquarters": "./scripts/starphleet-headquarters",
     "starphleet-build": "./scripts/starphleet-build",
     "starphleet-wait-network": "./scripts/starphleet-wait-network",

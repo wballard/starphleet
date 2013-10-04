@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#this is a provisioning script, it is designed to be run under Vagrant
-#as root, with the starphleet source tree at /starphleet
+#this is a provisioning script for the base system/host/vm
+#run as root, with the starphleet source tree at /starphleet
 
 
 apt-get -y update
