@@ -160,7 +160,12 @@ if options.init
               AvailabilityZones: _.map zones.AvailabilityZones, (x) -> x.ZoneName
             , nestedCallback
       #set a realistic LB health policy
-      (nestedCallback) ->
+      (optionalResult,nestedCallback) ->
+        # If we generate a new load balancer, the optionalResult will contain information on that instance
+        # Else we will be passed the callback as the first param
+        if typeof optionalResult is 'function'
+          nestedCallback = optionalResult
+
         zone.elb.configureHealthCheck
           LoadBalancerName: config.hashname
           HealthCheck:
