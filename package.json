@@ -8,7 +8,7 @@
     "tools": "./scripts/tools",
     "starphleet": "./scripts/starphleet.coffee",
     "starphleet-headquarters": "./scripts/starphleet-headquarters",
-    "starphleet-build": "./scripts/starphleet-build",
+    "starphleet-containerize": "./scripts/starphleet-containerize",
     "starphleet-wait-network": "./scripts/starphleet-wait-network",
     "starphleet-wait-lxc": "./scripts/starphleet-wait-lxc",
     "starphleet-start-script": "./scripts/starphleet-start-script",

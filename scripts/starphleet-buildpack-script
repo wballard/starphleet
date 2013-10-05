@@ -63,6 +63,8 @@ cat > /start <<EOF
 #!/bin/bash
 export HOME=/app
 for file in $app_root/.profile.d/*; do source \$file; done
+test -f /.orders && source /.orders
+test -f /.starphleet && source /.starphleet
 hash -r
 cd $app_root
 if [[ -f Procfile ]]; then
