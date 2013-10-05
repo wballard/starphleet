@@ -25,6 +25,7 @@ HOSTNAME=$(hostname)
 
 cat << EOF > /dev/stdout
 location ${URL} {
+  include /var/starphleet/nginx/cors.conf;
   # Path rewriting to hide mount prefix
   rewrite ${URL}(.*) /\$1 break;
   proxy_pass http://${IP_ADDRESS}:${PORT};
