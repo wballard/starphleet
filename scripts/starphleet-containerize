@@ -68,7 +68,6 @@ else
   #build script, uses buildpacks
   cp "${DIR}/starphleet-buildpack-script" "${CONTAINER_ROOT}/buildpack"
   #fire up the container
-  info starting ${CONTAINER_NAME}
   lxc-start --name ${CONTAINER_NAME} -d
   starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
   info building ${CONTAINER_NAME}

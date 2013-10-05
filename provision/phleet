@@ -3,10 +3,15 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 BLUE_BOLD=$(tput setaf 4; tput bold)
+GREEN=$(tput setaf 2; tput bold)
 NORMAL=$(tput sgr0)
 
 function announce() {
   echo -e "$BLUE_BOLD$*$NORMAL"
+}
+
+function info() {
+  echo -e "$GREEN$*$NORMAL" 1>&2
 }
 
 stop starphleet
@@ -15,7 +20,6 @@ stop starphleet
 cd /starphleet
 npm install -g coffee-script
 npm install -g
-announce Node packages installed
 cd /
 
 #starphleet lives here
@@ -40,14 +44,14 @@ if [ ! -d "${ADMIRALSSH}" ]; then
   mkdir ${ADMIRALSSH}
 fi
 chmod 700 ${ADMIRALSSH}
-
 chown ${ADMIRAL}:${ADMIRAL} ${ADMIRALSSH}
+info admiral created
 
 #base ubuntu LXC image, get this on before we start anything
 BASE_CONTAINER_NAME="starphleet-base"
 if lxc-ls | grep "${BASE_CONTAINER_NAME}$" > /dev/null; then
   date > /var/starphleet/diagnostic/starphleet-base
-  echo -n
+  info base container exists
 else
   echo '' > var/starphleet/diagnostic/starphleet-base
   lxc-create -n "${BASE_CONTAINER_NAME}" -t ubuntu
@@ -60,6 +64,7 @@ else
   lxc-stop --name ${BASE_CONTAINER_NAME}
   starphleet-wait-lxc ${CONTAINER_NAME} STOPPED
   date > /var/starphleet/diagnostic/starphleet-base
+  info base container built
 fi
 
 #good to go, start the phleet
