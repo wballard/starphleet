@@ -46,7 +46,6 @@ info admiral created
 cd /starphleet
 npm install -g coffee-script
 npm install -g
-npm install -g "git+https://github.com/wballard/starphleet.dashboard.git"
 cd /
 
 #base ubuntu LXC image, get this on before we start anything

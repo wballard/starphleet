@@ -9,7 +9,7 @@ source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-FREE_CPU=$(mpstat | grep all | awk '{ print $12 }')
+FREE_CPU=$(mpstat | grep all | sed -e 's/^.*all[ ]*//g' | awk '{ print $9 }')
 FREE_RAM=$(free | grep Mem | awk '{ print (1 - ($3 / $2)) * 100 }')
 FREE_DISK=$(df /var/lib/lxc | tail -1 | awk '{ print 100 - $5 }')
 
