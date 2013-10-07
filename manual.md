@@ -45,6 +45,10 @@ goes in a problem/solution format:
 The grand tour so you know what we are talking about with all of our
 silly names.
 
+## The 12-Factor App
+Starphleet owes a lot to the [12 factor app](http://12factor.net). Learn
+about it.
+
 ## Command Line
 All of starphleet is available from a simple command line script, which
 lets you hook it into any existing scripting framework you like without
