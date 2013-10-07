@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-## starphleet-publish 0.1.0
 ### Usage:
 ###    starphleet-publish <container_name> <container_port> <public_url>
 ### --help
@@ -7,11 +6,9 @@
 ### Publish HTTP traffic from the container port:/ out to the ship
 ### nginx at a designated url mount point. This lets you aggregate multiple
 ### web services under one host and avoid CORS and cross domain muck.
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
-version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 set -e

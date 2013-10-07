@@ -1,18 +1,16 @@
 #! /usr/bin/env bash
-## headquarters 0.1.0
 ### Usage:
-###    headquarters <url>
+###    starphleet-headquarters <url>
 ### --help
 ###
 ### Set the headquarters <url>. This is where the phleet will look for
 ### orders.
 ### The <url> can include a #branch on the end which will refer to that specific
 ### branch rather than default master.
-help=$(grep "^### " "$0" | cut -c 5-)
-version=$(grep "^## "  "$0" | cut -c 4-)
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 source "${DIR}/tools"
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 set -e
 
 cat <<EOF > /var/starphleet/.headquarters

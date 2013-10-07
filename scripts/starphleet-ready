@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-## starphleet-ready 0.1.0
 ### Usage:
 ###    starphleet-ready <container_name> <container_port> <url>
 ### --help
@@ -8,7 +7,6 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
-version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 PORT=${container_port:-${PORT}}

@@ -11,7 +11,6 @@
     "starphleet-containerize": "./scripts/starphleet-containerize",
     "starphleet-wait-network": "./scripts/starphleet-wait-network",
     "starphleet-wait-lxc": "./scripts/starphleet-wait-lxc",
-    "starphleet-start-script": "./scripts/starphleet-start-script",
     "starphleet-base-script": "./scripts/starphleet-base-script",
     "starphleet-buildpack-script": "./scripts/starphleet-buildpack-script",
     "starphleet-publish": "./scripts/starphleet-publish",

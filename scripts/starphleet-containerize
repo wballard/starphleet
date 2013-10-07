@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-## starphleet-containerize 0.1.0
 ### Usage:
 ###    starphleet-containerize <git_url> <container_name>
 ### --help
@@ -21,7 +20,6 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
-version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 set -e

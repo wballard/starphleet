@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export version=0.0.1
 #Library of colorized logging functions, just source this
 NORMAL=$(tput sgr0)
 GREEN=$(tput setaf 2; tput bold)

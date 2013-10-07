@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-## starphleet-base-script 0.1.0
 ### Usage:
 ###    starphleet-base-script
 ### --help
 ###
 ### Generate the a script to create a base image with buildpack support
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 help=$(grep "^### " "$0" | cut -c 5-)
-version=$(grep "^## "  "$0" | cut -c 4-)
+source ${DIR}/tools
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 cat << "EOF"

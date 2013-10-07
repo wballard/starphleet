@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-## starphleet-wait-lxc 0.1.0
 ### Usage:
-###    wait-network <name> <state>
+###    starphleet-wait-lxc <name> <state>
 ### --help
 ###
 ### Wait until it is obvious there is an address lease. This is a
 ### script generating script.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
-version=$(grep "^## "  "$0" | cut -c 4-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
 if [ -f /tmp/wait-lock ]; then
   echo -n
 else
