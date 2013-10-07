@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export version=0.0.1
 #Library of colorized logging functions, just source this
 NORMAL=$(tput sgr0)
 GREEN=$(tput setaf 2; tput bold)
@@ -38,6 +39,8 @@ function code() {
   exit $*
 }
 
+#get the current sha for a given git repository
 function get_CURRENT_SHA() {
   export CURRENT_SHA=$(git --git-dir "$1/.git" --work-tree "$1" log -n 1 --no-merges --pretty=format:%h)
 }
+

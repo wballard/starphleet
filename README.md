@@ -1,65 +1,54 @@
 # Starphleet? What?
-Virtualization is awesome. Much faster than getting another machine.
-Containerization is faster still. Fast is good.
+The fully open container based continuous deployment PaaS.
 
-What we really want is an open toolkit to turn machines, either physical
-or virtual, into container hosts. It needs to:
-
-* be really fast
-* run containers across multiple machines (container ships), creating
-  clusters, which we call phleets
-* leverage git as the backbone
-* use simple files for configuration, no APIs
-* run applications at a git ref
-* autodeploy new versions as a git ref advances
-* drainstop and switch users to new versions transparently
-* aggregate all the logs for each container ship in the phleet, and for
-  the entire phleet
-* aggregate metadata about networking and performance for each container
+[Read the Documentation]
 
 # Getting Started
-You need a git repository that defines your **starphleet headquarters**.
-Create a git repository, and create a single file that looks like this:
 
-**echo.orders**
-```
-autodeploy https://github.com/wballard/echo.git
-publish --private 3000 --public 80  --url /echo
-```
+You need a git repository that defines your **starphleet headquarters**,
+you can start up by forking our [base
+headquarters](https://github.com/wballard/starphleet.headquarters.git).
 
-Save it. Awesome. Add it. Commit it. Push it git somewhere you can see.
-Call that \<my git url\>. Get ready to paste that. Make sure you can get
-at this without any auth, this sample assume public access.
+Keep track of where you fork it, and for now make sure to use the
+**https** version of the url. Call this MY_URL.
 
-Fire up a machine with our AMI image or VMWare image. All the tools you
-need are preloaded, and self updating from our git. Any easy way to do
-this is with the `Vagrantfile` in this repository.
+## Locally, Vagrant
+Vagrant is a handy way to get a working autodeployment system right on
+your laptop inside a virtual machine. Prebuilt base images are provided
+in the `Vagrantfile` for both VMWare and VirtualBox. Great for hacking
+on starphleet itself.
 
-SSH into your machine, and bootstrap it.
+1. clone this repository
+2. cd into your clone
+3. `vagrant up` ... your ship is built
+4. `vagrant ssh`
+5. `sudo starphleet-headquarters MY_URL`
+6. `ifconfig` ... note your ip address
+7. Dashboard at http://ip-address/starphleet/dashboard
 
-```
-starphleet-headquarters <my git url>
-```
+## Cloudly, AWS
+Running on a cloud is ready to go with AWS. In order to get started, you
+need to have:
 
-Now, we're going to clone that repository for you on the virtual
-machine, which we call a *ship*, and monitor it for changes. That
-[echo.git](https://github.com/wballard/echo.git) will then be used to
-start up a container. Take a peek inside that repository, you'll see a
-`Starphleet`. This is mandatory and makes the container work at all. Our
-echo service isn't super exciting, but now:
+* An AWS account
+* AWS_ACCESS_KEY_ID environment variable set
+* AWS_SECRET_ACCESS_KEY environment variable set
+* A public SSH key that will be used to let you log in
 
-```
-curl http://<hostname>/echo/Hi
-```
+1. `npm install starphleet`
+2. `starphleet init MY_URL MY_PRIVATE_KEY_FILENAME MY_PUBLIC_KEY_FILENAME`
+3. `starphleet add ship us-west-1`
+4. `starphleet info` ... note a DNS name
+5. Dashboard at http://dns-name/starphleet/dashboard
 
-It's exciting, you'll get
-```
-Hi
-```
+## All Running?
+Once you are up and running, look in your forked headquarters at
+`echo/orders`. This is all it takes to get a web service automatically
+deploying:
+* `export PORT=` to have a network port for your service
+* `autodeploy git_url` to know what to deploy
 
-
-# Karsten Notes
-Wasn't super clear that --port means your service.
-Message if you create a crap ordera nd thus bust nginx
-
-
+By default there is now an exciting echo service running, which is
+mounted at `/echo`, exactly matching the folder name in the
+headquarters. So just:
+`curl http://ship/echo/hi`

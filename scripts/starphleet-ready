@@ -1,24 +1,34 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-ready <container_name> <container_port> <url>
+### --help
+###
+### Check if a container is ready by looking for a successful http return.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-if [ -n "${1}" ]; then
-  TEST_COMMAND="curl -X GET -o /dev/null -s -w %{response_code} ${1}"
+PORT=${container_port:-${PORT}}
+URL=${url:-}
+CONTAINER_NAME=${container_name}
+IP_ADDRESS=$(lxc-ls --fancy | grep "${CONTAINER_NAME}" | awk '{ print $3; }')
+TEST_GET="http://${IP_ADDRESS}:${PORT}/${URL}"
+TEST_COMMAND="curl -X GET -o /dev/null -s -w %{response_code} ${TEST_GET}"
 
-  for c in {1..100}; do
-    RESULT=`${TEST_COMMAND}`
-    if [ -n "${DEBUG}" ]; then
-      echo ${RESULT}
-    fi
-    if [ ${RESULT} == "200" ]; then
-      exit 0;
-    fi
-    sleep .2;
-  done
-
+for c in {1..300}; do
+  RESULT=`${TEST_COMMAND}`
   if [ -n "${DEBUG}" ]; then
     echo ${RESULT}
   fi
-  echo "failed to get 200 back from ${1}"
-  exit 1;
-else
-  echo no healthcheck present
+  if [ ${RESULT} == "200" ]; then
+    exit 0;
+  fi
+  sleep .2;
+done
+
+if [ -n "${DEBUG}" ]; then
+  echo ${RESULT}
 fi
+echo "failed to get 200 back from ${1}"
+exit 1;

@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-## starphleet-wait-network 0.1.0
 ### Usage:
 ###    starphleet-wait-network
-### --help
 ###
 ### Wait until it is obvious there is an address lease.
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
