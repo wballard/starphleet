@@ -126,7 +126,7 @@ if options.init
   config =
     url: options['<headquarters_url>']
     public_key: new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')
-    private_key: new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')
+    private_key: new Buffer(fs.readFileSync(options['<private_key_filename>'], 'utf8')).toString('base64')
     keyname: "starphleet-#{md5(new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')).substr(0,8)}"
     hashname: "starphleet-#{md5(options['<headquarters_url>']).substr(0,8)}"
   fs.writeFileSync '.starphleet', JSON.stringify(config)
