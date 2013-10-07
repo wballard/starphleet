@@ -90,6 +90,12 @@ isThereBadNews = (err) ->
     console.error "#{err}".red
     process.exit 1
 
+isConfigured = ->
+  if not fs.existsSync('.starphleet')
+    console.error "Starphleet not configured in this directory".red
+    console.error "Run", "starphleet init".cyan
+    process.exit 1
+
 for ev in  ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
   if not process.env[ev]
     isThereBadNews "#{ev} needs to be in your environment".red
@@ -211,6 +217,7 @@ if options.init
     process.exit 0
 
 if options.add and options.ship
+  isConfigured()
   config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
   zone = _.select(zones, (zone) -> zone.config.region is options['<region>'])[0]
   if not zone
@@ -238,6 +245,7 @@ if options.add and options.ship
     process.exit 0
 
 if options.info
+  isConfigured()
   config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
   UserData = new Buffer(config.url).toString('base64')
   queryZone = (zone, zoneCallback) ->
@@ -307,12 +315,13 @@ if options.info
           lb.push 'Load Balancer': balancer.DNSName
           lb.push 'Hosts': hosts.toString()
           console.log lb.toString()
-          console.log "Dashboards are at", "http://<host/starphleet/dashboard".cyan
+          console.log "Dashboards are at", "http://<host>/starphleet/dashboard".cyan
     else
       console.log "do 'starphleet add ship [region]' to get started\nvalid regions #{_.map(zones, (x) -> x.config.region)}".yellow
     process.exit 0
 
 if options.remove and options.ship
+  isConfigured()
   queryZone = (zone, zoneCallback) ->
     async.waterfall [
       (callback) ->
