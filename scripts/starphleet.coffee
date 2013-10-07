@@ -275,7 +275,7 @@ if options.info
       #now poke at the instances via http to lean starphleet specifics
       (balancer, callback) ->
         baseStatus = (instance, callback) ->
-          request {url: "http://#{instance.PublicDnsName}/starphleet/diagnostic/servers", timeout: 2000}, (err, res, body) ->
+          request {url: "http://#{instance.PublicDnsName}/starphleet/diagnostic", timeout: 2000}, (err, res, body) ->
             #eating errors
             callback undefined, body
         async.join balancer.Instances, baseStatus, 'BaseStatus', (err, instances) ->
