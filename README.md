@@ -1,7 +1,7 @@
 # Starphleet? What?
 The fully open container based continuous deployment PaaS.
 
-[Read the Documentation]
+[Read the Documentation](wballard.github.io/starphleet)
 
 # Getting Started
 
