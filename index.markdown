@@ -79,7 +79,7 @@ this way gives a versioned database of your configuation, allows you to
 edit and work with your own tools, and allows multiple hosting options.
 
 ###Security
-**No Fooling Important** -- your <headquarters_url> git repo needs to be
+**No Fooling Important** -- your `<headquarters_url>` git repo needs to be
 reachable by each ship running the starphleet software. In practice this
 means your headquarters is published in a public `https` or passwordless
 `git` protocol repository, not via `git+ssh`. All about open. If you
@@ -147,20 +147,20 @@ starphleet, at a given path, to control the autodeployment of a service.
 You can put anything in the script you like, it is just a shell script
 after all, but in practice there are only two things to do:
 
-* export PORT
-* autodeloy <git_url>
+* `export PORT`
+* `autodeloy <git_url>`
 
 Setting up orders as a shell script is to allow your creativity to run
 wild, but without you needing to learn a custom tool, DSL, scriptin
 language, config database, or API that seems to be the common approach.
 
 ### Security
-**No Fooling Important**, <git_url>, just like your <headquarters_url>
+**No Fooling Important**, `<git_url>`, just like your `<headquarters_url>`
 needs to be publicly reachable from each ship in the fleet, or for you
 to follow the instructions on privatization.
 
 ### Branches and Versions
-You can specify your <git_url> like <git_url>#<branch>, where branch can
+You can specify your `<git_url>` like `<git_url>#<branch>`, where branch can
 be a branch, a tag, or a commit sha -- anything you can check out. This
 hashtag approach lets you specify a deployment branch, as well as pin
 services to specific versions when needed.
@@ -227,7 +227,7 @@ and you keep them in the source repository of each service.
 This is where you specify a `BUILDPACK_URL`, but you can also put in
 other variables as you see fit.
 
-#### .profile.d/*
+#### .profile.d/
 You can mix in as many separate files here as you like, providing more
 environment.
 
@@ -301,8 +301,8 @@ that with other autodeploy systems, or classic 'off the air' deployment.
 
 ### healthcheck
 Each service repository can supply a `healthcheck` file, which contains
-an URL snippet http://<container-ip>:<container-port>/<snippet>. You
-supply the <snippet>, and if you don't provide it, the default is just
+an URL snippet `http://<container-ip>:<container-port>/<snippet>`. You
+supply the `<snippet>`, and if you don't provide it, the default is just
 blank, meaning hitting the root of your service.
 
 As soon as a 200 comes back, you are good to go and the new service is
@@ -389,4 +389,3 @@ It's OK for you to set up just in one location if you like. Or even have
 a phleet with one ship.
 
 ### Route53 Configuration
-<TBD>

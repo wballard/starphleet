@@ -1,8 +1,4 @@
 name: Starphleet
 lsi: false
-port: 9002
 pygments: false
 github: https://github.com/wballard/starphleet
-markdown: redcarpet
-redcarpet:
-  extensions: ["with_toc_data", "tables", "no_intra_emphasis", "autolink", "strikethrough", "superscript"]
