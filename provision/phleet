@@ -16,11 +16,6 @@ function info() {
 
 stop starphleet
 
-#starphleet control scripts from the mount shared source
-cd /starphleet
-npm install -g coffee-script
-npm install -g
-cd /
 
 #starphleet lives here
 mkdir -p /var/starphleet/diagnostic
@@ -46,6 +41,12 @@ fi
 chmod 700 ${ADMIRALSSH}
 chown ${ADMIRAL}:${ADMIRAL} ${ADMIRALSSH}
 info admiral created
+
+#starphleet control scripts from the mount shared source
+cd /starphleet
+npm install -g coffee-script
+npm install -g
+cd /
 
 #base ubuntu LXC image, get this on before we start anything
 BASE_CONTAINER_NAME="starphleet-base"
