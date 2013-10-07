@@ -307,6 +307,7 @@ if options.info
           lb.push 'Load Balancer': balancer.DNSName
           lb.push 'Hosts': hosts.toString()
           console.log lb.toString()
+          console.log "Dashboards are at", "http://<host/starphleet/dashboard".cyan
     else
       console.log "do 'starphleet add ship [region]' to get started\nvalid regions #{_.map(zones, (x) -> x.config.region)}".yellow
     process.exit 0
