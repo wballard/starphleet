@@ -7,15 +7,17 @@ goes in a problem/solution format:
 * Virtualization wastes resources, specifically RAM and CPU running
   multiple operating system images, which costs real money
   * containerization is the new virtualization, using LXC
+  * storage-as-a-service gets you out of the DBA scaling game
 * PaaS has the same vendor lock-in risks of old proprietary software,
-  just without the comptuers
+  just without the computers
   * full open source is the only way to go
   * allow installation on public as well as private clouds
   * use machines as you see fit, say with large RAM, GPGPU, or special
     hardware
-* Continous deployment is too hard
+* Continous deployment is too hard, so folks default to batches and
+  sprints
   * leverage git, allowing deployment with no more than the normal `git
-    push`
+    push` you use to share code
   * make continuous deployment the default
   * provides drainstop, restart, failover, and rollback as built ins
   * be like unix: files, scripts, environment variables -- and spare
@@ -25,6 +27,7 @@ goes in a problem/solution format:
     package/script system, and there is a ton of resource available via
     [Google]
   * Heroku Buildpacks already exist for most platforms, use them
+  * Focus on building services, not on systems
 * Multiple machine deployment is more work than running locally
   * Make load balancing the default, spanning computers and geographies
   * Make commands run across a phleet by default
@@ -337,7 +340,8 @@ like. Some things to keep in mind:
 
 * you will need LXC
 * you will need Upstart
-* buildpacks will need to work
+* buildpacks will need to work, which is easy with apt and work
+  otherwise
 
 In practice, packing things up as orders with buildpacks saves you from
 OS-ing around ships.
@@ -351,8 +355,26 @@ the default.
 Don't feel limited to just one phleet. Part of making your own PaaS is
 to give you the freedom to mix and match as you see fit.
 
+## Log Aggregation
+Just nearly as painful as getting everything deployed -- keeping an eye
+on it. You can generally get software that watches CPU, RAM, Disk,
+Network interfaces -- and it basically tells you nothing about your
+application. The real value is in logging, where you can have
+specifics and details to hunt down trouble.
+
+But, logs across multiple services, multiple machines, and multiple
+geographies aren't exactly fun, so starphleet aggregates all logs from
+all ships and containers for you. From there you can pipe this into
+services like [splunk], or my personal favorite, tail it and grep it.
+
+This also keeps you disks from filling up, since the logs are written to
+a stream and not to disk.
+
 ## Geo Scaling AWS
 By default, starphleet sets up four zones, three US, one Europe. Ships
 are added explicitly to zones, and you aren't required to use them all.
 It's OK for you to set up just in one location if you like. Or even have
 a phleet with one ship.
+
+### Route53 Configuration
+<TBD>
