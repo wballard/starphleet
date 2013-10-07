@@ -32,8 +32,7 @@ goes in a problem/solution format:
     folks from the learning curve of yet another tool
 * Dependencies suck up time
   * platform package managers, `npm`, `gem`, `apt` beat learning a new
-    package/script system, and there is a ton of resource available via
-    [Google](www.google.com)
+    package/script system, and there is a ton of resource available
   * Heroku Buildpacks already exist for most platforms, use them
   * Focus on building services, not on systems
 * Multiple machine deployment is more work than running locally
@@ -107,8 +106,8 @@ HTTP, including the use of server sent events and websockets.
 A headquarters instructs a phleet what services to deploy and how to
 serve it. A headquarters must be versioned with git, and hosted in a
 location on the internet where each ship in the phleet can reach it.
-The easiest thing to do is host on [github](www.github.com) or
-[bitbucket](www.bitbucket.com).
+The easiest thing to do is host on [github](http://www.github.com) or
+[bitbucket](http://www.bitbucket.com).
 
 The simplest possible phleet has a directory structure like:
 
@@ -378,7 +377,7 @@ specifics and details to hunt down trouble.
 But, logs across multiple services, multiple machines, and multiple
 geographies aren't exactly fun, so starphleet aggregates all logs from
 all ships and containers for you. From there you can pipe this into
-services like [splunk](www.splunk.com), or my personal favorite, tail it
+services like [splunk](http://www.splunk.com), or my personal favorite, tail it
 and grep it.
 
 This also keeps you disks from filling up, since the logs are written to
