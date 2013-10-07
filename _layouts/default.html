@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<title>{{ page.title }}</title>
+
+<link rel="stylesheet" href="stylesheets/bootstrap.min.css">
+<link rel="stylesheet" href="stylesheets/github.css">
+<link rel="stylesheet" href="javascripts/highlight.js/styles/monokai.css">
+<link rel="stylesheet" href="stylesheets/tweaks.css">
+<script src="javascripts/jquery.min.js"></script>
+<script src="javascripts/bootstrap.min.js"></script>
+<script src="javascripts/bootstrap-theme.js"></script>
+<script src="javascripts/toc.min.js"></script>
+<script src="javascripts/highlight.js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+</head>
+<body>
+
+{% include nav.html %}
+
+<div class="leftnav" id="leftnav">
+  <div class="sidebar-nav sidebar-nav-fixed">
+    <div id="toc">
+    </div>
+  </div>
+</div>
+<div class="main" id="main">
+  <div class="content" id="content">
+    {{content}}
+  </div>
+  <hr>
+  <footer>
+    <p>Copyright &copy; {{ site.time | date: "%Y" }}</p>
+  </footer>
+</div>
+
+</body>
+<script>
+//auto active
+$('li a').each(function(){
+  if(this.href == window.location.href) {
+    $(this).parent().addClass('active');
+  }
+})
+//room for the nav
+$(document).on('click', function(event){
+  if(event.target.href) {
+    setTimeout(function(){
+      $('body').scrollTop($('body').scrollTop() - 50);
+    });
+  }
+});
+$('#toc').toc({
+  container: '#main',
+  onHighlight: function(el) {
+    $('#toc').find('li').removeClass('active');
+    $(el).addClass('active');
+  }
+});
+$('#toc > ul').addClass('nav nav-pills nav-stacked');
+if($('#toc').children.length == 0) {
+  $('#leftnav').hide();
+} else {
+  $('#main').addClass('navpad');
+}
+$('table').addClass('table table-bordered table-striped');
+</script>
+</html>

@@ -1,0 +1,7 @@
+_site
+node_modules
+test
+src
+.server
+.starphleet*
+.vagrant*
