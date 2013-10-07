@@ -23,19 +23,19 @@ doc = """
 #{pkg.description}
 
 Usage:
-  starphleet init <headquarters_url> <public_key_filename>
+  starphleet init <headquarters_url> <private_key_filename> <public_key_filename>
   starphleet info
   starphleet add ship <region>
   starphleet remove ship <hostname>
-  starphleet rolling reboot
+  starphleet privatize <private_key_file>
+  starphleet set <name> <value>
   starphleet -h | --help | --version
 
 Notes:
   This uses the AWS API, so you will need these environment variables set:
     * AWS_ACCESS_KEY_ID
     * AWS_SECRET_ACCESS_KEY
-  In addition AWS_DEFAULT_REGION will be consulted, and if not set, will
-  default to us-west-1
+  EC2_INSTANCE_SIZE will be consulted, defaulting to m2.xlarge
 
 Description:
   This tool uses the AWS API for you to create a properly provisioned phleet
@@ -66,12 +66,6 @@ Description:
 
   remove ship
     Remove a ship by name, which you can get from 'info'.
-
-  rolling reboot
-    When something is wrong, and you can't figure it out, and you just want
-    to start over, call this, and each ship in the phleet will be rebooted
-    in sequence. It might not fix anything, but nothing feels as good as
-    'reboot it!'.
 
 """
 options = docopt doc, version: pkg.version
@@ -126,6 +120,7 @@ if options.init
   config =
     url: options['<headquarters_url>']
     public_key: new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')
+    private_key: new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')
     keyname: "starphleet-#{md5(new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')).substr(0,8)}"
     hashname: "starphleet-#{md5(options['<headquarters_url>']).substr(0,8)}"
   fs.writeFileSync '.starphleet', JSON.stringify(config)
@@ -228,7 +223,7 @@ if options.add and options.ship
         KeyName: config.keyname
         SecurityGroups: ['starphleet']
         UserData: new Buffer(config.url).toString('base64')
-        InstanceType: 'm2.xlarge'
+        InstanceType:  process.env['EC2_INSTANCE_SIZE'] or 'm2.xlarge'
       zone.runInstances todo, callback
     (ran, callback) ->
       ids = _.map ran.Instances, (x) -> {InstanceId: x.InstanceId}

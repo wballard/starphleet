@@ -1,5 +1,7 @@
 # Starphleet? What?
-The fully open, economical, container based continuous deployment PaaS.
+The fully open container based continuous deployment PaaS.
+
+[Read the Documentation]
 
 # Getting Started
 
@@ -13,7 +15,8 @@ Keep track of where you fork it, and for now make sure to use the
 ## Locally, Vagrant
 Vagrant is a handy way to get a working autodeployment system right on
 your laptop inside a virtual machine. Prebuilt base images are provided
-in the `Vagrantfile` for both VMWare and VirtualBox.
+in the `Vagrantfile` for both VMWare and VirtualBox. Great for hacking
+on starphleet itself.
 
 1. clone this repository
 2. cd into your clone
@@ -33,7 +36,7 @@ need to have:
 * A public SSH key that will be used to let you log in
 
 1. `npm install starphleet`
-2. `starphleet init MY_URL MY_PUBLIC_KEY_FILENAME`
+2. `starphleet init MY_URL MY_PRIVATE_KEY_FILENAME MY_PUBLIC_KEY_FILENAME`
 3. `starphleet add ship us-west-1`
 4. `starphleet info` ... note a DNS name
 5. Dashboard at http://dns-name/starphleet/dashboard

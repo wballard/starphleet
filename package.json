@@ -1,7 +1,7 @@
 {
   "name": "starphleet",
   "version": "0.0.1",
-  "description": "High speed containerized clusters",
+  "description": "The fully open container based continuous deployment PaaS.",
   "bin": {
     "docopt.py": "./scripts/docopt.py",
     "docopts": "./scripts/docopts",
@@ -23,7 +23,11 @@
     "url": "https://github.com/wballard/starphleet.git"
   },
   "keywords": [
-    "awesome"
+    "paas",
+    "autodeploy",
+    "lxc",
+    "container",
+    "service"
   ],
   "author": "Rear Admiral Ballard",
   "license": "BSD",
