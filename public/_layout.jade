@@ -1,0 +1,24 @@
+!!!
+html
+  head
+    title= title
+    link(rel="stylesheet", href="main.css")
+    link(rel="stylesheet", href="javascript/highlight.js/styles/monokai.css")
+    script(src="javascript/jquery.min.js")
+    script(src="javascript/bootstrap.min.js")
+    script(src="javascript/toc.min.js")
+    script(src="javascript/highlight.js/highlight.pack.js")
+    script(src="javascript/main.js")
+    meta(name="viewport",content="width=device-width, initial-scale=1, user-scalable=no")
+  body
+    div(class="navbar navbar-fixed-top")
+      div
+       a(class="navbar-brand", href="index.html")= sitename
+    div(class="leftnav", id="leftnav")
+      div(class="sidebar-nav sidebar-nav-fixed")
+        div(id="toc")
+    div(class="main", id="main")
+      div(class="content", id="content")
+        != yield
+      footer
+        p Copyright &copy 2013

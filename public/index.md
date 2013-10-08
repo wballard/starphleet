@@ -1,12 +1,8 @@
----
-layout: default
-title: Starphleet Manual
----
-
 <h1>Starphleet</h1>
 <div class="well">
 The fully open container based continuous deployment PaaS
 </div>
+
 
 This is a toolkit for turning virtual machine infrastructure into a
 continuous deployment stack. Looking at what is out there, Starphleet
@@ -63,7 +59,7 @@ needing to learn an API. The command line program is mostly shell, and
 some nodejs, which is a nice way to deploy to your laptop or personal
 computer to manage starphleet.
 
-```
+```bash
 npm install starphleet
 starphleet --help
 ```
@@ -194,7 +190,7 @@ In the root of a service's repository, make a `.env`. This is just a
 simple shell script that will be sourced. So, if you have a buildpack
 you know you want to use with a service:
 
-```.env
+```
 export BUILDPACK_URL=https://github.com/wballard/heroku-buildpack-nodejs.git
 ```
 
@@ -240,7 +236,7 @@ Starphleet wide environment variables are _secret_, supplied by
 command line, not kept in git, and protected with public/private key
 encryption.
 
-```
+```bash
 starphleet set <name> <value>
 ```
 
