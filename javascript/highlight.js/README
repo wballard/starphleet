@@ -1,0 +1,92 @@
+<!DOCTYPE html><html><head><title>Starphleet Documentation</title><link rel="stylesheet" href="main.css"><link rel="stylesheet" href="javascript/highlight.js/styles/monokai.css"><script src="javascript/jquery.min.js"></script><script src="javascript/bootstrap.min.js"></script><script src="javascript/toc.min.js"></script><script src="javascript/highlight.js/highlight.pack.js"></script><script src="javascript/main.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"></head><body><div class="navbar navbar-fixed-top"><div><a href="index.html" class="navbar-brand">Starphleet</a></div></div><div id="leftnav" class="leftnav"><div class="sidebar-nav sidebar-nav-fixed"><div id="toc"></div></div></div><div id="main" class="main"><div id="content" class="content"><h1>Highlight.js</h1>
+<p>Highlight.js highlights syntax in code examples on blogs, forums and,
+in fact, on any web page. It&#39;s very easy to use because it works
+automatically: finds blocks of code, detects a language, highlights it.</p>
+<p>Autodetection can be fine tuned when it fails by itself (see &quot;Heuristics&quot;).</p>
+<h2>Basic usage</h2>
+<p>Link the library and a stylesheet from your page and hook highlighting to
+the page load event:</p>
+<pre><code class="language-html">&lt;link rel=&quot;stylesheet&quot; href=&quot;styles/default.css&quot;&gt;
+&lt;script src=&quot;highlight.pack.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;hljs.initHighlightingOnLoad();&lt;/script&gt;</code></pre>
+<p>This will highlight all code on the page marked up as <code>&lt;pre&gt;&lt;code&gt; .. &lt;/code&gt;&lt;/pre&gt;</code>.
+If you use different markup or need to apply highlighting dynamically, read
+&quot;Custom initialization&quot; below.</p>
+<ul>
+<li><p>You can download your own customized version of &quot;highlight.pack.js&quot; or
+use the hosted one as described on the download page:
+<a href="http://softwaremaniacs.org/soft/highlight/en/download/">http://softwaremaniacs.org/soft/highlight/en/download/</a></p>
+</li>
+<li><p>Style themes are available in the download package or as hosted files.
+To create a custom style for your site see the class reference in the file
+<a href="http://github.com/isagalaev/highlight.js/blob/master/classref.txt">classref.txt</a> from the downloaded package.</p>
+</li>
+</ul>
+<h2>node.js</h2>
+<p>Highlight.js can be used under node.js. The package with all supported languages is
+installable from NPM:</p>
+<pre><code>npm install highlight.js</code></pre>
+<p>Alternatively, you can build it from the source with only languages you need:</p>
+<pre><code>python tools/build.py -tnode lang1 lang2 ..</code></pre>
+<p>Using the library:</p>
+<pre><code class="language-javascript">var hljs = require(&#39;highlight.js&#39;);
+
+// If you know the language
+hljs.highlight(lang, code).value;
+
+// Automatic language detection
+hljs.highlightAuto(code).value;</code></pre>
+<h2>Tab replacement</h2>
+<p>You can replace TAB (&#39;\x09&#39;) characters used for indentation in your code
+with some fixed number of spaces or with a <code>&lt;span&gt;</code> to give them special
+styling:</p>
+<pre><code class="language-html">&lt;script type=&quot;text/javascript&quot;&gt;
+  hljs.tabReplace = &#39;    &#39;; // 4 spaces
+  // ... or
+  hljs.tabReplace = &#39;&lt;span class=&quot;indent&quot;&gt;\t&lt;/span&gt;&#39;;
+
+  hljs.initHighlightingOnLoad();
+&lt;/script&gt;</code></pre>
+<h2>Custom initialization</h2>
+<p>If you use different markup for code blocks you can initialize them manually
+with <code>highlightBlock(code, tabReplace, useBR)</code> function. It takes a DOM element
+containing the code to highlight and optionally a string with which to replace
+TAB characters.</p>
+<p>Initialization using, for example, jQuery might look like this:</p>
+<pre><code class="language-javascript">$(document).ready(function() {
+  $(&#39;pre code&#39;).each(function(i, e) {hljs.highlightBlock(e)});
+});</code></pre>
+<p>You can use <code>highlightBlock</code> to highlight blocks dynamically inserted into
+the page. Just make sure you don&#39;t do it twice for already highlighted
+blocks.</p>
+<p>If your code container relies on <code>&lt;br&gt;</code> tags instead of line breaks (i.e. if
+it&#39;s not <code>&lt;pre&gt;</code>) pass <code>true</code> into the third parameter of <code>highlightBlock</code>
+to make highlight.js use <code>&lt;br&gt;</code> in the output:</p>
+<pre><code class="language-javascript">$(&#39;div.code&#39;).each(function(i, e) {hljs.highlightBlock(e, null, true)});</code></pre>
+<h2>Heuristics</h2>
+<p>Autodetection of a code&#39;s language is done using a simple heuristic:
+the program tries to highlight a fragment with all available languages and
+counts all syntactic structures that it finds along the way. The language
+with greatest count wins.</p>
+<p>This means that in short fragments the probability of an error is high
+(and it really happens sometimes). In this cases you can set the fragment&#39;s
+language explicitly by assigning a class to the <code>&lt;code&gt;</code> element:</p>
+<pre><code class="language-html">&lt;pre&gt;&lt;code class=&quot;html&quot;&gt;...&lt;/code&gt;&lt;/pre&gt;</code></pre>
+<p>You can use class names recommended in HTML5: &quot;language-html&quot;,
+&quot;language-php&quot;. Classes also can be assigned to the <code>&lt;pre&gt;</code> element.</p>
+<p>To disable highlighting of a fragment altogether use &quot;no-highlight&quot; class:</p>
+<pre><code class="language-html">&lt;pre&gt;&lt;code class=&quot;no-highlight&quot;&gt;...&lt;/code&gt;&lt;/pre&gt;</code></pre>
+<h2>Export</h2>
+<p>File export.html contains a little program that allows you to paste in a code
+snippet and then copy and paste the resulting HTML code generated by the
+highlighter. This is useful in situations when you can&#39;t use the script itself
+on a site.</p>
+<h2>Meta</h2>
+<ul>
+<li>Version: 7.3</li>
+<li>URL:     <a href="http://softwaremaniacs.org/soft/highlight/en/">http://softwaremaniacs.org/soft/highlight/en/</a></li>
+<li>Author:  Ivan Sagalaev (<a href="&#109;&#97;&#x69;&#108;&#x74;&#111;&#58;&#109;&#97;&#x6e;&#x69;&#97;&#x63;&#x40;&#115;&#111;&#102;&#x74;&#x77;&#97;&#x72;&#x65;&#x6d;&#97;&#x6e;&#105;&#97;&#x63;&#x73;&#46;&#111;&#x72;&#x67;">&#109;&#97;&#x6e;&#x69;&#97;&#x63;&#x40;&#115;&#111;&#102;&#x74;&#x77;&#97;&#x72;&#x65;&#x6d;&#97;&#x6e;&#105;&#97;&#x63;&#x73;&#46;&#111;&#x72;&#x67;</a>)</li>
+</ul>
+<p>For the license terms see LICENSE files.
+For the list of contributors see AUTHORS.en.txt file.</p>
+</div><footer><p>Copyright &copy 2013</p></footer></div></body></html>
