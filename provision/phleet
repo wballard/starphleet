@@ -42,6 +42,13 @@ chmod 700 ${ADMIRALSSH}
 chown ${ADMIRAL}:${ADMIRAL} ${ADMIRALSSH}
 info admiral created
 
+#transfer private keys
+info checking for private keys in /starphleet/private_keys
+if [ -d /starphleet/private_keys ]; then
+  test -d /var/starphleet/private_keys || mkdir -p /var/starphleet/private_keys
+  cp /starphleet/private_keys/* /var/starphleet/private_keys/
+fi
+
 #starphleet control scripts from the mount shared source
 cd /starphleet
 npm install -g coffee-script

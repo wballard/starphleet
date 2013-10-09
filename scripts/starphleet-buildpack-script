@@ -49,6 +49,16 @@ fi
 default_types=$(ruby -e "require 'yaml';puts (YAML.load_file('$app_root/.release')['default_process_types'] || {}).keys().join(', ')")
 [[ $default_types ]] && echo "       Default process types for $buildpack_name -> $default_types"
 
+cat > /exec <<EOF
+#!/bin/bash
+export HOME=/app
+for file in $app_root/.profile.d/*; do source \$file; done
+hash -r
+cd $app_root
+"\$@"
+EOF
+chmod +x /exec
+
 cat > /start <<EOF
 #!/bin/bash
 export HOME=/app
