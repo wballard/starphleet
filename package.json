@@ -15,6 +15,7 @@
     "starphleet-buildpack-script": "./scripts/starphleet-buildpack-script",
     "starphleet-publish": "./scripts/starphleet-publish",
     "starphleet-status": "./scripts/starphleet-status",
+    "starphleet-git": "./scripts/starphleet-git",
     "starphleet-ready": "./scripts/starphleet-ready"
   },
   "repository": {

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-git <args>...
+### --help
+###
+### Wrapper script to run git, with identity config files generated
+### from private keys
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+help=$(grep "^### " "$0" | cut -c 5-)
+source ${DIR}/tools
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+
+source /var/starphleet/.headquarters
+
+#admiral config file generation
+
+#completely regenerate each time there is a change. headquarters won't take
+#any lip from its admirals!
+echo "StrictHostKeyChecking no" > "${ADMIRAL_HOME}/.ssh/config"
+chown ${ADMIRAL}:${ADMIRAL} "${ADMIRAL_HOME}/.ssh/config"
+for key in $(ls "/var/starphleet/private_keys/")
+do
+  echo KEY: $key
+  chown ${ADMIRAL}:${ADMIRAL} /var/starphleet/private_keys/${key}
+  chmod 600 /var/starphleet/private_keys/${key}
+  echo "IdentityFile /var/starphleet/private_keys/${key}" >> "${ADMIRAL_HOME}/.ssh/config"
+done
+
+# script that patches SSH to use our admiral config
+trap 'rm -f /tmp/.git_ssh.$$' EXIT
+echo "ssh -F ${ADMIRAL_HOME}/.ssh/config \$@" > /tmp/.git_ssh.$$
+chmod +x /tmp/.git_ssh.$$
+export GIT_SSH=/tmp/.git_ssh.$$
+
+# Run the git command
+git "$@"
