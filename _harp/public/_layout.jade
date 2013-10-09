@@ -11,9 +11,12 @@ html
     script(src="javascript/main.js")
     meta(name="viewport",content="width=device-width, initial-scale=1, user-scalable=no")
   body
-    div(class="navbar navbar-fixed-top")
-      div
+    nav(class="navbar navbar-fixed-top")
+      div(class="navbar-header")
        a(class="navbar-brand", href="index.html")= sitename
+      ul(class="nav navbar-nav")
+        li
+          a(href="https://github.com/wballard/starphleet") Source
     div(class="leftnav", id="leftnav")
       div(class="sidebar-nav sidebar-nav-fixed")
         div(id="toc")
