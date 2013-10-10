@@ -247,7 +247,6 @@ if options.add and options.ship
 if options.info
   isConfigured()
   config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
-  UserData = new Buffer(config.url).toString('base64')
   queryZone = (zone, zoneCallback) ->
     async.waterfall [
       (callback) ->

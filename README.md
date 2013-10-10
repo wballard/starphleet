@@ -9,22 +9,49 @@ You need a git repository that defines your **starphleet headquarters**,
 you can start up by forking our [base
 headquarters](https://github.com/wballard/starphleet.headquarters.git).
 
-Keep track of where you fork it, and for now make sure to use the
-**https** version of the url. Call this MY_URL.
+Keep track of where you fork it, you'll need that git url.
+**Important**: the git url must be network reachable from your hosting
+cloud, often the best thing to do is use public git hosting services.
+
+I'm a big fan of environment variables, it saves typing repeated stuff.
+Paste in your url from above into your shell like this:
+
+```
+export STARPHLEET_HEADQUARTERS=<git_url>
+```
+
+OK -- so that might not have worked for you, particularly if your
+STARPHLEET_HEADQUARTERS was a git/ssh url. To make that work, you need
+to have the private key file you use with github, something like mine:
+
+```
+export STARPHLEET_PRIVATE_KEY=~/.ssh/wballard@mailframe.net
+```
+
+Yeah, go ahead. Spam me, that's my real email :)
+
 
 ## Locally, Vagrant
 Vagrant is a handy way to get a working autodeployment system right on
 your laptop inside a virtual machine. Prebuilt base images are provided
-in the `Vagrantfile` for both VMWare and VirtualBox. Great for hacking
-on starphleet itself.
+in the `Vagrantfile` for both VMWare and VirtualBox. Great for figuring
+if your services will autodeploy/start/run without worrying about load
+balancing.
 
-1. clone this repository
-2. cd into your clone
-3. `vagrant up` ... your ship is built
-4. `vagrant ssh`
-5. `sudo starphleet-headquarters MY_URL`
-6. `ifconfig` ... note your ip address
-7. Dashboard at http://ip-address/starphleet/dashboard
+```
+git clone https://github.com/wballard/starphleet.git
+cd starphleet
+vagrant up
+vagrant ssh -c "ifconfig eth0 | grep 'inet addr'"
+```
+Note the IP address from the last command, you can see the dashboard at
+http://ip-address/starphleet/dashboard. And, the ever amazing echo
+service that is in the default headquarters can be tested with:
+
+```
+curl http://ip-address/echo/hello
+```
+
 
 ## Cloudly, AWS
 Running on a cloud is ready to go with AWS. In order to get started, you

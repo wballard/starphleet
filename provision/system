@@ -18,7 +18,9 @@ apt-get -y install --force-yes libfuse-dev
 
 #initial apt package has nginx running. lame.
 /etc/init.d/nginx stop
-find /etc/rc* -name '*nginx' | grep nginx | xargs rm
+if find /etc/rc* | grep nginx; then
+  find /etc/rc* | grep nginx | xargs rm
+fi
 
 #we will be using bash. period
 rm /bin/sh
