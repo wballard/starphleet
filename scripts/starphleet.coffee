@@ -130,27 +130,8 @@ if options.init and options.ec2
   mustBeSet 'AWS_ACCESS_KEY_ID'
   mustBeSet 'AWS_SECRET_ACCESS_KEY'
   mustBeSet 'STARPHLEET_HEADQUARTERS'
-  niceToHave 'STARPHLEET_PUBLIC_KEY', 'is not set, you will not be able to ssh ubuntu@host'
-  niceToHave 'STARPHLEET_PRIVATE_KEY', 'is not set, you will only be able to access https git repos'
-  if process.env['STARPHLEET_PUBLIC_KEY']
-    public_key_content =
-      new Buffer(fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8')).toString('base64')
-    if fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8').indexOf('ssh-rsa') isnt 0
-      isThereBadNews "The public key provided was not ssh-rsa"
-    public_key_name = "starphleet-#{md5(new Buffer(fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8')).toString('base64')).substr(0,8)}"
-  else
-    public_key_name = ''
   initZone = (zone, callback) ->
     async.waterfall [
-      #checking if we already have the key
-      (nestedCallback) ->
-        zone.describeKeyPairs {}, (err, keyFob) ->
-          #adding if we lack the key
-          if _.some(keyFob.KeyPairs, (x) -> x.KeyName is public_key_name)
-            nestedCallback()
-          else if public_key_name and public_key_content
-            zone.importKeyPair {KeyName: public_key_name, PublicKeyMaterial: public_key_content}, ->
-              nestedCallback()
       #check for an existing ELB
       (nestedCallback) ->
         zone.elb.describeLoadBalancers({}, nestedCallback)
@@ -228,13 +209,34 @@ if options.init and options.ec2
     process.exit 0
 
 if options.add and options.ship
-  isConfigured()
-  config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
+  mustBeSet 'AWS_ACCESS_KEY_ID'
+  mustBeSet 'AWS_SECRET_ACCESS_KEY'
+  mustBeSet 'STARPHLEET_HEADQUARTERS'
+  niceToHave 'STARPHLEET_PUBLIC_KEY', 'is not set, you will not be able to ssh ubuntu@host'
+  niceToHave 'STARPHLEET_PRIVATE_KEY', 'is not set, you will only be able to access https git repos'
+  url = process.env['STARPHLEET_HEADQUARTERS']
   zone = _.select(zones, (zone) -> zone.config.region is options['<region>'])[0]
   if not zone
     isThereBadNews "You must pick a region from #{_.map(zones, (x) -> x.config.region)}".red
+  if process.env['STARPHLEET_PUBLIC_KEY']
+    public_key_content =
+      new Buffer(fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8')).toString('base64')
+    if fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8').indexOf('ssh-rsa') isnt 0
+      isThereBadNews "The public key provided was not ssh-rsa"
+    public_key_name = "starphleet-#{md5(new Buffer(fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8')).toString('base64')).substr(0,8)}"
+  else
+    public_key_name = ''
 
   async.waterfall [
+    #checking if we already have the key
+    (nestedCallback) ->
+      zone.describeKeyPairs {}, (err, keyFob) ->
+        #adding if we lack the key
+        if _.some(keyFob.KeyPairs, (x) -> x.KeyName is public_key_name)
+          nestedCallback()
+        else if public_key_name and public_key_content
+          zone.importKeyPair {KeyName: public_key_name, PublicKeyMaterial: public_key_content}, ->
+            nestedCallback()
     (callback) ->
       zone.describeImages {Owners: ['925278656507'], Filters: [{Name:"name", Values:[ami_name]}]}, callback
     (images, callback) ->
@@ -243,9 +245,9 @@ if options.add and options.ship
         ImageId: ami
         MinCount: 1
         MaxCount: 1
-        KeyName: config.keyname
+        KeyName: public_key_name
         SecurityGroups: ['starphleet']
-        UserData: new Buffer(config.url).toString('base64')
+        UserData: new Buffer(url).toString('base64')
         InstanceType:  process.env['EC2_INSTANCE_SIZE'] or 'm2.xlarge'
       zone.runInstances todo, callback
     (ran, callback) ->
