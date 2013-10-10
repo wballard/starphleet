@@ -23,11 +23,11 @@ doc = """
 #{pkg.description}
 
 Usage:
-  starphleet init <headquarters_url> <private_key_filename> <public_key_filename>
+  starphleet init ec2
   starphleet info
   starphleet add ship <region>
   starphleet remove ship <hostname>
-  starphleet privatize <private_key_file>
+  starphleet public key
   starphleet set <name> <value>
   starphleet -h | --help | --version
 
@@ -35,6 +35,9 @@ Notes:
   This uses the AWS API, so you will need these environment variables set:
     * AWS_ACCESS_KEY_ID
     * AWS_SECRET_ACCESS_KEY
+    * STARPHLEET_HEADQUARTERS
+    * STARPHLEET_PUBLIC_KEY
+    * STARPHLEET_PRIVATE_KEY
   EC2_INSTANCE_SIZE will be consulted, defaulting to m2.xlarge
 
 Description:
@@ -90,15 +93,14 @@ isThereBadNews = (err) ->
     console.error "#{err}".red
     process.exit 1
 
-isConfigured = ->
-  if not fs.existsSync('.starphleet')
-    console.error "Starphleet not configured in this directory".red
-    console.error "Run", "starphleet init".cyan
+mustBeSet = (name) ->
+  if not process.env[name]
+    console.error "#{name} needs to be in your environment".red
     process.exit 1
 
-for ev in  ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
-  if not process.env[ev]
-    isThereBadNews "#{ev} needs to be in your environment".red
+niceToHave = (name, message) ->
+  if not process.env[name]
+    console.error "#{name} #{message}".yellow
 
 ###
 Slight twist on map, take an array mapping through a function, then
@@ -119,39 +121,45 @@ Init is all about setting up a .starphleet file with the key and url. This will
 be used by subsequent commands when creating ships.
 ###
 
-if options.init
-  key_content = fs.readFileSync(options['<public_key_filename>'], 'utf8')
-  if key_content.indexOf('ssh-rsa') isnt 0
-    isThereBadNews "The public key provided was not ssh-rsa"
-  config =
-    url: options['<headquarters_url>']
-    public_key: new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')
-    private_key: new Buffer(fs.readFileSync(options['<private_key_filename>'], 'utf8')).toString('base64')
-    keyname: "starphleet-#{md5(new Buffer(fs.readFileSync(options['<public_key_filename>'], 'utf8')).toString('base64')).substr(0,8)}"
-    hashname: "starphleet-#{md5(options['<headquarters_url>']).substr(0,8)}"
-  fs.writeFileSync '.starphleet', JSON.stringify(config)
+if options.init and options.ec2
+  mustBeSet 'AWS_ACCESS_KEY_ID'
+  mustBeSet 'AWS_SECRET_ACCESS_KEY'
+  mustBeSet 'STARPHLEET_HEADQUARTERS'
+  niceToHave 'STARPHLEET_PUBLIC_KEY', 'is not set, you will not be able to ssh ubuntu@host'
+  niceToHave 'STARPHLEET_PRIVATE_KEY', 'is not set, you will only be able to access https git repos'
+  if process.env['STARPHLEET_PUBLIC_KEY']
+    public_key_content =
+      new Buffer(fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8')).toString('base64')
+    if fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8').indexOf('ssh-rsa') isnt 0
+      isThereBadNews "The public key provided was not ssh-rsa"
+    public_key_name = "starphleet-#{md5(new Buffer(fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8')).toString('base64')).substr(0,8)}"
+  else
+    public_key_name = ''
+  url = process.env['STARPHLEET_HEADQUARTERS']
+  hashname = "starphleet-#{md5(url).substr(0,8)}"
   initZone = (zone, callback) ->
     async.waterfall [
       #checking if we already have the key
-      (nestedCallback) -> zone.describeKeyPairs({}, nestedCallback),
-      #adding if we lack the key
-      (keyFob, nestedCallback) ->
-        if _.some(keyFob.KeyPairs, (x) -> x.KeyName is config.keyname)
-          nestedCallback()
-        else
-          zone.importKeyPair({KeyName: config.keyname, PublicKeyMaterial: config.public_key}, nestedCallback)
+      (nestedCallback) ->
+        zone.describeKeyPairs {}, (err, keyFob) ->
+          #adding if we lack the key
+          if _.some(keyFob.KeyPairs, (x) -> x.KeyName is public_key_name)
+            nestedCallback()
+          else if public_key_name and public_key_content
+            zone.importKeyPair {KeyName: public_key_name, PublicKeyMaterial: public_key_content}, ->
+              nestedCallback()
       #check for an existing ELB
       (nestedCallback) ->
         zone.elb.describeLoadBalancers({}, nestedCallback)
       #build an ELB if we need it
       (balancers, nestedCallback) ->
-        if _.some(balancers.LoadBalancerDescriptions, (x) -> x.LoadBalancerName is config.hashname)
+        if _.some(balancers.LoadBalancerDescriptions, (x) -> x.LoadBalancerName is hashname)
           nestedCallback()
         else
           zone.describeAvailabilityZones {}, (err, zones) ->
             isThereBadNews err
             zone.elb.createLoadBalancer
-              LoadBalancerName: config.hashname
+              LoadBalancerName: hashname
               Listeners: [
                 #on purpose TCP to do web sockets
                 Protocol: 'TCP'
@@ -161,14 +169,14 @@ if options.init
               AvailabilityZones: _.map zones.AvailabilityZones, (x) -> x.ZoneName
             , nestedCallback
       #set a realistic LB health policy
-      (optionalResult,nestedCallback) ->
+      (optionalResult, nestedCallback) ->
         # If we generate a new load balancer, the optionalResult will contain information on that instance
         # Else we will be passed the callback as the first param
         if typeof optionalResult is 'function'
           nestedCallback = optionalResult
 
         zone.elb.configureHealthCheck
-          LoadBalancerName: config.hashname
+          LoadBalancerName: hashname
           HealthCheck:
             Target: 'TCP:80'
             Interval: 5
