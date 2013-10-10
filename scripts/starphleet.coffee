@@ -218,36 +218,42 @@ if options.add and options.ship
   zone = _.select(zones, (zone) -> zone.config.region is options['<region>'])[0]
   if not zone
     isThereBadNews "You must pick a region from #{_.map(zones, (x) -> x.config.region)}".red
-  if process.env['STARPHLEET_PUBLIC_KEY']
-    public_key_content =
-      new Buffer(fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8')).toString('base64')
-    if fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8').indexOf('ssh-rsa') isnt 0
-      isThereBadNews "The public key provided was not ssh-rsa"
-    public_key_name = "starphleet-#{md5(new Buffer(fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8')).toString('base64')).substr(0,8)}"
-  else
-    public_key_name = ''
 
+  public_key_name = ''
   async.waterfall [
     #checking if we already have the key
     (nestedCallback) ->
-      zone.describeKeyPairs {}, (err, keyFob) ->
-        #adding if we lack the key
-        if _.some(keyFob.KeyPairs, (x) -> x.KeyName is public_key_name)
-          nestedCallback()
-        else if public_key_name and public_key_content
-          zone.importKeyPair {KeyName: public_key_name, PublicKeyMaterial: public_key_content}, ->
+      if process.env['STARPHLEET_PUBLIC_KEY']
+        public_key_content =
+          new Buffer(fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8')).toString('base64')
+        public_key_name = "starphleet-#{md5(public_key_content).substr(0,8)}"
+        zone.describeKeyPairs {}, (err, keyFob) ->
+          #adding if we lack the key
+          if _.some(keyFob.KeyPairs, (x) -> x.KeyName is public_key_name)
             nestedCallback()
+          else
+            zone.importKeyPair {KeyName: public_key_name, PublicKeyMaterial: public_key_content}, ->
+              nestedCallback()
+      else
+        nestedCallback()
     (callback) ->
       zone.describeImages {Owners: ['925278656507'], Filters: [{Name:"name", Values:[ami_name]}]}, callback
     (images, callback) ->
       ami = images.Images[0].ImageId
+      #seems like this is just about everything...
+      user_data = JSON.stringify
+        STARPHLEET_PUBLIC_KEY: fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8') if process.env['STARPHLEET_PUBLIC_KEY']
+        STARPHLEET_PRIVATE_KEY: fs.readFileSync(process.env['STARPHLEET_PRIVATE_KEY'], 'utf8') if process.env['STARPHLEET_PRIVATE_KEY']
+        STARPHLEET_HEADQUARTERS: process.env['STARPHLEET_HEADQUARTERS']
+        AWS_SECRET_ACCESS_KEY: process.env['AWS_SECRET_ACCESS_KEY']
+        AWS_ACCESS_KEY_ID: process.env['AWS_ACCESS_KEY_ID']
       todo =
         ImageId: ami
         MinCount: 1
         MaxCount: 1
         KeyName: public_key_name
         SecurityGroups: ['starphleet']
-        UserData: new Buffer(url).toString('base64')
+        UserData: new Buffer(user_data).toString('base64')
         InstanceType:  process.env['EC2_INSTANCE_SIZE'] or 'm2.xlarge'
       zone.runInstances todo, callback
     (ran, callback) ->
