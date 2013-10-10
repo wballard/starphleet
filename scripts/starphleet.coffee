@@ -24,11 +24,9 @@ doc = """
 
 Usage:
   starphleet init ec2
-  starphleet info
-  starphleet add ship <region>
-  starphleet remove ship <hostname>
-  starphleet public key
-  starphleet set <name> <value>
+  starphleet info ec2
+  starphleet add ship ec2 <region>
+  starphleet remove ship ec2 <hostname>
   starphleet -h | --help | --version
 
 Notes:
@@ -117,6 +115,13 @@ async.join = (array, mapper, propertyName, callback) ->
         x[0]
 
 ###
+Naming for our LB which defines a cluster
+###
+hashname = ->
+  url = process.env['STARPHLEET_HEADQUARTERS']
+  "starphleet-#{md5(url).substr(0,8)}"
+
+###
 Init is all about setting up a .starphleet file with the key and url. This will
 be used by subsequent commands when creating ships.
 ###
@@ -135,8 +140,6 @@ if options.init and options.ec2
     public_key_name = "starphleet-#{md5(new Buffer(fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8')).toString('base64')).substr(0,8)}"
   else
     public_key_name = ''
-  url = process.env['STARPHLEET_HEADQUARTERS']
-  hashname = "starphleet-#{md5(url).substr(0,8)}"
   initZone = (zone, callback) ->
     async.waterfall [
       #checking if we already have the key
@@ -153,13 +156,13 @@ if options.init and options.ec2
         zone.elb.describeLoadBalancers({}, nestedCallback)
       #build an ELB if we need it
       (balancers, nestedCallback) ->
-        if _.some(balancers.LoadBalancerDescriptions, (x) -> x.LoadBalancerName is hashname)
+        if _.some(balancers.LoadBalancerDescriptions, (x) -> x.LoadBalancerName is hashname())
           nestedCallback()
         else
           zone.describeAvailabilityZones {}, (err, zones) ->
             isThereBadNews err
             zone.elb.createLoadBalancer
-              LoadBalancerName: hashname
+              LoadBalancerName: hashname()
               Listeners: [
                 #on purpose TCP to do web sockets
                 Protocol: 'TCP'
@@ -176,7 +179,7 @@ if options.init and options.ec2
           nestedCallback = optionalResult
 
         zone.elb.configureHealthCheck
-          LoadBalancerName: hashname
+          LoadBalancerName: hashname()
           HealthCheck:
             Target: 'TCP:80'
             Interval: 5
@@ -247,18 +250,19 @@ if options.add and options.ship
       zone.runInstances todo, callback
     (ran, callback) ->
       ids = _.map ran.Instances, (x) -> {InstanceId: x.InstanceId}
-      zone.elb.registerInstancesWithLoadBalancer {LoadBalancerName: config.hashname, Instances: ids}, callback
+      zone.elb.registerInstancesWithLoadBalancer {LoadBalancerName: hashname(), Instances: ids}, callback
   ], (err) ->
     isThereBadNews err
     process.exit 0
 
-if options.info
-  isConfigured()
-  config = JSON.parse(fs.readFileSync '.starphleet', 'utf-8')
+if options.info and options.ec2
+  mustBeSet 'AWS_ACCESS_KEY_ID'
+  mustBeSet 'AWS_SECRET_ACCESS_KEY'
+  mustBeSet 'STARPHLEET_HEADQUARTERS'
   queryZone = (zone, zoneCallback) ->
     async.waterfall [
       (callback) ->
-        zone.elb.describeLoadBalancers {LoadBalancerNames: [config.hashname]}, callback
+        zone.elb.describeLoadBalancers {LoadBalancerNames: [hashname()]}, callback
       (loadBalancers, callback) ->
         getInstances = (balancer, balancerCallback) ->
           instances = []
