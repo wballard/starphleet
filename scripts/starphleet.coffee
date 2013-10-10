@@ -333,8 +333,7 @@ if options.info and options.ec2
       console.log "do 'starphleet add ship [region]' to get started\nvalid regions #{_.map(zones, (x) -> x.config.region)}".yellow
     process.exit 0
 
-if options.remove and options.ship
-  isConfigured()
+if options.remove and options.ship and options.ec2
   queryZone = (zone, zoneCallback) ->
     async.waterfall [
       (callback) ->
