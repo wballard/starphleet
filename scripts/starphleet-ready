@@ -11,8 +11,7 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 PORT=${container_port:-${PORT}}
 URL=${url:-}
-CONTAINER_NAME=${container_name}
-IP_ADDRESS=$(lxc-ls --fancy | grep "${CONTAINER_NAME}" | awk '{ print $3; }')
+IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
 TEST_GET="http://${IP_ADDRESS}:${PORT}/${URL}"
 TEST_COMMAND="curl -X GET -o /dev/null -s -w %{response_code} ${TEST_GET}"
 
@@ -30,5 +29,5 @@ done
 if [ -n "${DEBUG}" ]; then
   echo ${RESULT}
 fi
-echo "failed to get 200 back from ${1}"
+echo "failed to get 200 back from ${container_name}"
 exit 1;
