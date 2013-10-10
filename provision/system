@@ -32,8 +32,3 @@ ln /bin/bash /bin/sh
 
 apt-get clean
 
-#if we are on EC2, install the self update job
-if curl "http://169.254.169.254/latest/user-data/" --silent --connect-timeout 1; then
-  HEADQUARTERS=$(curl "http://169.254.169.254/latest/user-data/" --silent | sed -e's/%\([0-9A-F][0-9A-F]\)/\\\\\x\1/g' | xargs echo -e)
-  starphleet-headquarters "${HEADQUARTERS}"
-fi

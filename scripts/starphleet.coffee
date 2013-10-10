@@ -213,7 +213,7 @@ if options.add and options.ship
   mustBeSet 'AWS_SECRET_ACCESS_KEY'
   mustBeSet 'STARPHLEET_HEADQUARTERS'
   niceToHave 'STARPHLEET_PUBLIC_KEY', 'is not set, you will not be able to ssh ubuntu@host'
-  niceToHave 'STARPHLEET_PRIVATE_KEY', 'is not set, you will only be able to access https git repos'
+  niceToHave 'STARPHLEET_PRIVATE_KEY', 'is not set, you will only be able to access https git repos read only one way'
   url = process.env['STARPHLEET_HEADQUARTERS']
   zone = _.select(zones, (zone) -> zone.config.region is options['<region>'])[0]
   if not zone
