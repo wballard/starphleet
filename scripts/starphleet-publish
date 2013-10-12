@@ -17,7 +17,7 @@ PORT=${container_port:-${PORT}}
 URL=${public_url:-/}
 CONTAINER_NAME=${container_name}
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
-IP_ADDRESS=$(lxc-ls --fancy | grep "${CONTAINER_NAME}" | awk '{ print $3; }')
+IP_ADDRESS=$(lxc-ls --fancy | grep "^${CONTAINER_NAME}" | awk '{ print $3; }')
 HOSTNAME=$(hostname)
 
 cat << EOF > /dev/stdout
