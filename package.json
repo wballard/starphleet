@@ -7,6 +7,8 @@
     "docopts": "./scripts/docopts",
     "tools": "./scripts/tools",
     "starphleet": "./scripts/starphleet.coffee",
+    "urldecode": "./scripts/urldecode",
+    "urlencode": "./scripts/urlencode",
     "starphleet-headquarters": "./scripts/starphleet-headquarters",
     "starphleet-containerize": "./scripts/starphleet-containerize",
     "starphleet-wait-network": "./scripts/starphleet-wait-network",
@@ -14,6 +16,7 @@
     "starphleet-base-script": "./scripts/starphleet-base-script",
     "starphleet-buildpack-script": "./scripts/starphleet-buildpack-script",
     "starphleet-publish": "./scripts/starphleet-publish",
+    "starphleet-is-current": "./scripts/starphleet-is-current",
     "starphleet-status": "./scripts/starphleet-status",
     "starphleet-git": "./scripts/starphleet-git",
     "starphleet-ready": "./scripts/starphleet-ready"

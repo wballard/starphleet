@@ -20,11 +20,10 @@ export CURRENT_ORDERS="/var/starphleet/current_orders"
 export NGINX_CONF="/var/starphleet/nginx"
 export ADMIRAL="admiral"
 export ADMIRAL_HOME="/home/admiral"
+source /var/starphleet/tools
 if [ -s /var/starphleet/headquarters/.starphleet ]; then
   source /var/starphleet/headquarters/.starphleet
 fi
-
 EOF
-cat "${DIR}/tools" >> /var/starphleet/.headquarters
 
 info Headquarters is ${url}

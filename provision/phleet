@@ -20,6 +20,7 @@ stop starphleet
 #starphleet lives here
 mkdir -p /var/starphleet/diagnostic
 chmod -R 0777 /var/starphleet
+cp /starphleet/scripts/tools /var/starphleet/tools
 
 #put in the system overlay, gets all the files in place
 rm /etc/init/starphleet*

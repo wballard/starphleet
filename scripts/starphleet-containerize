@@ -41,7 +41,7 @@ trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
 #actually make a container here
 info Creating ${CONTAINER_NAME}
-if lxc-ls | grep "${CONTAINER_NAME}$" > /dev/null; then
+if lxc-ls | grep "^${CONTAINER_NAME}$" > /dev/null; then
   info already built ${CONTAINER_NAME}
 else
   #clone on top of the base image, this is just to save disk space
