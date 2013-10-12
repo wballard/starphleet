@@ -14,47 +14,44 @@ function info() {
   echo -e "$GREEN$*$NORMAL" 1>&2
 }
 
+#pre-shutdown to get a clean reinstall
 stop starphleet
-
 
 #starphleet lives here
 mkdir -p /var/starphleet/diagnostic
-chmod -R 0777 /var/starphleet
 cp /starphleet/scripts/tools /var/starphleet/tools
+chmod -R 0777 /var/starphleet
 
 #put in the system overlay, gets all the files in place
 rm /etc/init/starphleet*
 cp -R /starphleet/overlay/* /
 
-#someone has to be the admiral
+#starphleet and all of its scripts
+cd /starphleet
+npm install -g coffee-script
+npm install -g
+cd /
+
+#role account for folks acting as the admiral
 ADMIRAL="admiral"
 ADMIRAL_HOME="/home/admiral"
 useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
 adduser ${ADMIRAL} sudo
+test -d "${ADMIRAL_HOME}/.ssh" || mkdir -p "${ADMIRAL_HOME}/.ssh"
 chown -R ${ADMIRAL}:${ADMIRAL} /var/starphleet
-
-# the target user should always have an ssh folder
-ADMIRALSSH="${ADMIRAL_HOME}/.ssh"
-if [ ! -d "${ADMIRALSSH}" ]; then
-  echo Make admiral ssh folder at ${ADMIRALSSH}
-  mkdir ${ADMIRALSSH}
-fi
-chmod 700 ${ADMIRALSSH}
-chown ${ADMIRAL}:${ADMIRAL} ${ADMIRALSSH}
+chown -R ${ADMIRAL}:${ADMIRAL} "${ADMIRAL_HOME}"
 info admiral created
 
-#transfer private keys
+#role account for git push manual deployment
+gitreceive init
+adduser git sudo
+
+#transfer private keys, this is used in vagrant mode
 info checking for private keys in /starphleet/private_keys
 if [ -d /starphleet/private_keys ]; then
   test -d /var/starphleet/private_keys || mkdir -p /var/starphleet/private_keys
   cp /starphleet/private_keys/* /var/starphleet/private_keys/
 fi
-
-#starphleet control scripts from the mount shared source
-cd /starphleet
-npm install -g coffee-script
-npm install -g
-cd /
 
 #base ubuntu LXC image, get this on before we start anything
 BASE_CONTAINER_NAME="starphleet-base"

@@ -9,6 +9,7 @@
     "starphleet": "./scripts/starphleet.coffee",
     "urldecode": "./scripts/urldecode",
     "urlencode": "./scripts/urlencode",
+    "gitreceive": "./scripts/gitreceive",
     "starphleet-headquarters": "./scripts/starphleet-headquarters",
     "starphleet-containerize": "./scripts/starphleet-containerize",
     "starphleet-wait-network": "./scripts/starphleet-wait-network",
