@@ -36,7 +36,11 @@ EOF
 exit 0
 fi
 
-for status in $(find "${CURRENT_ORDERS}" -name '*.starphleetstatus')
+cat << EOF >> /dev/stdout
+orders:
+EOF
+
+for status in $(find "${CURRENT_ORDERS}" -name '*.starphleetstatus' | sort)
 do
   ORDER=$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}[[")
   cd "$(dirname "${status}")/git"
@@ -45,7 +49,6 @@ do
   AUTHOR=$(git log -1 --format='%ae')
   TEXT=$(git log -1 --format='%s')
 cat << EOF >> /dev/stdout
-orders:
   -
     order: ${ORDER}
     sha: ${SHA}
