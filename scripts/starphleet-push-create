@@ -12,7 +12,6 @@ HOSTNAME=$(hostname)
 set -e
 starphleet-destroy-lxc "${container_name}"
 starphleet-containerize "${local_repo}" "${container_name}"
-info ${container_name} created
 info run with
 announce ssh serve@${HOSTNAME} ${container_name}
 info clean up with

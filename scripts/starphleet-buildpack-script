@@ -67,6 +67,7 @@ for file in $app_root/.profile.d/*; do source \$file; done
 test -f /.orders && source /.orders
 test -f /.starphleet && source /.starphleet
 hash -r
+echo \$\$ > /.pid
 cd $app_root
 if [[ -f Procfile ]]; then
     ruby -e "require 'yaml';puts YAML.load_file('Procfile')['\$1']" | bash

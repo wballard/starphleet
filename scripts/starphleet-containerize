@@ -40,7 +40,7 @@ EOF
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
 #actually make a container here
-info Creating ${CONTAINER_NAME}
+info creating ${CONTAINER_NAME}
 if lxc-ls | grep "^${CONTAINER_NAME}$" > /dev/null; then
   warn already built ${CONTAINER_NAME}
   lxc-start --name ${CONTAINER_NAME} -d
@@ -50,7 +50,7 @@ else
   #clone on top of the base image, this is just to save disk space
   #this command can be problematic, giving off an error about
   #'cannot snapshot a directory', keptin :)
-  until lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s; do
+  until lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s > /dev/null; do
     warn trying again...
     sleep 1
   done
@@ -61,7 +61,7 @@ else
   BRANCH=$(echo "${git_url}" | awk -F '#' '{print $2;}')
 
   #get the source code, and get on the right branch
-  git clone "${REMOTE}" "${CONTAINER_ROOT}/app"
+  git clone "${REMOTE}" "${CONTAINER_ROOT}/app" > /dev/null
   pushd "${CONTAINER_ROOT}/app"
   chmod -R 0777 .
   if [ -n "${BRANCH}" ]; then
@@ -84,7 +84,9 @@ else
   #starphleet script
   test -f "${HEADQUARTERS_LOCAL}/.starphleet" && cat "${HEADQUARTERS_LOCAL}/.starphleet" > "${CONTAINER_ROOT}/.starphleet"
   #and finally, the buildpack web start
-  echo '/start web' > "${CONTAINER_ROOT}/web"
+  echo 'test -f /.pid && kill -- -$( ps opgid= $(cat /.pid) | tr -d " " )' > "${CONTAINER_ROOT}/kill"
+  chmod +x "${CONTAINER_ROOT}/kill"
+  echo '/kill; setsid /start web;' > "${CONTAINER_ROOT}/web"
   chmod +x "${CONTAINER_ROOT}/web"
   #fire up the container
   lxc-start --name ${CONTAINER_NAME} -d

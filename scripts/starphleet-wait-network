@@ -5,8 +5,8 @@
 ### Wait until it is obvious there is an address lease.
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #need to wait until the network is up
-until ifconfig | grep 'inet addr' | grep --invert '127.0.0.1'
+echo waiting for network
+until ifconfig | grep 'inet addr' | grep --invert '127.0.0.1' > /dev/null
 do
-  echo waiting for network
   sleep 1
 done

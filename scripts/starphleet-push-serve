@@ -9,8 +9,6 @@ source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-set -e
-
 #we aren't doing a healthcheck, this is just gonna publish
 CONTAINER_ROOT=/var/lib/lxc/${container_name}/rootfs
 #sourcing here to get variables, in particular $PORT
@@ -24,10 +22,5 @@ test -f "${CONTAINER_ROOT}/.starphleet" && source "${CONTAINER_ROOT}/.starphleet
 info PORT is ${PORT}
 starphleet-publish "${container_name}" ${PORT} "/${container_name}"
 
+#web service here
 lxc-attach --name ${container_name} -- /web
-
-function exit() {
-  starphleet-unpublish "${container_name}"
-}
-
-trap 'exit' EXIT
