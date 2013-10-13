@@ -15,11 +15,7 @@ case "$1" in
 #!/bin/bash
 source `which tools`
 CONTAINER_NAME="${1}"
-if sudo lxc-ls | grep "${CONTAINER_NAME}" > /dev/null; then
-  sudo lxc-stop --name ${CONTAINER_NAME}
-  sudo starphleet-wait-lxc ${CONTAINER_NAME} STOPPED
-  sudo lxc-destroy --name ${CONTAINER_NAME}
-fi
+sudo starphleet-destroy-lxc "${CONTAINER_NAME}"
 sudo starphleet-containerize "${PWD}" "${CONTAINER_NAME}"
 #URL=http://requestb.in/rlh4znrl
 #echo "----> Posting to \$URL ..."

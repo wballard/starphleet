@@ -47,3 +47,7 @@ function get_CURRENT_SHA() {
 function get_SHASUM() {
   export SHASUM=$(sha1sum "${1}" | awk '{ print substr($1,1,7); }')
 }
+
+function autodeploy() {
+  export AUTODEPLOY="${1}"
+}

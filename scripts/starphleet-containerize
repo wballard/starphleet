@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-containerize <git_url> <container_name>
+###    starphleet-containerize <git_url> <container_name> [<orders_script>]
 ### --help
 ###
 ### Make a new container for a git repository service.
@@ -45,7 +45,12 @@ if lxc-ls | grep "^${CONTAINER_NAME}$" > /dev/null; then
   info already built ${CONTAINER_NAME}
 else
   #clone on top of the base image, this is just to save disk space
-  lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s
+  #this command can be problematic, giving off an error about
+  #'cannot snapshot a directory', keptin :)
+  until lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s; do
+    warn trying again...
+    sleep 1
+  done
   #mounts and files, always can see starphleet read only
   mkdir ${CONTAINER_ROOT}/var/starphleet
   #and yes, here is the repo to containerize
@@ -65,6 +70,20 @@ else
   cp "${DIR}/starphleet-wait-network" "${CONTAINER_ROOT}/block"
   #build script, uses buildpacks
   cp "${DIR}/starphleet-buildpack-script" "${CONTAINER_ROOT}/buildpack"
+  # environment, enforced by our buildpack script, so the preference order is:
+  # * repository specific variables, basically our dev settings
+  # * headquarters/.../orders variables, service level overrides
+  # * headquarters/.starphleet variables, global overrides
+  if [ -f "${HEADQUARTERS_LOCAL}/.starphleet" ]; then
+    cat "${HEADQUARTERS_LOCAL}/.starphleet" >> "${CONTAINER_ROOT}/.starphleet"
+  fi
+  #orders script
+  ORDERS="${orders_script:-${DIR}/orders}"
+  cat "${DIR}/tools" > "${CONTAINER_ROOT}/.orders"
+  cat "${ORDERS}" >> "${CONTAINER_ROOT}/.orders"
+  #and finally, the buildpack web start
+  echo '/start web' > "${CONTAINER_ROOT}/web"
+  chmod +x "${CONTAINER_ROOT}/web"
   #fire up the container
   lxc-start --name ${CONTAINER_NAME} -d
   starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
