@@ -11,6 +11,7 @@
     "urldecode": "./scripts/urldecode",
     "urlencode": "./scripts/urlencode",
     "gitreceive": "./scripts/gitreceive",
+    "sshcommand": "./scripts/sshcommand",
     "starphleet-headquarters": "./scripts/starphleet-headquarters",
     "starphleet-containerize": "./scripts/starphleet-containerize",
     "starphleet-wait-network": "./scripts/starphleet-wait-network",
