@@ -5,6 +5,9 @@ export CURRENT_ORDERS="/var/starphleet/current_orders"
 export NGINX_CONF="/var/starphleet/nginx"
 export ADMIRAL="admiral"
 export ADMIRAL_HOME="/home/admiral"
+if [ "${TERM}" == "unknown" ]; then
+  export TERM="xterm-256color"
+fi
 #Library of colorized logging functions, just source this
 NORMAL=$(tput sgr0)
 GREEN=$(tput setaf 2; tput bold)

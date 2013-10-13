@@ -77,13 +77,12 @@ else
   # * repository specific variables, basically our dev settings
   # * headquarters/.../orders variables, service level overrides
   # * headquarters/.starphleet variables, global overrides
-  if [ -f "${HEADQUARTERS_LOCAL}/.starphleet" ]; then
-    cat "${HEADQUARTERS_LOCAL}/.starphleet" >> "${CONTAINER_ROOT}/.starphleet"
-  fi
   #orders script
   ORDERS="${orders_script:-${DIR}/orders}"
   cat "${DIR}/tools" > "${CONTAINER_ROOT}/.orders"
   cat "${ORDERS}" >> "${CONTAINER_ROOT}/.orders"
+  #starphleet script
+  test -f "${HEADQUARTERS_LOCAL}/.starphleet" && cat "${HEADQUARTERS_LOCAL}/.starphleet" > "${CONTAINER_ROOT}/.starphleet"
   #and finally, the buildpack web start
   echo '/start web' > "${CONTAINER_ROOT}/web"
   chmod +x "${CONTAINER_ROOT}/web"

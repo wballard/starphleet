@@ -46,6 +46,12 @@ info admiral created
 gitreceive init
 adduser git sudo
 
+#role account to serve orders by hand
+sshcommand create serve "sudo starphleet-push-serve"
+adduser serve sudo
+sshcommand create destroy "sudo starphleet-push-destroy"
+adduser destroy sudo
+
 #transfer private keys, this is used in vagrant mode
 info checking for private keys in /starphleet/private_keys
 if [ -d /starphleet/private_keys ]; then

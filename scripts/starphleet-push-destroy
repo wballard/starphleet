@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-push-destroy <container_name>
+### --help
+###
+### Clean up a container created by by git push.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+GITUSER=${GITUSER:-git}
+GITHOME="/home/$GITUSER"
+
+set -e
+
+starphleet-destroy-lxc "${container_name}"
+rm -rf "${GITHOME}/${container_name}"

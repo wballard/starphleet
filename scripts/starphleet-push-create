@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-push-create <local_repo> <container_name>
+### --help
+###
+### Create a container from a local repository, used from a post push hook.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+HOSTNAME=$(hostname)
+set -e
+starphleet-destroy-lxc "${container_name}"
+starphleet-containerize "${local_repo}" "${container_name}"
+info ${container_name} created
+info run with
+announce ssh serve@${HOSTNAME} ${container_name}
+info clean up with
+announce ssh destroy@${HOSTNAME} ${container_name}

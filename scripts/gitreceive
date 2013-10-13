@@ -13,15 +13,17 @@ case "$1" in
     touch $GITHOME/.ssh/authorized_keys
     cat > $GITHOME/receiver <<"EOF"
 #!/bin/bash
-export TERM=${TERM:-xterm-256color}
-source `which tools`
 CONTAINER_NAME="${1}"
-sudo starphleet-destroy-lxc "${CONTAINER_NAME}"
-sudo starphleet-containerize "${PWD}" "${CONTAINER_NAME}"
+sudo starphleet-push-create "${PWD}" "${CONTAINER_NAME}"
 EOF
     chmod +x $GITHOME/receiver
     chown -R $GITUSER $GITHOME
     echo "Created receiver script in $GITHOME for user '$GITUSER'."
+    ;;
+
+  reset) # gitreceive reset
+    rm $GITHOME/.ssh/authorized_keys
+    touch $GITHOME/.ssh/authorized_keys
     ;;
 
   upload-key) # gitreceive upload-key <username>

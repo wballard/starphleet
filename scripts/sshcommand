@@ -21,6 +21,13 @@ case "$1" in
     chown -R $USER $USERHOME
     ;;
 
+  reset) # sshcommand reset <user>
+    USER="$2"
+    USERHOME="$HOME_DIR/$USER"
+    rm $USERHOME/.ssh/authorized_keys
+    touch $USERHOME/.ssh/authorized_keys
+    ;;
+
   acl-add) # sshcommand acl-add <user> <name>
     if [[ $# -ne 3 ]]; then
       echo "Usage : sshcommand acl-add username command"
@@ -31,7 +38,6 @@ case "$1" in
     FINGERPRINT=$(ssh-keygen -lf /dev/stdin <<< $(echo $KEY) | awk '{print $2}')
     KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME \`cat $HOME_DIR/$USER/.sshcommand\` \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-user-rc,no-X11-forwarding,no-port-forwarding"
     echo "$KEY_PREFIX $KEY" >> "$HOME_DIR/$USER/.ssh/authorized_keys"
-    echo $FINGERPRINT
     ;;
 
   acl-remove) # sshcommand acl-remove <user> <name>
