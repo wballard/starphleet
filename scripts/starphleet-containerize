@@ -35,7 +35,7 @@ CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 #so we are starting the container twice
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/var/starphleet none bind,ro 0 0
+lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/var/starphleet none bind,rw 0 0
 EOF
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 

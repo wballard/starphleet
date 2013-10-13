@@ -95,3 +95,52 @@ cat << "EOF"
   cd /build/buildpacks/heroku-buildpack-ruby && bundle install
 
 EOF
+
+cat << "EOF"
+    # adding in the Yhat stuff
+    echo "-----> Building Yhat scientific environment"
+
+    function install_rpkg() {
+      pkg="$1"
+      cmd="r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);"
+      Rscript -e "${cmd}install.packages('${pkg}')"
+    }
+    
+    # start Yhat build
+    apt-get update
+    apt-get -y install software-properties-common python g++ make git
+    apt-get -y install python-software-properties
+    apt-get update
+    
+    # python
+    apt-get -y install python-setuptools
+    apt-get -y install python-pip
+    apt-get -y install python-dev build-essential
+    apt-get install -y python-numpy
+    apt-get install -y python-scipy
+    pip install scikit-learn
+    apt-get install -y python-pandas
+    easy_install statsmodels
+    pip install -U patsy
+    pip install -U yhat
+    
+    # r stuff
+    apt-get -y install r-base
+    pip install rpy2
+    apt-get -y install libcurl4-openssl-dev
+    #setup R configs
+    install_rpkg "yhatr"
+    install_rpkg "ggplot2"
+    install_rpkg "plyr"
+    install_rpkg "reshape2"
+    install_rpkg "forecast"
+    install_rpkg "stringr"
+    install_rpkg "lubridate"
+    install_rpkg "randomForest"
+    install_rpkg "rpart"
+    install_rpkg "e1071"
+    install_rpkg "kknn"
+
+EOF
+
+
