@@ -15,5 +15,8 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 test -f /tmp/wait-lock || touch /tmp/wait-lock
 flock /tmp/wait-lock --command "lxc-stop --name ${name}"
 flock /tmp/wait-lock --command "lxc-wait --name ${name} --state STOPPED --timeout 60"
-flock /tmp/wait-lock --command "lxc-destroy --name ${name}"
+until lxc-destroy --name "${CONTAINER_NAME}"; do
+  warn trying again...
+  sleep 1
+done
 
