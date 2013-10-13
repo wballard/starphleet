@@ -20,6 +20,7 @@
     "starphleet-base-script": "./scripts/starphleet-base-script",
     "starphleet-buildpack-script": "./scripts/starphleet-buildpack-script",
     "starphleet-publish": "./scripts/starphleet-publish",
+    "starphleet-unpublish": "./scripts/starphleet-unpublish",
     "starphleet-is-current": "./scripts/starphleet-is-current",
     "starphleet-status": "./scripts/starphleet-status",
     "starphleet-git": "./scripts/starphleet-git",

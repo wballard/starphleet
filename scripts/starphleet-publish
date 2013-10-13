@@ -16,11 +16,13 @@ set -e
 PORT=${container_port:-${PORT}}
 URL=${public_url:-/}
 CONTAINER_NAME=${container_name}
-CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 IP_ADDRESS=$(lxc-ls --fancy | grep "^${CONTAINER_NAME}" | awk '{ print $3; }')
 HOSTNAME=$(hostname)
+PUBLISH_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
 
-cat << EOF > /dev/stdout
+test ! -d "${NGINX_CONF}/published" && mkdir -p "${NGINX_CONF}/published"
+
+cat << EOF > "${PUBLISH_CONF}"
 location ${URL} {
   include /var/starphleet/nginx/cors.conf;
   # Path rewriting to hide mount prefix
@@ -35,3 +37,5 @@ location ${URL} {
   proxy_redirect / ${URL};
 }
 EOF
+
+initctl list | grep 'starphleet_nginx' > /dev/null && reload starphleet_nginx

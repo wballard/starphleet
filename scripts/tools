@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 export version=0.0.1
+export HEADQUARTERS_LOCAL="/var/starphleet/headquarters"
+export CURRENT_ORDERS="/var/starphleet/current_orders"
+export NGINX_CONF="/var/starphleet/nginx"
+export ADMIRAL="admiral"
+export ADMIRAL_HOME="/home/admiral"
 #Library of colorized logging functions, just source this
 NORMAL=$(tput sgr0)
 GREEN=$(tput setaf 2; tput bold)
