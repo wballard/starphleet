@@ -50,8 +50,7 @@ else
   #clone on top of the base image, this is just to save disk space
   #this command can be problematic, giving off an error about
   #'cannot snapshot a directory', keptin :)
-  until lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s > /dev/null; do
-    warn trying again...
+  until lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s > /dev/null 2>&1; do
     sleep 1
   done
   #mounts and files, always can see starphleet read only
@@ -62,12 +61,12 @@ else
 
   #get the source code, and get on the right branch
   git clone "${REMOTE}" "${CONTAINER_ROOT}/app" > /dev/null
-  pushd "${CONTAINER_ROOT}/app"
+  pushd "${CONTAINER_ROOT}/app" > /dev/null
   chmod -R 0777 .
   if [ -n "${BRANCH}" ]; then
     git checkout "${BRANCH}"
   fi
-  popd
+  popd > /dev/null
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
   #block script, makes sure we are on the air
   cp "${DIR}/starphleet-wait-network" "${CONTAINER_ROOT}/block"
