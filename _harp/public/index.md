@@ -62,7 +62,7 @@ some nodejs, which is a nice way to deploy to your laptop or personal
 computer to manage starphleet.
 
 ```bash
-npm install starphleet
+npm install "git+https://github.com/wballard/starphleet.git"
 starphleet --help
 ```
 
@@ -214,23 +214,22 @@ where you can keep variables, with different security thoughts.
 The environment variables are sourced in the order listed below, which
 allows you to override.
 
-### Services
+### .env
 Services themselves can have variables, these are inspired by Heroku,
 and you keep them in the source repository of each service. These are
 the variables with the lowest precedence.
 
-Your services will often be hosted in public repositories, so the config
-you put in here should be about development mode or public settings.
-
-#### .env
 This is where you specify a `BUILDPACK_URL`, but you can also put in
 other variables as you see fit.
+
+Your services will often be hosted in public repositories, so the config
+you put in here should be about development mode or public settings.
 
 #### .profile.d/
 You can mix in as many separate files here as you like, providing more
 environment.
 
-### Orders
+### orders
 The `orders` file itself is sourced for your service. This is where a
 service learns about `PORT` and `autodeploy`.
 
@@ -344,6 +343,11 @@ use `apt-get install` without a sudo.
 Containers are thrown away often, on each new version, and each server
 reboot. So, while you do have local filesystem access inside a container
 running a service, don't count on it living any lenght of time.
+
+## PORT
+This is an all important environment variable, and it is expected your
+service will honor it, publishing traffic here. This `PORT` is used to
+know where to connect the ship's proxy to your individual service.
 
 ## Autodeploy
 This is really easy. Just commit and push to the repository referenced
