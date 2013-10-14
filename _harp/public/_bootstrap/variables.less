@@ -18,11 +18,11 @@
 // Brand colors
 // -------------------------
 
-@brand-primary:         #007FFF;
-@brand-success:         #3FB618;
+@brand-primary:         #A60000;
+@brand-success:         #9FEE00;
 @brand-warning:         #FF7518;
 @brand-danger:          #FF0039;
-@brand-info:            #9954BB;
+@brand-info:            #009999;
 
 // Scaffolding
 // -------------------------
@@ -33,7 +33,7 @@
 // Links
 // -------------------------
 
-@link-color:            @brand-primary;
+@link-color:            @gray-darker;
 @link-hover-color:      darken(@link-color, 15%);
 
 // Typography
@@ -580,8 +580,8 @@
 
 // Code
 // ------------------------
-@code-color:                  #c7254e;
-@code-bg:                     #f9f2f4;
+@code-color:                  @brand-primary;
+@code-bg:                     lighten(@brand-primary, 60%);
 
 @pre-bg:                      #f5f5f5;
 @pre-color:                   @gray-dark;
