@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#this is a scritp to have /starphleet itself auto update
+#this is a script to have /starphleet itself auto update
 
 REMOTE="https://github.com/wballard/starphleet.git"
 LOCAL="/starphleet"

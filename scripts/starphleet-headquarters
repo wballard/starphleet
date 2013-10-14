@@ -15,10 +15,6 @@ set -e
 
 cat <<EOF > /var/starphleet/.headquarters
 export HEADQUARTERS_REMOTE="${url}"
-source /var/starphleet/tools
-if [ -s /var/starphleet/headquarters/.starphleet ]; then
-  source /var/starphleet/headquarters/.starphleet
-fi
 EOF
 
 info Headquarters is ${url}

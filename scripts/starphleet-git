@@ -7,8 +7,7 @@
 ### from private keys
 #no docopt on purpose, to hard to eat and pass along arbitrary switches
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-source /var/starphleet/.headquarters
+source "${DIR}/tools"
 
 #admiral config file generation
 

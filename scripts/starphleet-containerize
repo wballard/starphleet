@@ -11,10 +11,8 @@
 ###
 ### The container will have a layout with the following special directories:
 ### /var/starphleet - This mounts back to /var/starphleet on the host
-###    read only
 ### /app - Your git repository will be here
 ### /block - Handy way to block until the container has networking
-### /buildpack - Script to run the buildpack sequence on your container
 ### /start - This is the Heroku style start script
 ### /web - This is a shortcut for /start web
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -25,6 +23,7 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 set -e
 
 #places for things to live
+STARPHLEET_BASE="${STARPHLEET_BASE:-starphleet-base}"
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 
@@ -47,10 +46,11 @@ if lxc-ls | grep "^${CONTAINER_NAME}$" > /dev/null; then
   starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
   exit 0
 else
+  [ "${STARPHLEET_BASE}" == 'starphleet-base' ] || starphleet-containermake "${STARPHLEET_BASE}" "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}"
   #clone on top of the base image, this is just to save disk space
   #this command can be problematic, giving off an error about
   #'cannot snapshot a directory', keptin :)
-  until lxc-clone -o "starphleet-base" -n "${CONTAINER_NAME}" -s > /dev/null 2>&1; do
+  until lxc-clone -o "${STARPHLEET_BASE}" -n "${CONTAINER_NAME}" -s > /dev/null 2>&1; do
     sleep 1
   done
   #mounts and files, always can see starphleet read only

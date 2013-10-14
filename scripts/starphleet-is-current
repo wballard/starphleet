@@ -14,8 +14,6 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 #to deal with orders being deleted:w
 set -e
 
-test -f /var/starphleet/.headquarters && source /var/starphleet/.headquarters
-
 #strip of the two shas and .orders 8 + 8 + 7
 ORDER=$(urldecode $(echo "${container_name}" | awk '{print substr($0,1,length($0)-23)}'))
 ORDER_AT="${CURRENT_ORDERS}/${ORDER}"
