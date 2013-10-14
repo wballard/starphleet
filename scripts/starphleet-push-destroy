@@ -14,5 +14,5 @@ GITHOME="/home/$GITUSER"
 
 set -e
 
-starphleet-destroy-lxc "${container_name}"
+starphleet-lxc-destroy "${container_name}"
 rm -rf "${GITHOME}/${container_name}"

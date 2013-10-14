@@ -43,7 +43,7 @@ info creating ${CONTAINER_NAME}
 if lxc-ls | grep "^${CONTAINER_NAME}$" > /dev/null; then
   warn already built ${CONTAINER_NAME}
   lxc-start --name ${CONTAINER_NAME} -d
-  starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
+  starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
   exit 0
 else
   [ "${STARPHLEET_BASE}" == 'starphleet-base' ] || starphleet-containermake "${STARPHLEET_BASE}" "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}"
@@ -89,7 +89,7 @@ else
   chmod +x "${CONTAINER_ROOT}/web"
   #fire up the container
   lxc-start --name ${CONTAINER_NAME} -d
-  starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
+  starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
   info building ${CONTAINER_NAME}
   #once the network is up, make a workable container with the buildpack
   lxc-attach --name ${CONTAINER_NAME} -- bash /block

@@ -10,7 +10,7 @@ help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 HOSTNAME=$(hostname)
 set -e
-starphleet-destroy-lxc "${container_name}"
+starphleet-lxc-destroy "${container_name}"
 starphleet-containerize "${local_repo}" "${container_name}"
 info run with
 announce ssh serve@${HOSTNAME} ${container_name}

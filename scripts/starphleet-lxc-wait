@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-wait-lxc <name> <state>
+###    starphleet-lxc-wait <name> <state>
 ### --help
 ###
 ### Wait until it is obvious there is an address lease. This is a

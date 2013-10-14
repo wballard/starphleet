@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-destroy-lxc <name>
+###    starphleet-lxc-destroy <name>
 ### --help
 ###
 ### This is a more thorough destroy that will:

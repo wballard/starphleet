@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 BLUE_BOLD=$(tput setaf 4; tput bold)
@@ -27,10 +26,12 @@ rm /etc/init/starphleet*
 cp -R /starphleet/overlay/* /
 
 #starphleet and all of its scripts
+set -e
 cd /starphleet
 npm install -g coffee-script
 npm install -g
 cd /
+set +e
 
 #role account for folks acting as the admiral
 ADMIRAL="admiral"
@@ -60,7 +61,9 @@ if [ -d /starphleet/private_keys ]; then
 fi
 
 #base ubuntu LXC image, get this on before we start anything
+set -e
 starphleet-containermake starphleet-base /var/starphleet/containers/starphleet-base
+set +e
 
 #good to go, start the phleet
 start starphleet

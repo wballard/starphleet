@@ -26,7 +26,7 @@ else
   (
     flock 200
     info making a new container ${CONTAINER_NAME}
-    starphleet-destroy-lxc ${CONTAINER_NAME}
+    starphleet-lxc-destroy ${CONTAINER_NAME}
     #special case to make the base, otherwise go for a snapshot
     if [ "${CONTAINER_NAME}" == 'starphleet-base' ]; then
      lxc-create --name "${CONTAINER_NAME}" -t ubuntu
@@ -41,11 +41,11 @@ else
     cp "${build_script}" "${CONTAINER_ROOT}/.build_script"
     chmod +x "${CONTAINER_ROOT}/.build_script"
     lxc-start --name ${CONTAINER_NAME} -d
-    starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
+    starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
     lxc-attach --name ${CONTAINER_NAME} -- bash /.block
     lxc-attach --name ${CONTAINER_NAME} -- bash /.build_script
     lxc-stop --name ${CONTAINER_NAME}
-    starphleet-wait-lxc ${CONTAINER_NAME} STOPPED
+    starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
     date > "/var/starphleet/diagnostic/${CONTAINER_NAME}"
     #this is the 'done' marker used to make diff
     mv "${CONTAINER_ROOT}/.build_script" "${CONTAINER_ROOT}/build_script"
