@@ -166,41 +166,6 @@ be a branch, a tag, or a commit sha -- anything you can check out. This
 hashtag approach lets you specify a deployment branch, as well as pin
 services to specific versions when needed.
 
-## Buildpacks
-Huge thanks to Heroku for having open buildpacks, and to the open source
-community for making and extending them. The trick that makes the
-starphleet orders file so simple is the use of buildpacks and platform
-package managers to get your dependencies running.
-
-### Provided Buildpacks
-Using the available Heroku buildpacks, out of the box starphleet with
-autodetect and provision a service running:
-
-* Ruby
-* NodeJS
-* Java
-* Play
-* Python
-* PHP
-* Clojure
-* Go
-* Perl
-* Scala
-* Dart
-* NGINX static
-* Apache
-
-### Custom Buildpacks
-In the root of a service's repository, the one you reference with
-`autodeploy`, make a `.env`. This is just a simple shell script that
-will be sourced. So, if you have a buildpack you know you want to use
-with a service:
-
-```bash
-export BUILDPACK_URL=https://github.com/wballard/heroku-buildpack-nodejs.git
-```
-
-This buildpack is cloned and run to make a container from your service.
 
 ## Environments
 Your app will need to talk to things: external web services,
@@ -214,6 +179,27 @@ where you can keep variables, with different security thoughts.
 The environment variables are sourced in the order listed below, which
 allows you to override.
 
+### PORT=number
+This is an all important environment variable, and it is expected your
+service will honor it, publishing traffic here. This `PORT` is used to
+know where to connect the ship's proxy to your individual service.
+
+### autodeploy &lt;git_url&gt;
+This command in orders tells starphleet where to grab code from git.
+While it is possible to put this globally, you really should limit it
+just to `orders` files.
+
+### STARPHLEET_BASE=name
+This is the named base container to use for a service, which you can use
+to speed up builds by having common packages pre-installed.
+
+If not specified, this defaults to `starphleet-base` which is a general
+purpose buildpack aware container.
+
+### BUILDPACK_URL=&lt;git_url&gt;
+Set this to use a custom buildpack, otherwise Starphleet with attempt to
+use its default buildpacks to autodetect.
+
 ### .env
 Services themselves can have variables, these are inspired by Heroku,
 and you keep them in the source repository of each service. These are
@@ -224,10 +210,6 @@ other variables as you see fit.
 
 Your services will often be hosted in public repositories, so the config
 you put in here should be about development mode or public settings.
-
-#### .profile.d/
-You can mix in as many separate files here as you like, providing more
-environment.
 
 ### orders
 The `orders` file itself is sourced for your service. This is where a
@@ -319,6 +301,64 @@ put into rotation to take over future requests from the prior version.
 You get 60 seconds for your service to return this 200 past when it is
 initially started.
 
+# Containers
+Starphleet encapsualtes each service in an LXC container. Starting from
+a base container equipped with Heroku buildpacks, you can create your
+own custom containers to speed up builds as needed, as well as your own
+custom buildpacks.
+
+Containers serve as the bas system image, and are then customized with a
+servive+buildpack. In general:
+
+  * containers serve to create fixed, cached sets of software such as compilers
+  * buildpacks exist to install dynamic software, for example referenced
+    `npm` packages.
+
+## Base Containers
+Base containers provide system software and are used via file system
+snapshot, so provisioning them is quick. This serves as a base layer to
+give you system control.
+
+### Scripts
+Given any script in your headquarters named `containers/name`, an LXC
+container named `name` will be created for you, and automatically
+updated any time the script changes.
+
+These custom build scripts are run as virtual root in a dedicated LXC
+container that is itself a snapshot built on top of starphleet's own
+base container.
+
+This is similar in a way to a `Dockerfile`, but in keeping with the
+starphleet design, is just a shellscript, so there are no new custom
+commands to learn.
+
+## Buildpacks
+Buildpacks autodetect and provision services on containers for you
+without worrying about system or os level setup.
+
+Huge thanks to Heroku for having open buildpacks, and to the open source
+community for making and extending them. The trick that makes the
+starphleet orders file so simple is the use of buildpacks and platform
+package managers to get your dependencies running.
+
+### Provided Buildpacks
+Using the available Heroku buildpacks, out of the box starphleet with
+autodetect and provision a service running:
+
+* Ruby
+* NodeJS
+* Java
+* Play
+* Python
+* PHP
+* Clojure
+* Go
+* Perl
+* Scala
+* Dart
+* NGINX static
+* Apache
+
 # Services
 Services are any program you can dream up that meet these conditions:
 
@@ -343,11 +383,6 @@ use `apt-get install` without a sudo.
 Containers are thrown away often, on each new version, and each server
 reboot. So, while you do have local filesystem access inside a container
 running a service, don't count on it living any lenght of time.
-
-## PORT
-This is an all important environment variable, and it is expected your
-service will honor it, publishing traffic here. This `PORT` is used to
-know where to connect the ship's proxy to your individual service.
 
 ## Autodeploy
 This is really easy. Just commit and push to the repository referenced

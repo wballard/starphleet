@@ -3,23 +3,19 @@
 The fully open container based continuous deployment PaaS
 </div>
 
-
-<p>This is a toolkit for turning virtual machine infrastructure into a
-continuous deployment stack. Looking at what is out there, Starphleet
-goes in a problem/solution format:</p>
+<p>This is a toolkit for turning virtual or physical machine infrastructure
+into a continuous deployment stack. Here are some of the observed
+problems in autodeployment, and how Starphleet solves them:</p>
 <ul>
 <li>Virtualization wastes resources, specifically RAM and CPU running
 multiple operating system images, which costs real money<ul>
 <li>containerization is the new virtualization, using LXC</li>
-<li>storage-as-a-service gets you out of the DBA scaling game</li>
 </ul>
 </li>
-<li>PaaS has the same vendor lock-in risks of old proprietary software,
-just without the computers<ul>
+<li>PaaS has the same vendor lock-in risks of old proprietary software<ul>
 <li>full open source is the only way to go</li>
-<li>allow installation on public as well as private clouds</li>
-<li>use machines as you see fit, say with large RAM, GPGPU, or special
-hardware</li>
+<li>allow installation on public and private clouds, as well as
+computers</li>
 </ul>
 </li>
 <li>Continous deployment is too hard, so folks default to batches and
@@ -29,10 +25,7 @@ push</code> you use to share code</li>
 <li>make continuous deployment the default</li>
 <li>provides drainstop, restart, failover, and rollback as built ins</li>
 <li>be like unix: files, scripts, environment variables -- and spare
-folks from the learning curve of yet another tool</li>
-</ul>
-</li>
-<li>Dependencies suck up time<ul>
+folks from the learning curve of yet another system tool</li>
 <li>platform package managers, <code>npm</code>, <code>gem</code>, <code>apt</code> beat learning a new
 package/script system, and there is a ton of resource available</li>
 <li>Heroku Buildpacks already exist for most platforms, use them</li>
@@ -44,8 +37,9 @@ package/script system, and there is a ton of resource available</li>
 <li>Make commands run across a phleet by default</li>
 </ul>
 </li>
-<li>Making many small services should be easier than making big services<ul>
-<li>Easy deployment lowers the overhead of making many services</li>
+<li>Making many small services is hard to deploy<ul>
+<li>Containerizing allows multiple services to benefit from failover and
+redundancy without burning two machines/VMs per service</li>
 <li>Allow multiple services to be mounted behing one HTTP endpoint and
 avoid cross domain and CORS hell</li>
 </ul>
@@ -55,6 +49,14 @@ avoid cross domain and CORS hell</li>
 the entire phleet</li>
 <li>provide simple dashboards that give you the basics without requiring
 understanding and installing other monitoring software</li>
+</ul>
+</li>
+<li>Autodeployment systems all seem to have their own system which itself
+needs to be deployed!<ul>
+<li>Starphleet leverages git heavily, avoiding the need for yet another
+database or daemon</li>
+<li>Images are used as a starting point, avoiding the need to <em>install</em>
+the install software</li>
 </ul>
 </li>
 </ul>
@@ -70,7 +72,7 @@ lets you hook it into any existing scripting framework you like without
 needing to learn an API. The command line program is mostly shell, and
 some nodejs, which is a nice way to deploy to your laptop or personal
 computer to manage starphleet.</p>
-<pre><code class="language-bash">npm install starphleet
+<pre><code class="language-bash">npm install &quot;git+https://github.com/wballard/starphleet.git&quot;
 starphleet --help</code></pre>
 <h2>Phleet</h2>
 <p>The top level grouping. You manage starphleet at this level. You can
@@ -81,31 +83,30 @@ this way gives a versioned database of your configuation, allows you to
 edit and work with your own tools, and allows multiple hosting options.</p>
 <h3>Security</h3>
 <p><strong>No Fooling Important</strong> -- your <code>&lt;headquarters_url&gt;</code> git repo needs to be
-reachable by each ship running the starphleet software. In practice this
-means your headquarters is published in a public <code>https</code> or passwordless
-<code>git</code> protocol repository, not via <code>git+ssh</code>. All about open. If you
-really need this to be private you have two good options:</p>
-<ul>
-<li>have your own private phleet and git behind your firewall</li>
-<li><code>starphleet privatize &lt;private_key_file&gt;</code> equips the admiral --
-explained below with a private key to use via SSH</li>
-</ul>
+reachable by each ship running the starphleet software.</p>
+<p>The simple thing to do is use a public git repository via <code>https</code>. If you
+really need a private repository, or security, you can specify a private
+key and access git via <code>git+ssh</code>.</p>
+<p>And, in the cases when you need it, you can host your phleet and
+headquarters entierly inside your own firewall.</p>
 <h2>Ship</h2>
 <p>Our cute name for a host computer or virtual machine, it goes with the
 phleet metaphor. There are many ships in a fleet to provide scale and
 geographic distribution.</p>
-<h2>Container</h2>
-<p>An individual LXC container image running a service in a controlled
-virtual environment.</p>
-<h2>Service</h2>
-<p>An individual program, run in a container, on a ship, autodeployed
-across a phleet. Services provide your application functionality over
-HTTP, including the use of server sent events and websockets.</p>
+<h2>Orders</h2>
+<p>An individual program, run in a container, supported by a buildpack, on
+a ship, autodeployed across a phleet. Services provide your application
+functionality over HTTP, including the use of server sent events and
+websockets.</p>
+<h1>Phleets</h1>
+<p>Check the main <a href="https://github.com/wballard/starphleet">readme</a>. In
+particular pay attention to the environment variables for public and
+private keys.</p>
 <h1>Headquarters</h1>
-<p>A headquarters instructs a phleet what services to deploy and how to
-serve it. A headquarters must be versioned with git, and hosted in a
-location on the internet where each ship in the phleet can reach it.
-The easiest thing to do is host on <a href="http://www.github.com">github</a> or
+<p>A headquarters instructs a phleet with orders to deploy and how to serve
+them. A headquarters is a git repository, and hosted in a location on
+the internet where each ship in the phleet can reach it.  The easiest
+thing to do is host on <a href="http://www.github.com">github</a> or
 <a href="http://www.bitbucket.com">bitbucket</a>.</p>
 <p>The simplest possible phleet has a directory structure like:</p>
 <pre><code>..
@@ -135,93 +136,77 @@ users/
 starphleet, at a given path, to control the autodeployment of a service.
 You can put anything in the script you like, it is just a shell script
 after all, but in practice there are only two things to do:</p>
-<ul>
-<li><code>export PORT</code></li>
-<li><code>autodeloy &lt;git_url&gt;</code></li>
-</ul>
+<pre><code class="language-bash">export PORT
+autodeloy &lt;git_url&gt;</code></pre>
 <p>Setting up orders as a shell script is to allow your creativity to run
-wild, but without you needing to learn a custom tool, DSL, scriptin
-language, config database, or API that seems to be the common approach.</p>
+wild, but without you needing to learn a custom tool, DSL, scripting
+language, config database, or API.</p>
 <h3>Security</h3>
 <p><strong>No Fooling Important</strong>, <code>&lt;git_url&gt;</code>, just like your <code>&lt;headquarters_url&gt;</code>
-needs to be publicly reachable from each ship in the fleet, or for you
-to follow the instructions on privatization.</p>
+needs to be reachable from each ship in the fleet.</p>
 <h3>Branches and Versions</h3>
 <p>You can specify your <code>&lt;git_url&gt;</code> like <code>&lt;git_url&gt;#&lt;branch&gt;</code>, where branch can
 be a branch, a tag, or a commit sha -- anything you can check out. This
 hashtag approach lets you specify a deployment branch, as well as pin
 services to specific versions when needed.</p>
-<h2>Buildpacks</h2>
-<p>Huge thanks to Heroku for having open buildpacks, and to the open source
-community for making and extending them. The trick that makes the
-starphleet orders file so simple is the use of buildpacks and platform
-package managers to get your dependencies running.</p>
-<h3>Provided Buildpacks</h3>
-<p>Using the available Heroku buildpacks, out of the box starphleet with
-autodetect and provision a service running:</p>
-<ul>
-<li>Ruby</li>
-<li>NodeJS</li>
-<li>Java</li>
-<li>Play</li>
-<li>Python</li>
-<li>PHP</li>
-<li>Clojure</li>
-<li>Go</li>
-<li>Perl</li>
-<li>Scala</li>
-<li>Dart</li>
-<li>NGINX static</li>
-<li>Apache</li>
-</ul>
-<h3>Custom Buildpacks</h3>
-<p>In the root of a service&#39;s repository, make a <code>.env</code>. This is just a
-simple shell script that will be sourced. So, if you have a buildpack
-you know you want to use with a service:</p>
-<pre><code>export BUILDPACK_URL=https://github.com/wballard/heroku-buildpack-nodejs.git</code></pre>
-<p>This buildpack is cloned and run to make a container from your service.</p>
 <h2>Environments</h2>
-<p>Your app will need to talk to things, external web services,
+<p>Your app will need to talk to things: external web services,
 storage-as-a-service, databases, you name it. Starphleet goes back to
 basics and lets you set these through environment variables.</p>
-<p>Some environment variables are just open config, and some environment
+<p>Some environment variables are just config, and some environment
 variables are really secrets, so starphleet provides multiple locations
 where you can keep variables, with different security thoughts.</p>
-<p>Environment variables are sourced as each service starts, meaning the
-are read:</p>
-<ul>
-<li>when you deploy a new service</li>
-<li>when you autodeploy / upgrade a running service</li>
-<li>when a service crashes and self restarts</li>
-</ul>
 <p>The environment variables are sourced in the order listed below, which
 allows you to override.</p>
-<h3>Services</h3>
+<h3>PORT=number</h3>
+<p>This is an all important environment variable, and it is expected your
+service will honor it, publishing traffic here. This <code>PORT</code> is used to
+know where to connect the ship&#39;s proxy to your individual service.</p>
+<h3>autodeploy &lt;git_url&gt;</h3>
+<p>This command in orders tells starphleet where to grab code from git.
+While it is possible to put this globally, you really should limit it
+just to <code>orders</code> files.</p>
+<h3>STARPHLEET_BASE=name</h3>
+<p>This is the named base container to use for a service, which you can use
+to speed up builds by having common packages pre-installed.</p>
+<p>If not specified, this defaults to <code>starphleet-base</code> which is a general
+purpose buildpack aware container.</p>
+<h3>BUILDPACK_URL=&lt;git_url&gt;</h3>
+<p>Set this to use a custom buildpack, otherwise Starphleet with attempt to
+use its default buildpacks to autodetect.</p>
+<h3>.env</h3>
 <p>Services themselves can have variables, these are inspired by Heroku,
-and you keep them in the source repository of each service.</p>
-<h4>.env</h4>
+and you keep them in the source repository of each service. These are
+the variables with the lowest precedence.</p>
 <p>This is where you specify a <code>BUILDPACK_URL</code>, but you can also put in
 other variables as you see fit.</p>
-<h4>.profile.d/</h4>
-<p>You can mix in as many separate files here as you like, providing more
-environment.</p>
-<h3>Orders</h3>
+<p>Your services will often be hosted in public repositories, so the config
+you put in here should be about development mode or public settings.</p>
+<h3>orders</h3>
 <p>The <code>orders</code> file itself is sourced for your service. This is where a
-service learns about <code>PORT</code> and <code>AUTODEPLOY</code>.</p>
-<h3>Starphleet</h3>
-<p>Starphleet wide environment variables are <em>secret</em>, supplied by
-command line, not kept in git, and protected with public/private key
-encryption.</p>
-<pre><code class="language-bash">starphleet set &lt;name&gt; &lt;value&gt;</code></pre>
-<p>This will contact each ship in the phleet, and provide it with the name
-and value, encypted with the private key specified in <code>starphleet
-init</code>. On each ship, right before a service starts, these set values are
-decrypted with the paired public key and provide the <em>last override</em>,
-the perfect place for production URLs, usernames, and passwords.</p>
-<p>Since they are stored encrypted with your private key on each ship, only
-those with the private key can set them.</p>
+service learns about <code>PORT</code> and <code>autodeploy</code>.</p>
+<p>These settings are laid over the service, and provide the ability to set
+variables for a service in the context of a single phleet, compared to
+the service variables which are truly generic.</p>
+<h3>.starphleet</h3>
+<p>Starphleet wide environment variables are applied last, leading to the
+highest precedence. This is a great place to have your production
+usernames, passwords, and connection strings.</p>
+<p>Different than most systems, Starphleet sticks with the git/files
+metaphor even for this configuration, rather than a command line to
+set/get variables. All the benefits of source control and using your own
+tools, and no additional server software is needed, making starphleet
+simpler and less to break.</p>
+<p>As an example:</p>
+<pre><code class="language-bash">#all services will see this domain name
+export DOMAIN_NAME=&quot;production.com&quot;
+#every service is told to run at 3000 inside its container
+export PORT=3000</code></pre>
+<p>Now, this is a file right in your headquarters. To keep these private
+you put your headquarters in a private, hidden repository than can only
+be reached by private key <code>git+ssh</code>.</p>
 <h2>SSH Access</h2>
-<p>A big difference form other Paas: the ships are yours, and you can ssh
+<p>A big difference form other PaaS: the ships are yours, and you can <code>ssh</code>
 to them. Specifically, you can put as many public keys in the
 <code>authorized_keys</code> folder of your headquarters, one per file, to let in
 other users as you see fit via ssh.</p>
@@ -237,10 +222,10 @@ add a new one.</p>
 deployed, just add and remove admirals by adding and removing public key
 files in your github repository. Updates in seconds.</p>
 <h2>Self Healing</h2>
-<p>Each ship uses a pull type strategy. This is different than other
-platforms where you <em>push</em> your software to deploy. Some folks will not
-like this, as it involves polling. Some folks think polling is evil.
-Noted. Here are the reasons:</p>
+<p>Each ship uses a pull strategy to keep the headquarters up to date. This
+is different than other platforms where you <em>push</em> your software to
+deploy. Some folks will not like this, as it involves polling. Some
+folks think polling is evil. Noted. Here are the reasons:</p>
 <ul>
 <li>Ships go up and down, pull based lets ships catch up easily if they
 happened to be down when a new version was released</li>
@@ -268,6 +253,57 @@ blank, meaning hitting the root of your service.</p>
 put into rotation to take over future requests from the prior version.</p>
 <p>You get 60 seconds for your service to return this 200 past when it is
 initially started.</p>
+<h1>Containers</h1>
+<p>Starphleet encapsualtes each service in an LXC container. Starting from
+a base container equipped with Heroku buildpacks, you can create your
+own custom containers to speed up builds as needed, as well as your own
+custom buildpacks.</p>
+<p>Containers serve as the bas system image, and are then customized with a
+servive+buildpack. In general:</p>
+<ul>
+<li>containers serve to create fixed, cached sets of software such as compilers</li>
+<li>buildpacks exist to install dynamic software, for example referenced
+<code>npm</code> packages.</li>
+</ul>
+<h2>Base Containers</h2>
+<p>Base containers provide system software and are used via file system
+snapshot, so provisioning them is quick. This serves as a base layer to
+give you system control.</p>
+<h3>Scripts</h3>
+<p>Given any script in your headquarters named <code>containers/name</code>, an LXC
+container named <code>name</code> will be created for you, and automatically
+updated any time the script changes.</p>
+<p>These custom build scripts are run as virtual root in a dedicated LXC
+container that is itself a snapshot built on top of starphleet&#39;s own
+base container.</p>
+<p>This is similar in a way to a <code>Dockerfile</code>, but in keeping with the
+starphleet design, is just a shellscript, so there are no new custom
+commands to learn.</p>
+<h2>Buildpacks</h2>
+<p>Buildpacks autodetect and provision services on containers for you
+without worrying about system or os level setup.</p>
+<p>Huge thanks to Heroku for having open buildpacks, and to the open source
+community for making and extending them. The trick that makes the
+starphleet orders file so simple is the use of buildpacks and platform
+package managers to get your dependencies running.</p>
+<h3>Provided Buildpacks</h3>
+<p>Using the available Heroku buildpacks, out of the box starphleet with
+autodetect and provision a service running:</p>
+<ul>
+<li>Ruby</li>
+<li>NodeJS</li>
+<li>Java</li>
+<li>Play</li>
+<li>Python</li>
+<li>PHP</li>
+<li>Clojure</li>
+<li>Go</li>
+<li>Perl</li>
+<li>Scala</li>
+<li>Dart</li>
+<li>NGINX static</li>
+<li>Apache</li>
+</ul>
 <h1>Services</h1>
 <p>Services are any program you can dream up that meet these conditions:</p>
 <ul>
@@ -284,6 +320,13 @@ scalable programming, starphleet gives you more freedom.</p>
 <li>This is no specific API</li>
 <li>There are no mandated programming languages</li>
 </ul>
+<p>Services are run in LXC containers, and as such don&#39;t have acess to the
+entire machine, they are root in their own world of a container. This is
+convenient, particularly when making custom buildpacks as you can just
+use <code>apt-get install</code> without a sudo.</p>
+<p>Containers are thrown away often, on each new version, and each server
+reboot. So, while you do have local filesystem access inside a container
+running a service, don&#39;t count on it living any lenght of time.</p>
 <h2>Autodeploy</h2>
 <p>This is really easy. Just commit and push to the repository referenced
 in the orders. Every ship will get it.</p>
@@ -291,30 +334,29 @@ in the orders. Every ship will get it.</p>
 <p>Again, this is really easy, just use <code>git revert</code> and pull out commits,
 then push to the repository referenced in the orders. Best thing is,
 this preserves history.</p>
+<h2>Testing</h2>
+<p>Check the main <a href="https://github.com/wballard/starphleet">readme</a>.</p>
 <h1>Ships</h1>
 <p>Each ship in the phleet runs every ordered service. This makes things
 nice and symmetrical, and simplifies scaling. Just add more ships if you
 need more capacity. If you need full tilt performance, you can easily
-make a phleet with just one ordered service at <code>/</code>.</p>
+make a phleet with just one ordered service at <code>/</code>. Need a different
+mixture of services? Launch another phleet!</p>
 <h2>Linux Versions</h2>
 <p>The actual ships are provided as virual machine images in EC2, VMWare,
 and VirtualBox format. To keep things simple, these images are
 standardized on a single Linux version. Some folks who have varying
 preferences or notions about OS support contracts may not like this.
 Noted. All of starphleet is open, feel free to port it over anywhere you
-like. Some things to keep in mind:</p>
-<ul>
-<li>you will need LXC</li>
-<li>you will need Upstart</li>
-<li>buildpacks will need to work, which is easy with apt and work
-otherwise</li>
-</ul>
+like.</p>
 <p>In practice, packing things up as orders with buildpacks saves you from
-OS-ing around ships.</p>
+OS-ing around ships and just lets you focus on writing your services.
+Think a bit like Heroku, where the version of the OS is a decision made
+for you to save time.</p>
 <h2>EC2 Instance Sizes</h2>
 <p>Please, don&#39;t cheap out and go to small. The recommended minimum size is an
 m2.xlarge -- which is roughly the power of a decent laptop, so this is
-the default.</p>
+the default. You can change this with <code>EC2_INSTANCE_SIZE</code>.</p>
 <h1>Phleets</h1>
 <p>Don&#39;t feel limited to just one phleet. Part of making your own PaaS is
 to give you the freedom to mix and match as you see fit.</p>
@@ -336,5 +378,4 @@ a stream and not to disk.</p>
 are added explicitly to zones, and you aren&#39;t required to use them all.
 It&#39;s OK for you to set up just in one location if you like. Or even have
 a phleet with one ship.</p>
-<h3>Route53 Configuration</h3>
 </div><footer><p>Copyright &copy 2013</p></footer></div></body></html>
