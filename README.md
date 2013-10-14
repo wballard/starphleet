@@ -1,7 +1,8 @@
 # Starphleet? What?
 The fully open container based continuous deployment PaaS.
 
-[Read the Documentation](http://wballard.github.io/starphleet)
+[Read the documentation](http://wballard.github.io/starphleet) when you
+get a chance.
 
 # Getting Started
 You need a git repository that defines your **starphleet headquarters**,
@@ -15,15 +16,15 @@ cloud, often the best thing to do is use public git hosting services.
 I'm a big fan of environment variables, it saves typing repeated stuff.
 Paste in your url from above into your shell like this:
 
-```
+```bash
 export STARPHLEET_HEADQUARTERS=<git_url>
 ```
 
-OK -- so that might not have worked for you, particularly if your
-STARPHLEET_HEADQUARTERS was a git/ssh url. To make that work, you need
+OK -- so that might not work for you, particularly if your
+`STARPHLEET_HEADQUARTERS` was a git/ssh url. To make that work, you need
 to have the private key file you use with github, something like mine:
 
-```
+```bash
 export STARPHLEET_PRIVATE_KEY=~/.ssh/wballard@mailframe.net
 ```
 
@@ -36,7 +37,7 @@ in the `Vagrantfile` for both VMWare and VirtualBox. Great for figuring
 if your services will autodeploy/start/run without worrying about load
 balancing.
 
-```
+```bash
 git clone https://github.com/wballard/starphleet.git
 cd starphleet
 vagrant up
@@ -47,23 +48,24 @@ Note the IP address from the last command, you can see the dashboard at
 http://ip-address/starphleet/dashboard. And, the ever amazing echo
 service that is in the default headquarters can be tested with:
 
-```
+```bash
 curl http://ip-address/echo/hello
 ```
 
-## I the Cloud, AWS
+## In the Cloud, AWS
 Running on a cloud is ready to go with AWS. In order to get started, you
 need to have an AWS account, and the environment variables:
 
-```
+```bash
 export AWS_ACCESS_KEY_ID=xxx
 export AWS_SECRET_ACCESS_KEY=xxx
 ```
 
 And, to get going
 
-```
+```bash
 npm install "git+https://github.com/wballard/starphleet.git"
+starphleet --help
 
 #this uses STARPHLEET_PRIVATE_KEY if set to access git
 #and STARPHLEET_PUBLIC_KEY to allow ssh ubuntu@host access
@@ -92,3 +94,20 @@ where the service will mount, and plopping in an `orders` file. Add.
 Commit. Push. Magic, any time that referenced git repo is updated, it
 will be redeployed to every ship watching your headquarters.
 
+Sometimes you just want to see the build, or figure out what is going on.
+
+Starphleet lets you directly push to a ship and run a service outside
+the autodeploy process like this:
+
+```bash
+git remote add ship git@$SHIP_IP:name
+git push ship master
+ssh serve@$SHIP_IP name
+#control C when you are bored or done
+ssh destroy@$SHIP_IP name
+```
+
+This uses a git receive hook, and ssh command accounts (serve and
+destroy) to control the process. Your test service will be mounted on
+the ship at `http://$SHIP_IP/name`, allowing you to test the service at
+an alternate root -- exposing any hardcoded / trouble!

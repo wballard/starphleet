@@ -36,7 +36,7 @@ Notes:
     * STARPHLEET_HEADQUARTERS
     * STARPHLEET_PUBLIC_KEY
     * STARPHLEET_PRIVATE_KEY
-  EC2_INSTANCE_SIZE will be consulted, defaulting to m2.xlarge
+    * EC2_INSTANCE_SIZE will be consulted, defaulting to m2.xlarge
 
 Description:
   This tool uses the AWS API for you to create a properly provisioned phleet
