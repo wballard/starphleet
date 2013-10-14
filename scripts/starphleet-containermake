@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-containermake <container_name> <build_script>
+### --help
+###
+### Make or replace a container based on a build script.
+### This has one tiny bit of magic in that starphleet-base will be a
+### root level container, and all other containers will snapshot from
+### starphleet-base.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+set -e
+test -f "${build_script}"
+
+CONTAINER_NAME="${container_name}"
+CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
+
+#build is determined by the content of the build script
+if diff "${CONTAINER_ROOT}/build_script" "${build_script}"; then
+  info container is up to date
+  exit 0
+else
+  (
+    flock 200
+    info making a new container ${CONTAINER_NAME}
+    starphleet-destroy-lxc ${CONTAINER_NAME}
+    #special case to make the base, otherwise go for a snapshot
+    if [ "${CONTAINER_NAME}" == 'starphleet-base' ]; then
+     lxc-create --name "${CONTAINER_NAME}" -t ubuntu
+    else
+     until lxc-clone -o 'starphleet-base' -n "${CONTAINER_NAME}" -s > /dev/null 2>&1; do
+       sleep 1
+     done
+    fi
+    cp `which tools` "${CONTAINER_ROOT}/tools"
+    cp `which starphleet-wait-network` "${CONTAINER_ROOT}/.block"
+    chmod +x "${CONTAINER_ROOT}/.block"
+    cp "${build_script}" "${CONTAINER_ROOT}/.build_script"
+    chmod +x "${CONTAINER_ROOT}/.build_script"
+    lxc-start --name ${CONTAINER_NAME} -d
+    starphleet-wait-lxc ${CONTAINER_NAME} RUNNING
+    lxc-attach --name ${CONTAINER_NAME} -- bash /.block
+    lxc-attach --name ${CONTAINER_NAME} -- bash /.build_script
+    lxc-stop --name ${CONTAINER_NAME}
+    starphleet-wait-lxc ${CONTAINER_NAME} STOPPED
+    date > "/var/starphleet/diagnostic/${CONTAINER_NAME}"
+    #this is the 'done' marker used to make diff
+    mv "${CONTAINER_ROOT}/.build_script" "${CONTAINER_ROOT}/build_script"
+    info made container ${CONTAINER_NAME}
+  ) 200>/var/lock/starphleet-containermake
+fi
