@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-lxc-destroy <name>
+###    starphleet-lxc-destroy <container_name>
 ### --help
 ###
 ### This is a more thorough destroy that will:
@@ -12,9 +12,12 @@ source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-lxc-stop --name ${name}
-while lxc-ls | grep "^${name}" > /dev/null; do
-  lxc-destroy --name "${name}" > /dev/null 2>&1
+lxc-stop --name ${container_name}
+while lxc-ls | grep "^${container_name}" > /dev/null; do
+  lxc-destroy --name "${container_name}" > /dev/null 2>&1
   sleep 1
 done
 
+
+btrfs subvolume delete "/var/lib/lxc/${container_name}/rootfs"
+rm -rf "/var/lib/lxc/${container_name}"

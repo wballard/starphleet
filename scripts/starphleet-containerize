@@ -50,7 +50,7 @@ else
   #clone on top of the base image, this is just to save disk space
   #this command can be problematic, giving off an error about
   #'cannot snapshot a directory', keptin :)
-  until lxc-clone -o "${STARPHLEET_BASE}" -n "${CONTAINER_NAME}" -s > /dev/null 2>&1; do
+  until lxc-clone -o "${STARPHLEET_BASE}" -n "${CONTAINER_NAME}" -s; do
     sleep 1
   done
   #mounts and files, always can see starphleet read only
