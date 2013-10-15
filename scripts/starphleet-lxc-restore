@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-lxc-restore <container_name> <backup_file>
+### --help
+###
+### Take a file from lxc-backup and place it as a container.
+### NOTE: you must use the same <container_name>
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+starphleet-lxc-destroy "${container_name}"
+
+cd /var/lib/lxc
+tar --numeric-owner -xzf "${backup_file}"

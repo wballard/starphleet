@@ -70,6 +70,8 @@ Description:
 
 """
 options = docopt doc, version: pkg.version
+
+#All the exciting settings and globals
 zones = _.map [
   'us-east-1',
   'us-west-1',
