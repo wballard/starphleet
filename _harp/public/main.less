@@ -3,7 +3,6 @@
 
 body { padding-top: 70px; }
 
-
 .sidebar-nav {
   padding: 0px;
 }
@@ -15,6 +14,12 @@ body { padding-top: 70px; }
   bottom: 0px;
   width: 180px;
   overflow-y: scroll;
+}
+
+@media (max-width: 600px) {
+  .sidebar-nav-fixed {
+    display: none;
+  }
 }
 
 .main {
@@ -43,17 +48,13 @@ body { padding-top: 70px; }
 
 h1 {
   padding-bottom: .25em;
+  border-bottom: 1px solid @table-border-color;
 }
 
 footer {
   float: right;
 }
 
-@media (max-width: 600px) {
-  .sidebar-nav-fixed {
-    display: none;
-  }
-}
 
 #toc > ul {
   list-style: none;
