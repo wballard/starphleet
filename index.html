@@ -1,5 +1,5 @@
-<!DOCTYPE html><html><head><title>Starphleet Documentation</title><link rel="stylesheet" href="main.css"><link rel="stylesheet" href="javascript/highlight.js/styles/monokai.css"><script src="javascript/jquery.min.js"></script><script src="javascript/bootstrap.min.js"></script><script src="javascript/toc.min.js"></script><script src="javascript/highlight.js/highlight.pack.js"></script><script src="javascript/main.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"></head><body><nav class="navbar navbar-default navbar-fixed-top"><header class="navbar-header"><a href="index.html" class="navbar-brand">Starphleet</a><ul class="nav navbar-nav"><li><a href="https://github.com/wballard/starphleet">Source</a></li></ul></header></nav><nav id="leftnav" class="leftnav"><section id="toc" class="sidebar-nav sidebar-nav-fixed"></section></nav><article id="main" class="main"><p><h1>Starphleet</h1></p>
-<div class="well">
+<!DOCTYPE html><html><head><title>Starphleet Documentation</title><link rel="stylesheet" href="main.css"><script src="javascript/jquery.min.js"></script><script src="javascript/bootstrap.min.js"></script><script src="javascript/toc.min.js"></script><script src="javascript/highlight.js/highlight.pack.js"></script><script src="javascript/main.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"></head><body><nav class="navbar navbar-default navbar-fixed-top"><header class="navbar-header"><a href="index.html" class="navbar-brand">Starphleet</a><ul class="nav navbar-nav"><li><a href="https://github.com/wballard/starphleet">Source</a></li></ul></header></nav><nav id="toc" class="sidebar-nav sidebar-nav-fixed"></nav><article id="main" class="main"><p><h1>Starphleet</h1></p>
+<div class="jumbotron">
 The fully open container based continuous deployment PaaS
 </div>
 
@@ -228,7 +228,7 @@ you put your headquarters in a private, hidden repository than can only
 be reached by private key <code>git+ssh</code>.</p>
 <h2>healthcheck</h2>
 <p>Each service repository can supply a <code>healthcheck</code> file, which contains
-an URL snippet <code>http://&lt;container-ip&gt;:&lt;container-port&gt;/&lt;snippet&gt;</code>. You
+an URL snippet <strong>http://<container-ip>:<container-port>/<snippet></strong>. You
 supply the <code>&lt;snippet&gt;</code>, and if you don&#39;t provide it, the default is just
 blank, meaning hitting the root of your service.</p>
 <p>As soon as a 200 comes back, you are good to go and the new service is
@@ -310,21 +310,42 @@ package managers to get your dependencies running.</p>
 <h2>Provided Buildpacks</h2>
 <p>Using the available Heroku buildpacks, out of the box starphleet with
 autodetect and provision a service running:</p>
-<ul>
-<li>Ruby</li>
-<li>NodeJS</li>
-<li>Java</li>
-<li>Play</li>
-<li>Python</li>
-<li>PHP</li>
-<li>Clojure</li>
-<li>Go</li>
-<li>Perl</li>
-<li>Scala</li>
-<li>Dart</li>
-<li>NGINX static</li>
-<li>Apache</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ruby</td>
+<td>NodeJS</td>
+<td>Java</td>
+<td>Play</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>PHP</td>
+<td>Clojure</td>
+<td>Go</td>
+</tr>
+<tr>
+<td>Perl</td>
+<td>Scala</td>
+<td>Dart</td>
+<td>NGINX static</td>
+</tr>
+<tr>
+<td>Apache</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <h1>Services</h1>
 <p>Services are any program you can dream up that meet these conditions:</p>
 <ul>

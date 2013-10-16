@@ -14,15 +14,19 @@
 @gray:                   lighten(#000, 33.5%); // #555
 @gray-light:             lighten(#000, 60%);   // #999
 @gray-lighter:           lighten(#000, 90%);
+@blackness:              #272822;
+@blackedge:              lighten(@blackness, 60%);
+@whiteness:              #ddd;
 
 // Brand colors
 // -------------------------
 
-@brand-primary:         #A60000;
-@brand-success:         #9FEE00;
-@brand-warning:         #FF7518;
-@brand-danger:          #FF0039;
-@brand-info:            #009999;
+@brand-primary:         #EF4135;
+@brand-success:         #85EF34;
+@brand-warning:         #E2EF34;
+@brand-danger:          #F3766D;
+@brand-info:            #34E2EF;
+@brand-offset:          #9E34EF;
 
 // Scaffolding
 // -------------------------
@@ -78,7 +82,7 @@
 @line-height-large:              1.33;
 @line-height-small:              1.5;
 
-@border-radius-base:             0px;
+@border-radius-base:             2px;
 @border-radius-large:            0px;
 @border-radius-small:            0px;
 
@@ -98,7 +102,7 @@
 @table-bg-hover:                     #f5f5f5;
 @table-bg-active:                    @table-bg-hover;
 
-@table-border-color:                 #ddd; // table and cell border
+@table-border-color:                 @blackedge;
 
 
 // Buttons
@@ -239,7 +243,7 @@
 @navbar-height:                    50px;
 @navbar-margin-bottom:             @line-height-computed;
 @navbar-default-color:             #fff;
-@navbar-default-bg:                #272822;
+@navbar-default-bg:                @blackness;
 @navbar-default-border:            darken(@navbar-default-bg, 6.5%);
 @navbar-border-radius:             @border-radius-base;
 @navbar-padding-horizontal:        floor(@grid-gutter-width / 2);
@@ -353,8 +357,8 @@
 // -------------------------
 
 @jumbotron-padding:              30px;
-@jumbotron-color:                inherit;
-@jumbotron-bg:                   @gray-lighter;
+@jumbotron-color:                #ddd;
+@jumbotron-bg:                   @blackness;
 
 @jumbotron-heading-color:        inherit;
 
@@ -581,11 +585,11 @@
 // Code
 // ------------------------
 @code-color:                  #ddd;
-@code-bg:                     #272822;
+@code-bg:                     @blackness;
 
-@pre-bg:                      #f5f5f5;
-@pre-color:                   @gray-dark;
-@pre-border-color:            #ccc;
+@pre-bg:                      @blackness;
+@pre-color:                   @whiteness;
+@pre-border-color:            @blockquote-border-color;
 @pre-scrollable-max-height:   340px;
 
 // Type

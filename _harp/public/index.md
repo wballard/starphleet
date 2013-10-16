@@ -1,5 +1,5 @@
 <h1>Starphleet</h1>
-<div class="well">
+<div class="jumbotron">
 The fully open container based continuous deployment PaaS
 </div>
 
@@ -233,7 +233,7 @@ be reached by private key `git+ssh`.
 
 ## healthcheck
 Each service repository can supply a `healthcheck` file, which contains
-an URL snippet `http://<container-ip>:<container-port>/<snippet>`. You
+an URL snippet **http://<container-ip>:<container-port>/<snippet>**. You
 supply the `<snippet>`, and if you don't provide it, the default is just
 blank, meaning hitting the root of your service.
 
@@ -333,19 +333,12 @@ package managers to get your dependencies running.
 Using the available Heroku buildpacks, out of the box starphleet with
 autodetect and provision a service running:
 
-* Ruby
-* NodeJS
-* Java
-* Play
-* Python
-* PHP
-* Clojure
-* Go
-* Perl
-* Scala
-* Dart
-* NGINX static
-* Apache
+ | | | |
+--- | --- | --- | ---
+Ruby |  NodeJS |  Java | Play
+Python| PHP | Clojure | Go
+Perl | Scala | Dart | NGINX static
+Apache |||
 
 # Services
 Services are any program you can dream up that meet these conditions:

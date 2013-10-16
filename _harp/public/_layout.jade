@@ -3,7 +3,6 @@ html
   head
     title= title
     link(rel="stylesheet", href="main.css")
-    link(rel="stylesheet", href="javascript/highlight.js/styles/monokai.css")
     script(src="javascript/jquery.min.js")
     script(src="javascript/bootstrap.min.js")
     script(src="javascript/toc.min.js")
@@ -17,8 +16,7 @@ html
         ul(class="nav navbar-nav")
           li
             a(href="https://github.com/wballard/starphleet") Source
-    nav(class="leftnav", id="leftnav")
-      section(class="sidebar-nav sidebar-nav-fixed", id="toc")
+    nav(class="sidebar-nav sidebar-nav-fixed", id="toc")
     article(class="main", id="main")
       != yield
       footer

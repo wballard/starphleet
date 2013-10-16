@@ -1,5 +1,6 @@
 @import "_bootstrap/bootstrap";
 @import "_bootstrap/bootswatch";
+@import "glgcode";
 
 body {
   padding-top: 50px;
@@ -12,6 +13,7 @@ body {
 .sidebar-nav {
   .well;
   padding: 0px;
+  margin: 0px;
 }
 
 .sidebar-nav-fixed {
@@ -40,7 +42,7 @@ footer {
 /* Small devices (tablets, 768px and up) */
 @media (min-width: @screen-sm) {
   .sidebar-nav-fixed {
-    position:fixed;
+    position: fixed;
     top: 50px;
     left: 0px;
     bottom: 0px;
@@ -49,7 +51,7 @@ footer {
   }
   .main {
     position: fixed;
-    top: 60px;
+    top: 50px;
     left: 180px;
     right: 0px;
     bottom: 0px;
@@ -92,7 +94,7 @@ footer {
 
 #toc > ul {
   list-style: none;
-  padding: 2px;
+  padding: 0px;
 }
 #toc > ul > .toc-h1 > a {
   padding-left: 6px;
@@ -102,6 +104,9 @@ footer {
 }
 #toc > ul > .toc-h3 > a {
   padding-left: 18px;
+}
+.toc-active {
+  border: 1px solid darken(@brand-primary, 7%);
 }
 #toc a {
   font-size: 1.0em;
@@ -113,3 +118,11 @@ pre {
   padding: 0px;
 }
 
+li {
+  list-style-type: disc;
+}
+
+th {
+  background-color: @blackness;
+  color: @whiteness;
+}
