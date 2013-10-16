@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><title>Starphleet Documentation</title><link rel="stylesheet" href="main.css"><link rel="stylesheet" href="javascript/highlight.js/styles/monokai.css"><script src="javascript/jquery.min.js"></script><script src="javascript/bootstrap.min.js"></script><script src="javascript/toc.min.js"></script><script src="javascript/highlight.js/highlight.pack.js"></script><script src="javascript/main.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"></head><body><nav class="navbar navbar-default navbar-fixed-top"><header class="navbar-header"><a href="index.html" class="navbar-brand">Starphleet</a></header><ul class="nav navbar-nav"><li><a href="https://github.com/wballard/starphleet">Source</a></li></ul></nav><section id="leftnav" class="leftnav"><nav id="toc" class="sidebar-nav sidebar-nav-fixed"></nav></section><div id="main" class="main"><div id="content" class="content"><h1>Highlight.js</h1>
+<!DOCTYPE html><html><head><title>Starphleet Documentation</title><link rel="stylesheet" href="main.css"><link rel="stylesheet" href="javascript/highlight.js/styles/monokai.css"><script src="javascript/jquery.min.js"></script><script src="javascript/bootstrap.min.js"></script><script src="javascript/toc.min.js"></script><script src="javascript/highlight.js/highlight.pack.js"></script><script src="javascript/main.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"></head><body><nav class="navbar navbar-default navbar-fixed-top"><header class="navbar-header"><a href="index.html" class="navbar-brand">Starphleet</a><ul class="nav navbar-nav"><li><a href="https://github.com/wballard/starphleet">Source</a></li></ul></header></nav><nav id="leftnav" class="leftnav"><section id="toc" class="sidebar-nav sidebar-nav-fixed"></section></nav><article id="main" class="main"><h1>Highlight.js</h1>
 <p>Highlight.js highlights syntax in code examples on blogs, forums and,
 in fact, on any web page. It&#39;s very easy to use because it works
 automatically: finds blocks of code, detects a language, highlights it.</p>
@@ -85,8 +85,8 @@ on a site.</p>
 <ul>
 <li>Version: 7.3</li>
 <li>URL:     <a href="http://softwaremaniacs.org/soft/highlight/en/">http://softwaremaniacs.org/soft/highlight/en/</a></li>
-<li>Author:  Ivan Sagalaev (<a href="&#109;&#x61;&#x69;&#108;&#x74;&#x6f;&#58;&#109;&#97;&#x6e;&#x69;&#x61;&#99;&#64;&#115;&#111;&#x66;&#x74;&#119;&#x61;&#x72;&#101;&#109;&#97;&#110;&#x69;&#x61;&#x63;&#x73;&#46;&#x6f;&#114;&#103;">&#109;&#97;&#x6e;&#x69;&#x61;&#99;&#64;&#115;&#111;&#x66;&#x74;&#119;&#x61;&#x72;&#101;&#109;&#97;&#110;&#x69;&#x61;&#x63;&#x73;&#46;&#x6f;&#114;&#103;</a>)</li>
+<li>Author:  Ivan Sagalaev (<a href="&#x6d;&#97;&#105;&#108;&#x74;&#x6f;&#58;&#109;&#x61;&#x6e;&#105;&#97;&#99;&#64;&#x73;&#x6f;&#102;&#116;&#119;&#97;&#x72;&#101;&#109;&#x61;&#x6e;&#x69;&#x61;&#99;&#115;&#46;&#111;&#x72;&#103;">&#109;&#x61;&#x6e;&#105;&#97;&#99;&#64;&#x73;&#x6f;&#102;&#116;&#119;&#97;&#x72;&#101;&#109;&#x61;&#x6e;&#x69;&#x61;&#99;&#115;&#46;&#111;&#x72;&#103;</a>)</li>
 </ul>
 <p>For the license terms see LICENSE files.
 For the list of contributors see AUTHORS.en.txt file.</p>
-</div><footer><p>Copyright &copy 2013</p></footer></div></body></html>
+<footer><p>Copyright &copy 2013</p></footer></article></body></html>

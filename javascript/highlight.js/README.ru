@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><title>Starphleet Documentation</title><link rel="stylesheet" href="main.css"><link rel="stylesheet" href="javascript/highlight.js/styles/monokai.css"><script src="javascript/jquery.min.js"></script><script src="javascript/bootstrap.min.js"></script><script src="javascript/toc.min.js"></script><script src="javascript/highlight.js/highlight.pack.js"></script><script src="javascript/main.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"></head><body><nav class="navbar navbar-default navbar-fixed-top"><header class="navbar-header"><a href="index.html" class="navbar-brand">Starphleet</a></header><ul class="nav navbar-nav"><li><a href="https://github.com/wballard/starphleet">Source</a></li></ul></nav><section id="leftnav" class="leftnav"><nav id="toc" class="sidebar-nav sidebar-nav-fixed"></nav></section><div id="main" class="main"><div id="content" class="content"><h1>Highlight.js</h1>
+<!DOCTYPE html><html><head><title>Starphleet Documentation</title><link rel="stylesheet" href="main.css"><link rel="stylesheet" href="javascript/highlight.js/styles/monokai.css"><script src="javascript/jquery.min.js"></script><script src="javascript/bootstrap.min.js"></script><script src="javascript/toc.min.js"></script><script src="javascript/highlight.js/highlight.pack.js"></script><script src="javascript/main.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"></head><body><nav class="navbar navbar-default navbar-fixed-top"><header class="navbar-header"><a href="index.html" class="navbar-brand">Starphleet</a><ul class="nav navbar-nav"><li><a href="https://github.com/wballard/starphleet">Source</a></li></ul></header></nav><nav id="leftnav" class="leftnav"><section id="toc" class="sidebar-nav sidebar-nav-fixed"></section></nav><article id="main" class="main"><h1>Highlight.js</h1>
 <p>Highlight.js нужен для подсветки синтаксиса в примерах кода в блогах,
 форумах и вообще на любых веб-страницах. Пользоваться им очень просто,
 потому что работает он автоматически: сам находит блоки кода, сам
@@ -89,8 +89,8 @@ highlight.js.</p>
 <ul>
 <li>Версия: 7.3</li>
 <li>URL:    <a href="http://softwaremaniacs.org/soft/highlight/">http://softwaremaniacs.org/soft/highlight/</a></li>
-<li>Автор:  Иван Сагалаев (<a href="&#109;&#97;&#105;&#108;&#116;&#x6f;&#x3a;&#109;&#x61;&#110;&#x69;&#x61;&#x63;&#x40;&#115;&#x6f;&#102;&#116;&#119;&#97;&#114;&#101;&#109;&#97;&#x6e;&#105;&#x61;&#x63;&#115;&#46;&#x6f;&#114;&#x67;">&#109;&#x61;&#110;&#x69;&#x61;&#x63;&#x40;&#115;&#x6f;&#102;&#116;&#119;&#97;&#114;&#101;&#109;&#97;&#x6e;&#105;&#x61;&#x63;&#115;&#46;&#x6f;&#114;&#x67;</a>)</li>
+<li>Автор:  Иван Сагалаев (<a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#111;&#x3a;&#109;&#x61;&#x6e;&#105;&#x61;&#99;&#x40;&#115;&#111;&#x66;&#x74;&#x77;&#x61;&#114;&#101;&#x6d;&#x61;&#110;&#x69;&#x61;&#x63;&#115;&#x2e;&#111;&#114;&#x67;">&#109;&#x61;&#x6e;&#105;&#x61;&#99;&#x40;&#115;&#111;&#x66;&#x74;&#x77;&#x61;&#114;&#101;&#x6d;&#x61;&#110;&#x69;&#x61;&#x63;&#115;&#x2e;&#111;&#114;&#x67;</a>)</li>
 </ul>
 <p>Лицензионное соглашение читайте в файле LICENSE.
 Список соавторов читайте в файле AUTHORS.ru.txt</p>
-</div><footer><p>Copyright &copy 2013</p></footer></div></body></html>
+<footer><p>Copyright &copy 2013</p></footer></article></body></html>

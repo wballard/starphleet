@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><title>Starphleet Documentation</title><link rel="stylesheet" href="main.css"><link rel="stylesheet" href="javascript/highlight.js/styles/monokai.css"><script src="javascript/jquery.min.js"></script><script src="javascript/bootstrap.min.js"></script><script src="javascript/toc.min.js"></script><script src="javascript/highlight.js/highlight.pack.js"></script><script src="javascript/main.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"></head><body><nav class="navbar navbar-default navbar-fixed-top"><header class="navbar-header"><a href="index.html" class="navbar-brand">Starphleet</a></header><ul class="nav navbar-nav"><li><a href="https://github.com/wballard/starphleet">Source</a></li></ul></nav><section id="leftnav" class="leftnav"><nav id="toc" class="sidebar-nav sidebar-nav-fixed"></nav></section><div id="main" class="main"><div id="content" class="content"><p><h1>Starphleet</h1></p>
+<!DOCTYPE html><html><head><title>Starphleet Documentation</title><link rel="stylesheet" href="main.css"><link rel="stylesheet" href="javascript/highlight.js/styles/monokai.css"><script src="javascript/jquery.min.js"></script><script src="javascript/bootstrap.min.js"></script><script src="javascript/toc.min.js"></script><script src="javascript/highlight.js/highlight.pack.js"></script><script src="javascript/main.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"></head><body><nav class="navbar navbar-default navbar-fixed-top"><header class="navbar-header"><a href="index.html" class="navbar-brand">Starphleet</a><ul class="nav navbar-nav"><li><a href="https://github.com/wballard/starphleet">Source</a></li></ul></header></nav><nav id="leftnav" class="leftnav"><section id="toc" class="sidebar-nav sidebar-nav-fixed"></section></nav><article id="main" class="main"><p><h1>Starphleet</h1></p>
 <div class="well">
 The fully open container based continuous deployment PaaS
 </div>
@@ -149,7 +149,7 @@ needs to be reachable from each ship in the fleet.</p>
 be a branch, a tag, or a commit sha -- anything you can check out. This
 hashtag approach lets you specify a deployment branch, as well as pin
 services to specific versions when needed.</p>
-<h2>Environments</h2>
+<h1>Environments</h1>
 <p>Your app will need to talk to things: external web services,
 storage-as-a-service, databases, you name it. Starphleet goes back to
 basics and lets you set these through environment variables.</p>
@@ -158,23 +158,44 @@ variables are really secrets, so starphleet provides multiple locations
 where you can keep variables, with different security thoughts.</p>
 <p>The environment variables are sourced in the order listed below, which
 allows you to override.</p>
-<h3>PORT=number</h3>
-<p>This is an all important environment variable, and it is expected your
-service will honor it, publishing traffic here. This <code>PORT</code> is used to
-know where to connect the ship&#39;s proxy to your individual service.</p>
-<h3>autodeploy &lt;git_url&gt;</h3>
-<p>This command in orders tells starphleet where to grab code from git.
-While it is possible to put this globally, you really should limit it
-just to <code>orders</code> files.</p>
-<h3>STARPHLEET_BASE=name</h3>
-<p>This is the named base container to use for a service, which you can use
-to speed up builds by having common packages pre-installed.</p>
-<p>If not specified, this defaults to <code>starphleet-base</code> which is a general
-purpose buildpack aware container.</p>
-<h3>BUILDPACK_URL=&lt;git_url&gt;</h3>
-<p>Set this to use a custom buildpack, otherwise Starphleet with attempt to
-use its default buildpacks to autodetect.</p>
-<h3>.env</h3>
+<h2>Environment Variables</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PORT</td>
+<td>number</td>
+<td>This is an all important environment variable, and it is expected your service will honor it, publishing traffic here. This <code>PORT</code> is used to know where to connect the ship&#39;s proxy to your individual service.</td>
+</tr>
+<tr>
+<td>autodeploy</td>
+<td>&lt;git_url&gt;</td>
+<td>This command in orders tells starphleet where to grab code from git.  While it is possible to put this globally, you really should limit it just to <code>orders</code> files.</td>
+</tr>
+<tr>
+<td>STARPHLEET_BASE</td>
+<td>name</td>
+<td>This is the named base container to use for a service, which you can use to speed up builds by having common packages pre-installed.  If not specified, this defaults to <code>starphleet-base</code> which is a general purpose buildpack aware container.</td>
+</tr>
+<tr>
+<td>BUILDPACK_URL</td>
+<td>&lt;git_url&gt;</td>
+<td>Set this to use a custom buildpack, otherwise Starphleet with attempt to use its default buildpacks to autodetect.</td>
+</tr>
+<tr>
+<td>PUSH_HEADQUARTERS</td>
+<td>any</td>
+<td>When set, this will cause your headquarters to push back to the origin repository, allowing you to share state between ships.</td>
+</tr>
+</tbody>
+</table>
+<h2>.env</h2>
 <p>Services themselves can have variables, these are inspired by Heroku,
 and you keep them in the source repository of each service. These are
 the variables with the lowest precedence.</p>
@@ -182,13 +203,13 @@ the variables with the lowest precedence.</p>
 other variables as you see fit.</p>
 <p>Your services will often be hosted in public repositories, so the config
 you put in here should be about development mode or public settings.</p>
-<h3>orders</h3>
+<h2>orders</h2>
 <p>The <code>orders</code> file itself is sourced for your service. This is where a
 service learns about <code>PORT</code> and <code>autodeploy</code>.</p>
 <p>These settings are laid over the service, and provide the ability to set
 variables for a service in the context of a single phleet, compared to
 the service variables which are truly generic.</p>
-<h3>.starphleet</h3>
+<h2>.starphleet</h2>
 <p>Starphleet wide environment variables are applied last, leading to the
 highest precedence. This is a great place to have your production
 usernames, passwords, and connection strings.</p>
@@ -205,7 +226,16 @@ export PORT=3000</code></pre>
 <p>Now, this is a file right in your headquarters. To keep these private
 you put your headquarters in a private, hidden repository than can only
 be reached by private key <code>git+ssh</code>.</p>
-<h2>SSH Access</h2>
+<h2>healthcheck</h2>
+<p>Each service repository can supply a <code>healthcheck</code> file, which contains
+an URL snippet <code>http://&lt;container-ip&gt;:&lt;container-port&gt;/&lt;snippet&gt;</code>. You
+supply the <code>&lt;snippet&gt;</code>, and if you don&#39;t provide it, the default is just
+blank, meaning hitting the root of your service.</p>
+<p>As soon as a 200 comes back, you are good to go and the new service is
+put into rotation to take over future requests from the prior version.</p>
+<p>You get 60 seconds for your service to return this 200 past when it is
+initially started.</p>
+<h1>SSH Access</h1>
 <p>A big difference form other PaaS: the ships are yours, and you can <code>ssh</code>
 to them. Specifically, you can put as many public keys in the
 <code>authorized_keys</code> folder of your headquarters, one per file, to let in
@@ -221,6 +251,18 @@ add a new one.</p>
 <p>And, even more fun -- the <code>authorized_keys</code> themselves are continuously
 deployed, just add and remove admirals by adding and removing public key
 files in your github repository. Updates in seconds.</p>
+<h1>Containers</h1>
+<p>Starphleet encapsualtes each service in an LXC container. Starting from
+a base container equipped with Heroku buildpacks, you can create your
+own custom containers to speed up builds as needed, as well as your own
+custom buildpacks.</p>
+<p>Containers serve as the bas system image, and are then customized with a
+servive+buildpack. In general:</p>
+<ul>
+<li>containers serve to create fixed, cached sets of software such as compilers</li>
+<li>buildpacks exist to install dynamic software, for example referenced
+<code>npm</code> packages.</li>
+</ul>
 <h2>Self Healing</h2>
 <p>Each ship uses a pull strategy to keep the headquarters up to date. This
 is different than other platforms where you <em>push</em> your software to
@@ -244,32 +286,11 @@ full benefit of autodeployment and rolling upgrades requires you to
 think about your storage, and how different versions of code may
 interact with that. Or, totally ingore it -- you won&#39;t be any worse off
 that with other autodeploy systems, or classic &#39;off the air&#39; deployment.</p>
-<h3>healthcheck</h3>
-<p>Each service repository can supply a <code>healthcheck</code> file, which contains
-an URL snippet <code>http://&lt;container-ip&gt;:&lt;container-port&gt;/&lt;snippet&gt;</code>. You
-supply the <code>&lt;snippet&gt;</code>, and if you don&#39;t provide it, the default is just
-blank, meaning hitting the root of your service.</p>
-<p>As soon as a 200 comes back, you are good to go and the new service is
-put into rotation to take over future requests from the prior version.</p>
-<p>You get 60 seconds for your service to return this 200 past when it is
-initially started.</p>
-<h1>Containers</h1>
-<p>Starphleet encapsualtes each service in an LXC container. Starting from
-a base container equipped with Heroku buildpacks, you can create your
-own custom containers to speed up builds as needed, as well as your own
-custom buildpacks.</p>
-<p>Containers serve as the bas system image, and are then customized with a
-servive+buildpack. In general:</p>
-<ul>
-<li>containers serve to create fixed, cached sets of software such as compilers</li>
-<li>buildpacks exist to install dynamic software, for example referenced
-<code>npm</code> packages.</li>
-</ul>
 <h2>Base Containers</h2>
 <p>Base containers provide system software and are used via file system
 snapshot, so provisioning them is quick. This serves as a base layer to
 give you system control.</p>
-<h3>Scripts</h3>
+<h2>Scripts</h2>
 <p>Given any script in your headquarters named <code>containers/name</code>, an LXC
 container named <code>name</code> will be created for you, and automatically
 updated any time the script changes.</p>
@@ -286,7 +307,7 @@ without worrying about system or os level setup.</p>
 community for making and extending them. The trick that makes the
 starphleet orders file so simple is the use of buildpacks and platform
 package managers to get your dependencies running.</p>
-<h3>Provided Buildpacks</h3>
+<h2>Provided Buildpacks</h2>
 <p>Using the available Heroku buildpacks, out of the box starphleet with
 autodetect and provision a service running:</p>
 <ul>
@@ -378,4 +399,4 @@ a stream and not to disk.</p>
 are added explicitly to zones, and you aren&#39;t required to use them all.
 It&#39;s OK for you to set up just in one location if you like. Or even have
 a phleet with one ship.</p>
-</div><footer><p>Copyright &copy 2013</p></footer></div></body></html>
+<footer><p>Copyright &copy 2013</p></footer></article></body></html>
