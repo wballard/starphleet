@@ -56,6 +56,11 @@ function get_SHASUM() {
   export SHASUM=$(sha1sum "${1}" | awk '{ print substr($1,1,7); }')
 }
 
+function get_CONTAINER_NAME() {
+  export CONTAINER_NAME=$(echo $1 | sha1sum | awk '{print $1;}')
+  export CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
+}
+
 function autodeploy() {
   export AUTODEPLOY="${1}"
 }

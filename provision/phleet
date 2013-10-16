@@ -60,11 +60,6 @@ if [ -d /starphleet/private_keys ]; then
   cp /starphleet/private_keys/* /var/starphleet/private_keys/
 fi
 
-#base ubuntu LXC image, get this on before we start anything
-set -e
-starphleet-containermake starphleet-base /var/starphleet/containers/starphleet-base
-set +e
-
 #good to go, start the phleet
 start starphleet
 

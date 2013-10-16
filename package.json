@@ -29,6 +29,7 @@
     "starphleet-is-current": "./scripts/starphleet-is-current",
     "starphleet-status": "./scripts/starphleet-status",
     "starphleet-git": "./scripts/starphleet-git",
+    "starphleet-git-synch": "./scripts/starphleet-git-synch",
     "starphleet-ready": "./scripts/starphleet-ready"
   },
   "repository": {

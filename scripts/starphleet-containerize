@@ -46,7 +46,12 @@ if lxc-ls | grep "^${CONTAINER_NAME}$" > /dev/null; then
   starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
   exit 0
 else
-  [ "${STARPHLEET_BASE}" == 'starphleet-base' ] || starphleet-containermake "${STARPHLEET_BASE}" "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}"
+  #this root container is an unfortunate special case
+  if [ "${STARPHLEET_BASE}" == 'starphleet-base' ]; then
+    starphleet-containermake "${STARPHLEET_BASE}" "/var/starphleet/containers/${STARPHLEET_BASE}"
+  else
+    starphleet-containermake "${STARPHLEET_BASE}" "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}"
+  fi
   #clone on top of the base image, this is just to save disk space
   #this command can be problematic, giving off an error about
   #'cannot snapshot a directory', keptin :)
