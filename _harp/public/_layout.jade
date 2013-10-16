@@ -13,14 +13,13 @@ html
   body
     nav(class="navbar navbar-default navbar-fixed-top")
       header(class="navbar-header")
-       a(class="navbar-brand", href="index.html")= sitename
-      ul(class="nav navbar-nav")
-        li
-          a(href="https://github.com/wballard/starphleet") Source
-    section(class="leftnav", id="leftnav")
-      nav(class="sidebar-nav sidebar-nav-fixed", id="toc")
-    div(class="main", id="main")
-      div(class="content", id="content")
-        != yield
+        a(class="navbar-brand", href="index.html")= sitename
+        ul(class="nav navbar-nav")
+          li
+            a(href="https://github.com/wballard/starphleet") Source
+    nav(class="leftnav", id="leftnav")
+      section(class="sidebar-nav sidebar-nav-fixed", id="toc")
+    article(class="main", id="main")
+      != yield
       footer
         p Copyright &copy 2013

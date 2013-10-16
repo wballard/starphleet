@@ -14,6 +14,7 @@ $(document).ready(function() {
       });
     }
   });
+  //hook on the toc div
   $('#toc').toc({
     container: '#main',
     onHighlight: function(el) {
@@ -21,12 +22,8 @@ $(document).ready(function() {
       $(el).addClass('active');
     }
   });
+  //dynamic styles, makes markdown easier without inline HTML
   $('#toc > ul').addClass('nav nav-pills nav-stacked');
-  if($('#toc').children.length == 0) {
-    $('#leftnav').hide();
-  } else {
-    $('#main').addClass('navpad');
-  }
   $('table').addClass('table table-bordered table-striped');
   $('pre code').each(function(i, e) {console.log(e);hljs.highlightBlock(e)});
 });
