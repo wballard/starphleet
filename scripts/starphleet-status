@@ -25,17 +25,18 @@ cat << EOF >> /dev/stdout
 headquarters: ${HEADQUARTERS_REMOTE:-no headquarters}
 EOF
 
-if [ -d "${CURRENT_ORDERS}" ]; then
-cat << EOF >> /dev/stdout
-status: online
-EOF
+if [ -f "/var/starphleet/dashboard.starphleetstatus" ]; then
+  MAIN_STATUS=$(cat "/var/starphleet/dashboard.starphleetstatus")
 else
-cat << EOF >> /dev/stdout
-status: offline
-EOF
-exit 0
+  MAIN_STATUS="offline"
 fi
 
+cat << EOF >> /dev/stdout
+status: ${MAIN_STATUS}
+EOF
+
+if [ -d "${CURRENT_ORDERS}" ]; then
+### ORDERS status starts here
 cat << EOF >> /dev/stdout
 orders:
 EOF
@@ -58,3 +59,5 @@ cat << EOF >> /dev/stdout
     status: $(cat "${status}")
 EOF
 done
+### ORDERS status ends here
+fi
