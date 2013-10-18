@@ -23,10 +23,10 @@ PUBLISH_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
 test ! -d "${NGINX_CONF}/published" && mkdir -p "${NGINX_CONF}/published"
 
 cat << EOF > "${PUBLISH_CONF}"
-location ${URL} {
+location ${URL}/ {
   include /var/starphleet/nginx/cors.conf;
   # Path rewriting to hide mount prefix
-  rewrite ${URL}(.*) /\$1 break;
+  rewrite ${URL}/(.*) /\$1 break;
   proxy_pass http://${IP_ADDRESS}:${PORT};
   add_header X-CONTAINER ${CONTAINER_NAME};
   add_header X-SHIP ${HOSTNAME};
