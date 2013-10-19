@@ -86,7 +86,7 @@ zones = _.map zones, (zone) ->
   zone.elb = new AWS.ELB {region: zone.config.region, maxRetries: 15}
   zone
 zones = _.first(zones, 4)
-ami_name="starphleet-0.0.2"
+ami_name="starphleet-0.0.3"
 
 isThereBadNews = (err) ->
   if err
@@ -214,7 +214,7 @@ if options.add and options.ship
   mustBeSet 'AWS_ACCESS_KEY_ID'
   mustBeSet 'AWS_SECRET_ACCESS_KEY'
   mustBeSet 'STARPHLEET_HEADQUARTERS'
-  niceToHave 'STARPHLEET_PUBLIC_KEY', 'is not set, you will not be able to ssh ubuntu@host'
+  mustBeSet 'STARPHLEET_PUBLIC_KEY', 'is not set, you will not be able to ssh ubuntu@host'
   niceToHave 'STARPHLEET_PRIVATE_KEY', 'is not set, you will only be able to access https git repos read only one way'
   url = process.env['STARPHLEET_HEADQUARTERS']
   zone = _.select(zones, (zone) -> zone.config.region is options['<region>'])[0]
@@ -338,7 +338,7 @@ if options.info and options.ec2
           console.log lb.toString()
           console.log "Dashboards are at", "http://<host>/starphleet/dashboard".cyan
     else
-      console.log "do 'starphleet add ship [region]' to get started\nvalid regions #{_.map(zones, (x) -> x.config.region)}".yellow
+      console.log "do 'starphleet add ship ec2 [region]' to get started\nvalid regions #{_.map(zones, (x) -> x.config.region)}".yellow
     process.exit 0
 
 if options.remove and options.ship and options.ec2
