@@ -17,6 +17,11 @@ test -f "${build_script}"
 
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
+CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
+cat << EOF > ${CONTAINER_CONF}
+lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/var/starphleet none bind,rw 0 0
+EOF
+trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
 (
 #flocked, parallel container build is a race condition on start
@@ -44,6 +49,7 @@ else
     chmod +x "${CONTAINER_ROOT}/.block"
     cp "${build_script}" "${CONTAINER_ROOT}/.build_script"
     chmod +x "${CONTAINER_ROOT}/.build_script"
+    cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
     lxc-start --name ${CONTAINER_NAME} -d
     starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
     lxc-attach --name ${CONTAINER_NAME} -- bash /.block
