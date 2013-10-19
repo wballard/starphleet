@@ -4,8 +4,6 @@
 #bootstrap with
 #curl -L https://raw.github.com/wballard/starphleet/master/provision/selfupdate | sudo bash
 
-apt-get install git
-
 REMOTE="${STARPHLEET_REMOTE:-https://github.com/wballard/starphleet.git}"
 LOCAL="/starphleet"
 if [ -d "${LOCAL}" ]; then
