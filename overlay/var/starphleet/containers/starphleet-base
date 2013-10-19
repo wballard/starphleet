@@ -58,6 +58,6 @@ echo -n ${BUILDPACKS}  | tr ' ' '\n' | xargs -I % git clone --depth 1 %
 #ruby superstition
 export HOME=/
 gem install bundler
-cd /build/buildpacks/heroku-buildpack-ruby && bundle install
+cd /var/starphleet/buildpacks/heroku-buildpack-ruby.git && bundle install
 
 announce container ready
