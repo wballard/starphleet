@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+stop starphleet
+/starphleet/provision/system
+start starphleet

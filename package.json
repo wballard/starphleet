@@ -12,7 +12,6 @@
     "urlencode": "./scripts/urlencode",
     "gitreceive": "./scripts/gitreceive",
     "sshcommand": "./scripts/sshcommand",
-    "starphleet-volumes": "./scripts/starphleet-volumes",
     "starphleet-push-create": "./scripts/starphleet-push-create",
     "starphleet-push-serve": "./scripts/starphleet-push-serve",
     "starphleet-push-destroy": "./scripts/starphleet-push-destroy",

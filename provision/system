@@ -3,9 +3,6 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${DIR}/../scripts/tools"
 
-#pre-shutdown to get a clean reinstall
-stop starphleet
-
 #this is a provisioning script for the base system/host/vm
 #run as root, with the starphleet source tree at /starphleet
 
@@ -90,8 +87,5 @@ if [ -d /starphleet/private_keys ]; then
   test -d /var/starphleet/private_keys || mkdir -p /var/starphleet/private_keys
   cp /starphleet/private_keys/* /var/starphleet/private_keys/
 fi
-
-#good to go, start the phleet
-start starphleet
 
 announce *Welcome to Starphleet*
