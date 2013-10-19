@@ -44,6 +44,7 @@ else
        sleep 1
      done
     fi
+    mkdir ${CONTAINER_ROOT}/var/starphleet
     cp `which tools` "${CONTAINER_ROOT}/tools"
     cp `which starphleet-wait-network` "${CONTAINER_ROOT}/.block"
     chmod +x "${CONTAINER_ROOT}/.block"
