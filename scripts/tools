@@ -1,5 +1,6 @@
-#!/usr/bin/env bash
+#main include file for starphleet scripts
 export version=0.0.1
+export STARPHLEET_PULSE="5"
 export HEADQUARTERS_LOCAL="/var/starphleet/headquarters"
 export CURRENT_ORDERS="/var/starphleet/current_orders"
 export NGINX_CONF="/var/starphleet/nginx"

@@ -7,7 +7,7 @@ set -e
 
 app_root=/app
 cache_root=/cache
-buildpack_root=/build/buildpacks
+buildpack_root=/var/starphleet/buildpacks
 
 buildpacks=($buildpack_root/*)
 selected_buildpack=

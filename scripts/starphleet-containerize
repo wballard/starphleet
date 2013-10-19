@@ -58,7 +58,7 @@ else
   until lxc-clone -o "${STARPHLEET_BASE}" -n "${CONTAINER_NAME}" -s; do
     sleep 1
   done
-  #mounts and files, always can see starphleet read only
+  #mounts and files, always can see starphleet
   mkdir ${CONTAINER_ROOT}/var/starphleet
   #and yes, here is the repo to containerize
   REMOTE=$(echo "${git_url}" | awk -F '#' '{print $1;}')

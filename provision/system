@@ -1,34 +1,96 @@
 #!/usr/bin/env bash
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "${DIR}/../scripts/tools"
+
+#pre-shutdown to get a clean reinstall
+stop starphleet
+
 #this is a provisioning script for the base system/host/vm
 #run as root, with the starphleet source tree at /starphleet
 
+if [ -f /var/starphleet/.system ]; then
+  info base apt packages already installed
+  warn delete /var/starphleet/.system to force reinstall
+else
+  apt-get -y update
+  apt-get -y install --force-yes git curl apt-transport-https lsof ssh sysstat
+  apt-get -y install --force-yes python g++ make git
+  apt-get -y install --force-yes lxc man
+  apt-get -y install --force-yes software-properties-common
+  add-apt-repository -y ppa:nginx/stable
+  add-apt-repository -y ppa:chris-lea/node.js
+  apt-get -y update
+  apt-get -y install --force-yes nginx
+  apt-get -y install --force-yes nodejs
+  apt-get -y install --force-yes libfuse-dev
 
-apt-get -y update
-apt-get -y install --force-yes git curl apt-transport-https lsof ssh sysstat
-apt-get -y install --force-yes python g++ make git
-apt-get -y install --force-yes lxc man
-apt-get -y install --force-yes software-properties-common
-add-apt-repository -y ppa:nginx/stable
-add-apt-repository -y ppa:chris-lea/node.js
-apt-get -y update
-apt-get -y install --force-yes nginx
-apt-get -y install --force-yes nodejs
-apt-get -y install --force-yes libfuse-dev
+  #initial apt package has nginx running. lame.
+  /etc/init.d/nginx stop
+  if find /etc/rc* | grep nginx; then
+    find /etc/rc* | grep nginx | xargs rm
+  fi
 
-#initial apt package has nginx running. lame.
-/etc/init.d/nginx stop
-if find /etc/rc* | grep nginx; then
-  find /etc/rc* | grep nginx | xargs rm
+  #we will be using bash. period
+  rm /bin/sh
+  ln /bin/bash /bin/sh
+
 fi
 
-#we will be using bash. period
-rm /bin/sh
-ln /bin/bash /bin/sh
+#starphleet lives here
+mkdir -p /var/starphleet/diagnostic
+cp /starphleet/scripts/tools /var/starphleet/tools
+chmod -R 0777 /var/starphleet
 
+#put in the system overlay, gets all the files in place
+rm /etc/init/starphleet*
+cp -R /starphleet/overlay/* /
 
-#now ready for the phleet
-/starphleet/provision/phleet
+#starphleet and all of its scripts
+set -e
+cd /starphleet
+npm install -g coffee-script
+npm install -g
+cd /
+set +e
 
-apt-get clean
+#buildpacks
+mkdir -p /var/starphleet/buildpacks
+pushd /var/starphleet/buildpacks
+for buildpack in $(cat "${DIR}/buildpacks"); do
+  echo $buildpack
+  starphleet-git-synch "${buildpack}"
+done
+popd
 
+#role account for folks acting as the admiral
+ADMIRAL="admiral"
+ADMIRAL_HOME="/home/admiral"
+useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
+adduser ${ADMIRAL} sudo
+test -d "${ADMIRAL_HOME}/.ssh" || mkdir -p "${ADMIRAL_HOME}/.ssh"
+chown -R ${ADMIRAL}:${ADMIRAL} /var/starphleet
+chown -R ${ADMIRAL}:${ADMIRAL} "${ADMIRAL_HOME}"
+info admiral created
+
+#role account for git push manual deployment
+gitreceive init
+adduser git sudo
+
+#role account to serve orders by hand
+sshcommand create serve "sudo starphleet-push-serve"
+adduser serve sudo
+sshcommand create destroy "sudo starphleet-push-destroy"
+adduser destroy sudo
+
+#transfer private keys, this is used in vagrant mode
+info checking for private keys in /starphleet/private_keys
+if [ -d /starphleet/private_keys ]; then
+  test -d /var/starphleet/private_keys || mkdir -p /var/starphleet/private_keys
+  cp /starphleet/private_keys/* /var/starphleet/private_keys/
+fi
+
+#good to go, start the phleet
+start starphleet
+
+announce *Welcome to Starphleet*
