@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #this script relies on the 'new' ec2 command line, non java version
 
-IMAGE=ami-c2910ff2
-NAME=starphleet-0.0.2
+IMAGE=ami-e457ced4
+NAME=starphleet-0.0.3
 ZONES="us-east-1 us-west-1 eu-west-1 sa-east-1 ap-northeast-1 ap-southeast-1 ap-southeast-2"
 
 for zone in ${ZONES}

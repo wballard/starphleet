@@ -14,7 +14,7 @@
       if mount | grep ${DEVICE} > /dev/null; then
         umount ${DEVICE}
       fi
-      mkfs.btrfs ${DEVICE}
+      mkfs.btrfs --force ${DEVICE}
       #scrub away the mount point
       if [ -d /var/lib/lxc ]; then
         rm -rf /var/lib/lxc

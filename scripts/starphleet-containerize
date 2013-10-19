@@ -59,7 +59,7 @@ else
     sleep 1
   done
   #mounts and files, always can see starphleet
-  mkdir ${CONTAINER_ROOT}/var/starphleet
+  test [ -d ${CONTAINER_ROOT}/var/starphleet ] || mkdir ${CONTAINER_ROOT}/var/starphleet
   #and yes, here is the repo to containerize
   REMOTE=$(echo "${git_url}" | awk -F '#' '{print $1;}')
   BRANCH=$(echo "${git_url}" | awk -F '#' '{print $2;}')
