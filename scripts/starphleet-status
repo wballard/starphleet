@@ -10,6 +10,36 @@ help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 FREE_CPU=$(mpstat | grep all | sed -e 's/^.*all[ ]*//g' | awk '{ print $9 }')
+
+PREV_TOTAL=0
+PREV_IDLE=0
+
+for ignore in 1 2
+do
+  CPU=(`cat /proc/stat | grep '^cpu '`) # Get the total CPU statistics.
+  unset CPU[0]                          # Discard the "cpu" prefix.
+  IDLE=${CPU[4]}                        # Get the idle CPU time.
+
+  # Calculate the total CPU time.
+  TOTAL=0
+  for VALUE in "${CPU[@]}"; do
+    let "TOTAL=$TOTAL+$VALUE"
+  done
+
+  # Calculate the CPU usage since we last checked.
+  let "DIFF_IDLE=$IDLE-$PREV_IDLE"
+  let "DIFF_TOTAL=$TOTAL-$PREV_TOTAL"
+  let "DIFF_USAGE=(1000*($DIFF_TOTAL-$DIFF_IDLE)/$DIFF_TOTAL+5)/10"
+  let "FREE_CPU=(100-$DIFF_USAGE)"
+
+  # Remember the total and idle CPU times for the next check.
+  PREV_TOTAL="$TOTAL"
+  PREV_IDLE="$IDLE"
+
+  # Wait before checking again.
+  sleep 1
+done
+
 FREE_RAM=$(free | grep Mem | awk '{ print (1 - ($3 / $2)) * 100 }')
 FREE_DISK=$(df /var/lib/lxc | tail -1 | awk '{ print 100 - $5 }')
 
@@ -36,19 +66,19 @@ status: ${MAIN_STATUS}
 EOF
 
 if [ -d "${CURRENT_ORDERS}" ]; then
-### ORDERS status starts here
+  ### ORDERS status starts here
 cat << EOF >> /dev/stdout
 orders:
 EOF
 
-for status in $(find "${CURRENT_ORDERS}" -name '*.starphleetstatus' | sort)
-do
-  ORDER=$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}[[")
-  cd "$(dirname "${status}")/git"
-  SHA=$(git log -1 --format='%h')
-  AT=$(git log -1 --format='%at')
-  AUTHOR=$(git log -1 --format='%ae')
-  TEXT=$(git log -1 --format='%s')
+  for status in $(find "${CURRENT_ORDERS}" -name '*.starphleetstatus' | sort)
+  do
+    ORDER=$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}[[")
+    cd "$(dirname "${status}")/git"
+    SHA=$(git log -1 --format='%h')
+    AT=$(git log -1 --format='%at')
+    AUTHOR=$(git log -1 --format='%ae')
+    TEXT=$(git log -1 --format='%s')
 cat << EOF >> /dev/stdout
   -
     order: ${ORDER}
@@ -58,6 +88,6 @@ cat << EOF >> /dev/stdout
     text: ${TEXT}
     status: $(cat "${status}")
 EOF
-done
-### ORDERS status ends here
+  done
+  ### ORDERS status ends here
 fi
