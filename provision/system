@@ -13,7 +13,7 @@ else
   apt-get -y update
   apt-get -y install --force-yes btrfs-tools
   apt-get -y install --force-yes git curl apt-transport-https lsof ssh sysstat
-  apt-get -y install --force-yes python g++ make git
+  apt-get -y install --force-yes python g++ make git pkg-config
   apt-get -y install --force-yes lxc man
   apt-get -y install --force-yes software-properties-common
   add-apt-repository -y ppa:nginx/stable
