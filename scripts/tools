@@ -58,7 +58,7 @@ function get_SHASUM() {
 }
 
 function get_CONTAINER_NAME() {
-  export CONTAINER_NAME=$(echo $1 | sha1sum | awk '{print $1;}')
+  export CONTAINER_NAME="$(echo $1 | sha1sum | awk '{print $1;}').orders"
   export CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 }
 
