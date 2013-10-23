@@ -34,6 +34,11 @@ else
   ln /bin/bash /bin/sh
 
 fi
+    starphleet-containermake "${STARPHLEET_BASE}"
+
+if [ -f "/var/starphleet/containers/starphleet-base.tgz" ]; then
+  starphleet-containermake starphleet-base "/var/starphleet/containers/starphleet-base.tgz"
+fi
 
 #starphleet lives here
 mkdir -p /var/starphleet/diagnostic
