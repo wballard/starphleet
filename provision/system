@@ -34,10 +34,9 @@ else
   ln /bin/bash /bin/sh
 
 fi
-    starphleet-containermake "${STARPHLEET_BASE}"
 
 if [ -f "/var/starphleet/containers/starphleet-base.tgz" ]; then
-  starphleet-containermake starphleet-base "/var/starphleet/containers/starphleet-base.tgz"
+  starphleet-containermake starphleet-base "/var/starphleet/containers/starphleet-base"
 fi
 
 #starphleet lives here
