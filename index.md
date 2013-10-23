@@ -109,6 +109,7 @@ the internet where each ship in the phleet can reach it.  The easiest
 thing to do is host on [github](http://www.github.com) or
 [bitbucket](http://www.bitbucket.com).
 
+## Mounting Services to URLs
 The simplest possible phleet has a directory structure like:
 
 ```
@@ -118,28 +119,36 @@ orders
 ```
 
 Which will serve exactly one service at `/`. The path structure of the
-headquarters create the virtual HTTP patch structure of your services,
-specifically to let you have a set of services, implemented in different
-technologies, to be federated together behind on domain name. This is
+headquarters creates the virtual HTTP path structure of your services.
+
+The idea here is to let you have a large number of small services, all
+easily autodeployed. These can be implemented in different
+technologies
+
+The services are federated together behind one domain name. This is
 particularly useful for single page applications making use of a set of
 small, sharp back end services.
 
-As an example, imagine an application that has a front end, and two back
-end web services `workflow` and `users`.
+As an example, imagine an application that has a front end, and three back
+end web services: `/`, `/workflow`, and `/users`.
 
 ```
 .
 ..
 orders
 workflow/
-  .
-  ..
   orders
 users/
-  .
-  ..
   orders
 ```
+
+## WebSockets
+Services can expose WebSockets as well as HTTP. Note: due to how
+[socket.io](http://socket.io) client libraries work, it is only usable
+mounted at `/`. Short explanation is that connection string it uses,
+which it looks like an URL, just plain isn't -- it picks out the host
+name and uses the *path* part as a namespace inside its messages rather
+than as an actual HTTP path.
 
 ## Orders
 An `orders` file is simply a shell script run in the context of
