@@ -113,28 +113,25 @@ thing to do is host on [github](http://www.github.com) or
 The simplest possible phleet has a directory structure like:
 
 ```
-..
-.
+authorized_keys/
+containers/
+.starphleet
 orders
 ```
 
-Which will serve exactly one service at `/`. The path structure of the
-headquarters creates the virtual HTTP path structure of your services.
-
-The idea here is to let you have a large number of small services, all
-easily autodeployed. These can be implemented in different
-technologies
+Which will serve exactly one service at `/` as specified by `orders`.
+The path structure of the headquarters creates the virtual HTTP path
+structure of your services.
 
 The services are federated together behind one domain name. This is
 particularly useful for single page applications making use of a set of
-small, sharp back end services.
+small, sharp back end services, without all the fuss of CORS or other
+cross domain technique.
 
 As an example, imagine an application that has a front end, and three back
 end web services: `/`, `/workflow`, and `/users`.
 
 ```
-.
-..
 orders
 workflow/
   orders
@@ -142,15 +139,39 @@ users/
   orders
 ```
 
-## WebSockets
-Services can expose WebSockets as well as HTTP. Note: due to how
-[socket.io](http://socket.io) client libraries work, it is only usable
-mounted at `/`. Short explanation is that connection string it uses,
-which it looks like an URL, just plain isn't -- it picks out the host
-name and uses the *path* part as a namespace inside its messages rather
-than as an actual HTTP path.
+### authorized_keys/
+A big difference form other PaaS: the ships are yours, and you can `ssh`
+to them. Specifically, you can put as many public keys in the
+`authorized_keys` folder of your headquarters, one per file, to let in
+other users as you see fit via ssh.
 
-## Orders
+These special users are called `admirals`, again sticking with our
+nautical theme.
+
+Users get to a ship with `ssh admiral@ship`. The admiral account is a
+member of `sudoers`.
+
+In practice, this open access to the base machine lets you do what you
+want, when you want, truly open. And if you use this power to somehow
+destroy a ship -- somebody has to wreck the ship -- you can always just
+add a new one.
+
+And, even more fun -- the `authorized_keys` themselves are continuously
+deployed, just add and remove admirals by adding and removing public key
+files in your github repository. Updates in seconds.
+
+### containers/
+Given any shell script script in your headquarters named
+`containers/name`, an LXC container named `name` will be created for
+you, and automatically updated any time the script changes. This
+container can be used as the base for a service via `STARPHLEET_BASE`.
+
+These custom build scripts are run as virtual root in a dedicated LXC
+container that is itself a snapshot built on top of starphleet's own
+base container. Basically, this means you can use `apt-get` to easily
+put on system software to serve as a base layer.
+
+### orders
 An `orders` file is simply a shell script run in the context of
 starphleet, at a given path, to control the autodeployment of a service.
 You can put anything in the script you like, it is just a shell script
@@ -165,11 +186,9 @@ Setting up orders as a shell script is to allow your creativity to run
 wild, but without you needing to learn a custom tool, DSL, scripting
 language, config database, or API.
 
-### Security
-**No Fooling Important**, `<git_url>`, just like your `<headquarters_url>`
-needs to be reachable from each ship in the fleet.
+**No Fooling Important**, `autodeploy <git_url>`, just like your
+`<headquarters_url>` needs to be reachable from each ship in the fleet.
 
-### Branches and Versions
 You can specify your `<git_url>` like `<git_url>#<branch>`, where branch can
 be a branch, a tag, or a commit sha -- anything you can check out. This
 hashtag approach lets you specify a deployment branch, as well as pin
@@ -254,45 +273,88 @@ put into rotation to take over future requests from the prior version.
 You get 60 seconds for your service to return this 200 past when it is
 initially started.
 
-# SSH Access
-A big difference form other PaaS: the ships are yours, and you can `ssh`
-to them. Specifically, you can put as many public keys in the
-`authorized_keys` folder of your headquarters, one per file, to let in
-other users as you see fit via ssh.
 
-These special users are called `admirals`, again sticking with our
-nautical theme.
+# Services
 
-Users get to a ship with `ssh admiral@ship`. The admiral account is a
-member of `sudoers`.
+Repository + Container + Buildpack = Service
 
-In practice, this open access to the base machine lets you do what you
-want, when you want, truly open. And if you use this power to somehow
-destroy a ship -- somebody has to wreck the ship -- you can always just
-add a new one.
+Services are any program you can dream up that meet these conditions:
 
-And, even more fun -- the `authorized_keys` themselves are continuously
-deployed, just add and remove admirals by adding and removing public key
-files in your github repository. Updates in seconds.
+* Serve HTTP traffic to a PORT
+* Are hosted in git
+* Can read environment variables to get their settings, especially
+  `PORT`
 
-# Containers
+Unlike other PaaS which is trying to force you into a specific notion of
+scalable programming, starphleet gives you more freedom.
+
+* No specific scale up / scale out tradeoff is enforced
+* No specific 'scaleable database' is mandated
+* This is no specific API
+* There are no mandated programming languages
+
+Services are run in LXC containers, and as such don't have acess to the
+entire machine, they are root in their own world of a container. This is
+convenient, particularly when making custom buildpacks as you can just
+use `apt-get install` without a sudo.
+
+Containers are thrown away often, on each new version, and each server
+reboot. So, while you do have local filesystem access inside a container
+running a service, don't count on it living any lenght of time.
+
+## Containers
 Starphleet encapsualtes each service in an LXC container. Starting from
-a base container equipped with Heroku buildpacks, you can create your
-own custom containers to speed up builds as needed, as well as your own
-custom buildpacks.
+a base container , you can create your own custom containers to speed up
+builds as needed.
 
-Containers serve as the bas system image, and are then customized with a
-servive+buildpack. In general:
+Containers serve to create fixed, cached sets of software such as compilers,
+that don't vary with each push of your service.
 
-  * containers serve to create fixed, cached sets of software such as compilers
-  * buildpacks exist to install dynamic software, for example referenced
-    `npm` packages.
+## Buildpacks
+Buildpacks autodetect and provision services on containers for you
+without worrying about system or os level setup.
+
+Huge thanks to Heroku for having open buildpacks, and to the open source
+community for making and extending them. The trick that makes the
+starphleet orders file so simple is the use of buildpacks and platform
+package managers to get your dependencies running.
+
+Buildpacks serve to install dynamic, service specific code such as `npm`
+or `rubygems` that may vary with each push of your service.
+
+## Provided Buildpacks
+Using the available Heroku buildpacks, out of the box starphleet with
+autodetect and provision a service running:
+
+ | | | |
+--- | --- | --- | ---
+Ruby |  NodeJS |  Java | Play
+Python| PHP | Clojure | Go
+Perl | Scala | Dart | NGINX static
+Apache |||
+
+## WebSockets
+Services can expose WebSockets as well as HTTP. Note: due to how
+[socket.io](http://socket.io) client libraries work, it is only usable
+mounted at `/`. Short explanation is that connection string it uses,
+which it looks like an URL, just plain isn't -- it picks out the host
+name and uses the *path* part as a namespace inside its messages rather
+than as an actual HTTP path.
+
+## Autodeploy
+This is really easy. Just commit and push to the repository referenced
+in the orders. Every ship will get it.
+
+## Rollback
+Again, this is really easy, just use `git revert` and pull out commits,
+then push to the repository referenced in the orders. Best thing is,
+this preserves history.
 
 ## Self Healing
-Each ship uses a pull strategy to keep the headquarters up to date. This
-is different than other platforms where you *push* your software to
-deploy. Some folks will not like this, as it involves polling. Some
-folks think polling is evil. Noted. Here are the reasons:
+Each ship uses a pull strategy to keep up to date. This is different
+than other platforms where you *push* your software to deploy. Some
+folks will not like this, as it involves polling. Some folks think
+polling is evil. Noted. Here are the reasons:
 
 * Ships go up and down, pull based lets ships catch up easily if they
   happened to be down when a new version was released
@@ -312,81 +374,6 @@ full benefit of autodeployment and rolling upgrades requires you to
 think about your storage, and how different versions of code may
 interact with that. Or, totally ingore it -- you won't be any worse off
 that with other autodeploy systems, or classic 'off the air' deployment.
-
-## Base Containers
-Base containers provide system software and are used via file system
-snapshot, so provisioning them is quick. This serves as a base layer to
-give you system control.
-
-## Scripts
-Given any script in your headquarters named `containers/name`, an LXC
-container named `name` will be created for you, and automatically
-updated any time the script changes.
-
-These custom build scripts are run as virtual root in a dedicated LXC
-container that is itself a snapshot built on top of starphleet's own
-base container.
-
-This is similar in a way to a `Dockerfile`, but in keeping with the
-starphleet design, is just a shellscript, so there are no new custom
-commands to learn.
-
-## Buildpacks
-Buildpacks autodetect and provision services on containers for you
-without worrying about system or os level setup.
-
-Huge thanks to Heroku for having open buildpacks, and to the open source
-community for making and extending them. The trick that makes the
-starphleet orders file so simple is the use of buildpacks and platform
-package managers to get your dependencies running.
-
-## Provided Buildpacks
-Using the available Heroku buildpacks, out of the box starphleet with
-autodetect and provision a service running:
-
- | | | |
---- | --- | --- | ---
-Ruby |  NodeJS |  Java | Play
-Python| PHP | Clojure | Go
-Perl | Scala | Dart | NGINX static
-Apache |||
-
-# Services
-Services are any program you can dream up that meet these conditions:
-
-* Serve HTTP traffic to a PORT
-* Are hosted in git
-* Can read environment variables to get their settings
-* Have a _buildpack_ to get dependencies
-
-Unlike other PaaS which is trying to force you into a specific notion of
-scalable programming, starphleet gives you more freedom.
-
-* No specific scale up / scale out tradeoff is enforced
-* No specific 'scaleable database' is mandated
-* This is no specific API
-* There are no mandated programming languages
-
-Services are run in LXC containers, and as such don't have acess to the
-entire machine, they are root in their own world of a container. This is
-convenient, particularly when making custom buildpacks as you can just
-use `apt-get install` without a sudo.
-
-Containers are thrown away often, on each new version, and each server
-reboot. So, while you do have local filesystem access inside a container
-running a service, don't count on it living any lenght of time.
-
-## Autodeploy
-This is really easy. Just commit and push to the repository referenced
-in the orders. Every ship will get it.
-
-## Rollback
-Again, this is really easy, just use `git revert` and pull out commits,
-then push to the repository referenced in the orders. Best thing is,
-this preserves history.
-
-## Testing
-Check the main [readme](https://github.com/wballard/starphleet).
 
 # Ships
 Each ship in the phleet runs every ordered service. This makes things
@@ -418,6 +405,10 @@ Don't feel limited to just one phleet. Part of making your own PaaS is
 to give you the freedom to mix and match as you see fit.
 
 ## Log Aggregation
+This is pretty cool `curl http://<ship>/starphleet/logstream`. This uses
+[tailor](https://github.com/wballard/tailor) to provide a SSE stream of
+log events.
+
 Just nearly as painful as getting everything deployed -- keeping an eye
 on it. You can generally get software that watches CPU, RAM, Disk,
 Network interfaces -- and it basically tells you nothing about your
