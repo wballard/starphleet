@@ -1,7 +1,11 @@
 <h1>Starphleet</h1>
 <div class="jumbotron">
 The fully open container based continuous deployment PaaS
+
+Containers + Buildpacks + Repositories = Autodeploy Services
 </div>
+
+
 
 This is a toolkit for turning virtual or physical machine infrastructure
 into a continuous deployment stack. Here are some of the observed
