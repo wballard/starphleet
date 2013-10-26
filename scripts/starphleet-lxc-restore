@@ -14,7 +14,10 @@ starphleet-lxc-destroy "${container_name}"
 
 CONTAINER_ROOT="/var/lib/lxc/${container_name}"
 mkdir -p "${CONTAINER_ROOT}"
-#subvolume just for the root file system
+#subvolume just for the root file system, the tar lays on top of this
 btrfs subvolume create "${CONTAINER_ROOT}/rootfs"
 cd "${CONTAINER_ROOT}"
 tar --numeric-owner -xzf "${backup_file}" --strip-components=1
+sed -i "s]^lxc.utsname.*]lxc.utsname = ${container_name}]" config
+sed -i "s]^lxc.rootfs.*]lxc.rootfs = ${CONTAINER_ROOT}/rootfs]" config
+sed -i "s]^lxc.mount.*]lxc.mount = ${CONTAINER_ROOT}/fstab]" config

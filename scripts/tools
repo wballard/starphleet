@@ -1,3 +1,4 @@
+# vim: set ft=sh :
 #main include file for starphleet scripts
 export version=0.0.1
 export STARPHLEET_PULSE="5"
@@ -64,6 +65,17 @@ function get_CONTAINER_NAME() {
 
 function autodeploy() {
   export AUTODEPLOY="${1}"
+}
+
+function get_RANDOM_MAC_ADDRESS() {
+  range=255
+  for i in {1..6}
+  do
+    number=$RANDOM
+    let "number %= $range"
+    segment[$i]=$(echo "obase=16;$number" | bc)
+  done
+  export RANDOM_MAC_ADDRESS="${segment[1]}:${segment[2]}:${segment[3]}:${segment[4]}:${segment[5]}:${segment[6]}"
 }
 
 #overrides
