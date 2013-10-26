@@ -6,49 +6,25 @@ Containers + Buildpacks + Repositories = Autodeploy Services
 </div>
 
 
-
 This is a toolkit for turning virtual or physical machine infrastructure
 into a continuous deployment stack. Here are some of the observed
-problems in autodeployment, and how Starphleet solves them:
+problems in autodeployment:
 
 * Virtualization wastes resources, specifically RAM and CPU running
   multiple operating system images, which costs real money
-  * containerization is the new virtualization, using LXC
-* PaaS has the same vendor lock-in risks of old proprietary software
-  * full open source is the only way to go
-  * allow installation on public and private clouds, as well as
-    computers
-* Continous deployment is too hard, so folks default to batches and
-  sprints
-  * leverage git, allowing deployment with no more than the normal `git
-    push` you use to share code
-  * make continuous deployment the default
-  * provides drainstop, restart, failover, and rollback as built ins
-  * be like unix: files, scripts, environment variables -- and spare
-    folks from the learning curve of yet another system tool
-  * platform package managers, `npm`, `gem`, `apt` beat learning a new
-    package/script system, and there is a ton of resource available
-  * Heroku Buildpacks already exist for most platforms, use them
-  * Focus on building services, not on systems
-* Multiple machine deployment is more work than running locally
-  * Make load balancing the default, spanning computers and geographies
-  * Make commands run across a phleet by default
-* Making many small services is hard to deploy
-  * Containerizing allows multiple services to benefit from failover and
-    redundancy without burning two machines/VMs per service
-  * Allow multiple services to be mounted behing one HTTP endpoint and
-    avoid cross domain and CORS hell
+* Autodeploy PaaS has the same vendor lock-in risks of old proprietary software
+* Continous deployment is almost always a custom scripting exercise
+* Multiple machine / clustered deployment is extra work
+* Making many small services is more work than making megalith services
 * Seeing what is going on across multiple machines is hard
-  * aggregate all the logs for each container ship in the phleet, and for
-    the entire phleet
-  * provide simple dashboards that give you the basics without requiring
-    understanding and installing other monitoring software
-* Autodeployment systems all seem to have their own system which itself
-  needs to be deployed!
-  * Starphleet leverages git heavily, avoiding the need for yet another
-    database or daemon
-  * Images are used as a starting point, avoiding the need to _install_
-    the install software
+* Deployment system all seem to be at the *system* not *service* level
+* Every available autodeploy system requires that you set up servers to
+  deploy your servers, which themselves aren't autodeployed
+
+# Get Started
+Check the main [readme](https://github.com/wballard/starphleet). In
+particular pay attention to the environment variables for public and
+private keys.
 
 # Concepts
 The grand tour so you know what we are talking about with all of our
@@ -61,25 +37,33 @@ about it.
 ## Command Line
 All of starphleet is available from a simple command line script, which
 lets you hook it into any existing scripting framework you like without
-needing to learn an API. The command line program is mostly shell, and
+needing to learn an API. The command line program is mostly shell, a
+sprinkle of python for [docopt](https://github.com/docopt/), and
 some nodejs, which is a nice way to deploy to your laptop or personal
 computer to manage starphleet.
 
 ```bash
-npm install "git+https://github.com/wballard/starphleet.git"
+npm install -g "git+https://github.com/wballard/starphleet.git"
 starphleet --help
 ```
 
 ## Phleet
 The top level grouping. You manage starphleet at this level. You can
-make as many phleets as you like to arrange different groupings.
+make as many phleets as you like to arrange different groupings of
+services.
+
+Phleets are analagous to a single root URL, like
+`http://services.myorg.com` would be one fleet, with multiple ships and
+multiple services.
 
 ## Headquarters
 A git repository that instructs a phleet how to operate. Using git in
 this way gives a versioned database of your configuation, allows you to
 edit and work with your own tools, and allows multiple hosting options.
 
-###Security
+Using git as the database avoids the need for a *starphleet server*.
+
+### Security
 **No Fooling Important** -- your `<headquarters_url>` git repo needs to be
 reachable by each ship running the starphleet software.
 
@@ -210,7 +194,6 @@ The environment variables are sourced in the order listed below, which
 allows you to override.
 
 ## Environment Variables
-
 Name | Value | Description
 --- | --- | ---
 PORT | number | This is an all important environment variable, and it is expected your service will honor it, publishing traffic here. This `PORT` is used to know where to connect the ship's proxy to your individual service.
@@ -277,9 +260,6 @@ initially started.
 
 
 # Services
-
-Repository + Container + Buildpack = Service
-
 Services are any program you can dream up that meet these conditions:
 
 * Serve HTTP traffic to a PORT
@@ -332,6 +312,13 @@ The tarball approach involves:
 The provision script approach involved:
 1. make a script `name` in your headquarters `./containers/name`
 2. use that `name` as `STARPHLEET_BASE`
+
+### Caching
+Containers will be cached, two sets of rules:
+* script containers diff the script, so as you update the script the
+  container will rebuild
+* URL/tarball containers hash the URL, so you can old school cache bust
+  by taking on ?xxx type verison numbers or #hash
 
 ## Buildpacks
 Buildpacks autodetect and provision services on containers for you
