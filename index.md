@@ -312,6 +312,27 @@ builds as needed.
 Containers serve to create fixed, cached sets of software such as compilers,
 that don't vary with each push of your service.
 
+### Provided Container
+The
+[starphleet-base](https://s3-us-west-2.amazonaws.com/starphleet/starphleet-base.tgz)
+container is set up to run with buildpacks. It is built from a
+[script](https://github.com/wballard/starphleet/blob/master/overlay/var/starphleet/containers/starphleet-base).
+
+### Your Own Containers
+There are two basic approaches:
+* Save a container to a tarball reachable by URL
+* Make a provision script and have each ship build
+
+The tarball approach involves:
+1. make an lxc container, however you see fit
+2. use `starphleet-lxc-backup` to create a tarball of the container
+3. publish the tarball wherever you can reach it via http[s]
+4. use that published URL as `STARPHLEET_BASE`
+
+The provision script approach involved:
+1. make a script `name` in your headquarters `./containers/name`
+2. use that `name` as `STARPHLEET_BASE`
+
 ## Buildpacks
 Buildpacks autodetect and provision services on containers for you
 without worrying about system or os level setup.
