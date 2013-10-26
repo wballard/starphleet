@@ -38,6 +38,9 @@ lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/var/starphleet none bind,rw 
 EOF
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
+(
+#flocked, parallel container build is a race condition on start
+flock 200
 #actually make a container here
 info creating ${CONTAINER_NAME}
 if lxc-ls | grep "^${CONTAINER_NAME}$" > /dev/null; then
@@ -110,3 +113,4 @@ else
   #now we have a running, built container
   info built ${CONTAINER_NAME}
 fi
+) 200>/var/lock/starphleet-containerize

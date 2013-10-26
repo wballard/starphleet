@@ -14,7 +14,7 @@ source "${DIR}/tools"
 #completely regenerate each time there is a change. headquarters won't take
 #any lip from its admirals!
 export SSH_CONFIG=/tmp/ssh.config.$$
-trap "rm -f "${SSH_CONFIG}"" EXIT
+trap 'rm -f ${SSH_CONFIG}*' EXIT
 echo "StrictHostKeyChecking no" > "${SSH_CONFIG}"
 echo "CheckHostIP no" >> "${SSH_CONFIG}"
 echo "UserKnownHostsFile "${SSH_CONFIG}.known_hosts"" >> "${SSH_CONFIG}"
