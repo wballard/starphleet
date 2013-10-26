@@ -12,9 +12,18 @@ if [ -f /var/starphleet/.system ]; then
 else
   apt-get -y update
   apt-get -y install --force-yes btrfs-tools
-  apt-get -y install --force-yes git curl apt-transport-https lsof ssh sysstat
-  apt-get -y install --force-yes python g++ make git pkg-config
-  apt-get -y install --force-yes lxc man
+  apt-get -y install --force-yes git
+  apt-get -y install --force-yes curl
+  apt-get -y install --force-yes apt-transport-https
+  apt-get -y install --force-yes ssh
+  apt-get -y install --force-yes sysstat
+  apt-get -y install --force-yes python
+  apt-get -y install --force-yes g++
+  apt-get -y install --force-yes make
+  apt-get -y install --force-yes pkg-config
+  apt-get -y install --force-yes lxc
+  apt-get -y install --force-yes man
+  apt-get -y install --force-yes python-pip
   apt-get -y install --force-yes software-properties-common
   add-apt-repository -y ppa:nginx/stable
   add-apt-repository -y ppa:chris-lea/node.js
@@ -33,10 +42,9 @@ else
   rm /bin/sh
   ln /bin/bash /bin/sh
 
-fi
+  #aws command line tools anyone, the non java ones...
+  pip install awscli
 
-if [ -f "/var/starphleet/containers/starphleet-base.tgz" ]; then
-  starphleet-containermake starphleet-base "/var/starphleet/containers/starphleet-base"
 fi
 
 #starphleet lives here

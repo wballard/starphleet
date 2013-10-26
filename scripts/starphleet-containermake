@@ -30,37 +30,32 @@ if diff "${CONTAINER_ROOT}/build_script" "${build_script}"; then
   info container is up to date
   exit 0
 else
-  if [ -f "/var/starphleet/containers/${CONTAINER_NAME}.tgz" ]; then
-    info using cached container ${CONTAINER_NAME}
-    starphleet-lxc-restore "${CONTAINER_NAME}" "/var/starphleet/containers/${CONTAINER_NAME}.tgz"
+  info making a new container ${CONTAINER_NAME}
+  starphleet-lxc-destroy ${CONTAINER_NAME}
+  #special case to make the base, otherwise go for a snapshot
+  if [ "${CONTAINER_NAME}" == 'starphleet-base' ]; then
+   lxc-create --name "${CONTAINER_NAME}" -t ubuntu
   else
-    info making a new container ${CONTAINER_NAME}
-    starphleet-lxc-destroy ${CONTAINER_NAME}
-    #special case to make the base, otherwise go for a snapshot
-    if [ "${CONTAINER_NAME}" == 'starphleet-base' ]; then
-     lxc-create --name "${CONTAINER_NAME}" -t ubuntu
-    else
-     until lxc-clone -o 'starphleet-base' -n "${CONTAINER_NAME}" -s > /dev/null 2>&1; do
-       sleep 1
-     done
-    fi
-    test -d "${CONTAINER_ROOT}/var/starphleet" || mkdir -p "${CONTAINER_ROOT}/var/starphleet"
-    cp `which tools` "${CONTAINER_ROOT}/tools"
-    cp `which starphleet-wait-network` "${CONTAINER_ROOT}/.block"
-    chmod +x "${CONTAINER_ROOT}/.block"
-    cp "${build_script}" "${CONTAINER_ROOT}/.build_script"
-    chmod +x "${CONTAINER_ROOT}/.build_script"
-    cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
-    lxc-start --name ${CONTAINER_NAME} -d
-    starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
-    lxc-attach --name ${CONTAINER_NAME} -- bash /.block
-    lxc-attach --name ${CONTAINER_NAME} -- bash /.build_script
-    lxc-stop --name ${CONTAINER_NAME}
-    starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
-    date > "/var/starphleet/diagnostic/${CONTAINER_NAME}"
-    #this is the 'done' marker used to make diff
-    mv "${CONTAINER_ROOT}/.build_script" "${CONTAINER_ROOT}/build_script"
-    info made container ${CONTAINER_NAME}
+   until lxc-clone -o 'starphleet-base' -n "${CONTAINER_NAME}" -s > /dev/null 2>&1; do
+     sleep 1
+   done
   fi
+  test -d "${CONTAINER_ROOT}/var/starphleet" || mkdir -p "${CONTAINER_ROOT}/var/starphleet"
+  cp `which tools` "${CONTAINER_ROOT}/tools"
+  cp `which starphleet-wait-network` "${CONTAINER_ROOT}/.block"
+  chmod +x "${CONTAINER_ROOT}/.block"
+  cp "${build_script}" "${CONTAINER_ROOT}/.build_script"
+  chmod +x "${CONTAINER_ROOT}/.build_script"
+  cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
+  lxc-start --name ${CONTAINER_NAME} -d
+  starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
+  lxc-attach --name ${CONTAINER_NAME} -- bash /.block
+  lxc-attach --name ${CONTAINER_NAME} -- bash /.build_script
+  lxc-stop --name ${CONTAINER_NAME}
+  starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
+  date > "/var/starphleet/diagnostic/${CONTAINER_NAME}"
+  #this is the 'done' marker used to make diff
+  mv "${CONTAINER_ROOT}/.build_script" "${CONTAINER_ROOT}/build_script"
+  info made container ${CONTAINER_NAME}
 fi
 ) 200>/var/lock/starphleet-containermake

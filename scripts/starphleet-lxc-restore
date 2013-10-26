@@ -10,14 +10,29 @@ source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-starphleet-lxc-destroy "${container_name}"
+set -e
 
-CONTAINER_ROOT="/var/lib/lxc/${container_name}"
-mkdir -p "${CONTAINER_ROOT}"
-#subvolume just for the root file system, the tar lays on top of this
-btrfs subvolume create "${CONTAINER_ROOT}/rootfs"
-cd "${CONTAINER_ROOT}"
-tar --numeric-owner -xzf "${backup_file}" --strip-components=1
-sed -i "s]^lxc.utsname.*]lxc.utsname = ${container_name}]" config
-sed -i "s]^lxc.rootfs.*]lxc.rootfs = ${CONTAINER_ROOT}/rootfs]" config
-sed -i "s]^lxc.mount.*]lxc.mount = ${CONTAINER_ROOT}/fstab]" config
+if lxc-ls | grep "^${container_name}$" > /dev/null; then
+  warn already built ${container_name}
+else
+  #get the actual restore bundle
+  if [ -f "${backup_file}" ]; then
+    #just a file
+    echo -n
+  else
+    #assume we can curl it
+    curl "${backup_file}" > /tmp/$$
+    trap 'rm -rf /tmp/$$' EXIT
+    backup_file=/tmp/$$
+  fi
+
+  CONTAINER_ROOT="/var/lib/lxc/${container_name}"
+  mkdir -p "${CONTAINER_ROOT}"
+  #subvolume just for the root file system, the tar lays on top of this
+  btrfs subvolume create "${CONTAINER_ROOT}/rootfs"
+  cd "${CONTAINER_ROOT}"
+  tar --numeric-owner -xzf "${backup_file}" --strip-components=1
+  sed -i "s]^lxc.utsname.*]lxc.utsname = ${container_name}]" config
+  sed -i "s]^lxc.rootfs.*]lxc.rootfs = ${CONTAINER_ROOT}/rootfs]" config
+  sed -i "s]^lxc.mount.*]lxc.mount = ${CONTAINER_ROOT}/fstab]" config
+fi

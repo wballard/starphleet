@@ -23,7 +23,8 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 set -e
 
 #places for things to live
-STARPHLEET_BASE="${STARPHLEET_BASE:-starphleet-base}"
+#STARPHLEET_BASE="${STARPHLEET_BASE:-https://s3-us-west-2.amazonaws.com/starphleet/starphleet-base.tgz}"
+STARPHLEET_BASE="${STARPHLEET_BASE:-file:///var/starphleet/containers/starphleet-base.tgz}"
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 
@@ -46,11 +47,19 @@ if lxc-ls | grep "^${CONTAINER_NAME}$" > /dev/null; then
   starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
   exit 0
 else
-  #this root container is an unfortunate special case
-  if [ "${STARPHLEET_BASE}" == 'starphleet-base' ]; then
+  if [ -f "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}" ]
+  then
+    #base container from a headquarters container script
+    starphleet-containermake "${STARPHLEET_BASE}" "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}"
+  elif [ -f "/var/starphleet/containers/${STARPHLEET_BASE}" ]
+  then
+    #base container from a starphleet provided container script
     starphleet-containermake "${STARPHLEET_BASE}" "/var/starphleet/containers/${STARPHLEET_BASE}"
   else
-    starphleet-containermake "${STARPHLEET_BASE}" "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}"
+    #base container from a remote source, try to restore/get treating the base as a file/url
+    get_HASH "${STARPHLEET_BASE}"
+    starphleet-lxc-restore "${HASH}" "${STARPHLEET_BASE}"
+    STARPHLEET_BASE="${HASH}"
   fi
   #clone on top of the base image, this is just to save disk space
   #this command can be problematic, giving off an error about
