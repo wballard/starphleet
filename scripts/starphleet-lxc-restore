@@ -12,6 +12,9 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 set -e
 
+(
+#flocked, parallel container restore is a race condition on start
+flock 200
 if lxc-ls | grep "^${container_name}$" > /dev/null; then
   warn already built ${container_name}
 else
@@ -36,3 +39,4 @@ else
   sed -i "s]^lxc.rootfs.*]lxc.rootfs = ${CONTAINER_ROOT}/rootfs]" config
   sed -i "s]^lxc.mount.*]lxc.mount = ${CONTAINER_ROOT}/fstab]" config
 fi
+) 200>/var/lock/starphleet-lxc-restore

@@ -23,8 +23,7 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 set -e
 
 #places for things to live
-#STARPHLEET_BASE="${STARPHLEET_BASE:-https://s3-us-west-2.amazonaws.com/starphleet/starphleet-base.tgz}"
-STARPHLEET_BASE="${STARPHLEET_BASE:-file:///var/starphleet/containers/starphleet-base.tgz}"
+STARPHLEET_BASE="${STARPHLEET_BASE:-https://s3-us-west-2.amazonaws.com/starphleet/starphleet-base.tgz}"
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 

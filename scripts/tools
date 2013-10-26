@@ -59,7 +59,7 @@ function get_SHASUM() {
 }
 
 function get_HASH() {
-  export HASH=$(echo $1 | sha1sum | awk '{ print substr($1,1,7); }')
+  export HASH=$(echo $1 | sha1sum | awk '{ print substr($1); }')
 }
 
 function get_CONTAINER_NAME() {
