@@ -166,9 +166,8 @@ files in your github repository. Updates in seconds.
 
 ### containers/
 Given any shell script script in your headquarters named
-`containers/name`, an LXC container named `name` will be created for
-you, and automatically updated any time the script changes. This
-container can be used as the base for a service via `STARPHLEET_BASE`.
+`containers/name`, an LXC container `name` will be created on demand to
+serve as a `STARPHLEET_BASE`.
 
 These custom build scripts are run as virtual root in a dedicated LXC
 container that is itself a snapshot built on top of starphleet's own
@@ -216,8 +215,7 @@ Name | Value | Description
 --- | --- | ---
 PORT | number | This is an all important environment variable, and it is expected your service will honor it, publishing traffic here. This `PORT` is used to know where to connect the ship's proxy to your individual service.
 autodeploy | &lt;git_url&gt; | This command in orders tells starphleet where to grab code from git.  While it is possible to put this globally, you really should limit it just to `orders` files.
-STARPHLEET_BASE | name | This is the named base container to use for a service, which you can use to speed up builds by having common packages pre-installed.  If not specified, this defaults to `starphleet-base` which is a general purpose buildpack aware container.
-BUILDPACK_URL | &lt;git_url&gt; | Set this to use a custom buildpack, otherwise Starphleet with attempt to use its default buildpacks to autodetect.
+STARPHLEET_BASE | name | Either a `name` matching `HQ/containers/name, or an URL to download a prebuilt container image. Defaults to the starphleet provided base container
 PUSH_HEADQUARTERS | any | When set, this will cause your headquarters to push back to the origin repository, allowing you to share state between ships.
 STARPHLEET_REMOTE | &lt;git_url&gt; | Set this in your .starphleet to use your own fork of starphleet itself
 STARPHLEET_PULSE | int | Default 5, number of seconds between autodeploy checks
