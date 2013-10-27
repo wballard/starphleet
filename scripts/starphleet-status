@@ -49,8 +49,6 @@ free_cpu: ${FREE_CPU}
 free_disk: ${FREE_DISK}
 EOF
 
-test -f /var/starphleet/.headquarters && source /var/starphleet/.headquarters
-
 cat << EOF >> /dev/stdout
 headquarters: ${HEADQUARTERS_REMOTE:-no headquarters}
 EOF

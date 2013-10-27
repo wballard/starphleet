@@ -47,14 +47,16 @@ else
 
 fi
 
-#starphleet lives here
-mkdir -p /var/starphleet/diagnostic
-cp /starphleet/scripts/tools /var/starphleet/tools
-chmod -R 0777 /var/starphleet
-
 #put in the system overlay, gets all the files in place
+#for the starphleet jobs
 rm /etc/init/starphleet*
 cp -R /starphleet/overlay/* /
+
+#starphleet lives here
+mkdir -p /var/starphleet
+chmod 755 /var/starphleet
+mkdir -p /var/starphleet/diagnostic
+chmod 755 /var/starphleet/diagnostic
 
 #starphleet and all of its scripts
 set -e
@@ -66,6 +68,7 @@ set +e
 
 #buildpacks
 mkdir -p /var/starphleet/buildpacks
+chmod 755 /var/starphleet
 pushd /var/starphleet/buildpacks
 for buildpack in $(cat "${DIR}/buildpacks"); do
   echo $buildpack
@@ -82,6 +85,10 @@ test -d "${ADMIRAL_HOME}/.ssh" || mkdir -p "${ADMIRAL_HOME}/.ssh"
 chown -R ${ADMIRAL}:${ADMIRAL} /var/starphleet
 chown -R ${ADMIRAL}:${ADMIRAL} "${ADMIRAL_HOME}"
 info admiral created
+export HOME="${ADMIRAL_HOME}"
+git config --global user.name "The Admiral"
+git config --global user.email "admiral@${HOSTNAME}"
+git config --global push.default matching
 
 #role account for git push manual deployment
 gitreceive init
@@ -97,6 +104,7 @@ adduser destroy sudo
 info checking for private keys in /starphleet/private_keys
 if [ -d /starphleet/private_keys ]; then
   test -d /var/starphleet/private_keys || mkdir -p /var/starphleet/private_keys
+  chmod 755 /var/starphleet/private_keys
   cp /starphleet/private_keys/* /var/starphleet/private_keys/
 fi
 

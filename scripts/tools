@@ -2,6 +2,7 @@
 #main include file for starphleet scripts
 export version=0.0.1
 export STARPHLEET_PULSE="5"
+export HEADQUARTERS_SOURCE="/var/starphleet/.headquarters"
 export HEADQUARTERS_LOCAL="/var/starphleet/headquarters"
 export CURRENT_ORDERS="/var/starphleet/current_orders"
 export NGINX_CONF="/var/starphleet/nginx"
@@ -10,38 +11,33 @@ export ADMIRAL_HOME="/home/admiral"
 if [ "${TERM}" == "unknown" ]; then
   export TERM="xterm-256color"
 fi
-#Library of colorized logging functions, just source this
-NORMAL=$(tput sgr0)
-GREEN=$(tput setaf 2; tput bold)
-YELLOW=$(tput setaf 3)
-BLUE=$(tput setaf 4)
-BLUE_BOLD=$(tput setaf 4; tput bold)
-RED=$(tput setaf 1)
-FATAL=$(tput setaf 1; tput bold)
+export TAILOR_NPM="git+https://github.com/wballard/tailor.git"
+export DASHBOARD_NPM="git+https://github.com/wballard/starphleet.dashboard.git"
 
+#Library of colorized logging functions, just source this
 function error() {
-  echo -e "$RED$*$NORMAL" 1>&2
+  echo -e  '\E[31m'"\033[1m$*\033[0m"
 }
 
 function announce() {
-  echo -e "$BLUE_BOLD$*$NORMAL" 1>&2
+  echo -e  '\E[34m'"\033[1m$*\033[0m"
 }
 
 function fatal() {
-  echo -e "$FATAL$*$NORMAL" 1>&2
+  echo -e  '\E[41m'"\033[1m$*\033[0m"
   exit 1
 }
 
 function info() {
-  echo -e "$GREEN$*$NORMAL" 1>&2
+  echo -e  '\E[32m'"\033[1m$*\033[0m"
 }
 
 function warn() {
-  echo -e "$YELLOW$*$NORMAL" 1>&2
+  echo -e  '\E[33m'"\033[1m$*\033[0m"
 }
 
 function log() {
-  echo -e "$NORMAL$*$NORMAL" 1>&2
+  echo -e "$*"
 }
 
 function code() {
@@ -85,4 +81,7 @@ function get_RANDOM_MAC_ADDRESS() {
 #overrides
 if [ -f "${HEADQUARTERS_LOCAL}/.starphleet" ]; then
   source "${HEADQUARTERS_LOCAL}/.starphleet"
+fi
+if [ -f "${HEADQUARTERS_SOURCE}" ]; then
+  source "${HEADQUARTERS_SOURCE}"
 fi

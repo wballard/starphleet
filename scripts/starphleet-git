@@ -34,6 +34,6 @@ done
 export GIT_SSH="/tmp/.git_ssh.$$"
 echo "ssh -F ${SSH_CONFIG} \$@" > ${GIT_SSH}
 chmod +x ${GIT_SSH}
-trap 'rm "${GIT_SSH}";rm "${SSH_CONFIG}*"' EXIT
+trap 'rm "${GIT_SSH}";rm "${SSH_CONFIG}"; test -f "${SSH_CONFIG}.known_hosts" && rm "${SSH_CONFIG}.known_hosts"' EXIT
 # Run the git command
 git "$@"
