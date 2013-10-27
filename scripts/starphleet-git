@@ -13,8 +13,7 @@ source "${DIR}/tools"
 
 #completely regenerate each time there is a change. headquarters won't take
 #any lip from its admirals!
-export SSH_CONFIG=/tmp/ssh.config.$$
-trap 'rm -f ${SSH_CONFIG}*' EXIT
+export SSH_CONFIG="/tmp/ssh.config.$$"
 echo "StrictHostKeyChecking no" > "${SSH_CONFIG}"
 echo "CheckHostIP no" >> "${SSH_CONFIG}"
 echo "UserKnownHostsFile "${SSH_CONFIG}.known_hosts"" >> "${SSH_CONFIG}"
@@ -32,9 +31,9 @@ do
 done
 
 # script that patches SSH to use our admiral config
-trap 'rm -f /tmp/.git_ssh.$$' EXIT
-echo "ssh -F "${SSH_CONFIG}" \$@" > /tmp/.git_ssh.$$
-chmod +x /tmp/.git_ssh.$$
-export GIT_SSH=/tmp/.git_ssh.$$
+export GIT_SSH="/tmp/.git_ssh.$$"
+echo "ssh -F ${SSH_CONFIG} \$@" > ${GIT_SSH}
+chmod +x ${GIT_SSH}
+trap 'rm "${GIT_SSH}";rm "${SSH_CONFIG}*"' EXIT
 # Run the git command
 git "$@"
