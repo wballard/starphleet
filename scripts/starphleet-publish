@@ -13,8 +13,9 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 set -e
 
-PORT=${container_port:-${PORT}}
-URL=${public_url:-/}
+PORT="${container_port:-${PORT}}"
+URL="${public_url:-/}"
+[ "${URL}" == "/" ] && URL=""
 CONTAINER_NAME=${container_name}
 IP_ADDRESS=$(lxc-ls --fancy | grep "^${CONTAINER_NAME}" | awk '{ print $3; }')
 HOSTNAME=$(hostname)
@@ -34,7 +35,6 @@ location ${URL}/ {
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "upgrade";
-  proxy_redirect / ${URL};
 }
 EOF
 

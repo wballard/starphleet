@@ -10,27 +10,14 @@ if [ -f /var/starphleet/.system ]; then
   info base apt packages already installed
   warn delete /var/starphleet/.system to force reinstall
 else
-  apt-get -y update
-  apt-get -y install --force-yes btrfs-tools
-  apt-get -y install --force-yes git
-  apt-get -y install --force-yes curl
-  apt-get -y install --force-yes apt-transport-https
-  apt-get -y install --force-yes ssh
-  apt-get -y install --force-yes sysstat
-  apt-get -y install --force-yes python
-  apt-get -y install --force-yes g++
-  apt-get -y install --force-yes make
-  apt-get -y install --force-yes pkg-config
-  apt-get -y install --force-yes lxc
-  apt-get -y install --force-yes man
-  apt-get -y install --force-yes python-pip
+  set -e
   apt-get -y install --force-yes software-properties-common
   add-apt-repository -y ppa:nginx/stable
   add-apt-repository -y ppa:chris-lea/node.js
   apt-get -y update
-  apt-get -y install --force-yes nginx
-  apt-get -y install --force-yes nodejs
-  apt-get -y install --force-yes libfuse-dev
+  for package in $(cat "${DIR}/packages"); do
+    apt-get -y install --force-yes ${package}
+  done
 
   #initial apt package has nginx running. lame.
   /etc/init.d/nginx stop
@@ -44,7 +31,7 @@ else
 
   #aws command line tools anyone, the non java ones...
   pip install awscli
-
+  set +e
 fi
 
 #put in the system overlay, gets all the files in place

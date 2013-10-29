@@ -78,7 +78,6 @@ else
   #get the source code, and get on the right branch
   git clone "${REMOTE}" "${CONTAINER_ROOT}/app" > /dev/null
   pushd "${CONTAINER_ROOT}/app" > /dev/null
-  chmod -R 0777 .
   if [ -n "${BRANCH}" ]; then
     git checkout "${BRANCH}"
   fi
