@@ -11,6 +11,7 @@ if [ -f /var/starphleet/.system ]; then
   warn delete /var/starphleet/.system to force reinstall
 else
   set -e
+  apt-get -y update
   apt-get -y install --force-yes software-properties-common
   add-apt-repository -y ppa:nginx/stable
   add-apt-repository -y ppa:chris-lea/node.js
