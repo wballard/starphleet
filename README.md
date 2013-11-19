@@ -57,8 +57,11 @@ Running on a cloud is ready to go with AWS. In order to get started, you
 need to have an AWS account, and the environment variables:
 
 ```bash
+#these are to appease AWS
 export AWS_ACCESS_KEY_ID=xxx
 export AWS_SECRET_ACCESS_KEY=xxx
+#this is to let you ssh into the instances that will be created
+export STARPHLEET_PUBLIC_KEY=~/.ssh/wballard@mailframe.net.pub
 ```
 
 And, to get going
@@ -67,8 +70,6 @@ And, to get going
 npm install "git+https://github.com/wballard/starphleet.git"
 starphleet --help
 
-#this uses STARPHLEET_PRIVATE_KEY if set to access git
-#and STARPHLEET_PUBLIC_KEY to allow ssh ubuntu@host access
 starphleet init ec2
 starphleet add ship ec2 us-west-1
 starphleet info ec2
