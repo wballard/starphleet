@@ -208,6 +208,8 @@ Services themselves can have variables, these are inspired by Heroku,
 and you keep them in the source repository of each service. These are
 the variables with the lowest precedence.
 
+Literally, make a `.env` file in the root of your service.
+
 This is where you specify a `BUILDPACK_URL`, but you can also put in
 other variables as you see fit.
 
