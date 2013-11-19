@@ -5,6 +5,9 @@
 ###
 ### Make sure a git repo, with an option #[branch|tag] is
 ### pulled and merged into the specified local
+###
+### This exist 0 if there were changes, 1 if not, easier
+### to use in a shell script if this way
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
@@ -15,35 +18,45 @@ REMOTE=$(echo "${remote}" | awk -F '#' '{print $1;}')
 BRANCH=$(echo "${remote}" | awk -F '#' '{print $2;}')
 local="${local:-$(basename ${REMOTE})}"
 
+set -e
+
 if [ -d "${local}" ]; then
   cd "${local}"
   #make sure we have the correct repository and branch
   ORIGIN_URL=`git config remote.origin.url`
+  #make sure we have the correct repository and branch
   if [ "${ORIGIN_URL}" != "${REMOTE}" ]; then
     warn repository url differs, reclone needed
     cd ..
     rm -rf "${local}"
-    starphleet-git clone "${REMOTE}" "${local}"
+    starphleet-git clone "${REMOTE}" "${local}" > /dev/null
+    exit 0
   fi
   CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
   if [ -n "${BRANCH}" ]; then
     if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
       warn specified branch changed, checkout out ${BRANCH}
-      git checkout "${BRANCH}"
+      git checkout "${BRANCH}" > /dev/null
+      exit 0
     fi
   fi
   CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
-  starphleet-git fetch --all || fatal fetch error
+  starphleet-git fetch --all > /dev/null || fatal fetch error
   HAS_CHANGES=`git diff HEAD...origin/${CURRENT_BRANCH} --raw`
   if [ "${HAS_CHANGES}x" != "x" ]; then
     warn new code detected, pulling
-    starphleet-git pull
+    starphleet-git pull > /dev/null
+    exit 0
   fi
 else
   warn ${local} not found, initial clone needed
-  starphleet-git clone "${REMOTE}" "${local}"
+  starphleet-git clone "${REMOTE}" "${local}" > /dev/null
   cd "${local}"
   if [ -n "${BRANCH}" ]; then
-    git checkout "${BRANCH}"
+    git checkout "${BRANCH}" > /dev/null
   fi
+  exit 0
 fi
+
+#no changes, pop an error code
+exit 1

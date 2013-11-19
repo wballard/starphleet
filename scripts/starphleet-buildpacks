@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-buildpacks
+### --help
+###
+### This will install and update all the standard starphleet buildpacks.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+[ -d "${BUILDPACKS}" ] || mkdir -p "${BUILDPACKS}"
+cd "${BUILDPACKS}"
+for buildpack in $(cat "${DIR}/buildpacks"); do
+  info installing $buildpack ...
+  starphleet-git-synch "${buildpack}" || true
+done

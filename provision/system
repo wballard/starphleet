@@ -54,15 +54,8 @@ npm install -g
 cd /
 set +e
 
-#buildpacks
-mkdir -p /var/starphleet/buildpacks
+mkdir -p /var/starphleet
 chmod 755 /var/starphleet
-pushd /var/starphleet/buildpacks
-for buildpack in $(cat "${DIR}/buildpacks"); do
-  echo $buildpack
-  starphleet-git-synch "${buildpack}"
-done
-popd
 
 #role account for folks acting as the admiral
 ADMIRAL="admiral"

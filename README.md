@@ -60,7 +60,8 @@ need to have an AWS account, and the environment variables:
 #these are to appease AWS
 export AWS_ACCESS_KEY_ID=xxx
 export AWS_SECRET_ACCESS_KEY=xxx
-#this is to let you ssh into the instances that will be created
+#this is a public key that starphleet will install on the instances for
+#you so that you can ssh to them
 export STARPHLEET_PUBLIC_KEY=~/.ssh/wballard@mailframe.net.pub
 ```
 

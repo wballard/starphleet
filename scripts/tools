@@ -8,6 +8,7 @@ export HEADQUARTERS_LOCAL="/var/starphleet/headquarters"
 export CURRENT_ORDERS="/var/starphleet/current_orders"
 export PRIVATE_KEYS="/var/starphleet/private_keys"
 export NGINX_CONF="/var/starphleet/nginx"
+export BUILDPACKS="/var/starphleet/buildpacks"
 export ADMIRAL="admiral"
 export ADMIRAL_HOME="/home/admiral"
 if [ "${TERM}" == "unknown" ]; then
