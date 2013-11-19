@@ -27,6 +27,7 @@ Usage:
   starphleet info ec2
   starphleet add ship ec2 <region>
   starphleet remove ship ec2 <hostname>
+  starphleet init bootkey [<STARPHLEET_HEADQUARTERS>]
   starphleet -h | --help | --version
 
 Notes:

@@ -88,12 +88,10 @@ adduser serve sudo
 sshcommand create destroy "sudo starphleet-push-destroy"
 adduser destroy sudo
 
-#transfer private keys, this is used in vagrant mode
-info checking for private keys in /starphleet/private_keys
-if [ -d /starphleet/private_keys ]; then
-  test -d /var/starphleet/private_keys || mkdir -p /var/starphleet/private_keys
-  chmod 755 /var/starphleet/private_keys
-  cp /starphleet/private_keys/* /var/starphleet/private_keys/
-fi
+#make a place for private keys
+test -d /var/starphleet/private_keys || mkdir -p /var/starphleet/private_keys
+chmod 755 /var/starphleet/private_keys
+
+start starphleet
 
 announce *Welcome to Starphleet*
