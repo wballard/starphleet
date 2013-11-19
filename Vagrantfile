@@ -12,7 +12,7 @@ Vagrant::Config.run do |config|
   system "test -n \"${STARPHLEET_PRIVATE_KEY}\" && cp \"${STARPHLEET_PRIVATE_KEY}\" \"private_keys/\""
   config.vm.provision :shell, :inline => "
   /starphleet/provision/system;
-  starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}"
+  [ -n \"#{ENV['STARPHLEET_HEADQUARTERS']}\" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}"
 end
 
 Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|

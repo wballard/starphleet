@@ -89,8 +89,8 @@ sshcommand create destroy "sudo starphleet-push-destroy"
 adduser destroy sudo
 
 #make a place for private keys
-test -d /var/starphleet/private_keys || mkdir -p /var/starphleet/private_keys
-chmod 755 /var/starphleet/private_keys
+test -d "${PRIVATE_KEYS}" || mkdir -p "${PRIVATE_KEYS}"
+chmod 755 "${PRIVATE_KEYS}"
 
 start starphleet
 
