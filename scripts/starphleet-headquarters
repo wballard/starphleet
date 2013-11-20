@@ -19,7 +19,6 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 set -e
 
 if [ -z "${url}" ]; then
-  info checking EC2 metadata
   #if we are on EC2, metadata provides keys and the headquarters url
   if curl "http://169.254.169.254/latest/user-data/" --silent --connect-timeout 1 > /dev/null; then
     info using EC2 metadata
@@ -28,6 +27,12 @@ if [ -z "${url}" ]; then
     curl "http://169.254.169.254/latest/user-data/" --silent \
     | jq --raw-output '.STARPHLEET_PRIVATE_KEY' \
     > /var/starphleet/private_keys/userdata
+  elif [ -f /starphleet/headquarters ]; then
+    info using host based file
+    url=$(cat /starphleet/headquarters)
+    if [ -d /starphleet/private_keys ]; then
+      cp /starphleet/private_keys/* "${PRIVATE_KEYS}"
+    fi
   fi
 fi
 

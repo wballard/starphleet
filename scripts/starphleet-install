@@ -1,16 +1,26 @@
 #!/usr/bin/env bash
-
+### Usage:
+###    starphleet-install
+### --help
+###
+### This will get starphleet on a base machine
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "${DIR}/../scripts/tools"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 #this is a provisioning script for the base system/host/vm
 #run as root, with the starphleet source tree at /starphleet
+
+#put in the system overlay, gets all the files in place
+#for the starphleet jobs
+rm /etc/init/starphleet*
+cp -R ${DIR}/../overlay/* /
 
 if [ -f /var/starphleet/.system ]; then
   info base apt packages already installed
   warn delete /var/starphleet/.system to force reinstall
 else
-  set -e
   apt-get -y update
   apt-get -y install --force-yes software-properties-common
   add-apt-repository -y ppa:nginx/stable
@@ -32,30 +42,20 @@ else
 
   #aws command line tools anyone, the non java ones...
   pip install awscli
-  set +e
 fi
 
-#put in the system overlay, gets all the files in place
-#for the starphleet jobs
-rm /etc/init/starphleet*
-cp -R /starphleet/overlay/* /
 
 #starphleet lives here
-mkdir -p /var/starphleet
+test -d /var/starphleet || mkdir -p /var/starphleet
 chmod 755 /var/starphleet
-mkdir -p /var/starphleet/diagnostic
+test -d /var/starphleet/diagnostic || mkdir -p /var/starphleet/diagnostic
 chmod 755 /var/starphleet/diagnostic
 
 #starphleet and all of its scripts
-set -e
 cd /starphleet
 npm install -g coffee-script
 npm install -g
 cd /
-set +e
-
-mkdir -p /var/starphleet
-chmod 755 /var/starphleet
 
 #role account for folks acting as the admiral
 ADMIRAL="admiral"

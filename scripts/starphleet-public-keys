@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-cleanup
+###    starphleet-public-keys
 ### --help
 ###
-### Call this to toss all starphleet state on shutdown
+### Call this to synchronize headquarters public keys to the admiral
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
