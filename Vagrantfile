@@ -9,6 +9,7 @@ Vagrant::Config.run do |config|
 # Setup virtual machine box. This VM configuration code is always executed.
   config.vm.box = BOX_NAME
   config.vm.box_url = BOX_URI
+  config.vm.network :hostonly, "10.1.1.2"
   system "test -n \"${STARPHLEET_PRIVATE_KEY}\" && cp \"${STARPHLEET_PRIVATE_KEY}\" \"private_keys/\""
   config.vm.provision :shell, :inline => "
   /starphleet/provision/system;
