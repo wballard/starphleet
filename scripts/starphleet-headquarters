@@ -1,20 +1,42 @@
 #! /usr/bin/env bash
 ### Usage:
-###    starphleet-headquarters <url>
+###    starphleet-headquarters [<url>]
 ### --help
 ###
 ### Set the headquarters <url>. This is where the phleet will look for
 ### orders.
 ### The <url> can include a #branch on the end which will refer to that specific
 ### branch rather than default master.
+###
+### If <url> is not specified, this script will try to figure the headquarters
+### for you by:
+### * looking at EC2 metadata, including grabbing a private key
+### * looking on all attached volumes for
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${DIR}/tools"
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 set -e
 
-cat <<EOF > /var/starphleet/.headquarters
+if [ -z "${url}" ]; then
+  info checking EC2 metadata
+  #if we are on EC2, metadata provides keys and the headquarters url
+  if curl "http://169.254.169.254/latest/user-data/" --silent --connect-timeout 1 > /dev/null; then
+    info using EC2 metadata
+    url=$(curl "http://169.254.169.254/latest/user-data/" --silent | jq --raw-output '.STARPHLEET_HEADQUARTERS')
+    test -d /var/starphleet/private_keys || mkdir -p /var/starphleet/private_keys
+    curl "http://169.254.169.254/latest/user-data/" --silent \
+    | jq --raw-output '.STARPHLEET_PRIVATE_KEY' \
+    > /var/starphleet/private_keys/userdata
+  fi
+fi
+
+if [ -z "${url}" ]; then
+  error no headquarters url provided
+else
+cat <<EOF > "${HEADQUARTERS_SOURCE}"
 export HEADQUARTERS_REMOTE="${url}"
 EOF
-
 info Headquarters is ${url}
+fi
+

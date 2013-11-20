@@ -1,8 +1,18 @@
 #!/usr/bin/env bash
+### Usage:
+###    starphleet-volumes
+### --help
+###
+### Make sure we have a btrfs /var/lib/lxc to allow snapshots
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
+if curl "http://169.254.169.254/latest/user-data/" --silent --connect-timeout 1 > /dev/null; then
+  info setting up EC2 volumes
   #btrfs filesystem for images, this is mainly for the ec2 ephemeral
   #file system
-  echo starting starphleet
   if df | grep /var/lib/lxc > /dev/null; then
     echo -n
   else
@@ -23,3 +33,4 @@
       mount ${DEVICE} /var/lib/lxc
     fi
   fi
+fi

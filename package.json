@@ -30,6 +30,9 @@
     "starphleet-status": "./scripts/starphleet-status",
     "starphleet-git": "./scripts/starphleet-git",
     "starphleet-git-synch": "./scripts/starphleet-git-synch",
+    "starphleet-cleanup": "./scripts/starphleet-cleanup",
+    "starphleet-volumes": "./scripts/starphleet-volumes",
+    "starphleet-public-keys": "./scripts/starphleet-public-keys",
     "starphleet-ready": "./scripts/starphleet-ready"
   },
   "repository": {

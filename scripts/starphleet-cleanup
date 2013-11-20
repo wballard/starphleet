@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-cleanup
+### --help
+###
+### Call this to toss all starphleet state on shutdown
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+#lose all service state on stop, putting things back to as if no
+#services were published at all
+test -d "${CURRENT_ORDERS}" && rm -rf "${CURRENT_ORDERS}"
+test -d "${HEADQUARTERS_LOCAL}" && rm -rf "${HEADQUARTERS_LOCAL}"
+test -d "${NGINX_CONF}/published" && rm -rf "${NGINX_CONF}/published"
+for container in $(lxc-ls | grep '\.orders')
+do
+  warn need to destroy ${container}
+  starphleet-lxc-destroy ${container}
+done
