@@ -19,7 +19,6 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   config.vm.hostname = "ship"
 
   config.vm.provider :vmware_fusion do |f, override|
-    config.vm.network "public_network"
     override.vm.box_url = VF_BOX_URI
     override.vm.synced_folder ".", "/starphleet"
     override.vm.synced_folder "~", "/hosthome"
@@ -32,6 +31,5 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     override.vm.synced_folder "~", "/hosthome"
     f.vmx["displayName"] = "ship"
   end
-
 
 end
