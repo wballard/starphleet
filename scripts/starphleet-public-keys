@@ -36,6 +36,7 @@ if [ -d "${HQAUTHKEYS}" ]; then
       cat "${f}" | gitreceive upload-key $(basename "${f}")
       cat "${f}" | sshcommand acl-add serve $(basename "${f}")
       cat "${f}" | sshcommand acl-add destroy $(basename "${f}")
+      cat "${f}" | sshcommand acl-add update $(basename "${f}")
     fi
   done
 

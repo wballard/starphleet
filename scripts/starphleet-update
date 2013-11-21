@@ -13,8 +13,11 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 REMOTE="${STARPHLEET_REMOTE:-https://github.com/wballard/starphleet.git}"
 LOCAL="/var/starphleet/github"
 if starphleet-git-synch "${REMOTE}" "${LOCAL}"; then
+  info updating starphleet from github
   stop starphleet
   /var/starphleet/github/scripts/starphleet-install
   start starphleet
+else
+  info you have the latest starphleet
 fi
 
