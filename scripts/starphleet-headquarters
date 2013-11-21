@@ -30,7 +30,7 @@ if [ -z "${url}" ]; then
   elif [ -f /starphleet/headquarters ]; then
     info using host based file
     url=$(cat /starphleet/headquarters)
-    if [ -d /starphleet/private_keys ]; then
+    if find /starphleet/private_keys/* ; then
       cp /starphleet/private_keys/* "${PRIVATE_KEYS}"
     fi
   fi

@@ -45,12 +45,10 @@ vagrant ssh -c "ifconfig eth0 | grep 'inet addr'"
 ```
 
 Note the IP address from the last command, you can see the dashboard at
-http://ip-address/starphleet/dashboard. And, the ever amazing echo
-service that is in the default headquarters can be tested with:
+http://ip-address/starphleet/dashboard. This will take a few minutes the
+first time.
 
-```bash
-curl http://ip-address/echo/hello
-```
+k
 
 ## In the Cloud, AWS
 Running on a cloud is ready to go with AWS. In order to get started, you
