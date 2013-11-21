@@ -199,7 +199,6 @@ Name | Value | Description
 PORT | number | This is an all important environment variable, and it is expected your service will honor it, publishing traffic here. This `PORT` is used to know where to connect the ship's proxy to your individual service.
 autodeploy | &lt;git_url&gt; | This command in orders tells starphleet where to grab code from git.  While it is possible to put this globally, you really should limit it just to `orders` files.
 STARPHLEET_BASE | name | Either a `name` matching `HQ/containers/name, or an URL to download a prebuilt container image. Defaults to the starphleet provided base container
-PUSH_HEADQUARTERS | any | When set, this will cause your headquarters to push back to the origin repository, allowing you to share state between ships.
 STARPHLEET_REMOTE | &lt;git_url&gt; | Set this in your .starphleet to use your own fork of starphleet itself
 STARPHLEET_PULSE | int | Default 5, number of seconds between autodeploy checks
 
@@ -393,6 +392,19 @@ nice and symmetrical, and simplifies scaling. Just add more ships if you
 need more capacity. If you need full tilt performance, you can easily
 make a phleet with just one ordered service at `/`. Need a different
 mixture of services? Launch another phleet!
+
+## Updating Starphleet on a Ship
+Starphleet provides ssh trigged maintenance commands, which allow the
+`authorized_keys` specified admirals to perform maintenance. Assuming
+you have a private key configured in your ssh, and there is a matching
+public key in your headquarters, you can just:
+
+```
+ssh update@ship
+```
+
+Where *ship* is the ip or hostname of one of your ships. This will check
+for the latest version of starphleet and install it for you. Cool!
 
 ## Linux Versions
 The actual ships are provided as virual machine images in EC2, VMWare,
