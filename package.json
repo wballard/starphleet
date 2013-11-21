@@ -34,6 +34,7 @@
     "starphleet-volumes": "./scripts/starphleet-volumes",
     "starphleet-public-keys": "./scripts/starphleet-public-keys",
     "starphleet-install": "./scripts/starphleet-install",
+    "starphleet-update": "./scripts/starphleet-update",
     "starphleet-ready": "./scripts/starphleet-ready"
   },
   "repository": {

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-update
+### --help
+###
+### This will install the latest version of starphleet from github
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+
+REMOTE="${STARPHLEET_REMOTE:-https://github.com/wballard/starphleet.git}"
+LOCAL="/var/starphleet/github"
+if starphleet-git-synch "${REMOTE}" "${LOCAL}"; then
+  stop starphleet
+  /var/starphleet/github/scripts/starphleet-install
+  start starphleet
+fi
+
