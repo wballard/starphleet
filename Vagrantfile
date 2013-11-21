@@ -21,7 +21,6 @@ end
 
 Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   config.vm.hostname = "ship"
-  config.vm.network "private_network", ip: "192.168.50.4"
 
   config.vm.provider :vmware_fusion do |f, override|
     override.vm.box_url = VF_BOX_URI
