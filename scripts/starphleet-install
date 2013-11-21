@@ -57,6 +57,12 @@ npm install -g coffee-script
 npm install -g
 cd /
 
+#make a place for keys
+test -d "${PRIVATE_KEYS}" || mkdir -p "${PRIVATE_KEYS}"
+chmod 755 "${PRIVATE_KEYS}"
+test -d "${PUBLIC_KEYS}" || mkdir -p "${PUBLIC_KEYS}"
+chmod 755 "${PUBLIC_KEYS}"
+
 #role account for folks acting as the admiral
 ADMIRAL="admiral"
 ADMIRAL_HOME="/home/admiral"
@@ -83,9 +89,6 @@ adduser destroy sudo
 sshcommand create update "sudo starphleet-update"
 adduser update sudo
 
-#make a place for private keys
-test -d "${PRIVATE_KEYS}" || mkdir -p "${PRIVATE_KEYS}"
-chmod 755 "${PRIVATE_KEYS}"
 
 start starphleet
 

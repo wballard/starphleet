@@ -27,11 +27,15 @@ if [ -z "${url}" ]; then
     curl "http://169.254.169.254/latest/user-data/" --silent \
     | jq --raw-output '.STARPHLEET_PRIVATE_KEY' \
     > /var/starphleet/private_keys/userdata
+    #EC2 will put on public keys in its own special way
   elif [ -f /starphleet/headquarters ]; then
-    info using host based file
+    info using host based files on to your Vagrant
     url=$(cat /starphleet/headquarters)
     if find /starphleet/private_keys/* ; then
       cp /starphleet/private_keys/* "${PRIVATE_KEYS}"
+    fi
+    if find /starphleet/public_keys/* ; then
+      cp /starphleet/public_keys/* "${PUBLIC_KEYS}"
     fi
   fi
 fi

@@ -28,6 +28,13 @@ to have the private key file you use with github, something like mine:
 export STARPHLEET_PRIVATE_KEY=~/.ssh/wballard@mailframe.net
 ```
 
+And, you will want to be able to SSH to your ships, that's one of the
+big benefits!
+
+```bash
+export STARPHLEET_PUBLIC_KEY=~/.ssh/wballard@mailframe.net.pub
+```
+
 Yeah, go ahead. Spam me, that's my real email :)
 
 ## Locally, Vagrant
@@ -48,7 +55,8 @@ Note the IP address from the last command, you can see the dashboard at
 http://ip-address/starphleet/dashboard. This will take a few minutes the
 first time.
 
-k
+Super magic is happening here pulling in the `STARPHLEET_HEADQUARTERS1
+and `STARPHLEET_PRIVATE_KEY` specified before as environment variables.
 
 ## In the Cloud, AWS
 Running on a cloud is ready to go with AWS. In order to get started, you
@@ -58,9 +66,6 @@ need to have an AWS account, and the environment variables:
 #these are to appease AWS
 export AWS_ACCESS_KEY_ID=xxx
 export AWS_SECRET_ACCESS_KEY=xxx
-#this is a public key that starphleet will install on the instances for
-#you so that you can ssh to them
-export STARPHLEET_PUBLIC_KEY=~/.ssh/wballard@mailframe.net.pub
 ```
 
 And, to get going

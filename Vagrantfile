@@ -11,6 +11,8 @@ Vagrant::Config.run do |config|
   config.vm.box_url = BOX_URI
   system "test -d private_keys || mkdir private_keys"
   system "test -n \"${STARPHLEET_PRIVATE_KEY}\" && cp \"${STARPHLEET_PRIVATE_KEY}\" \"private_keys/\""
+  system "test -d public_keys || mkdir public_keys"
+  system "test -n \"${STARPHLEET_PUBLIC_KEY}\" && cp \"${STARPHLEET_PUBLIC_KEY}\" \"public_keys/\""
   system "test -n \"${STARPHLEET_HEADQUARTERS}\" && echo \"${STARPHLEET_HEADQUARTERS}\" > headquarters"
   config.vm.provision :shell, :inline => "
   /starphleet/scripts/starphleet-install;
