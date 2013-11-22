@@ -41,7 +41,11 @@ if [ -z "${url}" ]; then
 fi
 
 if [ -z "${url}" ]; then
-  error no headquarters url provided
+  if [ -f "${HEADQUARTERS_SOURCE}" ]; then
+    echo -n
+  else
+    error no headquarters url provided
+  fi
 else
 cat <<EOF > "${HEADQUARTERS_SOURCE}"
 export HEADQUARTERS_REMOTE="${url}"
