@@ -28,7 +28,6 @@ touch ${AUTHFILE}
 for f in $(find "${HQAUTHKEYS}" "${PUBLIC_KEYS}")
 do
   if ssh-keygen -l -f "${f}" > /dev/null; then
-    info granting to ${f}
     #direct ssh as the admiral
     cat "${f}" >> ${AUTHFILE}
     #git push based build/serve sequence, much like a manual
