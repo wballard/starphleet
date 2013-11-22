@@ -33,4 +33,18 @@ if curl "http://169.254.169.254/latest/user-data/" --silent --connect-timeout 1 
       mount ${DEVICE} /var/lib/lxc
     fi
   fi
+else
+  if mount | grep /dev/sda; then
+    info device already mounted, not blowing myself away
+  else
+    if df | grep /var/lib/lxc > /dev/null; then
+      echo -n
+    else
+      DEVICE=/dev/sda1
+      parted --script -- ${DEVICE} mklabel gpt mkpart primary btrfs 1 -1
+      mkfs.btrfs --force ${DEVICE}
+      mkdir -p /var/lib/lxc
+      mount ${DEVICE} /var/lib/lxc
+    fi
+  fi
 fi
