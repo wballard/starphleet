@@ -52,10 +52,10 @@ test -d /var/starphleet/diagnostic || mkdir -p /var/starphleet/diagnostic
 chmod 755 /var/starphleet/diagnostic
 
 #starphleet and all of its scripts
-cd /starphleet
+pushd "${DIR}/.."
 npm install -g coffee-script
 npm install -g
-cd /
+popd
 
 #make a place for keys
 test -d "${PRIVATE_KEYS}" || mkdir -p "${PRIVATE_KEYS}"
