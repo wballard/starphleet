@@ -12,6 +12,7 @@ export NGINX_CONF="/var/starphleet/nginx"
 export BUILDPACKS="/var/starphleet/buildpacks"
 export ADMIRAL="admiral"
 export ADMIRAL_HOME="/home/admiral"
+export MAX_OPEN_FILES="4096"
 if [ "${TERM}" == "unknown" ]; then
   export TERM="xterm-256color"
 fi
