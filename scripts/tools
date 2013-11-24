@@ -3,6 +3,7 @@
 export version=0.0.1
 export STARPHLEET_PULSE="5"
 export STARPHLEET_DRAINSTOP_WAIT="30"
+export STARPHLEET_ROOT="/var/starphleet"
 export HEADQUARTERS_SOURCE="/var/starphleet/.headquarters"
 export HEADQUARTERS_LOCAL="/var/starphleet/headquarters"
 export CURRENT_ORDERS="/var/starphleet/current_orders"

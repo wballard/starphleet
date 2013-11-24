@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-nuc <device> <headquarters> [<private_key>]
+### --help
+###
+### Create a bootable NUC system on the target device.
+### WARNING! This only runs on Linux
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+#zcat /starphleet/provision/ship.img.gz
+curl -L --silent https://s3-us-west-2.amazonaws.com/starphleet-images/ship.img.gz \
+  | zcat \
+  | pv -s 4G \
+  | dd bs=1M of=${device}
+
+[ -d .build ] || mkdir .build
+mount ${device}1 .build
+ROOT=./.build/@
+
+cat > ${ROOT}/etc/network/interfaces  <<'EOF'
+auto lo
+iface lo inet loopback
+auto em1
+iface em1 inet dhcp
+EOF
+
+cat > ${ROOT}/etc/sudoers <<'EOF'
+Defaults	env_reset
+Defaults	mail_badpass
+Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+root	ALL=(ALL:ALL) ALL
+%admin ALL=(ALL) ALL
+%sudo	ALL=(ALL:ALL) NOPASSWD:ALL
+EOF
+
+mkdir -p "${ROOT}/${STARPHLEET_ROOT}"
+cat <<EOF > "${ROOT}/${HEADQUARTERS_SOURCE}"
+export HEADQUARTERS_REMOTE="${headquarters}"
+EOF
+info Headquarters is ${headquarters}
+
+if [ -s "${private_key}" ]; then
+  mkdir -p "${ROOT}/${PRIVATE_KEYS}"
+  cp "${private_key}" "${ROOT}/${PRIVATE_KEYS}/userdata"
+fi
+
+cp ${DIR}/../provision/bootstrap* ${ROOT}/
+
+umount .build

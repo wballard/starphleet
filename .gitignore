@@ -5,3 +5,4 @@ node_modules
 private_keys
 public_keys
 headquarters
+provision/ship.img.gz

@@ -26,7 +26,7 @@ if [ -z "${url}" ]; then
     test -d /var/starphleet/private_keys || mkdir -p /var/starphleet/private_keys
     curl "http://169.254.169.254/latest/user-data/" --silent \
     | jq --raw-output '.STARPHLEET_PRIVATE_KEY' \
-    > /var/starphleet/private_keys/userdata
+    > "${PRIVATE_KEYS}/userdata"
     #EC2 will put on public keys in its own special way
   elif [ -f /starphleet/headquarters ]; then
     info using host based files on to your Vagrant
