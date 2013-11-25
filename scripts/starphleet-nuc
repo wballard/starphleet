@@ -48,5 +48,6 @@ if [ -s "${private_key}" ]; then
 fi
 
 cp ${DIR}/../provision/bootstrap* ${ROOT}/
+cp ${DIR}/../provision/starphleet_nuc_bootstrap.conf ${ROOT}/etc/init
 
 umount .build

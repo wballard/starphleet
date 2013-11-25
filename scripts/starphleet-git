@@ -19,7 +19,7 @@ echo "CheckHostIP no" >> "${SSH_CONFIG}"
 echo "UserKnownHostsFile "${SSH_CONFIG}.known_hosts"" >> "${SSH_CONFIG}"
 chown ${ADMIRAL}:${ADMIRAL} "${SSH_CONFIG}"
 if [ -d "${PRIVATE_KEYS}" ]; then
-  for key in $(find "/var/starphleet/private_keys/")
+  for key in $(find "${PRIVATE_KEYS}")
   do
     if [ -f "${key}" ]; then
       if grep "PRIVATE KEY" "${key}" > /dev/null; then
