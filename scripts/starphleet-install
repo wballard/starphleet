@@ -73,9 +73,6 @@ chown -R ${ADMIRAL}:${ADMIRAL} ${STARPHLEET_ROOT}
 chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}
 info admiral created
 export HOME="${ADMIRAL_HOME}"
-git config --global user.name "The Admiral"
-git config --global user.email "admiral@${HOSTNAME}"
-git config --global push.default matching
 
 #role account for git push manual deployment
 gitreceive init
