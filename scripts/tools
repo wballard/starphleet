@@ -31,7 +31,7 @@ function announce() {
 }
 
 function fatal() {
-  echo -e  '\E[41m'"\033[1m$*\033[0m"
+  echo -e  '\E[31m'"\033[1m$*\033[0m"
   exit 1
 }
 

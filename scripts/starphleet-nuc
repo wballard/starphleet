@@ -10,7 +10,10 @@ source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-#zcat /starphleet/provision/ship.img.gz
+if [ $(uname) != 'Linux' ]; then
+  fatal this only will run on Linux
+fi
+
 curl -L --silent https://s3-us-west-2.amazonaws.com/starphleet-images/ship.img.gz \
   | zcat \
   | pv -s 4G \
