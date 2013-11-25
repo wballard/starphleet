@@ -12,6 +12,9 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 #this is a provisioning script for the base system/host/vm
 #run as root, with the starphleet source tree at /starphleet
 
+echo "GMT" > /etc/timezone
+dpkg-reconfigure -f noninteractive tzdata
+
 #put in the system overlay, gets all the files in place
 #for the starphleet jobs
 rm /etc/init/starphleet*
