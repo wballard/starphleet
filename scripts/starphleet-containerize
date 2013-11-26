@@ -94,9 +94,9 @@ else
   #orders script
   ORDERS="${orders_script:-${DIR}/orders}"
   cat "${DIR}/tools" > "${CONTAINER_ROOT}/.orders"
-  cat "${ORDERS}" >> "${CONTAINER_ROOT}/.orders"
+  [ -f "${ORDERS}" ] && cat "${ORDERS}" >> "${CONTAINER_ROOT}/.orders"
   #starphleet script
-  test -f "${HEADQUARTERS_LOCAL}/.starphleet" && cat "${HEADQUARTERS_LOCAL}/.starphleet" > "${CONTAINER_ROOT}/.starphleet"
+  [ -f "${HEADQUARTERS_LOCAL}/.starphleet" ] && cat "${HEADQUARTERS_LOCAL}/.starphleet" > "${CONTAINER_ROOT}/.starphleet"
   #and finally, the buildpack web start
   echo 'test -f /.pid && kill -- -$( ps opgid= $(cat /.pid) | tr -d " " )' > "${CONTAINER_ROOT}/kill"
   chmod +x "${CONTAINER_ROOT}/kill"

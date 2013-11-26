@@ -8,11 +8,27 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
-HOSTNAME=$(hostname)
-set -e
+
+function clean_up {
+  info cleaning up
+  starphleet-unpublish "/${container_name}"
+  starphleet-lxc-destroy "${container_name}"
+  rm -rf "${local_repo}"
+  info bye!
+  exit
+}
+
+trap clean_up HUP INT TERM
+
+info making "${local_repo}" into container "${container_name}"
+test -f "${local_repo}/.env" && source "${local_repo}/.env"
+test -f "${HEADQUARTERS_ENV}" && source "${HEADQUARTERS_ENV}"
+info cleaning up existing push container
 starphleet-lxc-destroy "${container_name}"
+info making this push into a container
 starphleet-containerize "${local_repo}" "${container_name}"
-info run with
-announce ssh serve@${HOSTNAME} ${container_name}
-info clean up with
-announce ssh destroy@${HOSTNAME} ${container_name}
+info PORT is ${PORT:-3000}
+starphleet-publish "${container_name}" "${PORT:-3000}" "/${container_name}"
+info starting your pushed container
+lxc-attach --name ${container_name} -- /web
+clean_up

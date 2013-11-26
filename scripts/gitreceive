@@ -13,8 +13,7 @@ case "$1" in
     touch $GITHOME/.ssh/authorized_keys
     cat > $GITHOME/receiver <<"EOF"
 #!/bin/bash
-CONTAINER_NAME="${1}"
-sudo starphleet-push-create "${PWD}" "${CONTAINER_NAME}"
+sudo starphleet-push-create "${PWD}" "${1}"
 EOF
     chmod +x $GITHOME/receiver
     chown -R $GITUSER $GITHOME

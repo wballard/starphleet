@@ -82,10 +82,6 @@ gitreceive init
 adduser git sudo
 
 #role account to serve orders by hand
-sshcommand create serve "sudo starphleet-push-serve"
-adduser serve sudo
-sshcommand create destroy "sudo starphleet-push-destroy"
-adduser destroy sudo
 sshcommand create update "sudo starphleet-update"
 adduser update sudo
 

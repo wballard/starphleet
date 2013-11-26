@@ -99,10 +99,17 @@ where the service will mount, and plopping in an `orders` file. Add.
 Commit. Push. Magic, any time that referenced git repo is updated, it
 will be redeployed to every ship watching your headquarters.
 
+## Testing Buildpacks
+
 Sometimes you just want to see the build, or figure out what is going on.
 
 Starphleet lets you directly push to a ship and run a service outside
-the autodeploy process like this:
+the autodeploy process via a git push, think Heroku.
+
+### Keys
+You will need to have a public key in the `authorized_keys` that is
+matched up with a private key in your local ssh config.
+
 
 ```bash
 git remote add ship git@$SHIP_IP:name

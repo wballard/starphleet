@@ -13,8 +13,6 @@
     "sshcommand": "./scripts/sshcommand",
     "buildpacks": "./scripts/buildpacks",
     "starphleet-push-create": "./scripts/starphleet-push-create",
-    "starphleet-push-serve": "./scripts/starphleet-push-serve",
-    "starphleet-push-destroy": "./scripts/starphleet-push-destroy",
     "starphleet-headquarters": "./scripts/starphleet-headquarters",
     "starphleet-containerize": "./scripts/starphleet-containerize",
     "starphleet-containermake": "./scripts/starphleet-containermake",

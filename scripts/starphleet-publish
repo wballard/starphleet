@@ -38,6 +38,6 @@ location ${URL}/ {
 }
 EOF
 
-initctl list | grep 'starphleet_nginx' > /dev/null && reload starphleet_nginx
+initctl list | grep 'starphleet_nginx' > /dev/null && (reload starphleet_nginx || start starphleet_nginx)
 
 info published to http://${HOSTNAME}${URL}
