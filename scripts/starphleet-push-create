@@ -18,7 +18,22 @@ function clean_up {
   exit
 }
 
-trap clean_up HUP INT TERM
+trap clean_up HUP INT TERM EXIT
+
+
+function top_level_parent_pid {
+    # Look up the parent of the given PID.
+    pid=${1:-$$}
+    stat=($(</proc/${pid}/stat))
+    ppid=${stat[3]}
+    pname=${stat[1]}
+
+    # /sbin/init always has a PID of 1, so if you reach that, the current PID is
+    # the top-level parent. Otherwise, keep looking.
+    if [[ ${ppid} -ne 1 ]] ; then
+      top_level_parent_pid ${ppid}
+    fi
+}
 
 info making "${local_repo}" into container "${container_name}"
 test -f "${local_repo}/.env" && source "${local_repo}/.env"
@@ -30,5 +45,11 @@ starphleet-containerize "${local_repo}" "${container_name}"
 info PORT is ${PORT:-3000}
 starphleet-publish "${container_name}" "${PORT:-3000}" "/${container_name}"
 info starting your pushed container
-lxc-attach --name ${container_name} -- /web
-clean_up
+lxc-attach --name ${container_name} -- /web &
+while [ 1 ]; do
+  sleep 1
+  top_level_parent_pid
+  if [ ${pname} != '(sshd)' ]; then
+    exit 0
+  fi
+done
