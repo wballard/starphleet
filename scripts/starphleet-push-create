@@ -42,8 +42,8 @@ info cleaning up existing push container
 starphleet-lxc-destroy "${container_name}"
 info making this push into a container
 starphleet-containerize "${local_repo}" "${container_name}"
-info PORT is ${PORT:-3000}
-starphleet-publish "${container_name}" "${PORT:-3000}" "/${container_name}"
+info PORT is ${PORT}
+starphleet-publish "${container_name}" "${PORT}" "/${container_name}"
 info starting your pushed container
 lxc-attach --name ${container_name} -- /web &
 while [ 1 ]; do

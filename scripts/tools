@@ -1,6 +1,7 @@
 # vim: set ft=sh :
 #main include file for starphleet scripts
 export version=0.0.1
+export PORT=3000
 export STARPHLEET_PULSE="5"
 export STARPHLEET_DRAINSTOP_WAIT="30"
 export STARPHLEET_ROOT="/var/starphleet"
