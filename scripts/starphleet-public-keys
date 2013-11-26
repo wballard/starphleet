@@ -47,6 +47,6 @@ if [ -f "${HEADQUARTERS_LOCAL}/ssl/crt" ] && [ -f "${HEADQUARTERS_LOCAL}/ssl/key
   info updating SSL keys
   cp "${HEADQUARTERS_LOCAL}/ssl/crt" "${NGINX_CONF}/published/crt"
   cp "${HEADQUARTERS_LOCAL}/ssl/key" "${NGINX_CONF}/published/key"
-  reload starphleet_nginx
+  restart starphleet_nginx
 fi
 
