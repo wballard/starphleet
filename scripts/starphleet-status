@@ -44,6 +44,7 @@ FREE_RAM=$(free | grep Mem | awk '{ print (1 - ($3 / $2)) * 100 }')
 FREE_DISK=$(df /var/lib/lxc | tail -1 | awk '{ print 100 - $5 }')
 
 cat << EOF >> /dev/stdout
+hostname: $(hostname)
 free_ram: ${FREE_RAM}
 free_cpu: ${FREE_CPU}
 free_disk: ${FREE_DISK}
@@ -53,15 +54,18 @@ cat << EOF >> /dev/stdout
 headquarters: ${HEADQUARTERS_REMOTE:-no headquarters}
 EOF
 
-if [ -f "/var/starphleet/dashboard.starphleetstatus" ]; then
-  MAIN_STATUS=$(cat "/var/starphleet/dashboard.starphleetstatus")
-else
-  MAIN_STATUS="offline"
-fi
+cat << EOF >> /dev/stdout
+services:
+EOF
+IFS=$'\n'
+for service in $(initctl list | grep starphleet)
+do
 
 cat << EOF >> /dev/stdout
-status: ${MAIN_STATUS}
+  - ${service}
 EOF
+done
+unset IFS
 
 if [ -d "${CURRENT_ORDERS}" ]; then
   ### ORDERS status starts here
