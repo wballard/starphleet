@@ -6,6 +6,9 @@ set -e
 #This is the buildpack runner, this is really only useful to run
 #on a container as part of a build
 
+#use the angry cache proxy
+export http_proxy=http://ship:3032
+
 app_root=/app
 cache_root=/cache
 buildpack_root=/var/starphleet/buildpacks
