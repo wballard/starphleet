@@ -108,18 +108,16 @@ the autodeploy process via a git push, think Heroku.
 
 ### Keys
 You will need to have a public key in the `authorized_keys` that is
-matched up with a private key in your local ssh config.
-
+matched up with a private key in your local ssh config. Remember, you
+are pushing to the ship -- so this is just like pushing to any other git
+server over ssh.
 
 ```bash
+#the ship as a remote, the `name` can be anything you like
 git remote add ship git@$SHIP_IP:name
+#send along to the ship, this will build and serve
+#printing out an URL where you can access it for test
 git push ship master
-ssh serve@$SHIP_IP name
 #control C when you are bored or done
-ssh destroy@$SHIP_IP name
 ```
 
-This uses a git receive hook, and ssh command accounts (serve and
-destroy) to control the process. Your test service will be mounted on
-the ship at `http://$SHIP_IP/name`, allowing you to test the service at
-an alternate root -- exposing any hardcoded / trouble!
