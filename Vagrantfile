@@ -28,6 +28,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     override.vm.synced_folder ".", "/starphleet"
     override.vm.synced_folder "~", "/hosthome"
     f.vmx["displayName"] = "ship"
+    f.vmx["memsize"] = "4096"
   end
 
   config.vm.provider :virtualbox do |f, override|

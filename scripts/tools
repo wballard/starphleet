@@ -5,6 +5,7 @@ export PORT=3000
 export STARPHLEET_PULSE="5"
 export STARPHLEET_DRAINSTOP_WAIT="30"
 export STARPHLEET_ROOT="/var/starphleet"
+export STARPHLEET_CACHE="/var/starphleet/cache"
 export HEADQUARTERS_SOURCE="/var/starphleet/.headquarters"
 export HEADQUARTERS_LOCAL="/var/starphleet/headquarters"
 export HEADQUARTERS_ENV="/var/starphleet/headquarters/.starphleet"
@@ -20,11 +21,12 @@ export MAX_OPEN_FILES="4096"
 if [ "${TERM}" == "unknown" ]; then
   export TERM="xterm-256color"
 fi
-export TAILOR_REMOTE="https://github.com/wballard/tailor.git"
-export TAILOR_LOCAL="/var/starphleet/tailor"
-export DASHBOARD_REMOTE="https://github.com/wballard/starphleet.dashboard.git"
-export DASHBOARD_LOCAL="/var/starphleet/dashboard"
+export TAILOR_REMOTE="git+https://github.com/wballard/tailor.git"
+export DASHBOARD_REMOTE="git+https://github.com/wballard/starphleet.dashboard.git"
+export ANGRY_CACHE_REMOTE="git+https://github.com/epeli/angry-caching-proxy.git"
 export NPM_FLAGS="--registry http://registry.glgresearch.com/registry/_design/app/_rewrite"
+
+ulimit -n ${MAX_OPEN_FILES}
 
 #Library of colorized logging functions, just source this
 function error() {
