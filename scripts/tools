@@ -24,6 +24,7 @@ export TAILOR_REMOTE="https://github.com/wballard/tailor.git"
 export TAILOR_LOCAL="/var/starphleet/tailor"
 export DASHBOARD_REMOTE="https://github.com/wballard/starphleet.dashboard.git"
 export DASHBOARD_LOCAL="/var/starphleet/dashboard"
+export NPM_FLAGS="--registry http://registry.glgresearch.com/registry/_design/app/_rewrite"
 
 #Library of colorized logging functions, just source this
 function error() {

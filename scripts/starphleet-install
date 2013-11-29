@@ -56,8 +56,8 @@ chmod 755 ${STARPHLEET_ROOT}/diagnostic
 
 #starphleet and all of its scripts
 pushd "${DIR}/.."
-npm install -g coffee-script
-npm install -g
+npm ${NPM_FLAGS} install -g coffee-script
+npm ${NPM_FLAGS} install -g
 popd
 
 #make a place for keys
