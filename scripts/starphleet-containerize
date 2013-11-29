@@ -86,6 +86,12 @@ else
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
   #block script, makes sure we are on the air
   cp "${DIR}/starphleet-wait-network" "${CONTAINER_ROOT}/block"
+  #git scripts
+  cp "${DIR}/tools" "${CONTAINER_ROOT}/usr/bin/tools"
+  cp "${DIR}/docopts" "${CONTAINER_ROOT}/usr/bin/docopts"
+  cp "${DIR}/docopt.py" "${CONTAINER_ROOT}/usr/bin/docopt.py"
+  cp "${DIR}/starphleet-git" "${CONTAINER_ROOT}/usr/bin/starphleet-git"
+  cp "${DIR}/starphleet-git-synch" "${CONTAINER_ROOT}/usr/bin/starphleet-git-synch"
   #build script, uses buildpacks
   cp "${DIR}/starphleet-buildpack-script" "${CONTAINER_ROOT}/buildpack"
   # environment, enforced by our buildpack script, so the preference order is:
