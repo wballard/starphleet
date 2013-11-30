@@ -18,6 +18,7 @@ pkg = require(path.join(__dirname, "../package.json"))
 colors = require 'colors'
 table = require 'cli-table'
 request = require 'request'
+os = require 'os'
 
 doc = """
 #{pkg.description}
@@ -27,6 +28,7 @@ Usage:
   starphleet info ec2
   starphleet add ship ec2 <region>
   starphleet remove ship ec2 <hostname>
+  starphleet name ship ec2 <zone_id> <domain_name> <address>...
   starphleet -h | --help | --version
 
 Notes:
@@ -123,14 +125,16 @@ hashname = ->
   url = process.env['STARPHLEET_HEADQUARTERS']
   "starphleet-#{md5(url).substr(0,8)}"
 
+if options.ec2
+  mustBeSet 'AWS_ACCESS_KEY_ID'
+  mustBeSet 'AWS_SECRET_ACCESS_KEY'
+
 ###
 Init is all about setting up a .starphleet file with the key and url. This will
 be used by subsequent commands when creating ships.
 ###
 
 if options.init and options.ec2
-  mustBeSet 'AWS_ACCESS_KEY_ID'
-  mustBeSet 'AWS_SECRET_ACCESS_KEY'
   mustBeSet 'STARPHLEET_HEADQUARTERS'
   initZone = (zone, callback) ->
     async.waterfall [
@@ -210,9 +214,7 @@ if options.init and options.ec2
     isThereBadNews err
     process.exit 0
 
-if options.add and options.ship
-  mustBeSet 'AWS_ACCESS_KEY_ID'
-  mustBeSet 'AWS_SECRET_ACCESS_KEY'
+if options.add and options.ship and options.ec2
   mustBeSet 'STARPHLEET_HEADQUARTERS'
   mustBeSet 'STARPHLEET_PUBLIC_KEY', 'is not set, you will not be able to ssh ubuntu@host'
   niceToHave 'STARPHLEET_PRIVATE_KEY', 'is not set, you will only be able to access https git repos read only one way'
@@ -266,8 +268,6 @@ if options.add and options.ship
     process.exit 0
 
 if options.info and options.ec2
-  mustBeSet 'AWS_ACCESS_KEY_ID'
-  mustBeSet 'AWS_SECRET_ACCESS_KEY'
   mustBeSet 'STARPHLEET_HEADQUARTERS'
   queryZone = (zone, zoneCallback) ->
     async.waterfall [
@@ -364,4 +364,33 @@ if options.remove and options.ship and options.ec2
     isThereBadNews err
     if not options.removing
       isThereBadNews "#{options['<hostname>']} not found"
+    process.exit 0
+
+if options.name and options.ship and options.ec2
+  route53 = new AWS.Route53 {region: 'us-east-1'}
+  async.waterfall [
+    #need to check for an existing record, shame there is no UPDATE...
+    (nestedCallback) ->
+      route53.listResourceRecordSets {HostedZoneId: options['<zone_id>'], StartRecordName: "#{os.hostname()}.#{options['<domain_name>']}", StartRecordType: 'A', MaxItems: '1'}, nestedCallback
+    (records, nestedCallback) ->
+      change =
+        HostedZoneId: options['<zone_id>']
+        ChangeBatch:
+          Comment: 'Starphleet name update'
+          Changes: []
+      if records.ResourceRecordSets?[0]
+        change.ChangeBatch.Changes.push
+          Action: 'DELETE'
+          ResourceRecordSet: records.ResourceRecordSets[0]     
+      change.ChangeBatch.Changes.push
+        Action: 'CREATE'
+        ResourceRecordSet:
+          Name: "#{os.hostname()}.#{options['<domain_name>']}"
+          Type: 'A'
+          TTL: 300
+          ResourceRecords: _.map options['<address>'], (x) -> Value: x
+      route53.changeResourceRecordSets change, nestedCallback
+  ], (err, results) ->
+    isThereBadNews err
+    console.log JSON.stringify results
     process.exit 0
