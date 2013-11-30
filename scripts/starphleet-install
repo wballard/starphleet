@@ -59,12 +59,6 @@ chmod 755 ${STARPHLEET_ROOT}
 test -d ${STARPHLEET_ROOT}/diagnostic || mkdir -p ${STARPHLEET_ROOT}/diagnostic
 chmod 755 ${STARPHLEET_ROOT}/diagnostic
 
-npm ${NPM_FLAGS} install -g "${ANGRY_CACHE_REMOTE}"
-#use the angry cache proxy
-start starphleet_cache
-export http_proxy=http://ship:3032
-sleep 1
-
 npm ${NPM_FLAGS} install -g coffee-script
 npm ${NPM_FLAGS} install -g "${TAILOR_REMOTE}"
 npm ${NPM_FLAGS} install -g "${DASHBOARD_REMOTE}"

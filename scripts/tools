@@ -10,6 +10,7 @@ export HEADQUARTERS_SOURCE="/var/starphleet/.headquarters"
 export HEADQUARTERS_LOCAL="/var/starphleet/headquarters"
 export HEADQUARTERS_ENV="/var/starphleet/headquarters/.starphleet"
 export SHIPS="${HEADQUARTERS_LOCAL}/ships"
+export SHIP_SCRIPTS="${HEADQUARTERS_LOCAL}/shipscripts"
 export CURRENT_ORDERS="/var/starphleet/current_orders"
 export PRIVATE_KEYS="/var/starphleet/private_keys"
 export PUBLIC_KEYS="/var/starphleet/public_keys"
@@ -23,7 +24,6 @@ if [ "${TERM}" == "unknown" ]; then
 fi
 export TAILOR_REMOTE="git+https://github.com/wballard/tailor.git"
 export DASHBOARD_REMOTE="git+https://github.com/wballard/starphleet.dashboard.git"
-export ANGRY_CACHE_REMOTE="git+https://github.com/epeli/angry-caching-proxy.git"
 export NPM_FLAGS="--registry http://registry.glgresearch.com/registry/_design/app/_rewrite"
 export SHIP=ship-$(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub | awk '{ print $2; }' | sed -e 's/://g')
 
@@ -91,6 +91,15 @@ function get_RANDOM_MAC_ADDRESS() {
     segment[$i]=$(echo "obase=16;$number" | bc)
   done
   export RANDOM_MAC_ADDRESS="${segment[1]}:${segment[2]}:${segment[3]}:${segment[4]}:${segment[5]}:${segment[6]}"
+}
+
+function run_ship_scripts() {
+  for file in $(find "${SHIP_SCRIPTS}") ; do
+    if [ -x $file ] ; then
+      #no crashing allowed for these
+      $file || true
+    fi
+  done
 }
 
 #overrides
