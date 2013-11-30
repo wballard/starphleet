@@ -12,8 +12,13 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 #this is a provisioning script for the base system/host/vm
 #run as root, with the starphleet source tree at /starphleet
 
+#yep -- international, no fooling
 echo "GMT" > /etc/timezone
 dpkg-reconfigure -f noninteractive tzdata
+
+hostname "${SHIP}"
+echo "${SHIP}" > /etc/hostname
+echo "127.0.0.1 ${SHIP} localhost" > /etc/hosts
 
 #put in the system overlay, gets all the files in place
 #for the starphleet jobs
