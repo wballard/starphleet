@@ -95,7 +95,7 @@ function get_RANDOM_MAC_ADDRESS() {
 
 function run_ship_scripts() {
   for file in $(find "${SHIP_SCRIPTS}") ; do
-    if [ -x $file ] ; then
+    if [ -x $file ] && [ -f $file ]; then
       #no crashing allowed for these
       $file || true
     fi

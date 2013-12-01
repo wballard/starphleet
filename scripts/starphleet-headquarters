@@ -46,8 +46,7 @@ export HEADQUARTERS_REMOTE="${url}"
 EOF
   info Headquarters set to ${url}
 elif [ -f "${HEADQUARTERS_SOURCE}" ]; then
-  url=$(cat "${HEADQUARTERS_SOURCE}")
-  info Headquarters is ${url}
+  :
 else
   error no headquarters url provided
 fi

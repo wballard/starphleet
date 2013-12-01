@@ -41,7 +41,7 @@ chown ${ADMIRAL}:${ADMIRAL} ${AUTHFILE}
 
 #look for SSL keys
 if [ -f "${HEADQUARTERS_LOCAL}/ssl/crt" ] && [ -f "${HEADQUARTERS_LOCAL}/ssl/key" ]; then
-  if diff "${HEADQUARTERS_LOCAL}/ssl/crt" "${NGINX_CONF}/published/crt"; then
+  if diff "${HEADQUARTERS_LOCAL}/ssl/crt" "${NGINX_CONF}/published/crt" > /dev/null; then
     info updating SSL keys
     cp "${HEADQUARTERS_LOCAL}/ssl/crt" "${NGINX_CONF}/published/crt"
     cp "${HEADQUARTERS_LOCAL}/ssl/key" "${NGINX_CONF}/published/key"

@@ -16,6 +16,7 @@ source "${DIR}/tools"
 export SSH_CONFIG="/tmp/ssh.config.$$"
 echo "StrictHostKeyChecking no" > "${SSH_CONFIG}"
 echo "CheckHostIP no" >> "${SSH_CONFIG}"
+echo "LogLevel quiet" >> "${SSH_CONFIG}"
 echo "UserKnownHostsFile "${SSH_CONFIG}.known_hosts"" >> "${SSH_CONFIG}"
 chown ${ADMIRAL}:${ADMIRAL} "${SSH_CONFIG}"
 if [ -d "${PRIVATE_KEYS}" ]; then
