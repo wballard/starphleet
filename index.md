@@ -5,7 +5,6 @@ The fully open container based continuous deployment PaaS
 Containers + Buildpacks + Repositories = Autodeploy Services
 </div>
 
-
 This is a toolkit for turning virtual or physical machine infrastructure
 into a continuous deployment stack. Here are some of the observed
 problems in autodeployment:
@@ -22,9 +21,99 @@ problems in autodeployment:
   deploy your servers, which themselves aren't autodeployed
 
 # Get Started
-Check the main [readme](https://github.com/wballard/starphleet). In
-particular pay attention to the environment variables for public and
-private keys.
+You need a git repository that defines your **starphleet headquarters**,
+you can start up by forking our [base
+headquarters](https://github.com/wballard/starphleet.headquarters.git).
+
+Keep track of where you fork it, you'll need that git url.
+**Important**: the git url must be network reachable from your hosting
+cloud, often the best thing to do is use public git hosting services.
+
+I'm a big fan of environment variables, it saves typing repeated stuff.
+Paste in your url from above into your shell like this:
+
+```bash
+export STARPHLEET_HEADQUARTERS=<git_url>
+```
+
+OK -- so that might not work for you, particularly if your
+`STARPHLEET_HEADQUARTERS` was a git/ssh url. To make that work, you need
+to have the private key file you use with github, something like mine:
+
+```bash
+export STARPHLEET_PRIVATE_KEY=~/.ssh/wballard@mailframe.net
+```
+
+And, you will want to be able to SSH to your ships, that's one of the
+big benefits!
+
+```bash
+export STARPHLEET_PUBLIC_KEY=~/.ssh/wballard@mailframe.net.pub
+```
+
+Yeah, go ahead. Spam me, that's my real email :)
+
+## Locally, Vagrant
+Vagrant is a handy way to get a working autodeployment system right on
+your laptop inside a virtual machine. Prebuilt base images are provided
+in the `Vagrantfile` for both VMWare and VirtualBox. Great for figuring
+if your services will autodeploy/start/run without worrying about load
+balancing.
+
+```bash
+git clone https://github.com/wballard/starphleet.git
+cd starphleet
+vagrant up
+vagrant ssh -c "ifconfig eth0 | grep 'inet addr'"
+```
+
+Note the IP address from the last command, you can see the dashboard at
+http://ip-address/starphleet/dashboard. This will take a few minutes the
+first time.
+
+Super magic is happening here pulling in the `STARPHLEET_HEADQUARTERS1
+and `STARPHLEET_PRIVATE_KEY` specified before as environment variables.
+
+## In the Cloud, AWS
+Running on a cloud is ready to go with AWS. In order to get started, you
+need to have an AWS account, and the environment variables:
+
+```bash
+#these are to appease AWS
+export AWS_ACCESS_KEY_ID=xxx
+export AWS_SECRET_ACCESS_KEY=xxx
+```
+
+And, to get going
+
+```bash
+npm install "git+https://github.com/wballard/starphleet.git"
+starphleet --help
+
+starphleet init ec2
+starphleet add ship ec2 us-west-1
+starphleet info ec2
+```
+
+Note the dnsname from the last command, you can see the dashboard at
+http://dnsname/starphleet/dashboard.
+
+This will take a bit to launch up the nodes, but note that once you have
+em running, additional service deployments are going to be a lot quicker
+as the virtual machines are already built. Way better than making new
+VMs each time!
+
+## All Running?
+Once you are up and running, look in your forked headquarters at
+`echo/orders`. This is all it takes to get a web service automatically
+deploying:
+* `export PORT=` to have a network port for your service
+* `autodeploy git_url` to know what to deploy
+
+Ordering up your own services is just as easy as adding a directory
+where the service will mount, and plopping in an `orders` file. Add.
+Commit. Push. Magic, any time that referenced git repo is updated, it
+will be redeployed to every ship watching your headquarters.
 
 # Concepts
 The grand tour so you know what we are talking about with all of our
@@ -93,7 +182,7 @@ private keys.
 # Headquarters
 A headquarters instructs a phleet with orders to deploy and how to serve
 them. A headquarters is a git repository, and hosted in a location on
-the internet where each ship in the phleet can reach it.  The easiest
+the internet where each ship in the phleet can reach it. The easiest
 thing to do is host on [github](http://www.github.com) or
 [bitbucket](http://www.bitbucket.com).
 
@@ -111,10 +200,11 @@ Which will serve exactly one service at `/` as specified by `orders`.
 The path structure of the headquarters creates the virtual HTTP path
 structure of your services.
 
-The services are federated together behind one domain name. This is
+The services are federated together behind one host name. This is
 particularly useful for single page applications making use of a set of
 small, sharp back end services, without all the fuss of CORS or other
-cross domain technique.
+cross domain technique. *This may not be what you expect if you are used
+to hooking up one hostname per service.*
 
 As an example, imagine an application that has a front end, and three back
 end web services: `/`, `/workflow`, and `/users`.
@@ -151,12 +241,35 @@ files in your github repository. Updates in seconds.
 ### containers/
 Given any shell script script in your headquarters named
 `containers/name`, an LXC container `name` will be created on demand to
-serve as a `STARPHLEET_BASE`.
+serve as a `STARPHLEET_BASE`. This works by first creating an LXC
+container, then running your script on that container to set it up.
 
-These custom build scripts are run as virtual root in a dedicated LXC
+These custom build scripts are run as virtual root inside the LXC
 container that is itself a snapshot built on top of starphleet's own
 base container. Basically, this means you can use `apt-get` to easily
 put on system software to serve as a base layer.
+
+### ships/
+Ships, when configured with an appropriate git url and private key, will
+push back their configuration here, one per ship. Individual ships are
+identified by their hostname, which by default is built from their ssh
+key fingerprint.
+
+This ends up being a versioned database of your ships and where to find
+them on the network -- handy!
+
+### shipscripts/
+Ships themselves may need a bit of configuration, so any script in this
+directory that is executable will run when:
+* Starphleet starts
+* A change in IP address is detected
+
+This is used to implement things such as dynamic DNS registration, in
+fact you can look at `starphleet name ship ec2` in order to simulate
+dynamic DNS with Amazon Route53.
+
+In practice, you can put anything you like in here. Be aware they run as
+root on the ship and you can easily destroy things.
 
 ### orders
 An `orders` file is simply a shell script run in the context of
@@ -190,17 +303,15 @@ Some environment variables are just config, and some environment
 variables are really secrets, so starphleet provides multiple locations
 where you can keep variables, with different security thoughts.
 
-The environment variables are sourced in the order listed below, which
-allows you to override.
-
 ## Environment Variables
 Name | Value | Description
 --- | --- | ---
 PORT | number | This is an all important environment variable, and it is expected your service will honor it, publishing traffic here. This `PORT` is used to know where to connect the ship's proxy to your individual service.
-autodeploy | &lt;git_url&gt; | This command in orders tells starphleet where to grab code from git.  While it is possible to put this globally, you really should limit it just to `orders` files.
 STARPHLEET_BASE | name | Either a `name` matching `HQ/containers/name, or an URL to download a prebuilt container image. Defaults to the starphleet provided base container
 STARPHLEET_REMOTE | &lt;git_url&gt; | Set this in your .starphleet to use your own fork of starphleet itself
 STARPHLEET_PULSE | int | Default 5, number of seconds between autodeploy checks
+BUILDPACK_URL | &lt;git_url&gt; | Set this when you want to use a custom buildpack
+NPM_FLAGS | string | Starphleet uses a custom `npm` registry to just plain run faster, you can use your own here with `--registry <url>`
 
 ## .env
 Services themselves can have variables, these are inspired by Heroku,
@@ -209,7 +320,7 @@ the variables with the lowest precedence.
 
 Literally, make a `.env` file in the root of your service.
 
-This is where you specify a `BUILDPACK_URL`, but you can also put in
+This is usually where you specify a `BUILDPACK_URL`, but you can also put in
 other variables as you see fit.
 
 Your services will often be hosted in public repositories, so the config
@@ -247,18 +358,6 @@ Now, this is a file right in your headquarters. To keep these private
 you put your headquarters in a private, hidden repository than can only
 be reached by private key `git+ssh`.
 
-## healthcheck
-Each service repository can supply a `healthcheck` file, which contains
-an URL snippet **http://<container-ip>:<container-port>/<snippet>**. You
-supply the `<snippet>`, and if you don't provide it, the default is just
-blank, meaning hitting the root of your service.
-
-As soon as a 200 comes back, you are good to go and the new service is
-put into rotation to take over future requests from the prior version.
-
-You get 60 seconds for your service to return this 200 past when it is
-initially started.
-
 
 # Services
 Services are any program you can dream up that meet these conditions:
@@ -284,6 +383,30 @@ use `apt-get install` without a sudo.
 Containers are thrown away often, on each new version, and each server
 reboot. So, while you do have local filesystem access inside a container
 running a service, don't count on it living any lenght of time.
+
+## Autodeploy
+This is the most interesting feature, automatic upgrades, check the
+[orders](#orders).
+
+## Autorestart
+No need to code in `nodemon` or `forever` or any other keep alive system in
+your services, Starphleet will take care of it for you.
+
+## Watchdog
+And there is no need to *watch the watcher*, Starphleet monitors running
+services and restarts them on failure.
+
+## Healthcheck
+Each service repository can supply a `healthcheck` file, which contains
+an URL snippet **http://<container-ip>:<container-port>/<snippet>**. You
+supply the `<snippet>`, and if you don't provide it, the default is just
+blank, meaning hitting the root of your service.
+
+As soon as a 200 comes back, you are good to go and the new service is
+put into rotation to take over future requests from the prior version.
+
+You get 60 seconds for your service to return this 200 past when it is
+initially started.
 
 ## Containers
 Starphleet encapsualtes each service in an LXC container. Starting from
@@ -333,16 +456,33 @@ package managers to get your dependencies running.
 Buildpacks serve to install dynamic, service specific code such as `npm`
 or `rubygems` that may vary with each push of your service.
 
-## Provided Buildpacks
+### Provided Buildpacks
 Using the available Heroku buildpacks, out of the box starphleet with
 autodetect and provision a service running:
 
  | | | |
 --- | --- | --- | ---
-Ruby |  NodeJS |  Java | Play
-Python| PHP | Clojure | Go
-Perl | Scala | Dart | NGINX static
-Apache |||
+Ruby |  Python |  Node | NGINX static
+
+### Testing Buildpacks
+Sometimes you just want to see the build, or figure out what is going on.
+
+Starphleet lets you directly push to a ship and run a service outside
+the autodeploy process via a git push, think Heroku.
+
+You will need to have a public key in the `authorized_keys` that is
+matched up with a private key in your local ssh config. Remember, you
+are pushing to the ship -- so this is just like pushing to any other git
+server over ssh.
+
+```bash
+#the ship as a remote, the `name` can be anything you like
+git remote add ship git@$SHIP_IP:name
+#send along to the ship, this will build and serve
+#printing out an URL where you can access it for test
+git push ship master
+#control C when you are bored or done
+```
 
 ## WebSockets
 Services can expose WebSockets as well as HTTP. Note: due to how
