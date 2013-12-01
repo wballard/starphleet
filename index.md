@@ -312,6 +312,8 @@ STARPHLEET_REMOTE | &lt;git_url&gt; | Set this in your .starphleet to use your o
 STARPHLEET_PULSE | int | Default 5, number of seconds between autodeploy checks
 BUILDPACK_URL | &lt;git_url&gt; | Set this when you want to use a custom buildpack
 NPM_FLAGS | string | Starphleet uses a custom `npm` registry to just plain run faster, you can use your own here with `--registry <url>`
+AWS_ACCESS_KEY_ID | string | Used for AWS access
+AWS_SECRET_ACCESS_KEY | string | Used for AWS access
 
 ## .env
 Services themselves can have variables, these are inspired by Heroku,
