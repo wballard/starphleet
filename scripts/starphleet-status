@@ -75,8 +75,7 @@ EOF
 
   for status in $(find "${CURRENT_ORDERS}" -name '*.starphleetstatus' | sort)
   do
-    ORDER=$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}[[")
-    ORDER="${ORDER:-/}"
+    ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}[[")/"
     cd "$(dirname "${status}")/git"
     SHA=$(git log -1 --format='%h')
     AT=$(git log -1 --format='%at')
@@ -85,6 +84,7 @@ EOF
 cat << EOF >> /dev/stdout
   -
     order: ${ORDER}
+    log: /starphleet/logs${ORDER}service.log
     sha: ${SHA}
     at: ${AT}
     author: ${AUTHOR}
