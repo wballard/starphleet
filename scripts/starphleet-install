@@ -75,15 +75,7 @@ test -d ${PUBLIC_KEYS} || mkdir -p ${PUBLIC_KEYS}
 chmod 755 ${PUBLIC_KEYS}
 
 #role account for folks acting as the admiral
-ADMIRAL="admiral"
-ADMIRAL_HOME="/home/admiral"
-useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
-adduser ${ADMIRAL} sudo
-test -d ${ADMIRAL_HOME}/.ssh || mkdir -p ${ADMIRAL_HOME}/.ssh
-chown -R ${ADMIRAL}:${ADMIRAL} ${STARPHLEET_ROOT}
-chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}
-info admiral created
-export HOME="${ADMIRAL_HOME}"
+make_admiral
 
 #role account for git push manual deployment
 gitreceive init

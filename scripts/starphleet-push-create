@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-push-create <local_repo> <container_name>
+###    starphleet-push-create <local_repo> <revision>
 ### --help
 ###
 ### Create a container from a local repository, used from a post push hook.
@@ -8,6 +8,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+container_name="${revision}"
 
 function clean_up {
   info cleaning up
@@ -41,7 +42,7 @@ test -f "${HEADQUARTERS_ENV}" && source "${HEADQUARTERS_ENV}"
 info cleaning up existing push container
 starphleet-lxc-destroy "${container_name}"
 info making this push into a container
-starphleet-containerize "${local_repo}" "${container_name}"
+starphleet-containerize "${local_repo}#${revision}" "${container_name}"
 info PORT is ${PORT}
 starphleet-publish "${container_name}" "${PORT}" "/${container_name}"
 info starting your pushed container

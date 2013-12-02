@@ -84,16 +84,14 @@ else
   fi
   popd > /dev/null
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
-  #block script, makes sure we are on the air
-  cp "${DIR}/starphleet-wait-network" "${CONTAINER_ROOT}/block"
-  #git scripts
+  #scripts from our starphleet library
   cp "${DIR}/tools" "${CONTAINER_ROOT}/usr/bin/tools"
   cp "${DIR}/docopts" "${CONTAINER_ROOT}/usr/bin/docopts"
   cp "${DIR}/docopt.py" "${CONTAINER_ROOT}/usr/bin/docopt.py"
   cp "${DIR}/starphleet-git" "${CONTAINER_ROOT}/usr/bin/starphleet-git"
   cp "${DIR}/starphleet-git-synch" "${CONTAINER_ROOT}/usr/bin/starphleet-git-synch"
-  #build script, uses buildpacks
-  cp "${DIR}/starphleet-buildpack-script" "${CONTAINER_ROOT}/buildpack"
+  cp "${DIR}/starphleet-wait-network" "${CONTAINER_ROOT}/usr/bin/starphleet-wait-network"
+  cp "${DIR}/starphleet-buildpack-script" "${CONTAINER_ROOT}/usr/bin/starphleet-buildpack-script"
   # environment, enforced by our buildpack script, so the preference order is:
   # * repository specific variables, basically our dev settings
   # * headquarters/.../orders variables, service level overrides
@@ -114,8 +112,8 @@ else
   starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
   info building ${CONTAINER_NAME}
   #once the network is up, make a workable container with the buildpack
-  lxc-attach --name ${CONTAINER_NAME} -- bash /block
-  lxc-attach --name ${CONTAINER_NAME} -- bash /buildpack
+  lxc-attach --name ${CONTAINER_NAME} -- bash /usr/bin/starphleet-wait-network
+  lxc-attach --name ${CONTAINER_NAME} -- bash /usr/bin/starphleet-buildpack-script
   #now we have a running, built container
   info built ${CONTAINER_NAME}
 fi

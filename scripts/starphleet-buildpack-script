@@ -13,6 +13,8 @@ buildpack_root=/var/starphleet/buildpacks
 buildpacks=($buildpack_root/*)
 selected_buildpack=
 
+make_admiral
+
 mkdir -p $cache_root
 
 # This is to get a custom buildpack. Probably should use profile.d though
