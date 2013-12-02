@@ -261,6 +261,7 @@ them on the network -- handy!
 ### shipscripts/
 Ships themselves may need a bit of configuration, so any script in this
 directory that is executable will run when:
+
 * Starphleet starts
 * A change in IP address is detected
 
