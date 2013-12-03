@@ -17,13 +17,16 @@ make_admiral
 
 mkdir -p $cache_root
 
-# This is to get a custom buildpack. Probably should use profile.d though
+#set up the environment during the buildpack detect/compile sequence
 test -f "$app_root/.env" && . "$app_root/.env"
+[ -f "$app_root/.env" ] && . "$app_root/.env"
+[ -d $app_root/.profile.d ] && for file in $app_root/.profile.d/*; do source \$file; done
+[ -f /.orders ] && source /.orders
+[ -f /.starphleet ] && source /.starphleet
 
 if [ -n "$BUILDPACK_URL" ]; then
-  echo "       Fetching custom buildpack"
+  info "Fetching custom buildpack ${BUILDPACK_URL}"
   buildpack="/tmp/$$custom"
-  trap 'rm -rf ${buildpack}' EXIT
   starphleet-git-synch "$BUILDPACK_URL" "$buildpack"
   selected_buildpack="$buildpack"
   buildpack_name=$($buildpack/bin/detect "$app_root") && selected_buildpack=$buildpack
@@ -65,8 +68,9 @@ chmod +x /exec
 cat > /start <<EOF
 #!/bin/bash
 export HOME=/app
+#set up the environemnt for the service start sequence
 [ -f "$app_root/.env" ] && . "$app_root/.env"
-for file in $app_root/.profile.d/*; do source \$file; done
+[ -d $app_root/.profile.d ] && for file in $app_root/.profile.d/*; do source \$file; done
 [ -f /.orders ] && source /.orders
 [ -f /.starphleet ] && source /.starphleet
 hash -r

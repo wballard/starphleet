@@ -52,7 +52,6 @@ else
   pip install awscli
 fi
 
-
 #starphleet lives here
 test -d ${STARPHLEET_ROOT} || mkdir -p ${STARPHLEET_ROOT}
 chmod 755 ${STARPHLEET_ROOT}
