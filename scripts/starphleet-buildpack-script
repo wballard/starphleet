@@ -18,8 +18,7 @@ make_admiral
 mkdir -p $cache_root
 
 #set up the environment during the buildpack detect/compile sequence
-test -f "$app_root/.env" && . "$app_root/.env"
-[ -f "$app_root/.env" ] && . "$app_root/.env"
+[ -f $app_root/.env ] && source $app_root/.env
 [ -d $app_root/.profile.d ] && for file in $app_root/.profile.d/*; do source \$file; done
 [ -f /.orders ] && source /.orders
 [ -f /.starphleet ] && source /.starphleet
@@ -46,6 +45,7 @@ fi
 $selected_buildpack/bin/compile "$app_root" "$cache_root"
 
 echo "-----> Discovering process types"
+info "-----> Your port is ${PORT}"
 $selected_buildpack/bin/release "$app_root" "$cache_root" > "$app_root/.release"
 
 if [[ -f "$app_root/Procfile" ]]; then
