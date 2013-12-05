@@ -5,6 +5,17 @@
 ###
 ### Create a bootable NUC system on the target device.
 ### WARNING! This only runs on Linux
+###
+### In practice, you will want to be using a git, not an http/https url when
+### you are specificying a private key so that ships built with this key will
+### be able to write back to the headquarters.
+###
+### This will make a bootable USB key, needs to be at least 4G in size. Then you
+### pop it in your NUC and it will reformat the onboard SSD at /dev/sda, then
+### reboot leaving you a running ship.
+###
+### Remember to specify the bootable usb device -- not a partition -- this
+### script will be totally writing the device, partition table and all
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
@@ -16,7 +27,6 @@ fi
 
 curl -L --silent https://s3-us-west-2.amazonaws.com/starphleet-images/ship.img.gz \
   | zcat \
-  | pv -s 4G \
   | dd bs=1M of=${device}
 
 [ -d .build ] || mkdir .build
