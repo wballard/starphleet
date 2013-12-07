@@ -37,7 +37,19 @@ function top_level_parent_pid {
 }
 
 info making "${local_repo}" into container "${container_name}"
-test -f "${local_repo}/.env" && source "${local_repo}/.env"
+# we need to get our .env file (if present) from within the contents
+# of the repo, so we're gonna check out the repo and see if we've got
+# an .env file
+# first, a place to checkout our repo to
+CHECKOUT_PATH="/tmp/${container_name}"
+# make sure we don't have anything where we're gonna check things out
+test -f "${CHECKOUT_PATH}"  && rm -rf "${CHECKOUT_PATH}"
+git clone "${local_repo}" "${CHECKOUT_PATH}" > /dev/null
+pushd "${CHECKOUT_PATH}" > /dev/null
+git checkout "${revision}"
+popd > /dev/null
+# ad finally, if we have a .env, we let it chang our environment
+test -f "${CHECKOUT_PATH}/.env" && source "${CHECKOUT_PATH}/.env"
 test -f "${HEADQUARTERS_ENV}" && source "${HEADQUARTERS_ENV}"
 info cleaning up existing push container
 starphleet-lxc-destroy "${container_name}"
