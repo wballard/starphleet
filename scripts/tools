@@ -1,10 +1,10 @@
-# vim: set ft=sh :
-#main include file for starphleet scripts
+# vim: set ft=sh : #main include file for starphleet scripts
 export version=0.0.1
 export PORT=3000
 export STARPHLEET_PULSE="5"
 export STARPHLEET_DRAINSTOP_WAIT="30"
 export STARPHLEET_ROOT="/var/starphleet"
+export STARPHLEET_TMP="/var/starphleet/tmp"
 export STARPHLEET_CACHE="/var/starphleet/cache"
 export HEADQUARTERS_SOURCE="/var/starphleet/.headquarters"
 export HEADQUARTERS_LOCAL="/var/starphleet/headquarters"
@@ -111,10 +111,13 @@ function make_admiral() {
   info admiral created
 }
 
-#overrides
-if [ -f "${HEADQUARTERS_LOCAL}/.starphleet" ]; then
-  source "${HEADQUARTERS_LOCAL}/.starphleet"
-fi
-if [ -f "${HEADQUARTERS_SOURCE}" ]; then
-  source "${HEADQUARTERS_SOURCE}"
-fi
+# environment, enforced by our buildpack script, so the preference order is:
+# * repository specific variables, basically our dev settings
+# * headquarters/.../orders variables, service level overrides
+# * headquarters/.starphleet variables, global overrides
+[ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"
+[ -f /app/.env ] && source /app/.env
+[ -d /app/.profile.d ] && for file in /app/.profile.d/*; do source $file; done
+[ -f /.orders ] && source /.orders
+[ -f "${HEADQUARTERS_ENV}" ] && source "${HEADQUARTERS_ENV}"
+:

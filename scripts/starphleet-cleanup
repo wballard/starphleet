@@ -12,7 +12,7 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 #lose all service state on stop, putting things back to as if no
 #services were published at all
 test -d "${STARPHLEET_ROOT}/node_modules" && rm -rf "${STARPHLEET_ROOT}/node_modules"
-test -d "${STARPHLEET_ROOT}/tmp" && rm -rf "${STARPHLEET_ROOT}/tmp"
+test -d "${STARPHLEET_TMP}/*" && rm -rf "${STARPHLEET_TMP}/*"
 test -d "${CURRENT_ORDERS}" && rm -rf "${CURRENT_ORDERS}"
 test -d "${HEADQUARTERS_LOCAL}" && rm -rf "${HEADQUARTERS_LOCAL}"
 test -d "${NGINX_CONF}/published" && rm -rf "${NGINX_CONF}/published"
