@@ -41,24 +41,21 @@ info making "${local_repo}" into container "${container_name}"
 # of the repo, so we're gonna check out the repo and see if we've got
 # an .env file
 # first, a place to checkout our repo to
-CHECKOUT_PATH="/tmp/${container_name}"
+CHECKOUT_PATH="${STARPHLEET_TMP}/${container_name}"
 # make sure we don't have anything where we're gonna check things out
 test -f "${CHECKOUT_PATH}"  && rm -rf "${CHECKOUT_PATH}"
-git clone "${local_repo}" "${CHECKOUT_PATH}" > /dev/null
+git clone "${local_repo}" "${CHECKOUT_PATH}"
 pushd "${CHECKOUT_PATH}" > /dev/null
 git checkout "${revision}"
 popd > /dev/null
-# ad finally, if we have a .env, we let it chang our environment
-test -f "${CHECKOUT_PATH}/.env" && source "${CHECKOUT_PATH}/.env"
-test -f "${HEADQUARTERS_ENV}" && source "${HEADQUARTERS_ENV}"
 info cleaning up existing push container
 starphleet-lxc-destroy "${container_name}"
 info making this push into a container
-starphleet-containerize "${local_repo}#${revision}" "${container_name}"
+starphleet-containerize "${CHECKOUT_PATH}#${revision}" "${container_name}"
 info PORT is ${PORT}
 starphleet-publish "${container_name}" "${PORT}" "/${container_name}"
 info starting your pushed container
-lxc-attach --name ${container_name} -- /web &
+lxc-attach --name ${container_name} -- /start web &
 while [ 1 ]; do
   sleep 1
   top_level_parent_pid

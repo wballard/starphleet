@@ -38,6 +38,7 @@ ORDERS="${orders_script:-${DIR}/orders}"
 CONTAINER_BUILD_SCRIPT=${STARPHLEET_TMP}/${CONTAINER_NAME}.conf
 cat << EOF > ${CONTAINER_BUILD_SCRIPT}
 #source to get the headquarters and default environment
+export HOME=/app
 cp "${CONTAINER_ORDERS_SCRIPT}" /.orders
 source /usr/bin/tools
 starphleet-git-synch "${git_url}" /app
@@ -69,5 +70,5 @@ else
   else
     fatal no base container script ${STARPHLEET_BASE} is available
   fi
-  starphleet-containermake "${CONTAINER_NAME}" "${CONTAINER_BUILD_SCRIPT}" "${STARPHLEET_BASE}"
+  starphleet-containermake --run "${CONTAINER_NAME}" "${CONTAINER_BUILD_SCRIPT}" "${STARPHLEET_BASE}"
 fi

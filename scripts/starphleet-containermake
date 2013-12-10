@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-containermake <container_name> <build_script> [<base_container_name>]
+###    starphleet-containermake [--run] <container_name> <build_script> [<base_container_name>]
 ### --help
 ###
 ### Make or replace a container based on a build script.
@@ -61,9 +61,10 @@ else
   starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
   lxc-attach --name ${CONTAINER_NAME} -- bash starphleet-wait-network
   lxc-attach --name ${CONTAINER_NAME} -- bash -c "source /usr/bin/tools; /.build_script"
-  lxc-stop --name ${CONTAINER_NAME}
-  starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
-  date > "/var/starphleet/diagnostic/${CONTAINER_NAME}"
+  if [ -z "${run}" ]; then
+    lxc-stop --name ${CONTAINER_NAME}
+    starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
+  fi
   #this is the 'done' marker used to make diff
   mv "${CONTAINER_ROOT}/.build_script" "${CONTAINER_ROOT}/build_script"
   info made container ${CONTAINER_NAME}

@@ -45,7 +45,6 @@ fi
 $selected_buildpack/bin/compile "$app_root" "$cache_root"
 
 echo "-----> Discovering process types"
-info "-----> Your port is ${PORT}"
 $selected_buildpack/bin/release "$app_root" "$cache_root" > "$app_root/.release"
 
 if [[ -f "$app_root/Procfile" ]]; then
@@ -59,6 +58,7 @@ cat > /start <<EOF
 #!/bin/bash
 export HOME=/app
 source /usr/bin/tools
+info your port is ${PORT}
 cd $app_root
 if [[ -f Procfile ]]; then
     ruby -e "require 'yaml';puts YAML.load_file('Procfile')['\$1']" | bash
