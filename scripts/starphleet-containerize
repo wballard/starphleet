@@ -45,6 +45,8 @@ starphleet-git-synch "${git_url}" /app
 #source again, we may now have orders which change the environment
 source /usr/bin/tools
 starphleet-buildpack-script
+info port is \$PORT
+echo \$PORT > /.port
 EOF
 
 #actually make a container here

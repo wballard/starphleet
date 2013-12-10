@@ -58,7 +58,6 @@ cat > /start <<EOF
 #!/bin/bash
 export HOME=/app
 source /usr/bin/tools
-info your port is ${PORT}
 cd $app_root
 if [[ -f Procfile ]]; then
     ruby -e "require 'yaml';puts YAML.load_file('Procfile')['\$1']" | bash
