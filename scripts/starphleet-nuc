@@ -62,5 +62,9 @@ fi
 
 cp /starphleet/provision/bootstrap* ${ROOT}/
 cp /starphleet/provision/starphleet_nuc_bootstrap.conf ${ROOT}/etc/init
+cp /starphleet/provision/40_custom /etc/grub.d
+update-grub
+cp /boot/grub/grub.cfg ${ROOT}/boot/grub/grub.cfg
+cp /starphleet/provision/40_custom ${ROOT}/etc/grub.d
 
 umount .build
