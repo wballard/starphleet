@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-source /tools
-
 #apt packages
 read -r -d '' PACKAGES << FFF
 autoconf
@@ -50,14 +48,7 @@ FFF
 apt-get -y update
 echo -n ${PACKAGES}  | tr ' ' '\n' | xargs -I % xargs apt-get install -y --force-yes %
 
-#load on all the buildpacks
-mkdir -p /build/buildpacks
-cd /build/buildpacks
-echo -n ${BUILDPACKS}  | tr ' ' '\n' | xargs -I % git clone --depth 1 %
-
 #ruby superstition
 export HOME=/
 gem install bundler
-cd /var/starphleet/buildpacks/heroku-buildpack-ruby.git && bundle install
 
-announce container ready

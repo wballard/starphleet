@@ -53,9 +53,10 @@ else
 fi
 
 #starphleet lives here
-test -d ${STARPHLEET_ROOT} || mkdir -p ${STARPHLEET_ROOT}
+[ -d ${STARPHLEET_ROOT} ] || mkdir -p ${STARPHLEET_ROOT}
+[ -d ${STARPHLEET_TMP} ] || mkdir -p ${STARPHLEET_TMP}
 chmod 755 ${STARPHLEET_ROOT}
-test -d ${STARPHLEET_ROOT}/diagnostic || mkdir -p ${STARPHLEET_ROOT}/diagnostic
+[ -d ${STARPHLEET_ROOT}/diagnostic ] || mkdir -p ${STARPHLEET_ROOT}/diagnostic
 chmod 755 ${STARPHLEET_ROOT}/diagnostic
 
 npm ${NPM_FLAGS} install -g coffee-script

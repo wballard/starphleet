@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-containermake <container_name> <build_script>
+###    starphleet-containermake [--run] <container_name> <build_script> [<base_container_name>]
 ### --help
 ###
 ### Make or replace a container based on a build script.
@@ -17,6 +17,11 @@ test -f "${build_script}"
 
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
+#configuration, this is the place to mount directories on the host computer
+#into the container
+#note: this takes effect after the initial create, which generates the
+#inital container configuration, and this is tacked on the end
+#so we are starting the container twice
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 cat << EOF > ${CONTAINER_CONF}
 lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/var/starphleet none bind,rw 0 0
@@ -33,27 +38,33 @@ else
   info making a new container ${CONTAINER_NAME}
   starphleet-lxc-destroy ${CONTAINER_NAME}
   #special case to make the base, otherwise go for a snapshot
-  if [ "${CONTAINER_NAME}" == 'starphleet-base' ]; then
-   lxc-create --name "${CONTAINER_NAME}" -t ubuntu
+  if [ -z "${base_container_name}" ]; then
+    lxc-create --name "${CONTAINER_NAME}" -t ubuntu
   else
-   until lxc-clone -o 'starphleet-base' -n "${CONTAINER_NAME}" -s > /dev/null 2>&1; do
+   until lxc-clone -o "${base_container_name}" -n "${CONTAINER_NAME}" -s 2>&1; do
      sleep 1
    done
   fi
+  #make a directory where we can mount back to the ship and a config file to mount
   test -d "${CONTAINER_ROOT}/var/starphleet" || mkdir -p "${CONTAINER_ROOT}/var/starphleet"
-  cp `which tools` "${CONTAINER_ROOT}/tools"
-  cp `which starphleet-wait-network` "${CONTAINER_ROOT}/.block"
-  chmod +x "${CONTAINER_ROOT}/.block"
+  cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
+  #copy on the starphleet commands
+  [ -d "${CONTAINER_ROOT}/usr/bin" ] || mkdir -p "${CONTAINER_ROOT}/usr/bin"
+  cp /usr/bin/starphleet* "${CONTAINER_ROOT}/usr/bin/"
+  cp /usr/bin/docopt* "${CONTAINER_ROOT}/usr/bin/"
+  cp /usr/bin/tools "${CONTAINER_ROOT}/usr/bin/"
+  #this is the build script for the container itself
   cp "${build_script}" "${CONTAINER_ROOT}/.build_script"
   chmod +x "${CONTAINER_ROOT}/.build_script"
-  cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
+  #start up the container, waiting for the network, and then run the container build script
   lxc-start --name ${CONTAINER_NAME} -d
   starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
-  lxc-attach --name ${CONTAINER_NAME} -- bash /.block
-  lxc-attach --name ${CONTAINER_NAME} -- bash /.build_script
-  lxc-stop --name ${CONTAINER_NAME}
-  starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
-  date > "/var/starphleet/diagnostic/${CONTAINER_NAME}"
+  lxc-attach --name ${CONTAINER_NAME} -- bash starphleet-wait-network
+  lxc-attach --name ${CONTAINER_NAME} -- bash -c "source /usr/bin/tools; /.build_script"
+  if [ -z "${run}" ]; then
+    lxc-stop --name ${CONTAINER_NAME}
+    starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
+  fi
   #this is the 'done' marker used to make diff
   mv "${CONTAINER_ROOT}/.build_script" "${CONTAINER_ROOT}/build_script"
   info made container ${CONTAINER_NAME}

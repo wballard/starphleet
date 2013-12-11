@@ -23,32 +23,44 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 set -e
 
 #places for things to live
-STARPHLEET_BASE="${STARPHLEET_BASE:-https://s3-us-west-2.amazonaws.com/starphleet/starphleet-base.tgz}"
+STARPHLEET_BASE="${STARPHLEET_BASE:-starphleet-base}"
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 
-#configuration, this is the place to mount directories on the host computer
-#into the container
-#note: this takes effect after the initial create, which generates the
-#inital container configuration, and this is tacked on the end
-#so we are starting the container twice
-CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
-cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/var/starphleet none bind,rw 0 0
-EOF
-trap 'rm -rf ${CONTAINER_CONF}' EXIT
+#get the orders copied to a place where the will be visible to the container
+CONTAINER_ORDERS_SCRIPT=${STARPHLEET_TMP}/${CONTAINER_NAME}.orders
+ORDERS="${orders_script:-${DIR}/orders}"
+[ -f "${ORDERS}" ] && cp "${ORDERS}" "${CONTAINER_ORDERS_SCRIPT}"
 
-(
-#flocked, parallel container build is a race condition on start
-flock 200
+#build script for our service container, the most important thing is that
+#it gets the source from git
+#the second most important thing is to know that this runs on the container
+CONTAINER_BUILD_SCRIPT=${STARPHLEET_TMP}/${CONTAINER_NAME}.conf
+cat << EOF > ${CONTAINER_BUILD_SCRIPT}
+#source to get the headquarters and default environment
+export HOME=/app
+cp "${CONTAINER_ORDERS_SCRIPT}" /.orders
+source /usr/bin/tools
+starphleet-git-synch "${git_url}" /app
+#source again, we may now have orders which change the environment
+source /usr/bin/tools
+starphleet-buildpack-script
+info port is \$PORT
+echo \$PORT > /.port
+EOF
+
 #actually make a container here
 info creating ${CONTAINER_NAME}
 if lxc-ls | grep "^${CONTAINER_NAME}$" > /dev/null; then
   warn already built ${CONTAINER_NAME}
   lxc-start --name ${CONTAINER_NAME} -d
   starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
+  lxc-attach --name ${CONTAINER_NAME} -- bash starphleet-wait-network
   exit 0
 else
+  #making base containers as needed, base container serves as the source for
+  #and we clone the service container on top, the idea is the base container
+  #can be re-used and thus improve build time
   if [ -f "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}" ]
   then
     #base container from a headquarters container script
@@ -58,63 +70,7 @@ else
     #base container from a starphleet provided container script
     starphleet-containermake "${STARPHLEET_BASE}" "/var/starphleet/containers/${STARPHLEET_BASE}"
   else
-    #base container from a remote source, try to restore/get treating the base as a file/url
-    get_HASH "${STARPHLEET_BASE}"
-    starphleet-lxc-restore "${HASH}" "${STARPHLEET_BASE}"
-    STARPHLEET_BASE="${HASH}"
+    fatal no base container script ${STARPHLEET_BASE} is available
   fi
-  #clone on top of the base image, this is just to save disk space
-  #this command can be problematic, giving off an error about
-  #'cannot snapshot a directory', keptin :)
-  until lxc-clone -o "${STARPHLEET_BASE}" -n "${CONTAINER_NAME}" -s; do
-    sleep 1
-  done
-  #mounts and files, always can see starphleet
-  test -d ${CONTAINER_ROOT}/var/starphleet || mkdir ${CONTAINER_ROOT}/var/starphleet
-  #host file, need to be able to resolve back to the ship
-  starphleet-addresses | xargs -I % echo % ship >> ${CONTAINER_ROOT}/etc/hosts
-  #and yes, here is the repo to containerize
-  REMOTE=$(echo "${git_url}" | awk -F '#' '{print $1;}')
-  BRANCH=$(echo "${git_url}" | awk -F '#' '{print $2;}')
-  #get the source code, and get on the right branch
-  git clone "${REMOTE}" "${CONTAINER_ROOT}/app" > /dev/null
-  pushd "${CONTAINER_ROOT}/app" > /dev/null
-  if [ -n "${BRANCH}" ]; then
-    git checkout "${BRANCH}"
-  fi
-  popd > /dev/null
-  cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
-  #scripts from our starphleet library
-  cp "${DIR}/tools" "${CONTAINER_ROOT}/usr/bin/tools"
-  cp "${DIR}/docopts" "${CONTAINER_ROOT}/usr/bin/docopts"
-  cp "${DIR}/docopt.py" "${CONTAINER_ROOT}/usr/bin/docopt.py"
-  cp "${DIR}/starphleet-git" "${CONTAINER_ROOT}/usr/bin/starphleet-git"
-  cp "${DIR}/starphleet-git-synch" "${CONTAINER_ROOT}/usr/bin/starphleet-git-synch"
-  cp "${DIR}/starphleet-wait-network" "${CONTAINER_ROOT}/usr/bin/starphleet-wait-network"
-  cp "${DIR}/starphleet-buildpack-script" "${CONTAINER_ROOT}/usr/bin/starphleet-buildpack-script"
-  # environment, enforced by our buildpack script, so the preference order is:
-  # * repository specific variables, basically our dev settings
-  # * headquarters/.../orders variables, service level overrides
-  # * headquarters/.starphleet variables, global overrides
-  #orders script
-  ORDERS="${orders_script:-${DIR}/orders}"
-  cat "${DIR}/tools" > "${CONTAINER_ROOT}/.orders"
-  [ -f "${ORDERS}" ] && cat "${ORDERS}" >> "${CONTAINER_ROOT}/.orders"
-  #starphleet script
-  [ -f "${HEADQUARTERS_LOCAL}/.starphleet" ] && cat "${HEADQUARTERS_LOCAL}/.starphleet" > "${CONTAINER_ROOT}/.starphleet"
-  #and finally, the buildpack web start
-  echo 'test -f /.pid && kill -- -$( ps opgid= $(cat /.pid) | tr -d " " )' > "${CONTAINER_ROOT}/kill"
-  chmod +x "${CONTAINER_ROOT}/kill"
-  echo '/kill; setsid /start web;' > "${CONTAINER_ROOT}/web"
-  chmod +x "${CONTAINER_ROOT}/web"
-  #fire up the container
-  lxc-start --name ${CONTAINER_NAME} -d
-  starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
-  info building ${CONTAINER_NAME}
-  #once the network is up, make a workable container with the buildpack
-  lxc-attach --name ${CONTAINER_NAME} -- bash /usr/bin/starphleet-wait-network
-  lxc-attach --name ${CONTAINER_NAME} -- bash /usr/bin/starphleet-buildpack-script
-  #now we have a running, built container
-  info built ${CONTAINER_NAME}
+  starphleet-containermake --run "${CONTAINER_NAME}" "${CONTAINER_BUILD_SCRIPT}" "${STARPHLEET_BASE}"
 fi
-) 200>/var/lock/starphleet-containerize

@@ -13,7 +13,6 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 set -e
 
-PORT="${container_port:-${PORT}}"
 URL="${public_url:-/}"
 [ "${URL}" == "/" ] && URL=""
 CONTAINER_NAME=${container_name}
@@ -28,7 +27,7 @@ location ${URL}/ {
   include /var/starphleet/nginx/cors.conf;
   # Path rewriting to hide mount prefix
   rewrite ${URL}/(.*) /\$1 break;
-  proxy_pass http://${IP_ADDRESS}:${PORT};
+  proxy_pass http://${IP_ADDRESS}:${container_port};
   add_header X-CONTAINER ${CONTAINER_NAME};
   add_header X-SHIP ${HOSTNAME};
   # WebSocket support (nginx 1.4)

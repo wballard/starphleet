@@ -6,3 +6,4 @@ private_keys
 public_keys
 headquarters
 provision/ship.img.gz
+*.pyc
