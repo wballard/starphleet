@@ -1,9 +1,11 @@
 # vim: set ft=sh : #main include file for starphleet scripts
 export version=0.0.1
 export PORT=3000
+export LXC_ROOT="/var/lib/lxc"
 export STARPHLEET_PULSE="5"
 export STARPHLEET_DRAINSTOP_WAIT="30"
 export STARPHLEET_ROOT="/var/starphleet"
+export STARPHLEET_PORTS="/var/starphleet/ports"
 export STARPHLEET_TMP="/var/starphleet/tmp"
 export STARPHLEET_CACHE="/var/starphleet/cache"
 export HEADQUARTERS_SOURCE="/var/starphleet/.headquarters"
@@ -75,7 +77,6 @@ function get_HASH() {
 
 function get_CONTAINER_NAME() {
   export CONTAINER_NAME="$(echo $1 | sha1sum | awk '{print $1;}').orders"
-  export CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 }
 
 function autodeploy() {

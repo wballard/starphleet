@@ -41,7 +41,7 @@ do
 done
 
 FREE_RAM=$(free | grep Mem | awk '{ print (1 - ($3 / $2)) * 100 }')
-FREE_DISK=$(df /var/lib/lxc | tail -1 | awk '{ print 100 - $5 }')
+FREE_DISK=$(df "${LXC_ROOT}" | tail -1 | awk '{ print 100 - $5 }')
 
 cat << EOF >> /dev/stdout
 hostname: $(hostname)

@@ -17,6 +17,7 @@ test -f "${build_script}"
 
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
+CONTAINER_OVERLAY=/var/lib/lxc/${CONTAINER_NAME}/delta0
 #configuration, this is the place to mount directories on the host computer
 #into the container
 #note: this takes effect after the initial create, which generates the
@@ -41,32 +42,30 @@ else
   if [ -z "${base_container_name}" ]; then
     lxc-create --name "${CONTAINER_NAME}" -t ubuntu
   else
-   until lxc-clone -o "${base_container_name}" -n "${CONTAINER_NAME}" -s 2>&1; do
-     sleep 1
-   done
+    lxc-clone --snapshot -B overlayfs -o "${base_container_name}" -n "${CONTAINER_NAME}"
   fi
   #make a directory where we can mount back to the ship and a config file to mount
   test -d "${CONTAINER_ROOT}/var/starphleet" || mkdir -p "${CONTAINER_ROOT}/var/starphleet"
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/../config
   #copy on the starphleet commands
-  [ -d "${CONTAINER_ROOT}/usr/bin" ] || mkdir -p "${CONTAINER_ROOT}/usr/bin"
-  cp /usr/bin/starphleet* "${CONTAINER_ROOT}/usr/bin/"
-  cp /usr/bin/docopt* "${CONTAINER_ROOT}/usr/bin/"
-  cp /usr/bin/tools "${CONTAINER_ROOT}/usr/bin/"
+  mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
+  cp /usr/bin/starphleet* "${CONTAINER_OVERLAY}/usr/bin/"
+  cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
+  cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
   #this is the build script for the container itself
-  cp "${build_script}" "${CONTAINER_ROOT}/.build_script"
-  chmod +x "${CONTAINER_ROOT}/.build_script"
+  cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
+  chmod +x "${CONTAINER_OVERLAY}/build_script"
   #start up the container, waiting for the network, and then run the container build script
   lxc-start --name ${CONTAINER_NAME} -d
   starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
   lxc-attach --name ${CONTAINER_NAME} -- bash starphleet-wait-network
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c "source /usr/bin/tools; /.build_script"
-  if [ -z "${run}" ]; then
+  lxc-attach --name ${CONTAINER_NAME} -- bash -c "source /usr/bin/tools; /build_script"
+  if [ "${run}" == "true" ]; then
+    info leaving ${CONTAINER_NAME} running
+  else
     lxc-stop --name ${CONTAINER_NAME}
     starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
   fi
-  #this is the 'done' marker used to make diff
-  mv "${CONTAINER_ROOT}/.build_script" "${CONTAINER_ROOT}/build_script"
   info made container ${CONTAINER_NAME}
 fi
 ) 200>/var/lock/starphleet-containermake

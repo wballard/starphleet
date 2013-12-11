@@ -6,7 +6,6 @@
 ### This is a more thorough destroy that will:
 ### * make sure the container is stopped
 ### * destroy the container
-### * make sure the root file system is really gone
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
@@ -18,4 +17,3 @@ while lxc-ls | grep "^${container_name}" > /dev/null; do
   sleep 1
 done
 
-rm -rf "/var/lib/lxc/${container_name}"
