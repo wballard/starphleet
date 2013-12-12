@@ -4,13 +4,18 @@ exec tail -n +3 $0
 # menu entries you want to add after this comment.  Be careful not to change
 # the 'exec tail' line above.
 menuentry 'Reinstall Ubuntu from USB'  {
-recordfail
+    recordfail
     load_video
     gfxmode $linux_gfx_mode
     insmod gzio
     insmod part_msdos
     insmod btrfs
     set root='hd1,msdos1'
-    linux   /@/boot/vmlinuz-3.11.0-12-generic root=/dev/sdb1 ro rootflags=subvol=@
+    if [ x$feature_platform_search_hint = xy ]; then
+      search --no-floppy --fs-uuid --set=root --hint-bios=hd1,msdos1 b8aa7dcf-fa78-4b23-9900-5d4c8a2a7259
+    else
+      search --no-floppy --fs-uuid --set=root b8aa7dcf-fa78-4b23-9900-5d4c8a2a7259
+    fi
+    linux   /@/boot/vmlinuz-3.11.0-12-generic root=UUID=b8aa7dcf-fa78-4b23-9900-5d4c8a2a7259 ro rootflags=subvol=@
     initrd  /@/boot/initrd.img-3.11.0-12-generic
 }
