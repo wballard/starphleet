@@ -47,6 +47,9 @@ Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/b
 root	ALL=(ALL:ALL) ALL
 %admin ALL=(ALL) ALL
 %sudo	ALL=(ALL:ALL) NOPASSWD:ALL
+vagrant ALL=NOPASSWD: ALL
+Defaults env_keep="SSH_AUTH_SOCK"
+Defaults !requiretty
 EOF
 
 mkdir -p "${ROOT}/${STARPHLEET_ROOT}"
