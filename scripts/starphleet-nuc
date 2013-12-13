@@ -62,9 +62,14 @@ fi
 
 cp /starphleet/provision/bootstrap* ${ROOT}/
 cp /starphleet/provision/starphleet_nuc_bootstrap.conf ${ROOT}/etc/init
-cp /starphleet/provision/40_custom /etc/grub.d
 cp /starphleet/provision/40_custom ${ROOT}/etc/grub.d
-update-grub
-cp /boot/grub/grub.cfg ${ROOT}/boot/grub/grub.cfg
+sudo grub-install --no-floppy --root-directory=${ROOT} /dev/sdb
+cp /starphleet/provision/boot/grub/device.map ${ROOT}/boot/grub
+
+sudo grub-install --no-floppy --root-directory=/mnt/root/@ /dev/sdb
+sudo cp /starphleet/provision/boot/grub/device.map /mnt/root/@/boot/grub
+sudo grub-install --root-directory=/mnt/root/@ /dev/sdb
+sudo grub-mkconfig -o /mnt/pig/@/boot/grub/grub.cfg
+
 
 umount .build
