@@ -26,7 +26,7 @@ if [ "${TERM}" == "unknown" ]; then
 fi
 export TAILOR_REMOTE="git+https://github.com/wballard/tailor.git"
 export DASHBOARD_REMOTE="git+https://github.com/wballard/starphleet.dashboard.git"
-export NPM_FLAGS="--registry http://registry.glgresearch.com/registry/_design/app/_rewrite"
+export NPM_FLAGS=""
 export SHIP=ship-$(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub | awk '{ print $2; }' | sed -e 's/://g')
 
 ulimit -n ${MAX_OPEN_FILES}
