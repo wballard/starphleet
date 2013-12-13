@@ -1,9 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-BOX_NAME = ENV['BOX_NAME'] || "lxc-2"
-BOX_URI = ENV['BOX_URI'] || "https://bitbucket.org/Wballard/boxes/downloads/VagrantUbuntuLXC.box"
-VF_BOX_URI = ENV['VF_BOX_URI'] || "https://bitbucket.org/Wballard/boxes/downloads/VagrantUbuntuLXC-vmware_fusion.box"
+BOX_NAME = ENV['BOX_NAME'] || "saucy"
+BOX_URI = ENV['BOX_URI'] || "http://cloud-images.ubuntu.com/vagrant/saucy/current/saucy-server-cloudimg-amd64-vagrant-disk1.box"
+VF_BOX_URI = ENV['VF_BOX_URI'] || "http://brennovich.s3.amazonaws.com/saucy64_vmware_fusion.box"
 
 Vagrant::Config.run do |config|
 # Setup virtual machine box. This VM configuration code is always executed.

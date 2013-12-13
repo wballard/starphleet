@@ -24,18 +24,16 @@ set -e
 
 #places for things to live
 STARPHLEET_BASE="${STARPHLEET_BASE:-starphleet-base}"
-CONTAINER_NAME="${container_name}"
-CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}/rootfs
 
 #get the orders copied to a place where the will be visible to the container
-CONTAINER_ORDERS_SCRIPT=${STARPHLEET_TMP}/${CONTAINER_NAME}.orders
+CONTAINER_ORDERS_SCRIPT=${STARPHLEET_TMP}/${container_name}.orders
 ORDERS="${orders_script:-${DIR}/orders}"
 [ -f "${ORDERS}" ] && cp "${ORDERS}" "${CONTAINER_ORDERS_SCRIPT}"
 
 #build script for our service container, the most important thing is that
 #it gets the source from git
 #the second most important thing is to know that this runs on the container
-CONTAINER_BUILD_SCRIPT=${STARPHLEET_TMP}/${CONTAINER_NAME}.conf
+CONTAINER_BUILD_SCRIPT=${STARPHLEET_TMP}/${container_name}.build
 cat << EOF > ${CONTAINER_BUILD_SCRIPT}
 #source to get the headquarters and default environment
 export HOME=/app
@@ -46,16 +44,16 @@ starphleet-git-synch "${git_url}" /app
 source /usr/bin/tools
 starphleet-buildpack-script
 info port is \$PORT
-echo \$PORT > /.port
+echo \$PORT > "${STARPHLEET_PORTS}/${container_name}"
 EOF
 
 #actually make a container here
-info creating ${CONTAINER_NAME}
-if lxc-ls | grep "^${CONTAINER_NAME}$" > /dev/null; then
-  warn already built ${CONTAINER_NAME}
-  lxc-start --name ${CONTAINER_NAME} -d
-  starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
-  lxc-attach --name ${CONTAINER_NAME} -- bash starphleet-wait-network
+info creating ${container_name}
+if lxc-ls | grep "^${container_name}$" > /dev/null; then
+  warn already built ${container_name}
+  lxc-start --name ${container_name} -d
+  starphleet-lxc-wait ${container_name} RUNNING
+  lxc-attach --name ${container_name} -- bash starphleet-wait-network
   exit 0
 else
   #making base containers as needed, base container serves as the source for
@@ -72,5 +70,5 @@ else
   else
     fatal no base container script ${STARPHLEET_BASE} is available
   fi
-  starphleet-containermake --run "${CONTAINER_NAME}" "${CONTAINER_BUILD_SCRIPT}" "${STARPHLEET_BASE}"
+  starphleet-containermake --run "${container_name}" "${CONTAINER_BUILD_SCRIPT}" "${STARPHLEET_BASE}"
 fi

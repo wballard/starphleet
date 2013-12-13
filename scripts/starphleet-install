@@ -55,6 +55,7 @@ fi
 #starphleet lives here
 [ -d ${STARPHLEET_ROOT} ] || mkdir -p ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_TMP} ] || mkdir -p ${STARPHLEET_TMP}
+[ -d ${STARPHLEET_PORTS} ] || mkdir -p ${STARPHLEET_PORTS}
 chmod 755 ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_ROOT}/diagnostic ] || mkdir -p ${STARPHLEET_ROOT}/diagnostic
 chmod 755 ${STARPHLEET_ROOT}/diagnostic
@@ -73,6 +74,19 @@ test -d ${PRIVATE_KEYS} || mkdir -p ${PRIVATE_KEYS}
 chmod 755 ${PRIVATE_KEYS}
 test -d ${PUBLIC_KEYS} || mkdir -p ${PUBLIC_KEYS}
 chmod 755 ${PUBLIC_KEYS}
+
+#allow passwordless sudoers
+cat > ${ROOT}/etc/sudoers <<'EOF'
+Defaults	env_reset
+Defaults	mail_badpass
+Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+root	ALL=(ALL:ALL) ALL
+%admin ALL=(ALL) ALL
+%sudo	ALL=(ALL:ALL) NOPASSWD:ALL
+vagrant ALL=NOPASSWD: ALL
+Defaults env_keep="SSH_AUTH_SOCK"
+Defaults !requiretty
+EOF
 
 #role account for folks acting as the admiral
 make_admiral

@@ -52,7 +52,7 @@ info cleaning up existing push container
 starphleet-lxc-destroy "${container_name}"
 info making this push into a container
 starphleet-containerize "${CHECKOUT_PATH}#${revision}" "${container_name}"
-export PORT=$(cat "/var/lib/lxc/${container_name}/rootfs/.port")
+export PORT=$(cat "${STARPHLEET_PORTS}/${container_name}")
 
 starphleet-publish "${container_name}" "${PORT}" "/${container_name}"
 info starting your pushed container
