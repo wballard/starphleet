@@ -155,6 +155,10 @@ if options.init and options.ec2
                 Protocol: 'TCP'
                 LoadBalancerPort: 80
                 InstancePort: 80
+                ,
+                Protocol: 'TCP'
+                LoadBalancerPort: 443
+                InstancePort: 443
               ]
               AvailabilityZones: _.map zones.AvailabilityZones, (x) -> x.ZoneName
             , nestedCallback

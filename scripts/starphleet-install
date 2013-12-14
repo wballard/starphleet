@@ -12,6 +12,10 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 #this is a provisioning script for the base system/host/vm
 #run as root, with the starphleet source tree at /starphleet
 
+#role account for folks acting as the admiral, do this really early
+#as it will provide the home directory
+make_admiral
+
 #yep -- international, no fooling
 echo "GMT" > /etc/timezone
 dpkg-reconfigure -f noninteractive tzdata
@@ -85,9 +89,6 @@ vagrant ALL=NOPASSWD: ALL
 Defaults env_keep="SSH_AUTH_SOCK"
 Defaults !requiretty
 EOF
-
-#role account for folks acting as the admiral
-make_admiral
 
 #role account for git push manual deployment
 gitreceive init
