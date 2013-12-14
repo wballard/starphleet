@@ -19,6 +19,7 @@ colors = require 'colors'
 table = require 'cli-table'
 request = require 'request'
 os = require 'os'
+yaml = require 'js-yaml'
 
 doc = """
 #{pkg.description}
@@ -94,8 +95,8 @@ zones = _.first(zones, 4)
 
 isThereBadNews = (err) ->
   if /LoadBalancerNotFound/.test("#{err}")
-    console.error "No load balancer found for #{process.env['STARPHLEET_HEADQUARTERS']}".red
-    console.error "Have you run".red
+    console.error "No load balancer found for #{process.env['STARPHLEET_HEADQUARTERS']}".yellow
+    console.error "Have you run".yellow
     console.error "  starphleet init ec2".blue
     process.exit 1
   else if err
@@ -253,7 +254,6 @@ if options.add and options.ship and options.ec2
       user_data =
         runcmd: [
           "apt-get install -y git",
-          "mkdir /starphleet",
           "git clone https://github.com/wballard/starphleet.git /starphleet",
           "/starphleet/scripts/starphleet-install",
           "starphleet-headquarters #{process.env['STARPHLEET_HEADQUARTERS']}"
@@ -274,7 +274,7 @@ if options.add and options.ship and options.ec2
         MaxCount: 1
         KeyName: public_key_name
         SecurityGroups: ['starphleet']
-        UserData: new Buffer(JSON.stringify(user_data)).toString('base64')
+        UserData: new Buffer("#cloud-config\n" + yaml.safeDump(user_data)).toString('base64')
         InstanceType:  process.env['EC2_INSTANCE_SIZE'] or 'm2.xlarge'
       zone.runInstances todo, callback
     (ran, callback) ->
@@ -356,7 +356,9 @@ if options.info and options.ec2
           console.log "Dashboards are at", "http://<host>/starphleet/dashboard".cyan
           console.log "Remember to", "ssh ubuntu@<host>".cyan
     else
-      console.log "do 'starphleet add ship ec2 [region]' to get started\nvalid regions #{_.map(zones, (x) -> x.config.region)}".yellow
+      console.log "Run".yellow
+      console.log "  starphleet add ship ec2 [region]".blue
+      console.log "valid regions #{_.map(zones, (x) -> x.config.region)}".yellow
     process.exit 0
 
 if options.remove and options.ship and options.ec2
