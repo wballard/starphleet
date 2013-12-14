@@ -93,7 +93,12 @@ zones = _.map zones, (zone) ->
 zones = _.first(zones, 4)
 
 isThereBadNews = (err) ->
-  if err
+  if /LoadBalancerNotFound/.test("#{err}")
+    console.error "No load balancer found for #{process.env['STARPHLEET_HEADQUARTERS']}".red
+    console.error "Have you run".red
+    console.error "  starphleet init ec2".blue
+    process.exit 1
+  else if err
     console.error "#{err}".red
     process.exit 1
 
@@ -243,9 +248,9 @@ if options.add and options.ship and options.ec2
       else
         nestedCallback()
     (callback) ->
-      ami = images[options['<region>']
+      ami = images[options['<region>']]
       #leverage cloud-init cloud-config
-      user_data = JSON.stringify
+      user_data =
         runcmd: [
           "apt-get install -y git",
           "mkdir /starphleet",
@@ -269,7 +274,7 @@ if options.add and options.ship and options.ec2
         MaxCount: 1
         KeyName: public_key_name
         SecurityGroups: ['starphleet']
-        UserData: new Buffer(user_data).toString('base64')
+        UserData: new Buffer(JSON.stringify(user_data)).toString('base64')
         InstanceType:  process.env['EC2_INSTANCE_SIZE'] or 'm2.xlarge'
       zone.runInstances todo, callback
     (ran, callback) ->
