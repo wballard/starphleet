@@ -32,7 +32,6 @@
     "starphleet-git-synch": "./scripts/starphleet-git-synch",
     "starphleet-cleanup": "./scripts/starphleet-cleanup",
     "starphleet-public-keys": "./scripts/starphleet-public-keys",
-    "starphleet-install": "./scripts/starphleet-install",
     "starphleet-update": "./scripts/starphleet-update",
     "starphleet-ready": "./scripts/starphleet-ready"
   },
