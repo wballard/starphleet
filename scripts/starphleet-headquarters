@@ -19,17 +19,7 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 set -e
 
 if [ -z "${url}" ]; then
-  #if we are on EC2, metadata provides keys and the headquarters url
-  if curl "http://169.254.169.254/latest/user-data/" --silent --connect-timeout 1 > /dev/null; then
-    info using EC2 metadata
-    url=$(curl "http://169.254.169.254/latest/user-data/" --silent | jq --raw-output '.STARPHLEET_HEADQUARTERS')
-    test -d /var/starphleet/private_keys || mkdir -p /var/starphleet/private_keys
-    curl "http://169.254.169.254/latest/user-data/" --silent \
-    | jq --raw-output '.STARPHLEET_PRIVATE_KEY' \
-    > "${PRIVATE_KEYS}/userdata"
-    #EC2 will put on public keys in its own special way
-  elif [ -f /starphleet/headquarters ]; then
-    info looks like you may be on Vagrant
+  if [ -f /starphleet/headquarters ]; then
     url=$(cat /starphleet/headquarters)
     if find /starphleet/private_keys/* > /dev/null ; then
       [ -d "${PRIVATE_KEYS}" ] && cp /starphleet/private_keys/* "${PRIVATE_KEYS}"

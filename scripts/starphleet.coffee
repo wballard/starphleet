@@ -74,6 +74,9 @@ Description:
 options = docopt doc, version: pkg.version
 
 #All the exciting settings and globals
+images =
+  'us-west-1': 'ami-b698a9f3'
+  'us-west-2': 'ami-2e12771e'
 zones = _.map [
   'us-east-1',
   'us-west-1',
@@ -88,7 +91,6 @@ zones = _.map zones, (zone) ->
   zone.elb = new AWS.ELB {region: zone.config.region, maxRetries: 15}
   zone
 zones = _.first(zones, 4)
-ami_name="starphleet-0.0.3"
 
 isThereBadNews = (err) ->
   if err
@@ -241,16 +243,26 @@ if options.add and options.ship and options.ec2
       else
         nestedCallback()
     (callback) ->
-      zone.describeImages {Owners: ['925278656507'], Filters: [{Name:"name", Values:[ami_name]}]}, callback
-    (images, callback) ->
-      ami = images.Images[0].ImageId
-      #seems like this is just about everything...
+      ami = images[options['<region>']
+      #leverage cloud-init cloud-config
       user_data = JSON.stringify
-        STARPHLEET_PUBLIC_KEY: fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8') if process.env['STARPHLEET_PUBLIC_KEY']
-        STARPHLEET_PRIVATE_KEY: fs.readFileSync(process.env['STARPHLEET_PRIVATE_KEY'], 'utf8') if process.env['STARPHLEET_PRIVATE_KEY']
-        STARPHLEET_HEADQUARTERS: process.env['STARPHLEET_HEADQUARTERS']
-        AWS_SECRET_ACCESS_KEY: process.env['AWS_SECRET_ACCESS_KEY']
-        AWS_ACCESS_KEY_ID: process.env['AWS_ACCESS_KEY_ID']
+        runcmd: [
+          "apt-get install -y git",
+          "mkdir /starphleet",
+          "git clone https://github.com/wballard/starphleet.git /starphleet",
+          "/starphleet/scripts/starphleet-install",
+          "starphleet-headquarters #{process.env['STARPHLEET_HEADQUARTERS']}"
+        ]
+        write_files: [
+          {
+            content: fs.readFileSync(process.env['STARPHLEET_PRIVATE_KEY'], 'utf8') if process.env['STARPHLEET_PRIVATE_KEY']
+            path: '/starphleet/private_keys/starphleet'
+          },
+          {
+            content: fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8') if process.env['STARPHLEET_PRIVATE_KEY']
+            path: '/starphleet/public_keys/starphleet.pub'
+          }
+        ]
       todo =
         ImageId: ami
         MinCount: 1
@@ -381,7 +393,7 @@ if options.name and options.ship and options.ec2
       if records.ResourceRecordSets?[0]
         change.ChangeBatch.Changes.push
           Action: 'DELETE'
-          ResourceRecordSet: records.ResourceRecordSets[0]     
+          ResourceRecordSet: records.ResourceRecordSets[0]
       change.ChangeBatch.Changes.push
         Action: 'CREATE'
         ResourceRecordSet:

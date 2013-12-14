@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-REMOTE="${STARPHLEET_REMOTE:-https://github.com/wballard/starphleet.git}"
-LOCAL="/starphleet"
-apt-get update -y
-apt-get install -y git
-[ -d "${LOCAL}" ] || mkdir -p "${LOCAL}"
-git clone  "${REMOTE}" "${LOCAL}"
-cd "${LOCAL}"
-./scripts/starphleet-install
