@@ -261,11 +261,11 @@ if options.add and options.ship and options.ec2
         write_files: [
           {
             content: fs.readFileSync(process.env['STARPHLEET_PRIVATE_KEY'], 'utf8') if process.env['STARPHLEET_PRIVATE_KEY']
-            path: '/starphleet/private_keys/starphleet'
+            path: '/var/starphleet/private_keys/starphleet'
           },
           {
             content: fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8') if process.env['STARPHLEET_PRIVATE_KEY']
-            path: '/starphleet/public_keys/starphleet.pub'
+            path: '/var/starphleet/public_keys/starphleet.pub'
           }
         ]
       todo =
