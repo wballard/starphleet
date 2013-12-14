@@ -61,8 +61,6 @@ chmod 755 ${STARPHLEET_ROOT}
 chmod 755 ${STARPHLEET_ROOT}/diagnostic
 
 npm ${NPM_FLAGS} install -g coffee-script
-npm ${NPM_FLAGS} install -g "${TAILOR_REMOTE}"
-npm ${NPM_FLAGS} install -g "${DASHBOARD_REMOTE}"
 
 #starphleet and all of its scripts
 pushd "${DIR}/.."
