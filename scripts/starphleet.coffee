@@ -76,22 +76,14 @@ options = docopt doc, version: pkg.version
 
 #All the exciting settings and globals
 images =
+  'us-east-1': 'ami-5df8da34'
   'us-west-1': 'ami-b698a9f3'
   'us-west-2': 'ami-2e12771e'
-zones = _.map [
-  'us-east-1',
-  'us-west-1',
-  'us-west-2',
-  'eu-west-1',
-  'sa-east-1',
-  'ap-northeast-1',
-  'ap-southeast-1',
-  'ap-southeast-2'
-], (x) -> new AWS.EC2 {region: x, maxRetries: 15}
+  'eu-west-1': 'ami-f4bb5583'
+zones = _.map _.keys(images), (x) -> new AWS.EC2 {region: x, maxRetries: 15}
 zones = _.map zones, (zone) ->
   zone.elb = new AWS.ELB {region: zone.config.region, maxRetries: 15}
   zone
-zones = _.first(zones, 4)
 
 isThereBadNews = (err) ->
   if /LoadBalancerNotFound/.test("#{err}")
@@ -268,6 +260,7 @@ if options.add and options.ship and options.ec2
             path: '/var/starphleet/public_keys/starphleet.pub'
           }
         ]
+        output: {all: '| tee -a /var/log/cloud-init-output.log'}
       todo =
         ImageId: ami
         MinCount: 1
