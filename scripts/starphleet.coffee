@@ -76,10 +76,10 @@ options = docopt doc, version: pkg.version
 
 #All the exciting settings and globals
 images =
-  'us-east-1': 'ami-5df8da34'
-  'us-west-1': 'ami-b698a9f3'
-  'us-west-2': 'ami-2e12771e'
-  'eu-west-1': 'ami-f4bb5583'
+  'us-east-1': 'ami-8f311fe6'
+  'us-west-1': 'ami-c2fccc87'
+  'us-west-2': 'ami-ec6c08dc'
+  'eu-west-1': 'ami-d23cd5a5'
 zones = _.map _.keys(images), (x) -> new AWS.EC2 {region: x, maxRetries: 15}
 zones = _.map zones, (zone) ->
   zone.elb = new AWS.ELB {region: zone.config.region, maxRetries: 15}
