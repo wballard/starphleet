@@ -84,8 +84,6 @@ zones = _.map _.keys(images), (x) -> new AWS.EC2 {region: x, maxRetries: 15}
 zones = _.map zones, (zone) ->
   zone.elb = new AWS.ELB {region: zone.config.region, maxRetries: 15}
   zone
-#just one zone for the moment
-zones = zones.slice(0,1)
 
 isThereBadNews = (err) ->
   if /LoadBalancerNotFound/.test("#{err}")
