@@ -84,6 +84,8 @@ zones = _.map _.keys(images), (x) -> new AWS.EC2 {region: x, maxRetries: 15}
 zones = _.map zones, (zone) ->
   zone.elb = new AWS.ELB {region: zone.config.region, maxRetries: 15}
   zone
+#just one zone for the moment
+zones = zones.slice(0,1)
 
 isThereBadNews = (err) ->
   if /LoadBalancerNotFound/.test("#{err}")
@@ -136,6 +138,16 @@ be used by subsequent commands when creating ships.
 
 if options.init and options.ec2
   mustBeSet 'STARPHLEET_HEADQUARTERS'
+  listeners = []
+  listeners.push
+    #on purpose TCP to do web sockets
+    Protocol: 'TCP'
+    LoadBalancerPort: 80
+    InstancePort: 80
+  listeners.push
+    Protocol: 'TCP'
+    LoadBalancerPort: 443
+    InstancePort: 443
   initZone = (zone, callback) ->
     async.waterfall [
       #check for an existing ELB
@@ -150,16 +162,7 @@ if options.init and options.ec2
             isThereBadNews err
             zone.elb.createLoadBalancer
               LoadBalancerName: hashname()
-              Listeners: [
-                #on purpose TCP to do web sockets
-                Protocol: 'TCP'
-                LoadBalancerPort: 80
-                InstancePort: 80
-                ,
-                Protocol: 'TCP'
-                LoadBalancerPort: 443
-                InstancePort: 443
-              ]
+              Listeners: listeners
               AvailabilityZones: _.map zones.AvailabilityZones, (x) -> x.ZoneName
             , nestedCallback
       #set a realistic LB health policy
