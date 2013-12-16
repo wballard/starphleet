@@ -28,7 +28,7 @@ Usage:
   starphleet init ec2
   starphleet info ec2
   starphleet add ship ec2 <region>
-  starphleet remove ship ec2 <hostname>
+  starphleet remove ship ec2 <region> <id>
   starphleet name ship ec2 <zone_id> <domain_name> <address>...
   starphleet -h | --help | --version
 
@@ -342,10 +342,10 @@ if options.info and options.ec2
       for balancer in all
         if balancer.Instances.length
           hosts = new table
-            head: ['Hostname', 'Status']
-            colWidths: [60, 12]
+            head: ['ID', 'Hostname', 'Status']
+            colWidths: [12, 60, 12]
           for instance in balancer.Instances
-            hosts.push ["#{instance.PublicDnsName}", "#{instance.Status}"]
+            hosts.push ["#{instance.InstanceId}", "#{instance.PublicDnsName}", "#{instance.Status}"]
           lb = new table()
           lb.push Region: balancer.Region
           lb.push 'Load Balancer': balancer.DNSName
@@ -360,28 +360,31 @@ if options.info and options.ec2
     process.exit 0
 
 if options.remove and options.ship and options.ec2
-  queryZone = (zone, zoneCallback) ->
-    async.waterfall [
-      (callback) ->
-        zone.describeInstances {Filters: [{Name:"dns-name", Values:[options['<hostname>']]}]}, callback
-      (zoneInstances, callback) ->
-        instance_ids = []
-        for reservation in zoneInstances.Reservations
-          for instance in reservation.Instances
-            instance_ids.push instance.InstanceId
-        callback undefined, instance_ids
-      (instanceIds, callback) ->
-        if instanceIds.length
-          options.removing = true
-          zone.terminateInstances {InstanceIds: instanceIds}, callback
-        else
-          callback()
-    ], zoneCallback
-  async.each zones, queryZone, (err) ->
-    isThereBadNews err
-    if not options.removing
-      isThereBadNews "#{options['<hostname>']} not found"
-    process.exit 0
+  mustBeSet 'STARPHLEET_HEADQUARTERS'
+  zone = _.select(zones, (zone) -> zone.config.region is options['<region>'])[0]
+  if not zone
+    isThereBadNews "You must pick a region from #{_.map(zones, (x) -> x.config.region)}".red
+  async.waterfall [
+    (callback) ->
+      zone.describeInstanceStatus
+        InstanceIds: [options['<id>']]
+      , callback
+    (statuses, callback) ->
+      if statuses.InstanceStatuses.length
+        zone.terminateInstances
+          InstanceIds: [options['<id>']]
+        , callback
+      else
+        callback undefined, null
+    (ignore, callback) ->
+      zone.elb.deregisterInstancesFromLoadBalancer
+        LoadBalancerName: hashname()
+        Instances:
+          [InstanceId: options['<id>']]
+      , callback
+    ], (err) ->
+      isThereBadNews err
+      process.exit 0
 
 if options.name and options.ship and options.ec2
   route53 = new AWS.Route53 {region: 'us-east-1'}
