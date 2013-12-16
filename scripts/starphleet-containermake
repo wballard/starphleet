@@ -15,6 +15,9 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 set -e
 test -f "${build_script}"
 
+[ -d /var/lib/lxc/data ] || mkdir -p /var/lib/lxc/data
+chmod 777 /var/lib/lxc/data
+
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
 CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
@@ -26,6 +29,7 @@ CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 cat << EOF > ${CONTAINER_CONF}
 lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/rootfs/var/starphleet none bind,rw 0 0
+lxc.mount.entry = /var/lib/lxc/data ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
 EOF
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
@@ -50,6 +54,7 @@ else
   lxc-clone --snapshot -B overlayfs -o "${base_container_name}" -n "${CONTAINER_NAME}"
   #make a directory where we can mount back to the ship and a config file to mount
   test -d "${CONTAINER_OVERLAY}/var/starphleet" || mkdir -p "${CONTAINER_OVERLAY}/var/starphleet"
+  test -d "${CONTAINER_OVERLAY}/var/data" || mkdir -p "${CONTAINER_OVERLAY}/var/data"
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/config
   #copy on the starphleet commands
   mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
