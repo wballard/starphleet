@@ -21,7 +21,6 @@ function clean_up {
 
 trap clean_up HUP INT TERM EXIT
 
-
 function top_level_parent_pid {
     # Look up the parent of the given PID.
     pid=${1:-$$}

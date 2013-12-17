@@ -13,8 +13,7 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 set -e
 
-URL="${public_url:-/}"
-[ "${URL}" == "/" ] && URL=""
+public_url=$(echo "${public_url}/" | sed -e 's[//[/[g')
 CONTAINER_NAME=${container_name}
 IP_ADDRESS=$(lxc-ls --fancy | grep "^${CONTAINER_NAME}" | awk '{ print $3; }')
 HOSTNAME=$(hostname)
@@ -23,10 +22,10 @@ PUBLISH_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
 test ! -d "${NGINX_CONF}/published" && mkdir -p "${NGINX_CONF}/published"
 
 cat << EOF > "${PUBLISH_CONF}"
-location ${URL}/ {
+location ${public_url} {
   include /var/starphleet/nginx/cors.conf;
   # Path rewriting to hide mount prefix
-  rewrite ${URL}/(.*) /\$1 break;
+  rewrite ${public_url}(.*) /\$1 break;
   proxy_pass http://${IP_ADDRESS}:${container_port};
   add_header X-CONTAINER ${CONTAINER_NAME};
   add_header X-SHIP ${HOSTNAME};
@@ -39,4 +38,4 @@ EOF
 
 initctl list | grep 'starphleet_nginx' > /dev/null && (reload starphleet_nginx || start starphleet_nginx)
 
-info published to http://${HOSTNAME}${URL}
+info published to http://${HOSTNAME}${public_url}

@@ -16,6 +16,8 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 #as it will provide the home directory
 make_admiral
 
+chmod 755 /var/lib/lxc
+
 #yep -- international, no fooling
 echo "GMT" > /etc/timezone
 dpkg-reconfigure -f noninteractive tzdata

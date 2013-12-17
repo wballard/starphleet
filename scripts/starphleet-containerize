@@ -48,7 +48,6 @@ echo \$PORT > "${STARPHLEET_PORTS}/${container_name}"
 EOF
 
 #actually make a container here
-info creating ${container_name}
 if lxc-ls | grep "^${container_name}$" > /dev/null; then
   warn already built ${container_name}
   lxc-start --name ${container_name} -d
@@ -56,6 +55,7 @@ if lxc-ls | grep "^${container_name}$" > /dev/null; then
   lxc-attach --name ${container_name} -- bash starphleet-wait-network
   exit 0
 else
+  info building ${container_name}
   #making base containers as needed, base container serves as the source for
   #and we clone the service container on top, the idea is the base container
   #can be re-used and thus improve build time
