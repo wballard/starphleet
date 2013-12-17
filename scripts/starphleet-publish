@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-publish <container_name> <container_port> <public_url>
+###    starphleet-publish <container_name> <container_port> <public_url> [<container_url>]
 ### --help
 ###
-### Publish HTTP traffic from the container port:/ out to the ship
+### Publish HTTP traffic from the container out to the ship
 ### nginx at a designated url mount point. This lets you aggregate multiple
 ### web services under one host and avoid CORS and cross domain muck.
+###
+### Optionally, you can 'deep publish' or alias further into the container.
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
@@ -14,9 +16,8 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 set -e
 
 public_url=$(echo "${public_url}/" | sed -e 's[//[/[g')
-CONTAINER_NAME=${container_name}
-IP_ADDRESS=$(lxc-ls --fancy | grep "^${CONTAINER_NAME}" | awk '{ print $3; }')
-HOSTNAME=$(hostname)
+container_url=$(echo "${container_url}/" | sed -e 's[//[/[g')
+IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
 PUBLISH_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
 
 test ! -d "${NGINX_CONF}/published" && mkdir -p "${NGINX_CONF}/published"
@@ -26,9 +27,10 @@ location ${public_url} {
   include /var/starphleet/nginx/cors.conf;
   # Path rewriting to hide mount prefix
   rewrite ${public_url}(.*) /\$1 break;
-  proxy_pass http://${IP_ADDRESS}:${container_port};
-  add_header X-CONTAINER ${CONTAINER_NAME};
-  add_header X-SHIP ${HOSTNAME};
+  proxy_pass http://${IP_ADDRESS}:${container_port}${container_url};
+  add_header X-CONTAINER ${container_name};
+  add_header X-CONTAINER-URL ${container_url};
+  add_header X-SHIP $(hostname);
   # WebSocket support (nginx 1.4)
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
@@ -37,5 +39,4 @@ location ${public_url} {
 EOF
 
 initctl list | grep 'starphleet_nginx' > /dev/null && (reload starphleet_nginx || start starphleet_nginx)
-
-info published to http://${HOSTNAME}${public_url}
+info published ${container_name}:${container_port}${container_url} to ${public_url}

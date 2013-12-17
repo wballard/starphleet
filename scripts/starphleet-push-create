@@ -40,13 +40,15 @@ info making "${local_repo}" into container "${container_name}"
 # of the repo, so we're gonna check out the repo and see if we've got
 # an .env file
 # first, a place to checkout our repo to
-CHECKOUT_PATH="${STARPHLEET_TMP}/${container_name}"
+export CHECKOUT_PATH="${STARPHLEET_TMP}/${container_name}"
 # make sure we don't have anything where we're gonna check things out
 test -f "${CHECKOUT_PATH}"  && rm -rf "${CHECKOUT_PATH}"
 git clone "${local_repo}" "${CHECKOUT_PATH}"
 pushd "${CHECKOUT_PATH}" > /dev/null
 git checkout "${revision}"
 popd > /dev/null
+#resource tools, we now have a cloned repository locally to pick up env
+source ${DIR}/tools
 info cleaning up existing push container
 starphleet-lxc-destroy "${container_name}"
 info making this push into a container
@@ -54,6 +56,10 @@ starphleet-containerize "${CHECKOUT_PATH}#${revision}" "${container_name}"
 export PORT=$(cat "${STARPHLEET_PORTS}/${container_name}")
 
 starphleet-publish "${container_name}" "${PORT}" "/${container_name}"
+for container_url in "${!REPUBLISH[@]}"; do
+  starphleet-publish "${container_name}" "${PORT}" "${REPUBLISH[$container_url]}" "${container_url}"
+done
+
 info starting your pushed container
 lxc-attach --name ${container_name} -- /start web &
 while [ 1 ]; do

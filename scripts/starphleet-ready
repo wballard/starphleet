@@ -10,11 +10,11 @@ help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 PORT=${container_port:-${PORT}}
-URL=${url:-}
+URL=${url:-/}
 
 for c in {1..100}; do
   IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
-  TEST_GET="http://${IP_ADDRESS}:${PORT}/${URL}"
+  TEST_GET="http://${IP_ADDRESS}:${PORT}${URL}"
   TEST_COMMAND="curl -X GET -o /dev/null -s -w %{response_code} ${TEST_GET}"
   RESULT=`${TEST_COMMAND}`
   if [ -n "${DEBUG}" ]; then

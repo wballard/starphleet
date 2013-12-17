@@ -84,6 +84,14 @@ function autodeploy() {
   export AUTODEPLOY="${1}"
 }
 
+#republish a container at multiple locations
+#container -> ship
+declare -A REPUBLISH
+function republish() {
+  REPUBLISH["${1}"]="${2}"
+  export REPUBLISH
+}
+
 function get_RANDOM_MAC_ADDRESS() {
   range=255
   for i in {1..6}
@@ -120,6 +128,7 @@ function make_admiral() {
 # * headquarters/.../orders variables, service level overrides
 # * headquarters/.starphleet variables, global overrides
 [ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"
+[ -f "/${CHECKOUT_PATH}/.env" ] && source "/${CHECKOUT_PATH}/.env"
 [ -f /app/.env ] && source /app/.env
 [ -d /app/.profile.d ] && for file in /app/.profile.d/*; do source $file; done
 [ -f /.orders ] && source /.orders
