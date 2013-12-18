@@ -40,6 +40,7 @@ chmod 600 ${AUTHFILE}
 chown ${ADMIRAL}:${ADMIRAL} ${AUTHFILE}
 
 #look for SSL keys
+[ -d "${NGINX_CONF}/published" ] || mkdir -p "${NGINX_CONF}/published"
 if [ -f "${HEADQUARTERS_LOCAL}/ssl/crt" ] && [ -f "${HEADQUARTERS_LOCAL}/ssl/key" ]; then
   if diff "${HEADQUARTERS_LOCAL}/ssl/crt" "${NGINX_CONF}/published/crt" > /dev/null; then
     #keys are the same
