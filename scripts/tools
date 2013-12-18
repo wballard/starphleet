@@ -83,6 +83,7 @@ function get_CONTAINER_NAME() {
 function autodeploy() {
   export AUTODEPLOY="${1}"
 }
+export -f autodeploy
 
 #republish a container at multiple locations
 #container -> ship
@@ -91,6 +92,7 @@ function republish() {
   REPUBLISH["${1}"]="${2}"
   export REPUBLISH
 }
+export -f republish
 
 function get_RANDOM_MAC_ADDRESS() {
   range=255
@@ -122,6 +124,7 @@ function make_admiral() {
   chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}
   info admiral created
 }
+export -f make_admiral
 
 # environment, enforced by our buildpack script, so the preference order is:
 # * repository specific variables, basically our dev settings
