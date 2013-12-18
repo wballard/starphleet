@@ -80,6 +80,7 @@ images =
   'us-west-1': 'ami-c2fccc87'
   'us-west-2': 'ami-ec6c08dc'
   'eu-west-1': 'ami-d23cd5a5'
+  'ap-southeast-1': 'ami-82c793d0'
 zones = _.map _.keys(images), (x) -> new AWS.EC2 {region: x, maxRetries: 15}
 zones = _.map zones, (zone) ->
   zone.elb = new AWS.ELB {region: zone.config.region, maxRetries: 15}
