@@ -36,7 +36,7 @@ trap 'rm -rf ${CONTAINER_CONF}' EXIT
 (
 #flocked, parallel container build is a race condition on start
 flock 200
-if diff "${CONTAINER_OVERLAY}/build_script" "${build_script}"; then
+if [ -f "${CONTAINER_OVERLAY}/build_script" ] && diff "${CONTAINER_OVERLAY}/build_script" "${build_script}"; then
   info container is up to date
   exit 0
 else
