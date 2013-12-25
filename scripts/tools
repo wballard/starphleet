@@ -28,7 +28,6 @@ export TAILOR_REMOTE="git+https://github.com/wballard/tailor.git"
 export DASHBOARD_REMOTE="git+https://github.com/wballard/starphleet.dashboard.git"
 export NPM_FLAGS=""
 export SHIP=ship-$(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub | awk '{ print $2; }' | sed -e 's/://g')
-export HOME="${ADMIRAL_HOME}"
 
 ulimit -n ${MAX_OPEN_FILES}
 
@@ -91,6 +90,7 @@ function republish() {
   REPUBLISH["${1}"]="${2}"
   export REPUBLISH
 }
+export -f republish
 
 function get_RANDOM_MAC_ADDRESS() {
   range=255
@@ -130,7 +130,6 @@ function make_admiral() {
 [ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"
 [ -f "/${CHECKOUT_PATH}/.env" ] && source "/${CHECKOUT_PATH}/.env"
 [ -f /app/.env ] && source /app/.env
-[ -d /app/.profile.d ] && for file in /app/.profile.d/*; do source $file; done
 [ -f /.orders ] && source /.orders
 [ -f "${HEADQUARTERS_ENV}" ] && source "${HEADQUARTERS_ENV}"
 :

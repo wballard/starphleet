@@ -56,7 +56,7 @@ default_types=$(ruby -e "require 'yaml';puts (YAML.load_file('$app_root/.release
 
 cat > /start <<EOF
 #!/bin/bash
-export HOME=/app
+export HOME=/
 source /usr/bin/tools
 cd $app_root
 if [[ -f Procfile ]]; then

@@ -12,6 +12,7 @@
     "gitreceive": "./scripts/gitreceive",
     "sshcommand": "./scripts/sshcommand",
     "buildpacks": "./scripts/buildpacks",
+    "builder": "./scripts/builder",
     "starphleet-push-create": "./scripts/starphleet-push-create",
     "starphleet-addresses": "./scripts/starphleet-addresses",
     "starphleet-headquarters": "./scripts/starphleet-headquarters",

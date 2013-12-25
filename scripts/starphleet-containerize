@@ -36,13 +36,23 @@ ORDERS="${orders_script:-${DIR}/orders}"
 CONTAINER_BUILD_SCRIPT=${STARPHLEET_TMP}/${container_name}.build
 cat << EOF > ${CONTAINER_BUILD_SCRIPT}
 #source to get the headquarters and default environment
-export HOME=/app
+export HOME=/
 cp "${CONTAINER_ORDERS_SCRIPT}" /.orders
 source /usr/bin/tools
+make_admiral
 starphleet-git-synch "${git_url}" /app
 #source again, we may now have orders which change the environment
 source /usr/bin/tools
-starphleet-buildpack-script
+
+#set up a place onboard for possible custom buildpacks
+mkdir -p /build
+cp -r "${BUILDPACKS}" /build/buildpacks
+
+#now hand off to buildstep builder
+builder
+
+#have the tools script sourced early in the buildpack environment sequence
+cp /usr/bin/tools /app/.profile.d/__starphleet
 info port is \$PORT
 echo \$PORT > "${STARPHLEET_PORTS}/${container_name}"
 EOF

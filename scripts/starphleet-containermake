@@ -61,6 +61,7 @@ else
   cp /usr/bin/starphleet* "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
+  cp /usr/bin/builder "${CONTAINER_OVERLAY}/usr/bin/"
   #this is the build script for the container itself
   cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
   chmod +x "${CONTAINER_OVERLAY}/build_script"
