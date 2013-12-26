@@ -21,6 +21,8 @@ request = require 'request'
 os = require 'os'
 yaml = require 'js-yaml'
 
+EC2_INSTANCE_SIZE="m2.2xlarge"
+
 doc = """
 #{pkg.description}
 
@@ -39,7 +41,7 @@ Notes:
     * STARPHLEET_HEADQUARTERS
     * STARPHLEET_PUBLIC_KEY
     * STARPHLEET_PRIVATE_KEY
-    * EC2_INSTANCE_SIZE will be consulted, defaulting to m2.xlarge
+    * EC2_INSTANCE_SIZE will be consulted, defaulting to #{EC2_INSTANCE_SIZE}
 
 Description:
   This tool uses the AWS API for you to create a properly provisioned phleet
@@ -274,7 +276,7 @@ if options.add and options.ship and options.ec2
         KeyName: public_key_name
         SecurityGroups: ['starphleet']
         UserData: new Buffer("#cloud-config\n" + yaml.safeDump(user_data)).toString('base64')
-        InstanceType:  process.env['EC2_INSTANCE_SIZE'] or 'm2.xlarge'
+        InstanceType:  process.env['EC2_INSTANCE_SIZE'] or EC2_INSTANCE_SIZE
       zone.runInstances todo, callback
     (ran, callback) ->
       ids = _.map ran.Instances, (x) -> {InstanceId: x.InstanceId}
