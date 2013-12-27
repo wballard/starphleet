@@ -75,9 +75,16 @@ EOF
 
   for status in $(find "${CURRENT_ORDERS}" -name '*.starphleetstatus' | sort)
   do
-    ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}[[")/"
+    LOCAL=$(dirname "${status}")/git
+    get_CURRENT_SHA "${LOCAL}"
+    SERVICE_SHA=${CURRENT_SHA}
+    get_SHASUM "${LOCAL}/../orders"
+    ORDERS_SHA=${SHASUM}
+    ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
+    ENCODED_ORDER=$(urlencode "${ORDER}")
+    SERVICE_NAME=$(echo "${ENCODED_ORDER}.${ORDERS_SHA}.${SERVICE_SHA}.orders")
+    get_CONTAINER_NAME "${SERVICE_NAME}"
     cd "$(dirname "${status}")/git"
-    SHA=$(git log -1 --format='%h')
     AT=$(git log -1 --format='%at')
     AUTHOR=$(git log -1 --format='%ae')
     TEXT=$(git log -1 --format='%s')
@@ -85,10 +92,11 @@ cat << EOF >> /dev/stdout
   -
     order: ${ORDER}
     log: /starphleet/logs${ORDER}service.log
-    sha: ${SHA}
+    sha: ${SERVICE_SHA}
     at: ${AT}
     author: ${AUTHOR}
     text: ${TEXT}
+    container: ${CONTAINER_NAME}
     status: $(cat "${status}")
 EOF
   done
