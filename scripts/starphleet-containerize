@@ -11,10 +11,9 @@
 ###
 ### The container will have a layout with the following special directories:
 ### /var/starphleet - This mounts back to /var/starphleet on the host
-### /app - Your git repository will be here
+### ${HOME}/app - Your git repository will be here
 ### /block - Handy way to block until the container has networking
-### /start - This is the Heroku style start script
-### /web - This is a shortcut for /start web
+### ${HOME}/start - This is the Heroku style start script
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
@@ -36,20 +35,20 @@ ORDERS="${orders_dir}/orders"
 CONTAINER_BUILD_SCRIPT=${STARPHLEET_TMP}/${container_name}.build
 cat << EOF > ${CONTAINER_BUILD_SCRIPT}
 #source to get the headquarters and default environment
-export HOME=/
-cp "${CONTAINER_ORDERS_SCRIPT}" /.orders
+sudo cp "${CONTAINER_ORDERS_SCRIPT}" /.orders
 source /usr/bin/tools
+trace "HOME=\${HOME}"
 
-starphleet-git-synch "${git_url}" /app
+starphleet-git-synch "${git_url}" "\${HOME}/app"
 #source again, we may now have orders which change the environment
 source /usr/bin/tools
 
 #set up a place onboard for possible custom buildpacks
-mkdir -p /build
-cp -r "${BUILDPACKS}" /build/buildpacks
+mkdir -p "\${HOME}/build"
+cp -r "${BUILDPACKS}" "\${HOME}/build/buildpacks"
 EOF
 
-cat << 'EOF' >> ${CONTAINER_BUILD_SCRIPT}
+cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 #buildpacks may pull git and need ssh identity
 starphleet-git-config > /tmp/gitsshconfig
 export GIT_SSH=/tmp/gitssh
@@ -60,19 +59,20 @@ EOF
 cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 #now hand off to buildstep builder
 export BUILDPACK_CACHE_DIR="${orders_dir}/.cache"
-mkdir -p "${BUILDPACK_CACHE_DIR}"
+sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
+sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
 builder
 
 #have the tools script sourced early in the buildpack environment sequence
-cp /usr/bin/tools /app/.profile.d/__starphleet
+cp /usr/bin/tools "\${HOME}/app/.profile.d/__starphleet"
 #build variables
-echo "export STARPHLEET_DEPLOY_TIME='$(date)'" >> /app/.profile.d/__starphleetenv
-echo "export STARPHLEET_DEPLOY_GITURL=${git_url}" >> /app/.profile.d/__starphleetenv
-echo "export STARPHLEET_ENV=${orders_dir}/.starphleetenv" >> /app/.profile.d/__starphleetenv
+echo "export STARPHLEET_DEPLOY_TIME='$(date)'" >> "\${HOME}/app/.profile.d/__starphleetenv"
+echo "export STARPHLEET_DEPLOY_GITURL=${git_url}" >> "\${HOME}/app/.profile.d/__starphleetenv"
+echo "export STARPHLEET_ENV=${orders_dir}/.starphleetenv" >> "\${HOME}/app/.profile.d/__starphleetenv"
 source /usr/bin/tools
 info port is \$PORT
-echo \$PORT > "${STARPHLEET_PORTS}/${container_name}"
-[ -d "${orders_dir}" ] && env | sort > "${orders_dir}/.starphleetenv"
+sudo bash -c "echo \$PORT > \"${STARPHLEET_PORTS}/${container_name}\""
+[ -d "${orders_dir}" ] && env | sudo bash -c "sort > \"${orders_dir}/.starphleetenv\""
 EOF
 
 #actually make a container here

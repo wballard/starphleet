@@ -15,6 +15,6 @@ IFS=$'\n'
 for service in $(initctl list | grep "starphleet_serve_order (${ENCODED_ORDER}" | grep --invert-match "${current_service_name}")
 do
   name=$(echo "${service}" | awk '{print $2}' | sed -e 's/^(//' -e 's/)$//')
-  info reaping $name
+  info "reaping ${name}"
   stop --no-wait starphleet_serve_order name="${name}"
 done
