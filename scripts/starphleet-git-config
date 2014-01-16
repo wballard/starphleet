@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-git-config
+### --help
+###
+### Generate git configuration to override ssh.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+
+echo "StrictHostKeyChecking no"
+echo "CheckHostIP no"
+echo "LogLevel quiet"
+echo "UserKnownHostsFile /dev/null"
+if [ -d "${PRIVATE_KEYS}" ]; then
+  for key in $(find "${PRIVATE_KEYS}")
+  do
+    if [ -f "${key}" ]; then
+      get_HASH "${key}${USER}"
+      if grep "PRIVATE KEY" "${key}" > /dev/null; then
+        cp "${key}" /tmp/${HASH}
+        chown ${USER}:${USER} /tmp/${HASH}
+        echo "IdentityFile /tmp/${HASH}"
+      fi
+    fi
+  done
+fi

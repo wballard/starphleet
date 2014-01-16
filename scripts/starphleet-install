@@ -101,7 +101,7 @@ sshcommand create update "sudo starphleet-update"
 adduser update sudo
 
 
-start starphleet
+#start starphleet
 
 touch /var/starphleet/.system
 announce *Welcome to Starphleet*

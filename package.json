@@ -30,6 +30,7 @@
     "starphleet-unpublish": "./scripts/starphleet-unpublish",
     "starphleet-status": "./scripts/starphleet-status",
     "starphleet-git": "./scripts/starphleet-git",
+    "starphleet-git-config": "./scripts/starphleet-git-config",
     "starphleet-nuc": "./scripts/starphleet-nuc",
     "starphleet-git-synch": "./scripts/starphleet-git-synch",
     "starphleet-cleanup": "./scripts/starphleet-cleanup",

@@ -39,7 +39,7 @@ cat << EOF > ${CONTAINER_BUILD_SCRIPT}
 export HOME=/
 cp "${CONTAINER_ORDERS_SCRIPT}" /.orders
 source /usr/bin/tools
-make_admiral
+
 starphleet-git-synch "${git_url}" /app
 #source again, we may now have orders which change the environment
 source /usr/bin/tools
@@ -47,7 +47,17 @@ source /usr/bin/tools
 #set up a place onboard for possible custom buildpacks
 mkdir -p /build
 cp -r "${BUILDPACKS}" /build/buildpacks
+EOF
 
+cat << 'EOF' >> ${CONTAINER_BUILD_SCRIPT}
+#buildpacks may pull git and need ssh identity
+starphleet-git-config > /tmp/gitsshconfig
+export GIT_SSH=/tmp/gitssh
+echo "ssh -F /tmp/gitsshconfig \$@" > /tmp/gitssh
+chmod +x /tmp/gitssh
+EOF
+
+cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 #now hand off to buildstep builder
 builder
 
