@@ -343,19 +343,22 @@ if options.info and options.ec2
     isThereBadNews err
     if _.any(all, (balancer) -> balancer.Instances.length)
       for balancer in all
+        lb = new table
+          chars: { 'top': '=' , 'top-mid': '' , 'top-left': '' , 'top-right': ''
+            , 'bottom': '' , 'bottom-mid': '' , 'bottom-left': '' , 'bottom-right': ''
+            , 'left': '' , 'left-mid': '' , 'mid': '' , 'mid-mid': ''
+            , 'right': '' , 'right-mid': '' , 'middle': ' ' }
+          style: { 'padding-left': 0, 'padding-right': 1 }
+        lb.push "Region": "#{balancer.Region}"
+        lb.push "Load Balanger": "#{balancer.DNSName}"
         if balancer.Instances.length
-          hosts = new table
-            head: ['ID', 'Hostname', 'Status']
-            colWidths: [12, 60, 12]
           for instance in balancer.Instances
-            hosts.push ["#{instance.InstanceId}", "#{instance.PublicDnsName}", "#{instance.Status}"]
-          lb = new table()
-          lb.push Region: balancer.Region
-          lb.push 'Load Balancer': balancer.DNSName
-          lb.push 'Hosts': hosts.toString()
-          console.log lb.toString()
-          console.log "Dashboards are at", "http://<host>/starphleet/dashboard".cyan
-          console.log "Remember to", "ssh ubuntu@<host>".cyan
+            lb.push "ID": "#{instance.InstanceId}"
+            lb.push "Host": "#{instance.PublicDnsName}"
+            lb.push "Status": "#{instance.Status}"
+        console.log lb.toString()
+      console.log "Dashboards are at", "http://<host>/starphleet/dashboard".cyan
+      console.log "Remember to", "ssh ubuntu@<host>".cyan
     else
       console.log "Run".yellow
       console.log "  starphleet add ship ec2 [region]".blue
