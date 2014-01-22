@@ -2,11 +2,10 @@
 set -e
 
 app_root=/app
-build_root=/build/app
+build_root=$app_root
 cache_root=/cache/app
 buildpack_root=/build/buildpacks
 
-cp -r /app /build
 
 buildpacks=($buildpack_root/*)
 selected_buildpack=
@@ -45,7 +44,7 @@ $selected_buildpack/bin/compile "$build_root" "$cache_root"
 
 echo "-----> Discovering process types"
 
-$selected_buildpack/bin/release "$build_root" > /build/app/.release
+$selected_buildpack/bin/release "$build_root" > "$build_root/.release"
 
 if [[ -f "$build_root/Procfile" ]]; then
   types=$(ruby -e "require 'yaml';puts YAML.load_file('$build_root/Procfile').keys().join(', ')")
@@ -57,22 +56,12 @@ default_types=$(ruby -e "require 'yaml';puts (YAML.load_file('$build_root/.relea
 mkdir -p $build_root/.profile.d
 ruby -e "require 'yaml';(YAML.load_file('$build_root/.release')['config_vars'] || {}).each{|k,v| puts \"#{k}=#{v}\"}" > $build_root/.profile.d/config_vars
 
-cat > /exec <<EOF
-#!/bin/bash
-export HOME=/app
-for file in $app_root/.profile.d/*; do source \$file; done
-hash -r
-cd $app_root
-"\$@"
-EOF
-chmod +x /exec
-
 cat > /start <<EOF
 #!/bin/bash
-export HOME=/app
-for file in $app_root/.profile.d/*; do source \$file; done
+export HOME=$build_root
+for file in $build_root/.profile.d/*; do source \$file; done
 hash -r
-cd $app_root
+cd $build_root
 if [[ -f Procfile ]]; then
     ruby -e "require 'yaml';puts YAML.load_file('Procfile')['\$1']" | bash
 else
@@ -81,5 +70,3 @@ fi
 EOF
 chmod +x /start
 
-rm -fR /app
-mv /build/app /
