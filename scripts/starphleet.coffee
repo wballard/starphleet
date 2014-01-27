@@ -80,13 +80,13 @@ options = docopt doc, version: pkg.version
 images =
   'us-east-1': 'ami-8f311fe6'
   'us-west-1': 'ami-c2fccc87'
-  'us-west-2': 'ami-ec6c08dc'
   'eu-west-1': 'ami-d23cd5a5'
   'ap-southeast-1': 'ami-82c793d0'
 zones = _.map _.keys(images), (x) -> new AWS.EC2 {region: x, maxRetries: 15}
 zones = _.map zones, (zone) ->
   zone.elb = new AWS.ELB {region: zone.config.region, maxRetries: 15}
   zone
+
 
 isThereBadNews = (err) ->
   if /LoadBalancerNotFound/.test("#{err}")
@@ -234,7 +234,7 @@ if options.add and options.ship and options.ec2
   public_key_name = ''
   async.waterfall [
     #checking if we already have the key
-    (nestedCallback) ->
+    (callback) ->
       if process.env['STARPHLEET_PUBLIC_KEY']
         public_key_content =
           new Buffer(fs.readFileSync(process.env['STARPHLEET_PUBLIC_KEY'], 'utf8')).toString('base64')
@@ -242,12 +242,12 @@ if options.add and options.ship and options.ec2
         zone.describeKeyPairs {}, (err, keyFob) ->
           #adding if we lack the key
           if _.some(keyFob.KeyPairs, (x) -> x.KeyName is public_key_name)
-            nestedCallback()
+            callback()
           else
             zone.importKeyPair {KeyName: public_key_name, PublicKeyMaterial: public_key_content}, ->
-              nestedCallback()
+              callback()
       else
-        nestedCallback()
+        callback()
     (callback) ->
       ami = images[options['<region>']]
       #leverage cloud-init cloud-config
@@ -281,6 +281,14 @@ if options.add and options.ship and options.ec2
     (ran, callback) ->
       ids = _.map ran.Instances, (x) -> {InstanceId: x.InstanceId}
       zone.elb.registerInstancesWithLoadBalancer {LoadBalancerName: hashname(), Instances: ids}, callback
+    (ran, callback) ->
+      ids = _.map ran.Instances, (x) -> x.InstanceId
+      todo =
+        Resources: ids
+        Tags: [
+          {Key: 'Name', Value: 'Starphleet'}
+        ]
+      zone.createTags todo, callback
   ], (err) ->
     isThereBadNews err
     process.exit 0
