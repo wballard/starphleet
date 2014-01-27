@@ -22,6 +22,7 @@ if [ -d "${PRIVATE_KEYS}" ]; then
       if grep "PRIVATE KEY" "${key}" > /dev/null; then
         cp "${key}" /tmp/${HASH}
         chown ${USER}:${USER} /tmp/${HASH}
+        chmod 0400 /tmp/${HASH}
         echo "IdentityFile /tmp/${HASH}"
       fi
     fi
