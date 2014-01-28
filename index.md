@@ -80,12 +80,18 @@ need to have an AWS account, and the environment variables:
 #these are to appease AWS
 export AWS_ACCESS_KEY_ID=xxx
 export AWS_SECRET_ACCESS_KEY=xxx
+#git url used to clone your headquarters
+export STARPHLEET_HEADQUARTERS=git@github.com:wballard/starphleet.headquarters.git
+#set a key path here if you have a private headquarters
+export STARPHLEET_PRIVATE_KEY=~/.ssh/wballard@mailframe.net
+#a public key that goes with your private key, use this to ssh to ships
+export STARPHLEET_PUBLIC_KEY=~/.ssh/wballard@mailframe.net.pub
 ```
 
 And, to get going
 
 ```bash
-npm install "git+https://github.com/wballard/starphleet.git"
+npm install -g starphleet-cli
 starphleet --help
 
 starphleet init ec2
@@ -120,19 +126,6 @@ silly names.
 ## The 12-Factor App
 Starphleet owes a lot to the [12 factor app](http://12factor.net). Learn
 about it.
-
-## Command Line
-All of starphleet is available from a simple command line script, which
-lets you hook it into any existing scripting framework you like without
-needing to learn an API. The command line program is mostly shell, a
-sprinkle of python for [docopt](https://github.com/docopt/), and
-some nodejs, which is a nice way to deploy to your laptop or personal
-computer to manage starphleet.
-
-```bash
-npm install -g "git+https://github.com/wballard/starphleet.git"
-starphleet --help
-```
 
 ## Phleet
 The top level grouping. You manage starphleet at this level. You can
@@ -313,6 +306,7 @@ BUILDPACK_URL | &lt;git_url&gt; | Set this when you want to use a custom buildpa
 NPM_FLAGS | string | Starphleet uses a custom `npm` registry to just plain run faster, you can use your own here with `--registry <url>`
 AWS_ACCESS_KEY_ID | string | Used for AWS access
 AWS_SECRET_ACCESS_KEY | string | Used for AWS access
+EC2_INSTANCE_SIZE | string | Override the size of EC2 instance with this variable
 
 ## .env
 Services themselves can have variables, these are inspired by Heroku,
@@ -365,6 +359,7 @@ Services are any program you can dream up that meet these conditions:
 
 * Serve HTTP traffic to a PORT
 * Are hosted in git
+* Install and run with a buildpack
 * Can read environment variables to get their settings, especially
   `PORT`
 
@@ -379,7 +374,8 @@ scalable programming, starphleet gives you more freedom.
 Services are run in LXC containers, and as such don't have acess to the
 entire machine, they are root in their own world of a container. This is
 convenient, particularly when making custom buildpacks as you can just
-use `apt-get install` without a sudo.
+use `apt-get install` without a sudo. LXC containers can be thought of
+as their own root.
 
 Containers are thrown away often, on each new version, and each server
 reboot. So, while you do have local filesystem access inside a container
@@ -391,7 +387,10 @@ This is the most interesting feature, automatic upgrades, check the
 
 ## Autorestart
 No need to code in `nodemon` or `forever` or any other keep alive system in
-your services, Starphleet will take care of it for you.
+your services, Starphleet will take care of it for you. Just run your
+service with a simple command line using
+[Procfile](https://devcenter.heroku.com/articles/procfile) or package manager
+specific features like `npm start` and `npm install` scripts.
 
 ## Watchdog
 And there is no need to *watch the watcher*, Starphleet monitors running
@@ -411,7 +410,7 @@ initially started.
 
 ## Containers
 Starphleet encapsualtes each service in an LXC container. Starting from
-a base container , you can create your own custom containers to speed up
+a base container, you can create your own custom containers to speed up
 builds as needed.
 
 Containers serve to create fixed, cached sets of software such as compilers,
@@ -444,6 +443,22 @@ Containers will be cached, two sets of rules:
   container will rebuild
 * URL/tarball containers hash the URL, so you can old school cache bust
   by taking on ?xxx type verison numbers or #hash
+
+### Shared Filesystem
+Each container mounts `/var/data` back to the ship, which allows you a
+place to save data that lives between autodeploys of your service. This
+is a great place to leave files that you don't want to recreate each
+time you push a new version.
+
+This is also a way to use files to collaborate between services if you
+like.
+
+But beware -- depending on your ship's disk size, you can fill up your
+disk and have all kinds of trouble if you abuse this. For example, if
+you really want a service that has a database process inside -- great --
+just make sure you have enough space to do it!
+
+This is *not a distributed filesystem*, just a local filesystem.
 
 ## Buildpacks
 Buildpacks autodetect and provision services on containers for you
