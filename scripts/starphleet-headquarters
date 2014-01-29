@@ -18,25 +18,11 @@ help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 set -e
 
-if [ -z "${url}" ]; then
-  if [ -f /starphleet/headquarters ]; then
-    url=$(cat /starphleet/headquarters)
-    if find /starphleet/private_keys/* > /dev/null ; then
-      [ -d "${PRIVATE_KEYS}" ] && cp /starphleet/private_keys/* "${PRIVATE_KEYS}"
-    fi
-    if find /starphleet/public_keys/* > /dev/null ; then
-      [ -d "${PUBLIC_KEYS}" ] && cp /starphleet/public_keys/* "${PUBLIC_KEYS}"
-    fi
-  fi
-fi
-
 if [ -n "${url}" ]; then
-cat <<EOF > "${HEADQUARTERS_SOURCE}"
-export HEADQUARTERS_REMOTE="${url}"
-EOF
+  echo export HEADQUARTERS_REMOTE="${url}" > "${HEADQUARTERS_SOURCE}"
   info Headquarters set to ${url}
 elif [ -f "${HEADQUARTERS_SOURCE}" ]; then
-  :
+  info Headquarters is $(cat ${HEADQUARTERS_SOURCE})
 else
   error no headquarters url provided
 fi

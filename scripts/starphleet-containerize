@@ -63,6 +63,9 @@ builder
 
 #have the tools script sourced early in the buildpack environment sequence
 cp /usr/bin/tools /app/.profile.d/__starphleet
+echo export STARPHLEET_DEPLOY_TIME="$(date)" >> /app/.profile.d/__starphleet.env
+echo export STARPHLEET_DEPLOY_GITURL=${git_url} >> /app/.profile.d/__starphleet.env
+source /usr/bin/tools
 info port is \$PORT
 echo \$PORT > "${STARPHLEET_PORTS}/${container_name}"
 EOF

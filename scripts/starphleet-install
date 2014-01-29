@@ -66,8 +66,6 @@ chmod 755 ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_ROOT}/diagnostic ] || mkdir -p ${STARPHLEET_ROOT}/diagnostic
 chmod 755 ${STARPHLEET_ROOT}/diagnostic
 
-npm ${NPM_FLAGS} install -g coffee-script
-
 #starphleet and all of its scripts
 pushd "${DIR}/.."
 npm ${NPM_FLAGS} install -g
@@ -78,6 +76,13 @@ test -d ${PRIVATE_KEYS} || mkdir -p ${PRIVATE_KEYS}
 chmod 755 ${PRIVATE_KEYS}
 test -d ${PUBLIC_KEYS} || mkdir -p ${PUBLIC_KEYS}
 chmod 755 ${PUBLIC_KEYS}
+#force install private and public keys from local vagrant image
+if find /starphleet/private_keys/* > /dev/null ; then
+  [ -d "${PRIVATE_KEYS}" ] && cp /starphleet/private_keys/* "${PRIVATE_KEYS}"
+fi
+if find /starphleet/public_keys/* > /dev/null ; then
+  [ -d "${PUBLIC_KEYS}" ] && cp /starphleet/public_keys/* "${PUBLIC_KEYS}"
+fi
 
 #allow passwordless sudoers
 cat > ${ROOT}/etc/sudoers <<'EOF'
