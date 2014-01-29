@@ -307,6 +307,8 @@ NPM_FLAGS | string | Starphleet uses a custom `npm` registry to just plain run f
 AWS_ACCESS_KEY_ID | string | Used for AWS access
 AWS_SECRET_ACCESS_KEY | string | Used for AWS access
 EC2_INSTANCE_SIZE | string | Override the size of EC2 instance with this variable
+STARPHLEET_DEPLOY_TIME | date string | Set in your service environment to let you know when it was deployed
+STARPHLEET_DEPLOY_GITURL | string | Set in your service environment to let you know where the code came from
 
 ## .env
 Services themselves can have variables, these are inspired by Heroku,
