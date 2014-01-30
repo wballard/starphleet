@@ -51,6 +51,7 @@ EOF
     get_SHASUM "${LOCAL}/../orders"
     ORDERS_SHA=${SHASUM}
     ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
+    CURRENT_ENV="$(dirname ${status})/.starphleetenv"
     ENCODED_ORDER=$(urlencode "${ORDER}")
     SERVICE_NAME=$(echo "${ENCODED_ORDER}.${ORDERS_SHA}.${SERVICE_SHA}.orders")
     get_CONTAINER_NAME "${SERVICE_NAME}"
@@ -68,7 +69,10 @@ cat << EOF >> /dev/stdout
     text: ${TEXT}
     container: ${CONTAINER_NAME}
     status: $(cat "${status}")
+    environment: >
 EOF
+    [ -f "${CURRENT_ENV}" ] && cat "${CURRENT_ENV}" | sed -e "s[^[      ["
+    
   done
   ### ORDERS status ends here
 fi
