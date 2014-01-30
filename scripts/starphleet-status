@@ -10,7 +10,7 @@ help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 ##basic computer stats
-[ -f "${STARPHLEET_STATS}" ] && source "${STARPHLEET_STATS}"
+[ -f "${STARPHLEET_CPU_STATS}" ] && source "${STARPHLEET_CPU_STATS}"
 FREE_RAM=$(free | grep Mem | awk '{ print (1 - ($3 / $2)) * 100 }')
 FREE_DISK=$(df "${LXC_ROOT}" | tail -1 | awk '{ print 100 - $5 }')
 
