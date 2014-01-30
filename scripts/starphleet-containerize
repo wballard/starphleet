@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-containerize <git_url> <container_name> [<orders_script>]
+###    starphleet-containerize <git_url> <container_name> [<orders_dir>]
 ### --help
 ###
 ### Make a new container for a git repository service.
@@ -27,7 +27,7 @@ STARPHLEET_BASE="${STARPHLEET_BASE:-starphleet-base}"
 
 #get the orders copied to a place where the will be visible to the container
 CONTAINER_ORDERS_SCRIPT=${STARPHLEET_TMP}/${container_name}.orders
-ORDERS="${orders_script:-${DIR}/orders}"
+ORDERS="${orders_dir}/orders"
 [ -f "${ORDERS}" ] && cp "${ORDERS}" "${CONTAINER_ORDERS_SCRIPT}"
 
 #build script for our service container, the most important thing is that
@@ -63,11 +63,12 @@ builder
 
 #have the tools script sourced early in the buildpack environment sequence
 cp /usr/bin/tools /app/.profile.d/__starphleet
-echo export STARPHLEET_DEPLOY_TIME="$(date)" >> /app/.profile.d/__starphleet.env
-echo export STARPHLEET_DEPLOY_GITURL=${git_url} >> /app/.profile.d/__starphleet.env
+echo export STARPHLEET_DEPLOY_TIME="$(date)" >> /app/.profile.d/__starphleetenv
+echo export STARPHLEET_DEPLOY_GITURL=${git_url} >> /app/.profile.d/__starphleetenv
 source /usr/bin/tools
 info port is \$PORT
 echo \$PORT > "${STARPHLEET_PORTS}/${container_name}"
+[ -d "${orders_dir}" ] && env > "${orders_dir}/.starphleetenv"
 EOF
 
 #actually make a container here
