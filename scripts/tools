@@ -85,15 +85,6 @@ function autodeploy() {
   export AUTODEPLOY="${1}"
 }
 
-#republish a container at multiple locations
-#container -> ship
-declare -A REPUBLISH
-function republish() {
-  REPUBLISH["${1}"]="${2}"
-  export REPUBLISH
-}
-export -f republish
-
 function get_RANDOM_MAC_ADDRESS() {
   range=255
   for i in {1..6}
