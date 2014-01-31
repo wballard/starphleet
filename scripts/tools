@@ -87,6 +87,7 @@ function autodeploy() {
 
 #shim for compatibility -- does nothing
 function republish() {
+:
 }
 
 function get_RANDOM_MAC_ADDRESS() {
