@@ -3,7 +3,7 @@ set -e
 
 app_root=/app
 build_root=$app_root
-cache_root=/cache/app
+cache_root="${BUILDPACK_CACHE_DIR:-/app/cache}"
 buildpack_root=/build/buildpacks
 
 
@@ -14,7 +14,7 @@ mkdir -p $cache_root
 mkdir -p $build_root/.profile.d
 
 # This is to get a custom buildpack. Probably should use profile.d though
-[[ -f "$app_root/.env" ]] && . "$app_root/.env"
+[ -f "$app_root/.env" ] && . "$app_root/.env"
 
 if [ -n "$BUILDPACK_URL" ]; then
   echo "       Fetching custom buildpack"
