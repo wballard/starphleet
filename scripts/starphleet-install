@@ -109,4 +109,5 @@ adduser update sudo
 #start starphleet
 
 touch /var/starphleet/.system
+sudo start starphleet
 announce *Welcome to Starphleet*

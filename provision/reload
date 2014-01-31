@@ -1,4 +1,3 @@
 #!/usr/bin/env bash
 stop starphleet
 /starphleet/scripts/starphleet-install
-start starphleet
