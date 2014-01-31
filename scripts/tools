@@ -85,11 +85,6 @@ function autodeploy() {
   export AUTODEPLOY="${1}"
 }
 
-#shim for compatibility -- does nothing
-function republish() {
-:
-}
-
 function get_RANDOM_MAC_ADDRESS() {
   range=255
   for i in {1..6}
