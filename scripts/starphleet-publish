@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-publish <container_name> <container_port> <public_url> [<container_url>]
+###    starphleet-publish <container_name> <container_port> <publish_port> <public_url> [<container_url>]
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
@@ -18,13 +18,15 @@ set -e
 public_url=$(echo "${public_url}/" | sed -e 's[//[/[g')
 container_url=$(echo "${container_url}/" | sed -e 's[//[/[g')
 IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
-PUBLISH_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
+MOUNT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
+BARE_CONF="${NGINX_CONF}/published_bare/$(urlencode \"${public_url}\").conf"
 
 test ! -d "${NGINX_CONF}/published" && mkdir -p "${NGINX_CONF}/published"
+test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_bare"
 
-cat << EOF > "${PUBLISH_CONF}"
+cat << EOF > "${MOUNT_CONF}"
 location ${public_url} {
-  include /var/starphleet/nginx/cors.conf;
+  include ${NGINX_CONF}/cors.conf;
   # Path rewriting to hide mount prefix
   rewrite ${public_url}(.*) /\$1 break;
   proxy_pass http://${IP_ADDRESS}:${container_port}${container_url};
@@ -38,5 +40,34 @@ location ${public_url} {
 }
 EOF
 
+if [ -n "${publish_port}" ]
+then
+cat << EOF > "${BARE_CONF}"
+server {
+  listen ${publish_port};
+
+  location / {
+    include ${NGINX_CONF}/cors.conf;
+    proxy_pass http://${IP_ADDRESS}:${container_port}${container_url%/};
+    add_header X-CONTAINER ${container_name};
+    add_header X-CONTAINER-URL ${container_url};
+    add_header X-SHIP $(hostname);
+    # WebSocket support (nginx 1.4)
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
+}
+EOF
+else
+  rm -f "${BARE_CONF}"
+fi
+
 initctl list | grep 'starphleet_nginx' > /dev/null && (reload starphleet_nginx || start starphleet_nginx)
-info published ${container_name}:${container_port}${container_url} to ${public_url}
+if [ -n "${publish_port}" ]; then
+  info "published ${container_name}:${container_port}${container_url} to ${public_url} and :${publish_port}"
+else
+  info "published ${container_name}:${container_port}${container_url} to ${public_url}"
+fi
+
+# vi: set ft=sh ts=2 et sw=2 sts=2 :

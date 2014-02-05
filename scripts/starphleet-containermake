@@ -58,6 +58,7 @@ else
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/config
   #copy on the starphleet commands
   mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
+  [[ -d /hosthome && -f /hosthome/.starphleet ]] && cp /hosthome/.starphleet "${CONTAINER_OVERLAY}/.starphleet"
   cp /usr/bin/starphleet* "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
@@ -69,7 +70,10 @@ else
   lxc-start --name ${CONTAINER_NAME} -d
   starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
   lxc-attach --name ${CONTAINER_NAME} -- bash starphleet-wait-network
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c "source /usr/bin/tools; /build_script"
+  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n127.0.0.1    $(< /etc/hostname)" >> /etc/hosts'
+  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'chmod 777 /var/log/'
+  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'
+  lxc-attach --name ${CONTAINER_NAME} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "source /usr/bin/tools; /build_script"
   if [ "${run}" == "true" ]; then
     info leaving ${CONTAINER_NAME} running
   else
