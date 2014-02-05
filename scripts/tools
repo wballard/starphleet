@@ -132,4 +132,4 @@ function make_admiral() {
 [ -f "${HOME}/app/.env" ] && source "${HOME}/app/.env"
 [ -f "/.orders" ] && source "/.orders"
 [ -f "${HEADQUARTERS_ENV}" ] && source "${HEADQUARTERS_ENV}"
-[ -f "/hosthome/.starphleet" ] && source "/hosthome/.starphleet"
+[ -f "/.starphleet" ] && source "/.starphleet"
