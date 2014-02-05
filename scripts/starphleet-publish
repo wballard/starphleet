@@ -44,7 +44,7 @@ if [ -n "${publish_port}" ]
 then
 cat << EOF > "${BARE_CONF}"
 server {
-  listen ${container_port};
+  listen ${publish_port};
 
   location / {
     include ${NGINX_CONF}/cors.conf;
@@ -64,6 +64,10 @@ else
 fi
 
 initctl list | grep 'starphleet_nginx' > /dev/null && (reload starphleet_nginx || start starphleet_nginx)
-info published ${container_name}:${container_port}${container_url} to ${public_url}
+if [ -n "${publish_port}" ]; then
+  info "published ${container_name}:${container_port}${container_url} to ${public_url}"
+else
+  info "published ${container_name}:${container_port}${container_url} to ${public_url} and :${publish_port}"
+fi
 
 # vi: set ft=sh ts=2 et sw=2 sts=2 :
