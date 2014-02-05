@@ -59,8 +59,6 @@ cat << EOF > "${HOME}/start"
 #!/bin/bash
 export HOME=$build_root
 for file in $build_root/.profile.d/*; do source \$file; done
-env | sort
-env | sort > "\${HOME}/\${STARPHLEET_ENV}"
 hash -r
 cd $build_root
 if [[ -f Procfile ]]; then
