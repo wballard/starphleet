@@ -45,7 +45,7 @@ source /usr/bin/tools
 
 #set up a place onboard for possible custom buildpacks
 mkdir -p "\${HOME}/build"
-cp -r "${BUILDPACKS}" "\${HOME}/build/buildpacks"
+rsync -az "${BUILDPACKS}/" "\${HOME}/build/buildpacks"
 EOF
 
 cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
