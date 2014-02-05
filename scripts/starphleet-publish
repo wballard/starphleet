@@ -65,9 +65,9 @@ fi
 
 initctl list | grep 'starphleet_nginx' > /dev/null && (reload starphleet_nginx || start starphleet_nginx)
 if [ -n "${publish_port}" ]; then
-  info "published ${container_name}:${container_port}${container_url} to ${public_url}"
-else
   info "published ${container_name}:${container_port}${container_url} to ${public_url} and :${publish_port}"
+else
+  info "published ${container_name}:${container_port}${container_url} to ${public_url}"
 fi
 
 # vi: set ft=sh ts=2 et sw=2 sts=2 :
