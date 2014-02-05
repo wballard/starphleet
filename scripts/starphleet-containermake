@@ -58,6 +58,7 @@ else
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/config
   #copy on the starphleet commands
   mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
+  [[ -d /hosthome && -f /hosthome/.starphleet ]] && cp /hosthome/.starphleet "${CONTAINER_OVERLAY}/.starphleet"
   cp /usr/bin/starphleet* "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
