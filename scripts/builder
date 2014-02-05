@@ -57,7 +57,6 @@ ruby -e "require 'yaml';(YAML.load_file('$build_root/.release')['config_vars'] |
 
 cat << EOF > "${HOME}/start"
 #!/bin/bash
-export HOME=$build_root
 for file in $build_root/.profile.d/*; do source \$file; done
 hash -r
 cd $build_root
