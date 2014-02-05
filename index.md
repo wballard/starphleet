@@ -380,10 +380,8 @@ scalable programming, starphleet gives you more freedom.
 * There are no mandated programming languages
 
 Services are run in LXC containers, and as such don't have acess to the
-entire machine, they are root in their own world of a container. This is
-convenient, particularly when making custom buildpacks as you can just
-use `apt-get install` without a sudo. LXC containers can be thought of
-as their own root.
+entire machine, LXC containers can be thought of
+as a Linux environment without the kernel.
 
 Containers are thrown away often, on each new version, and each server
 reboot. So, while you do have local filesystem access inside a container
