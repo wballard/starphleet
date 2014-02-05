@@ -72,6 +72,11 @@ first time.
 Super magic is happening here pulling in the `STARPHLEET_HEADQUARTERS1
 and `STARPHLEET_PRIVATE_KEY` specified before as environment variables.
 
+If you would like to set the memory footprint of your ship you can run:
+```bash
+export STARPHLEET_VAGRANT_MEMSIZE=8192
+```
+
 ## In the Cloud, AWS
 Running on a cloud is ready to go with AWS. In order to get started, you
 need to have an AWS account, and the environment variables:
@@ -235,10 +240,9 @@ Given any shell script script in your headquarters named
 serve as a `STARPHLEET_BASE`. This works by first creating an LXC
 container, then running your script on that container to set it up.
 
-These custom build scripts are run as virtual root inside the LXC
+These custom build scripts are run as the ubuntu user inside the LXC
 container that is itself a snapshot built on top of starphleet's own
-base container. Basically, this means you can use `apt-get` to easily
-put on system software to serve as a base layer.
+base container.
 
 ### ships/
 Ships, when configured with an appropriate git url and private key, will
@@ -355,6 +359,8 @@ Now, this is a file right in your headquarters. To keep these private
 you put your headquarters in a private, hidden repository than can only
 be reached by private key `git+ssh`.
 
+You can also place a .starphleet file in your home directory with your environmental files allowing
+your environment to not be checked into your headquarters.
 
 # Services
 Services are any program you can dream up that meet these conditions:
