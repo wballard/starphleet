@@ -28,7 +28,6 @@ CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
 #so we are starting the container twice
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = /hosthome ${CONTAINER_ROOT}/rootfs/hosthome none bind,rw 0 0
 lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/rootfs/var/starphleet none bind,rw 0 0
 lxc.mount.entry = /var/lib/lxc/data ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
 EOF
@@ -54,7 +53,6 @@ else
   fi
   lxc-clone --snapshot -B overlayfs -o "${base_container_name}" -n "${CONTAINER_NAME}"
   #make a directory where we can mount back to the ship and a config file to mount
-  test -d "${CONTAINER_OVERLAY}/hosthome" || mkdir -p "${CONTAINER_OVERLAY}/hosthome"
   test -d "${CONTAINER_OVERLAY}/var/starphleet" || mkdir -p "${CONTAINER_OVERLAY}/var/starphleet"
   test -d "${CONTAINER_OVERLAY}/var/data" || mkdir -p "${CONTAINER_OVERLAY}/var/data"
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/config
