@@ -35,7 +35,7 @@ function top_level_parent_pid {
     fi
 }
 
-info making "${local_repo}" into container "${container_name}"
+info "making ${local_repo} into container ${container_name}"
 # we need to get our .env file (if present) from within the contents
 # of the repo, so we're gonna check out the repo and see if we've got
 # an .env file
@@ -58,7 +58,7 @@ export PORT=$(cat "${STARPHLEET_PORTS}/${container_name}")
 starphleet-publish "${container_name}" "${PORT}" "/${container_name}"
 
 info starting your pushed container
-lxc-attach --name ${container_name} -- /start web &
+lxc-attach --name ${container_name} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "setsid ~/start web"
 while [ 1 ]; do
   sleep 1
   top_level_parent_pid
