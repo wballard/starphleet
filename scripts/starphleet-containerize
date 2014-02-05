@@ -72,6 +72,7 @@ echo "export STARPHLEET_ENV=${orders_dir}/.starphleetenv" >> "\${HOME}/app/.prof
 source /usr/bin/tools
 info port is \$PORT
 sudo bash -c "echo \$PORT > \"${STARPHLEET_PORTS}/${container_name}\""
+sudo bash -c "[ -n "\${PUBLISH_PORT}" ] && echo \$PUBLISH_PORT > \"${STARPHLEET_PUBLISH_PORTS}/${container_name}\""
 [ -d "${orders_dir}" ] && env | sudo bash -c "sort > \"${orders_dir}/.starphleetenv\""
 EOF
 

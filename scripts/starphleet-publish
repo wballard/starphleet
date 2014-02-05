@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-publish <container_name> <container_port> <public_url> [<container_url>]
+###    starphleet-publish <container_name> <container_port> <publish_port> <public_url> [<container_url>]
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
@@ -40,6 +40,8 @@ location ${public_url} {
 }
 EOF
 
+if [ -n "${publish_port}" ]
+then
 cat << EOF > "${BARE_CONF}"
 server {
   listen ${container_port};
@@ -57,6 +59,9 @@ server {
   }
 }
 EOF
+else
+  rm -f "${BARE_CONF}"
+fi
 
 initctl list | grep 'starphleet_nginx' > /dev/null && (reload starphleet_nginx || start starphleet_nginx)
 info published ${container_name}:${container_port}${container_url} to ${public_url}
