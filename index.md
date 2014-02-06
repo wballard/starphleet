@@ -54,9 +54,9 @@ Yeah, go ahead. Spam me, that's my real email :)
 ## Locally, Vagrant
 Vagrant is a handy way to get a working autodeployment system right on
 your laptop inside a virtual machine. Prebuilt base images are provided
-in the `Vagrantfile` for both VMWare and VirtualBox. Great for figuring
-if your services will autodeploy/start/run without worrying about load
-balancing.
+in the `Vagrantfile` for both VMWare, VirtualBox and Parallels. Great
+for figuring if your services will autodeploy/start/run without worrying
+about load balancing.
 
 ```bash
 git clone https://github.com/wballard/starphleet.git
@@ -69,7 +69,7 @@ Note the IP address from the last command, you can see the dashboard at
 http://ip-address/starphleet/dashboard. This will take a few minutes the
 first time.
 
-Super magic is happening here pulling in the `STARPHLEET_HEADQUARTERS1
+Super magic is happening here pulling in the `STARPHLEET_HEADQUARTERS`
 and `STARPHLEET_PRIVATE_KEY` specified before as environment variables.
 
 If you would like to set the memory footprint of your ship you can run:
@@ -103,9 +103,6 @@ starphleet init ec2
 starphleet add ship ec2 us-west-1
 starphleet info ec2
 ```
-
-Note the dnsname from the last command, you can see the dashboard at
-http://dnsname/starphleet/dashboard.
 
 This will take a bit to launch up the nodes, but note that once you have
 em running, additional service deployments are going to be a lot quicker
@@ -196,11 +193,12 @@ Which will serve exactly one service at `/` as specified by `orders`.
 The path structure of the headquarters creates the virtual HTTP path
 structure of your services.
 
-The services are federated together behind one host name. This is
+By default, all services are federated together behind one host name. This is
 particularly useful for single page applications making use of a set of
 small, sharp back end services, without all the fuss of CORS or other
 cross domain technique. *This may not be what you expect if you are used
-to hooking up one hostname per service.*
+to hooking up one hostname per service.* (And there is a hostname per service
+override if needed)
 
 As an example, imagine an application that has a front end, and three back
 end web services: `/`, `/workflow`, and `/users`.
@@ -213,7 +211,7 @@ users/
   orders
 ```
 
-### authorized_keys/
+### authorized\_keys/
 A big difference form other PaaS: the ships are yours, and you can `ssh`
 to them. Specifically, you can put as many public keys in the
 `authorized_keys` folder of your headquarters, one per file, to let in
@@ -303,6 +301,7 @@ where you can keep variables, with different security thoughts.
 Name | Value | Description
 --- | --- | ---
 PORT | number | This is an all important environment variable, and it is expected your service will honor it, publishing traffic here. This `PORT` is used to know where to connect the ship's proxy to your individual service.
+PUBLISH_PORT | number | Allows your service to be accessible on the ship at `http://<SHIP_DNS>:PUBLISH_PORT` in addition to `http://<SHIP_DNS/orders`.
 STARPHLEET_BASE | name | Either a `name` matching `HQ/containers/name, or an URL to download a prebuilt container image. Defaults to the starphleet provided base container
 STARPHLEET_REMOTE | &lt;git_url&gt; | Set this in your .starphleet to use your own fork of starphleet itself
 STARPHLEET_PULSE | int | Default 5, number of seconds between autodeploy checks
@@ -359,8 +358,10 @@ Now, this is a file right in your headquarters. To keep these private
 you put your headquarters in a private, hidden repository than can only
 be reached by private key `git+ssh`.
 
-You can also place a .starphleet file in your home directory with your environmental files allowing
-your environment to not be checked into your headquarters.
+If you are using vagrant, you can also place a .starphleet file in your
+home directory (~/.starphleet), with global overrides,  allowing you to
+use local environment variables that don't need to be checked into your
+headquarters.
 
 # Services
 Services are any program you can dream up that meet these conditions:
