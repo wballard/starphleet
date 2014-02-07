@@ -26,4 +26,3 @@ elif [ -f "${HEADQUARTERS_SOURCE}" ]; then
 else
   error no headquarters url provided
 fi
-

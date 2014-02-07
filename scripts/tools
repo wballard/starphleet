@@ -6,6 +6,7 @@ export STARPHLEET_PULSE="5"
 export STARPHLEET_DRAINSTOP_WAIT="30"
 export STARPHLEET_ROOT="/var/starphleet"
 export STARPHLEET_PORTS="/var/starphleet/ports"
+export STARPHLEET_PUBLISH_PORTS="/var/starphleet/publish_ports"
 export STARPHLEET_TMP="/var/starphleet/tmp"
 export STARPHLEET_CACHE="/var/starphleet/cache"
 export STARPHLEET_CPU_STATS="/var/starphleet/.cpustats"
@@ -30,6 +31,7 @@ export TAILOR_REMOTE="git+https://github.com/wballard/tailor.git"
 export DASHBOARD_REMOTE="git+https://github.com/wballard/starphleet.dashboard.git"
 export NPM_FLAGS=""
 export SHIP=ship-$(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub | awk '{ print $2; }' | sed -e 's/://g')
+export STARPHLEET_APP_USER="ubuntu"
 
 ulimit -n ${MAX_OPEN_FILES}
 
@@ -45,6 +47,10 @@ function announce() {
 function fatal() {
   echo -e  '\E[31m'"\033[1m$*\033[0m"
   exit 1
+}
+
+function trace() {
+  echo -e  '\E[35m'"\033[1m$*\033[0m"
 }
 
 function info() {
@@ -111,6 +117,7 @@ function make_admiral() {
   useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
   adduser ${ADMIRAL} sudo
   test -d ${ADMIRAL_HOME}/.ssh || mkdir -p ${ADMIRAL_HOME}/.ssh
+  mkdir -p ${STARPHLEET_ROOT}
   chown -R ${ADMIRAL}:${ADMIRAL} ${STARPHLEET_ROOT}
   chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}
   info admiral created
@@ -122,7 +129,8 @@ function make_admiral() {
 # * headquarters/.starphleet variables, global overrides
 [ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"
 [ -f "/${CHECKOUT_PATH}/.env" ] && source "/${CHECKOUT_PATH}/.env"
-[ -f /app/.env ] && source /app/.env
-[ -f /.orders ] && source /.orders
+[ -f "${HOME}/app/.env" ] && source "${HOME}/app/.env"
+[ -f "/.orders" ] && source "/.orders"
 [ -f "${HEADQUARTERS_ENV}" ] && source "${HEADQUARTERS_ENV}"
+[ -f "/.starphleet" ] && source "/.starphleet"
 :

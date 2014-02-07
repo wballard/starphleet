@@ -1,11 +1,10 @@
 #!/bin/bash
 set -e
 
-app_root=/app
-build_root=$app_root
-cache_root="${BUILDPACK_CACHE_DIR:-/app/cache}"
-buildpack_root=/build/buildpacks
-
+app_root="${HOME}/app"
+build_root="${app_root}"
+cache_root="${BUILDPACK_CACHE_DIR:-${HOME}/cache/app}"
+buildpack_root="${HOME}/build/buildpacks"
 
 buildpacks=($buildpack_root/*)
 selected_buildpack=
@@ -56,12 +55,12 @@ default_types=$(ruby -e "require 'yaml';puts (YAML.load_file('$build_root/.relea
 mkdir -p $build_root/.profile.d
 ruby -e "require 'yaml';(YAML.load_file('$build_root/.release')['config_vars'] || {}).each{|k,v| puts \"#{k}=#{v}\"}" > $build_root/.profile.d/config_vars
 
-cat > /start <<EOF
+cat << EOF > "${HOME}/start"
 #!/bin/bash
 export HOME=$build_root
 for file in $build_root/.profile.d/*; do source \$file; done
 env | sort
-env | sort > \$STARPHLEET_ENV
+env | sudo bash -c "sort > \"\${STARPHLEET_ENV}\""
 hash -r
 cd $build_root
 if [[ -f Procfile ]]; then
@@ -70,5 +69,5 @@ else
     ruby -e "require 'yaml';puts (YAML.load_file('.release')['default_process_types'] || {})['\$1']" | bash
 fi
 EOF
-chmod +x /start
+chmod +x "${HOME}/start"
 

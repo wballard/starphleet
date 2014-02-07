@@ -16,7 +16,8 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 #as it will provide the home directory
 make_admiral
 
-chmod 755 /var/lib/lxc
+mkdir -p "${LXC_ROOT}"
+chmod 755 "${LXC_ROOT}"
 
 #yep -- international, no fooling
 echo "GMT" > /etc/timezone
@@ -28,7 +29,7 @@ echo "127.0.0.1 ${SHIP} localhost" > /etc/hosts
 
 #put in the system overlay, gets all the files in place
 #for the starphleet jobs
-rm /etc/init/starphleet*
+rm -f /etc/init/starphleet*
 cp -R ${DIR}/../overlay/* /
 
 if [ -f /var/starphleet/.system ]; then
@@ -62,6 +63,7 @@ fi
 [ -d ${STARPHLEET_ROOT} ] || mkdir -p ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_TMP} ] || mkdir -p ${STARPHLEET_TMP}
 [ -d ${STARPHLEET_PORTS} ] || mkdir -p ${STARPHLEET_PORTS}
+[ -d ${STARPHLEET_PUBLISH_PORTS} ] || mkdir -p ${STARPHLEET_PUBLISH_PORTS}
 chmod 755 ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_ROOT}/diagnostic ] || mkdir -p ${STARPHLEET_ROOT}/diagnostic
 chmod 755 ${STARPHLEET_ROOT}/diagnostic
@@ -105,9 +107,6 @@ adduser git sudo
 sshcommand create update "sudo starphleet-update"
 adduser update sudo
 
-
-#start starphleet
-
 touch /var/starphleet/.system
-sudo start starphleet
+start starphleet
 announce *Welcome to Starphleet*

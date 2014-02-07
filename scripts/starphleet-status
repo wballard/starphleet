@@ -62,7 +62,7 @@ EOF
 cat << EOF
   -
     order: ${ORDER}
-    log: /starphleet/logs/${ORDER}/service.log
+    log: ${STARPHLEET_ROOT}/logs/${ORDER}/service.log
     sha: ${SERVICE_SHA}
     at: ${AT}
     author: ${AUTHOR}

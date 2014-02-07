@@ -14,8 +14,8 @@ help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 
-REMOTE=$(echo "${remote}" | awk -F '#' '{print $1;}')
-BRANCH=$(echo "${remote}" | awk -F '#' '{print $2;}')
+REMOTE=$(echo "${remote//$'\r'/}" | awk -F '#' '{print $1;}')
+BRANCH=$(echo "${remote//$'\r'/}" | awk -F '#' '{print $2;}')
 local="${local:-$(basename ${REMOTE})}"
 
 set -e
