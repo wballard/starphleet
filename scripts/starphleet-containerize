@@ -48,7 +48,9 @@ mkdir -p "\${HOME}/build"
 rsync -az "${BUILDPACKS}/" "\${HOME}/build/buildpacks"
 EOF
 
-cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
+#This *really needs* to be unescaped, notice the \$@ passed along
+#to git SSH and ... there are no variables to escape :)
+cat << 'EOF' >> ${CONTAINER_BUILD_SCRIPT}
 #buildpacks may pull git and need ssh identity
 starphleet-git-config > /tmp/gitsshconfig
 export GIT_SSH=/tmp/gitssh
