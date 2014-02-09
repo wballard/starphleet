@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-publish <container_name> <container_port> <publish_port> <public_url>
+###    starphleet-publish <container_name> <container_port> <publish_port> <public_url> [<htpasswd>]
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
@@ -24,6 +24,7 @@ BARE_CONF="${NGINX_CONF}/published_bare/$(urlencode \"${public_url}\").conf"
 test ! -d "${NGINX_CONF}/published" && mkdir -p "${NGINX_CONF}/published"
 test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_bare"
 
+#basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
 location ${public_url} {
   include ${NGINX_CONF}/cors.conf;
@@ -37,9 +38,15 @@ location ${public_url} {
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "upgrade";
-}
 EOF
+if [ -n "${htpasswd}" ]; then
+  echo "  auth_basic \"\";" >> "${MOUNT_CONF}"
+  echo "  auth_basic_user_file ${htpasswd};" >> "${MOUNT_CONF}"
+fi
+echo '}' >> "${MOUNT_CONF}"
 
+
+#port publication, this is optional if a port is set
 if [ -n "${publish_port}" ]
 then
 cat << EOF > "${BARE_CONF}"
@@ -56,9 +63,12 @@ server {
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "upgrade";
-  }
-}
 EOF
+if [ -n "${htpasswd}" ]; then
+  echo "  auth_basic \"\";" >> "${BARE_CONF}"
+  echo "  auth_basic_user_file ${htpasswd};" >> "${BARE_CONF}"
+fi
+echo "  }\n}" >> "${BARE_CONF}"
 else
   rm -f "${BARE_CONF}"
 fi
