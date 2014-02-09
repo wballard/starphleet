@@ -211,6 +211,12 @@ users/
   orders
 ```
 
+### HTTP Basic security
+Similar to good old fashioned Apache setups, you can put an `.htpasswd`
+file in each order directory, right next to `orders`. This will
+automaticially protect that service with HTTP basic, useful to limit
+access to an API.
+
 ### authorized\_keys/
 A big difference form other PaaS: the ships are yours, and you can `ssh`
 to them. Specifically, you can put as many public keys in the
