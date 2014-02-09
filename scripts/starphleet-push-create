@@ -55,7 +55,7 @@ info making this push into a container
 starphleet-containerize "${CHECKOUT_PATH}#${revision}" "${container_name}"
 export PORT=$(cat "${STARPHLEET_PORTS}/${container_name}")
 
-starphleet-publish "${container_name}" "${PORT}" "" "/${container_name}"
+starphleet-publish "${container_name}" "${PORT}" "${PUBLISH_PORT}" "/${container_name}"
 
 info starting your pushed container
 lxc-attach --name ${container_name} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "setsid ~/start web"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-publish <container_name> <container_port> <publish_port> <public_url> [<container_url>]
+###    starphleet-publish <container_name> <container_port> <publish_port> <public_url>
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
@@ -29,7 +29,7 @@ location ${public_url} {
   include ${NGINX_CONF}/cors.conf;
   # Path rewriting to hide mount prefix
   rewrite ${public_url}(.*) /\$1 break;
-  proxy_pass http://${IP_ADDRESS}:${container_port}${container_url};
+  proxy_pass http://${IP_ADDRESS}:${container_port};
   add_header X-CONTAINER ${container_name};
   add_header X-CONTAINER-URL ${container_url};
   add_header X-SHIP $(hostname);
@@ -48,7 +48,7 @@ server {
 
   location / {
     include ${NGINX_CONF}/cors.conf;
-    proxy_pass http://${IP_ADDRESS}:${container_port}${container_url%/};
+    proxy_pass http://${IP_ADDRESS}:${container_port}/;
     add_header X-CONTAINER ${container_name};
     add_header X-CONTAINER-URL ${container_url};
     add_header X-SHIP $(hostname);
