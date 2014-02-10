@@ -68,7 +68,7 @@ if [ -n "${htpasswd}" ]; then
   echo "  auth_basic \"\";" >> "${BARE_CONF}"
   echo "  auth_basic_user_file ${htpasswd};" >> "${BARE_CONF}"
 fi
-echo "  }\n}" >> "${BARE_CONF}"
+echo "  }}" >> "${BARE_CONF}"
 else
   rm -f "${BARE_CONF}"
 fi
