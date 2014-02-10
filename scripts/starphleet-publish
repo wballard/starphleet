@@ -27,6 +27,10 @@ test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_ba
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
 location ${public_url} {
+  gzip on;
+  gzip_types *;
+  gzip_proxied any;
+  gzip_comp_level 6;
   include ${NGINX_CONF}/cors.conf;
   # Path rewriting to hide mount prefix
   rewrite ${public_url}(.*) /\$1 break;
@@ -54,6 +58,10 @@ server {
   listen ${publish_port};
 
   location / {
+    gzip on;
+    gzip_types *;
+    gzip_proxied any;
+    gzip_comp_level 6;
     include ${NGINX_CONF}/cors.conf;
     proxy_pass http://${IP_ADDRESS}:${container_port}/;
     add_header X-CONTAINER ${container_name};
