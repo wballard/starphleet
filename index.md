@@ -217,7 +217,30 @@ file in each order directory, right next to `orders`. This will
 automaticially protect that service with HTTP basic, useful to limit
 access to an API.
 
-### authorized\_keys/
+## data/
+Starphleet provides a shared data directory to each container at
+`/var/data` inside the container. This is a mount back to the ship, and
+is a perfect place to store shared data files.
+
+And, this data can be autodeployed. You set this up with a folder tree
+similar to mounting services, and in each directory, provide an `orders`
+script. As an example
+
+```
+data/
+  templates/
+    orders
+  scripts/
+    orders
+  orders
+```
+
+At each level you put at `orders` file, which is described below. So,
+each `orders` file should `autodeploy <url>` right into that directory.
+Imagine an autorefreshing `git clone <ur> .`.
+
+
+## authorized\_keys/
 A big difference form other PaaS: the ships are yours, and you can `ssh`
 to them. Specifically, you can put as many public keys in the
 `authorized_keys` folder of your headquarters, one per file, to let in
@@ -238,7 +261,7 @@ And, even more fun -- the `authorized_keys` themselves are continuously
 deployed, just add and remove admirals by adding and removing public key
 files in your github repository. Updates in seconds.
 
-### containers/
+## containers/
 Given any shell script script in your headquarters named
 `containers/name`, an LXC container `name` will be created on demand to
 serve as a `STARPHLEET_BASE`. This works by first creating an LXC
@@ -248,7 +271,7 @@ These custom build scripts are run as the ubuntu user inside the LXC
 container that is itself a snapshot built on top of starphleet's own
 base container.
 
-### ships/
+## ships/
 Ships, when configured with an appropriate git url and private key, will
 push back their configuration here, one per ship. Individual ships are
 identified by their hostname, which by default is built from their ssh
@@ -257,7 +280,7 @@ key fingerprint.
 This ends up being a versioned database of your ships and where to find
 them on the network -- handy!
 
-### shipscripts/
+## shipscripts/
 Ships themselves may need a bit of configuration, so any script in this
 directory that is executable will run when:
 
@@ -271,7 +294,7 @@ dynamic DNS with Amazon Route53.
 In practice, you can put anything you like in here. Be aware they run as
 root on the ship and you can easily destroy things.
 
-### orders
+## orders
 An `orders` file is simply a shell script run in the context of
 starphleet, at a given path, to control the autodeployment of a service.
 You can put anything in the script you like, it is just a shell script
@@ -293,6 +316,9 @@ You can specify your `<git_url>` like `<git_url>#<branch>`, where branch can
 be a branch, a tag, or a commit sha -- anything you can check out. This
 hashtag approach lets you specify a deployment branch, as well as pin
 services to specific versions when needed.
+
+When ordering under `data/`, there isn't much need to `export PORT`, but
+it won't hurt anything either :)
 
 # Environments
 Your app will need to talk to things: external web services,
