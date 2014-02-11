@@ -28,8 +28,8 @@ CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
 #so we are starting the container twice
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = /var/starphleet ${CONTAINER_ROOT}/rootfs/var/starphleet none bind,rw 0 0
-lxc.mount.entry = /var/lib/lxc/data ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs/var/starphleet none bind,rw 0 0
+lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
 EOF
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
