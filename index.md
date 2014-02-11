@@ -204,41 +204,74 @@ As an example, imagine an application that has a front end, and three back
 end web services: `/`, `/workflow`, and `/users`.
 
 ```
-orders
-workflow/
+/
   orders
-users/
-  orders
+  workflow/
+    orders
+  users/
+    orders
 ```
 
-### HTTP Basic security
+### .htpasswd
 Similar to good old fashioned Apache setups, you can put an `.htpasswd`
 file in each order directory, right next to `orders`. This will
 automaticially protect that service with HTTP basic, useful to limit
 access to an API.
 
-## data/
+### orders
+An `orders` file is simply a shell script run in the context of
+starphleet, at a given path, to control the autodeployment of a service.
+You can put anything in the script you like, it is just a shell script
+after all, but in practice there are only two things to do:
+
+```bash
+export PORT
+autodeloy <git_url>
+```
+
+Setting up orders as a shell script is to allow your creativity to run
+wild, but without you needing to learn a custom tool, DSL, scripting
+language, config database, or API.
+
+**No Fooling Important**, `autodeploy <git_url>`, just like your
+`<headquarters_url>` needs to be reachable from each ship in the fleet.
+
+You can specify your `<git_url>` like `<git_url>#<branch>`, where branch can
+be a branch, a tag, or a commit sha -- anything you can check out. This
+hashtag approach lets you specify a deployment branch, as well as pin
+services to specific versions when needed.
+
+### remote
 Starphleet provides a shared data directory to each container at
 `/var/data` inside the container. This is a mount back to the ship, and
 is a perfect place to store shared data files.
 
 And, this data can be autodeployed. You set this up with a folder tree
 similar to mounting services, and in each directory, provide an `orders`
-script. As an example
+script. As an example:
 
 ```
-data/
+/
+  remote
   templates/
-    orders
-  scripts/
-    orders
-  orders
+    remote
 ```
 
-At each level you put at `orders` file, which is described below. So,
-each `orders` file should `autodeploy <url>` right into that directory.
-Imagine an autorefreshing `git clone <ur> .`.
+This will result in data looking like:
 
+```
+/var/data/
+  ...synched files from remote
+  templates/
+    ...synched files from remote
+```
+
+Individal `remote` scripts are really just shell scripts with a special
+`autodeploy` command:
+
+```bash
+autodeploy <git_url>
+```
 
 ## authorized\_keys/
 A big difference form other PaaS: the ships are yours, and you can `ssh`
@@ -293,32 +326,6 @@ dynamic DNS with Amazon Route53.
 
 In practice, you can put anything you like in here. Be aware they run as
 root on the ship and you can easily destroy things.
-
-## orders
-An `orders` file is simply a shell script run in the context of
-starphleet, at a given path, to control the autodeployment of a service.
-You can put anything in the script you like, it is just a shell script
-after all, but in practice there are only two things to do:
-
-```bash
-export PORT
-autodeloy <git_url>
-```
-
-Setting up orders as a shell script is to allow your creativity to run
-wild, but without you needing to learn a custom tool, DSL, scripting
-language, config database, or API.
-
-**No Fooling Important**, `autodeploy <git_url>`, just like your
-`<headquarters_url>` needs to be reachable from each ship in the fleet.
-
-You can specify your `<git_url>` like `<git_url>#<branch>`, where branch can
-be a branch, a tag, or a commit sha -- anything you can check out. This
-hashtag approach lets you specify a deployment branch, as well as pin
-services to specific versions when needed.
-
-When ordering under `data/`, there isn't much need to `export PORT`, but
-it won't hurt anything either :)
 
 # Environments
 Your app will need to talk to things: external web services,
