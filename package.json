@@ -34,7 +34,8 @@
     "starphleet-cleanup": "./scripts/starphleet-cleanup",
     "starphleet-public-keys": "./scripts/starphleet-public-keys",
     "starphleet-update": "./scripts/starphleet-update",
-    "starphleet-ready": "./scripts/starphleet-ready"
+    "starphleet-ready": "./scripts/starphleet-ready",
+    "starphleet-jobs": "./scripts/starphleet-jobs"
   },
   "repository": {
     "type": "git",
