@@ -167,6 +167,9 @@ a ship, autodeployed across a phleet. Services provide your application
 functionality over HTTP, including the use of server sent events and
 websockets.
 
+You can also order scheduled tasks, which may or may not offer a port
+and run on the clock with `cron`.
+
 # Phleets
 Check the main [readme](https://github.com/wballard/starphleet). In
 particular pay attention to the environment variables for public and
@@ -241,6 +244,7 @@ be a branch, a tag, or a commit sha -- anything you can check out. This
 hashtag approach lets you specify a deployment branch, as well as pin
 services to specific versions when needed.
 
+
 ### remote
 Starphleet provides a shared data directory to each container at
 `/var/data` inside the container. This is a mount back to the ship, and
@@ -272,6 +276,25 @@ Individal `remote` scripts are really just shell scripts with a special
 ```bash
 autodeploy <git_url>
 ```
+
+## jobs
+Jobs leverage cron and urls, implement your jobs as a service. Schedule
+them by hitting and url. This also lets you easily run the job manually
+with curl when needed.
+
+The `jobs` file uses cron syntax, with the 'command' simply being an url:
+
+```
+* * * * * http://localhost/workflow?do=stuff
+* * * 1 * http://localhost/workflow?do=modaystuff
+```
+
+This dodges a few common problems with cron that folks run into:
+
+* The logging gets captured to syslog for you automatically, piped to
+  `logger`
+* The environment is fixed inside your container for your service
+* You don't need to think about 'who' the job runs as
 
 ## authorized\_keys/
 A big difference form other PaaS: the ships are yours, and you can `ssh`
