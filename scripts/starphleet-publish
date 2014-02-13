@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-publish <container_name> <container_port> <publish_port> <public_url> [<htpasswd>]
+###    starphleet-publish <container_group> <container_port> <publish_port> <public_url> [<htpasswd>]
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
@@ -29,7 +29,7 @@ test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_ba
 
 #Creating Upstream to Load Balance lxcs
 echo "upstream lxc_app_${order_name} {" > "${UPSTREAM_CONF}"
-for IP_ADDRESS in $(lxc-ls --fancy | grep "^${container_name%_CM*}" | awk '{ print $3; }')
+for IP_ADDRESS in $(lxc-ls --fancy | grep "^${container_group}" | awk '{ print $3; }')
 do
   echo "server ${IP_ADDRESS}:${container_port};" >> "${UPSTREAM_CONF}"
 done
@@ -99,7 +99,7 @@ location ${public_url} {
   # Path rewriting to hide mount prefix
   rewrite ${public_url}(.*) /\$1 break;
   proxy_pass http://lxc_app_${order_name};
-  add_header X-CONTAINER ${container_name};
+  add_header X-CONTAINER_GROUP ${container_group};
   add_header X-SHIP $(hostname);
   # WebSocket support (nginx 1.4)
   proxy_http_version 1.1;
@@ -127,7 +127,7 @@ server {
     gzip_comp_level 6;
     include ${NGINX_CONF}/cors.conf;
     proxy_pass http://lxc_app_${order_name};
-    add_header X-CONTAINER ${container_name};
+    add_header X-CONTAINER_GROUP ${container_group};
     add_header X-SHIP $(hostname);
     # WebSocket support (nginx 1.4)
     proxy_http_version 1.1;
@@ -145,9 +145,9 @@ fi
 
 initctl list | grep 'starphleet_nginx' > /dev/null && (reload starphleet_nginx || start starphleet_nginx)
 if [ -n "${publish_port}" ]; then
-  info "published ${container_name}:${container_port}${container_url} to ${public_url} and :${publish_port}"
+  info "published ${container_group}:${container_port}${container_url} to ${public_url} and :${publish_port}"
 else
-  info "published ${container_name}:${container_port}${container_url} to ${public_url}"
+  info "published ${container_group}:${container_port}${container_url} to ${public_url}"
 fi
 
 # vi: set ft=sh ts=2 et sw=2 sts=2 :
