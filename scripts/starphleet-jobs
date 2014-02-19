@@ -11,5 +11,5 @@ help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 if [ -f "${jobs_file}" ]; then
-  cat "${jobs_file}" | awk '{ print $1 " " $2 " " $3 " " $4 " " $5 " curl --silent " "\"" $6 "\" " "2>&1 | logger";}'
+  cat "${jobs_file}" | awk '{ print $1 " " $2 " " $3 " " $4 " " $5 " curl --silent " "\"" $6 "\" " "2>&1 | logger -t starphleet_jobs";}'
 fi

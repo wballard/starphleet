@@ -31,7 +31,7 @@ if [ "${TERM}" == "unknown" ]; then
 fi
 export TAILOR_REMOTE="git+https://github.com/wballard/tailor.git"
 export DASHBOARD_REMOTE="git+https://github.com/wballard/starphleet.dashboard.git"
-export NPM_FLAGS=""
+export NPM_FLAGS="--unsafe-perm"
 export SHIP=ship-$(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub | awk '{ print $2; }' | sed -e 's/://g')
 export STARPHLEET_APP_USER="ubuntu"
 
