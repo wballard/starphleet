@@ -236,6 +236,12 @@ Setting up orders as a shell script is to allow your creativity to run
 wild, but without you needing to learn a custom tool, DSL, scripting
 language, config database, or API.
 
+You can optionally specify more processes to run your order for additional power.  Add the variable to your order file:
+```bash
+export CREW_MEMBERS=2
+```
+Note: Max Crew Members allowed is twice the number of CPUs of the Ship.
+
 **No Fooling Important**, `autodeploy <git_url>`, just like your
 `<headquarters_url>` needs to be reachable from each ship in the fleet.
 
