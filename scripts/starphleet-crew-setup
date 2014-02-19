@@ -12,8 +12,8 @@ trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 set -e
 
 ORDER_DIR="${CURRENT_ORDERS}/${order}"
-function sp_status() { echo '${1}' > "${ORDER_DIR}/.starphleetstatus"; }
-function cm_status() { echo '${1}' > "${ORDER_DIR}/.starphleetstatus_CM${2}"; }
+function sp_status() { echo "${1}" > "${ORDER_DIR}/.starphleetstatus"; }
+function cm_status() { echo "${1}" > "${ORDER_DIR}/.starphleetstatus_CM${2}"; }
 
 ORDER_LOCAL="${ORDER_DIR}/git"
 get_CURRENT_SHA "${ORDER_LOCAL}"
