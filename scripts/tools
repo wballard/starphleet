@@ -34,6 +34,9 @@ export DASHBOARD_REMOTE="git+https://github.com/wballard/starphleet.dashboard.gi
 export NPM_FLAGS="--unsafe-perm"
 export SHIP=ship-$(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub | awk '{ print $2; }' | sed -e 's/://g')
 export STARPHLEET_APP_USER="ubuntu"
+export CREW_MEMBERS="1"
+
+export CREW_MEMBER_MAX="$(($(grep "processor" "/proc/cpuinfo" | wc -l) * 2))"
 
 ulimit -n ${MAX_OPEN_FILES}
 
@@ -86,7 +89,7 @@ function get_HASH() {
 }
 
 function get_CONTAINER_NAME() {
-  export CONTAINER_NAME="$(echo $1 | sha1sum | awk '{print $1;}').orders"
+  export CONTAINER_NAME="$(echo $1 | sha1sum | awk '{print $1;}')_CM${2:-1}.orders"
 }
 
 function autodeploy() {
@@ -123,6 +126,17 @@ function make_admiral() {
   chown -R ${ADMIRAL}:${ADMIRAL} ${STARPHLEET_ROOT}
   chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}
   info admiral created
+}
+
+function apply_order_exports()
+{
+  # export the three key variables from the orders file (PORT, PUBLISH_PORT, CREW_MEMBERS)
+  $(awk '/^[ \t]*export[ \t]+(PORT|PUBLISH_PORT|CREW_MEMBERS)[ \t]*=/ {print $0}' "${1}")
+  
+  if [ "${CREW_MEMBERS}" -gt "${CREW_MEMBER_MAX}" ]; then 
+    echo "You have too many crew members - cap crew members to ${CREW_MEMBER_MAX}"
+    export CREW_MEMBERS="${CREW_MEMBER_MAX}" 
+  fi
 }
 
 # environment, enforced by our buildpack script, so the preference order is:
