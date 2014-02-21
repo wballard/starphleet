@@ -9,6 +9,10 @@ buildpack_root="${HOME}/build/buildpacks"
 buildpacks=($buildpack_root/*)
 selected_buildpack=
 
+# start: heroku buildpack hack (some buildpacks create "temp" /app dir)
+sudo bash -c "mkdir -p /app && chown ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} /app"
+# end: heroku buildpack hack
+
 mkdir -p $cache_root
 mkdir -p $build_root/.profile.d
 
@@ -40,6 +44,11 @@ fi
 export REQUEST_ID=$(openssl rand -base64 32)
 
 $selected_buildpack/bin/compile "$build_root" "$cache_root"
+
+# start: heroku buildpack hack (some buildpacks create "temp" /app dir)
+sudo rm -rf "/app"
+sudo ln -s "${app_root}" "/app"
+# end: heroku buildpack hack
 
 echo "-----> Discovering process types"
 
