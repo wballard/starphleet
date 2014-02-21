@@ -71,7 +71,6 @@ chmod 755 ${STARPHLEET_ROOT}/diagnostic
 #starphleet and all of its scripts
 pushd "${DIR}/.."
 npm ${NPM_FLAGS} install -g
-npm ${NPM_FLAGS} install -g "${TAILOR_REMOTE}"
 popd
 
 #make a place for keys
@@ -107,6 +106,10 @@ adduser git sudo
 #role account to serve orders by hand
 sshcommand create update "sudo starphleet-update"
 adduser update sudo
+
+#log tailing
+export HOME="${ADMIRAL_HOME}"
+npm ${NPM_FLAGS} install -g "${TAILOR_REMOTE}"
 
 touch /var/starphleet/.system
 start starphleet
