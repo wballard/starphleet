@@ -53,7 +53,8 @@ EOF
     ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
     CURRENT_ENV="$(dirname ${status})/.starphleetenv"
     ENCODED_ORDER=$(urlencode "${ORDER}")
-    SERVICE_NAME=$(echo "${ENCODED_ORDER}.${ORDERS_SHA}.${SERVICE_SHA}.orders")
+    get_STARPHLEET_ID
+    SERVICE_NAME=$(echo "${ENCODED_ORDER}.${ORDERS_SHA}.${SERVICE_SHA}.${STARPHLEET_ID}")
     get_CONTAINER_NAME "${SERVICE_NAME}"
     cd "$(dirname "${status}")/git"
     AT=$(git log -1 --format='%at')

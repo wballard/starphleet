@@ -4,6 +4,7 @@
 ### --help
 ###
 ### This will get starphleet on a base machine
+if [[ "$(id -u)" -ne "0" ]]; then echo "you must be sudo to run this this script"; exit 1; fi
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
@@ -62,8 +63,6 @@ fi
 #starphleet lives here
 [ -d ${STARPHLEET_ROOT} ] || mkdir -p ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_TMP} ] || mkdir -p ${STARPHLEET_TMP}
-[ -d ${STARPHLEET_PORTS} ] || mkdir -p ${STARPHLEET_PORTS}
-[ -d ${STARPHLEET_PUBLISH_PORTS} ] || mkdir -p ${STARPHLEET_PUBLISH_PORTS}
 chmod 755 ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_ROOT}/diagnostic ] || mkdir -p ${STARPHLEET_ROOT}/diagnostic
 chmod 755 ${STARPHLEET_ROOT}/diagnostic
@@ -110,7 +109,7 @@ adduser update sudo
 #log tailing
 export HOME="${ADMIRAL_HOME}"
 npm ${NPM_FLAGS} install -g "${TAILOR_REMOTE}"
-
+echo "ibase=10;obase=16;$(date +%s)" | bc > "${STARPHLEET_ID_FILE}"
 touch /var/starphleet/.system
 start starphleet
 announce *Welcome to Starphleet*
