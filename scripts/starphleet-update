@@ -4,6 +4,7 @@
 ### --help
 ###
 ### This will install the latest version of starphleet from github
+if [[ "$(id -u)" -ne "0" ]]; then echo "you must be sudo to run this this script"; exit 1; fi
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
@@ -13,7 +14,9 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 REMOTE="${STARPHLEET_REMOTE:-https://github.com/wballard/starphleet.git}"
 LOCAL="/var/starphleet/github"
 if starphleet-git-synch "${REMOTE}" "${LOCAL}"; then
-  info updating starphleet from github
+  info "updating starphleet from github"
+  get_STARPHLEET_ID
+  echo "${STARPHLEET_ID}" > "${STARPHLEET_ROOT}/.update"
   stop starphleet
   /var/starphleet/github/scripts/starphleet-install
 else

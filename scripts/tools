@@ -7,22 +7,20 @@ export STARPHLEET_SHARED_DATA="${LXC_ROOT}/data"
 export STARPHLEET_PULSE="5"
 export STARPHLEET_DRAINSTOP_WAIT="30"
 export STARPHLEET_ROOT="/var/starphleet"
-export STARPHLEET_PORTS="/var/starphleet/ports"
-export STARPHLEET_PUBLISH_PORTS="/var/starphleet/publish_ports"
-export STARPHLEET_TMP="/var/starphleet/tmp"
-export STARPHLEET_CACHE="/var/starphleet/cache"
-export STARPHLEET_CPU_STATS="/var/starphleet/.cpustats"
-export STARPHLEET_STATUS="/var/starphleet/.status"
-export HEADQUARTERS_SOURCE="/var/starphleet/.headquarters"
-export HEADQUARTERS_LOCAL="/var/starphleet/headquarters"
-export HEADQUARTERS_ENV="/var/starphleet/headquarters/.starphleet"
+export STARPHLEET_TMP="${STARPHLEET_ROOT}/tmp"
+export STARPHLEET_CACHE="${STARPHLEET_ROOT}/cache"
+export STARPHLEET_CPU_STATS="${STARPHLEET_ROOT}/.cpustats"
+export STARPHLEET_STATUS="${STARPHLEET_ROOT}/.status"
+export HEADQUARTERS_SOURCE="${STARPHLEET_ROOT}/.headquarters"
+export HEADQUARTERS_LOCAL="${STARPHLEET_ROOT}/headquarters"
+export HEADQUARTERS_ENV="${STARPHLEET_ROOT}/headquarters/.starphleet"
 export SHIPS="${HEADQUARTERS_LOCAL}/ships"
 export SHIP_SCRIPTS="${HEADQUARTERS_LOCAL}/shipscripts"
-export CURRENT_ORDERS="/var/starphleet/current_orders"
-export PRIVATE_KEYS="/var/starphleet/private_keys"
-export PUBLIC_KEYS="/var/starphleet/public_keys"
-export NGINX_CONF="/var/starphleet/nginx"
-export BUILDPACKS="/var/starphleet/buildpacks"
+export CURRENT_ORDERS="${STARPHLEET_ROOT}/current_orders"
+export PRIVATE_KEYS="${STARPHLEET_ROOT}/private_keys"
+export PUBLIC_KEYS="${STARPHLEET_ROOT}/public_keys"
+export NGINX_CONF="${STARPHLEET_ROOT}/nginx"
+export BUILDPACKS="${STARPHLEET_ROOT}/buildpacks"
 export ADMIRAL="admiral"
 export ADMIRAL_HOME="/home/admiral"
 export MAX_OPEN_FILES="4096"
@@ -35,8 +33,8 @@ export NPM_FLAGS="--unsafe-perm"
 export SHIP=ship-$(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub | awk '{ print $2; }' | sed -e 's/://g')
 export STARPHLEET_APP_USER="ubuntu"
 export CREW_MEMBERS="1"
-
 export CREW_MEMBER_MAX="$(($(grep "processor" "/proc/cpuinfo" | wc -l) * 2))"
+export STARPHLEET_ID_FILE="${STARPHLEET_ROOT}/.starphleet_id"
 
 ulimit -n ${MAX_OPEN_FILES}
 
@@ -77,19 +75,28 @@ function code() {
 
 #get the current sha for a given git repository
 function get_CURRENT_SHA() {
-  export CURRENT_SHA=$(git --git-dir "$1/.git" --work-tree "$1" rev-parse HEAD)
+  export CURRENT_SHA="$(git --git-dir "$1/.git" --work-tree "$1" rev-parse HEAD)"
 }
 
 function get_SHASUM() {
-  export SHASUM=$(sha1sum "${1}" | awk '{ print substr($1,1,7); }')
+  export SHASUM="$(sha1sum "${1}" | awk '{ print substr($1,1,7); }')"
 }
 
 function get_HASH() {
-  export HASH=$(echo $1 | sha1sum | awk '{ print $1; }')
+  export HASH="$(echo $1 | sha1sum | awk '{ print $1; }')"
+}
+
+#TODO: later move this var out to tools
+function get_STARPHLEET_ID() {
+  export STARPHLEET_ID="$(cat "${STARPHLEET_ID_FILE}")"
+}
+
+function get_CONTAINER_GROUP() {
+  export CONTAINER_GROUP="$(echo $1 | sha1sum | awk '{ print $1; }')_$(cat "${STARPHLEET_ID_FILE}")"
 }
 
 function get_CONTAINER_NAME() {
-  export CONTAINER_NAME="$(echo $1 | sha1sum | awk '{print $1;}')_CM${2:-1}.orders"
+  export CONTAINER_NAME="$(echo $1 | sha1sum | awk '{ print $1; }')_$(cat "${STARPHLEET_ID_FILE}")_CM${2:-1}"
 }
 
 function autodeploy() {
