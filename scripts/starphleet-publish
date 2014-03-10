@@ -31,7 +31,7 @@ test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_ba
 echo "upstream lxc_app_${order_name} {" > "${UPSTREAM_CONF}"
 for IP_ADDRESS in $(lxc-ls --fancy | grep "^${container_group}" | awk '{ print $3; }')
 do
-  echo "server ${IP_ADDRESS}:${container_port} max_fails=3;" >> "${UPSTREAM_CONF}"
+  echo "server ${IP_ADDRESS}:${container_port} max_fails=0;" >> "${UPSTREAM_CONF}"
 done
 echo "}" >> "${UPSTREAM_CONF}"
 
