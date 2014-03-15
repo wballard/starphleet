@@ -70,9 +70,7 @@ cat << EOF
       ${TEXT}
     container: ${CONTAINER_NAME}
     status: $(cat "${status}")
-    environment:
 EOF
-    [ -f "${CURRENT_ENV}" ] && cat "${CURRENT_ENV}"  | grep '=' | awk '{split($0, a, "="); print "      ", a[1], ":", a[2]}'
 
   done
   ### ORDERS status ends here
