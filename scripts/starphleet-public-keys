@@ -29,6 +29,7 @@ do
   if ssh-keygen -l -f "${f}" > /dev/null; then
     #direct ssh as the admiral
     cat "${f}" >> ${AUTHFILE}
+    echo '' >> ${AUTHFILE}
     #git push based build/serve sequence, much like a manual
     #interactive heroku style
     cat "${f}" | gitreceive upload-key $(basename "${f}")
