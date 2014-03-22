@@ -13,7 +13,7 @@ trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 set -e
 ENCODED_ORDER=$(urlencode "${order}")
 IFS=$'\n'
-for service in $(initctl list | grep "starphleet_serve_order (${ENCODED_ORDER}" | grep --invert-match "${current_service_name}")
+for service in $(initctl list | grep -e "starphleet_serve_order (${ENCODED_ORDER}\." | grep --invert-match "${current_service_name}")
 do
   name=$(echo "${service}" | awk '{print $2}' | sed -e 's/^(//' -e 's/)$//')
   info "reaping ${name}"
