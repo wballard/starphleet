@@ -62,8 +62,6 @@ fi
 #starphleet lives here
 [ -d ${STARPHLEET_ROOT} ] || mkdir -p ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_TMP} ] || mkdir -p ${STARPHLEET_TMP}
-[ -d ${STARPHLEET_PORTS} ] || mkdir -p ${STARPHLEET_PORTS}
-[ -d ${STARPHLEET_PUBLISH_PORTS} ] || mkdir -p ${STARPHLEET_PUBLISH_PORTS}
 chmod 755 ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_ROOT}/diagnostic ] || mkdir -p ${STARPHLEET_ROOT}/diagnostic
 chmod 755 ${STARPHLEET_ROOT}/diagnostic
@@ -107,9 +105,6 @@ adduser git sudo
 sshcommand create update "sudo starphleet-update"
 adduser update sudo
 
-#log tailing
-export HOME="${ADMIRAL_HOME}"
-npm ${NPM_FLAGS} install -g "${TAILOR_REMOTE}"
 
 touch /var/starphleet/.system
 start starphleet

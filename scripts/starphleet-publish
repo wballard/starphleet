@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-publish <container_group> <container_port> <publish_port> <public_url> [<htpasswd>]
+###    starphleet-publish <container_name> <container_port> <publish_port> <public_url> [<htpasswd>]
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
@@ -12,7 +12,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
-
+scripts/starphleet-containerize|21 col 1| trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 set -e
 
 order_name=${public_url}
@@ -23,24 +23,15 @@ container_port=$(eval echo ${container_port})
 publish_port=$(eval echo ${publish_port})
 MOUNT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
 BARE_CONF="${NGINX_CONF}/published_bare/$(urlencode \"${public_url}\").conf"
-UPSTREAM_CONF="${NGINX_CONF}/upstream/$(urlencode \"${public_url}\").conf"
+IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
 
-test ! -d "${NGINX_CONF}/upstream" && mkdir -p "${NGINX_CONF}/upstream"
 test ! -d "${NGINX_CONF}/published" && mkdir -p "${NGINX_CONF}/published"
 test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_bare"
-
-#Creating Upstream to Load Balance lxcs
-echo "upstream lxc_app_${order_name} {" > "${UPSTREAM_CONF}"
-for IP_ADDRESS in $(lxc-ls --fancy | grep "^${container_group}" | awk '{ print $3; }')
-do
-  echo "server ${IP_ADDRESS}:${container_port} max_fails=0;" >> "${UPSTREAM_CONF}"
-done
-echo "}" >> "${UPSTREAM_CONF}"
 
 
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
-location /${order_name}/cache1h/ {
+location ${public_url}/cache1h/ {
     proxy_buffering on;
     proxy_cache primary_zone;
     proxy_cache_lock on;
@@ -50,10 +41,10 @@ location /${order_name}/cache1h/ {
     proxy_cache_lock_timeout 5s;
     proxy_cache_use_stale updating error timeout;
     proxy_cache_valid 1h;
-    proxy_pass http://lxc_app_${order_name}/;
+    proxy_pass http://${IP_ADDRESS}:${container_port};
 }
 
-location /${order_name}/cache2h/ {
+location ${public_url}/cache2h/ {
     proxy_buffering on;
     proxy_cache primary_zone;
     proxy_cache_lock on;
@@ -63,10 +54,10 @@ location /${order_name}/cache2h/ {
     proxy_cache_lock_timeout 5s;
     proxy_cache_use_stale updating error timeout;
     proxy_cache_valid 2h;
-    proxy_pass http://lxc_app_${order_name}/;
+    proxy_pass http://${IP_ADDRESS}:${container_port};
 }
 
-location /${order_name}/cache4h/ {
+location ${public_url}/cache4h/ {
     proxy_buffering on;
     proxy_cache primary_zone;
     proxy_cache_lock on;
@@ -76,10 +67,10 @@ location /${order_name}/cache4h/ {
     proxy_cache_lock_timeout 5s;
     proxy_cache_use_stale updating error timeout;
     proxy_cache_valid 4h;
-    proxy_pass http://lxc_app_${order_name}/;
+    proxy_pass http://${IP_ADDRESS}:${container_port};
 }
 
-location /${order_name}/cache365d/ {
+location ${public_url}/cache365d/ {
     proxy_buffering on;
     proxy_cache primary_zone;
     proxy_cache_lock on;
@@ -89,7 +80,7 @@ location /${order_name}/cache365d/ {
     proxy_cache_lock_timeout 5s;
     proxy_cache_use_stale updating error timeout;
     proxy_cache_valid 365d;
-    proxy_pass http://lxc_app_${order_name}/;
+    proxy_pass http://${IP_ADDRESS}:${container_port};
 }
 
 location ${public_url} {
@@ -100,8 +91,8 @@ location ${public_url} {
   include ${NGINX_CONF}/cors.conf;
   # Path rewriting to hide mount prefix
   rewrite ${public_url}(.*) /\$1 break;
-  proxy_pass http://lxc_app_${order_name};
-  add_header X-CONTAINER_GROUP ${container_group};
+  proxy_pass http://${IP_ADDRESS}:${container_port};
+  add_header X-CONTAINER ${container_name};
   add_header X-SHIP $(hostname);
   # WebSocket support (nginx 1.4)
   proxy_http_version 1.1;
@@ -128,8 +119,8 @@ server {
     gzip_proxied any;
     gzip_comp_level 6;
     include ${NGINX_CONF}/cors.conf;
-    proxy_pass http://lxc_app_${order_name};
-    add_header X-CONTAINER_GROUP ${container_group};
+    proxy_pass http://${IP_ADDRESS}:${container_port};
+    add_header X-CONTAINER ${container_name};
     add_header X-SHIP $(hostname);
     # WebSocket support (nginx 1.4)
     proxy_http_version 1.1;
@@ -148,9 +139,9 @@ fi
 reload starphleet_nginx || start starphleet_nginx
 if [ "${publish_port}" != "${PUBLISH_PORT}" ]
 then
-  info "published ${container_group}:${container_port}${container_url} to ${public_url} and :${publish_port}"
+  info "published ${container_name}:${container_port}${container_url} to ${public_url} and :${publish_port}"
 else
-  info "published ${container_group}:${container_port}${container_url} to ${public_url}"
+  info "published ${container_name}:${container_port}${container_url} to ${public_url}"
 fi
 
 # vi: set ft=sh ts=2 et sw=2 sts=2 :

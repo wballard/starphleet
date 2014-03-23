@@ -52,9 +52,8 @@ source ${DIR}/tools
 info cleaning up existing push container
 starphleet-lxc-destroy "${container_name}"
 info making this push into a container
-starphleet-containerize "${CHECKOUT_PATH}#${revision}" "${container_name}"
-export PORT=$(cat "${STARPHLEET_PORTS}/${container_name}")
-
+starphleet-containerize "${CHECKOUT_PATH}#${revision}" "${container_name}" "${CHECKOUT_PATH}"
+source "${CHECKOUT_PATH}/.starphleetenv"
 starphleet-publish "${container_name}" "${PORT}" "${PUBLISH_PORT}" "/${container_name}"
 
 info "starting your pushed container"

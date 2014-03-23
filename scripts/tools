@@ -8,8 +8,6 @@ export STARPHLEET_SHARED_DATA="${LXC_ROOT}/data"
 export STARPHLEET_PULSE="10"
 export STARPHLEET_DRAINSTOP_WAIT="30"
 export STARPHLEET_ROOT="/var/starphleet"
-export STARPHLEET_PORTS="/var/starphleet/ports"
-export STARPHLEET_PUBLISH_PORTS="/var/starphleet/publish_ports"
 export STARPHLEET_TMP="/var/starphleet/tmp"
 export STARPHLEET_CACHE="/var/starphleet/cache"
 export STARPHLEET_CPU_STATS="/var/starphleet/.cpustats"
@@ -30,9 +28,6 @@ export MAX_OPEN_FILES="4096"
 if [ "${TERM}" == "unknown" ]; then
   export TERM="xterm-256color"
 fi
-export TAILOR_REMOTE="git+https://github.com/wballard/tailor.git"
-export DASHBOARD_REMOTE="git+https://github.com/wballard/starphleet.dashboard.git"
-export NPM_FLAGS="--unsafe-perm"
 export SHIP=ship-$(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub | awk '{ print $2; }' | sed -e 's/://g')
 export STARPHLEET_APP_USER="ubuntu"
 export CREW_MEMBERS="1"
@@ -78,7 +73,7 @@ function code() {
 
 #get the current sha for a given git repository
 function get_CURRENT_SHA() {
-  export CURRENT_SHA=$(git --git-dir "$1/.git" --work-tree "$1" rev-parse HEAD)
+  export CURRENT_SHA=$(git --git-dir "$1/.git" --work-tree "$1" rev-parse --short HEAD)
 }
 
 function get_SHASUM() {
@@ -87,10 +82,6 @@ function get_SHASUM() {
 
 function get_HASH() {
   export HASH=$(echo $1 | sha1sum | awk '{ print $1; }')
-}
-
-function get_CONTAINER_NAME() {
-  export CONTAINER_NAME="$(echo $1 | sha1sum | awk '{print $1;}')_CM${2:-1}.orders"
 }
 
 function autodeploy() {
