@@ -236,12 +236,6 @@ Setting up orders as a shell script is to allow your creativity to run
 wild, but without you needing to learn a custom tool, DSL, scripting
 language, config database, or API.
 
-You can optionally specify more processes to run your order for additional power.  Add the variable to your order file:
-```bash
-export CREW_MEMBERS=2
-```
-Note: Max Crew Members allowed is twice the number of CPUs of the Ship.
-
 **No Fooling Important**, `autodeploy <git_url>`, just like your
 `<headquarters_url>` needs to be reachable from each ship in the fleet.
 
@@ -658,26 +652,6 @@ the default. You can change this with `EC2_INSTANCE_SIZE`.
 # Phleets
 Don't feel limited to just one phleet. Part of making your own PaaS is
 to give you the freedom to mix and match as you see fit.
-
-## Log Aggregation
-This is pretty cool `curl http://<ship>/starphleet/logstream`. This uses
-[tailor](https://github.com/wballard/tailor) to provide a SSE stream of
-log events.
-
-Just nearly as painful as getting everything deployed -- keeping an eye
-on it. You can generally get software that watches CPU, RAM, Disk,
-Network interfaces -- and it basically tells you nothing about your
-application. The real value is in logging, where you can have
-specifics and details to hunt down trouble.
-
-But, logs across multiple services, multiple machines, and multiple
-geographies aren't exactly fun, so starphleet aggregates all logs from
-all ships and containers for you. From there you can pipe this into
-services like [splunk](http://www.splunk.com), or my personal favorite, tail it
-and grep it.
-
-This also keeps you disks from filling up, since the logs are written to
-a stream and not to disk.
 
 ## Geo Scaling AWS
 By default, starphleet sets up four zones, three US, one Europe. Ships
