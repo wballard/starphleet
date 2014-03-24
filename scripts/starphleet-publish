@@ -90,6 +90,8 @@ location ${public_url}/ {
   gzip_proxied any;
   gzip_comp_level 6;
   include ${NGINX_CONF}/cors.conf;
+  # Path rewriting to hide mount prefix
+  rewrite ${public_url}/(.*) /\$1 break;
   proxy_pass http://${IP_ADDRESS}:${container_port};
   add_header X-CONTAINER ${container_name};
   add_header X-SHIP $(hostname);
