@@ -16,8 +16,7 @@ scripts/starphleet-containerize|21 col 1| trace "$(basename "$(test -L "$0" && r
 set -e
 
 order_name=${public_url}
-public_url=$(echo "/${public_url}/" | sed -e 's[//[/[g')
-container_url=$(echo "${container_url}/" | sed -e 's[//[/[g')
+public_url=$(echo "/${public_url}" | sed -e 's[//[/[g')
 #pulling out any nested quotes
 container_port=$(eval echo ${container_port})
 publish_port=$(eval echo ${publish_port})
@@ -89,8 +88,6 @@ location ${public_url} {
   gzip_proxied any;
   gzip_comp_level 6;
   include ${NGINX_CONF}/cors.conf;
-  # Path rewriting to hide mount prefix
-  rewrite ${public_url}(.*) /\$1 break;
   proxy_pass http://${IP_ADDRESS}:${container_port};
   add_header X-CONTAINER ${container_name};
   add_header X-SHIP $(hostname);
@@ -139,9 +136,9 @@ fi
 reload starphleet_nginx || start starphleet_nginx
 if [ "${publish_port}" != "${PUBLISH_PORT}" ]
 then
-  info "published ${container_name}:${container_port}${container_url} to ${public_url} and :${publish_port}"
+  info "published ${container_name}:${container_port} to ${public_url} and :${publish_port}"
 else
-  info "published ${container_name}:${container_port}${container_url} to ${public_url}"
+  info "published ${container_name}:${container_port} to ${public_url}"
 fi
 
 # vi: set ft=sh ts=2 et sw=2 sts=2 :
