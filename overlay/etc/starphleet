@@ -1,0 +1,2 @@
+#configure starphleet with global overrides here
+export STARPHLEET=LIVES
