@@ -396,7 +396,7 @@ These settings are laid over the service, and provide the ability to set
 variables for a service in the context of a single phleet, compared to
 the service variables which are truly generic.
 
-## .starphleet
+## /etc/starphleet
 Starphleet wide environment variables are applied last, leading to the
 highest precedence. This is a great place to have your production
 usernames, passwords, and connection strings.
@@ -419,11 +419,6 @@ export PORT=3000
 Now, this is a file right in your headquarters. To keep these private
 you put your headquarters in a private, hidden repository than can only
 be reached by private key `git+ssh`.
-
-If you are using vagrant, you can also place a .starphleet file in your
-home directory (~/.starphleet), with global overrides,  allowing you to
-use local environment variables that don't need to be checked into your
-headquarters.
 
 # Services
 Services are any program you can dream up that meet these conditions:
