@@ -16,7 +16,9 @@ scripts/starphleet-containerize|21 col 1| trace "$(basename "$(test -L "$0" && r
 set -e
 
 order_name=${public_url}
-public_url=$(echo "/${public_url}" | sed -e 's[//[/[g')
+if [ "${public_url}" == "/" ]; then
+  public_url=""
+fi
 #pulling out any nested quotes
 container_port=$(eval echo ${container_port})
 publish_port=$(eval echo ${publish_port})
@@ -82,7 +84,7 @@ location ${public_url}/cache365d/ {
     proxy_pass http://${IP_ADDRESS}:${container_port};
 }
 
-location ${public_url} {
+location ${public_url}/ {
   gzip on;
   gzip_types *;
   gzip_proxied any;
