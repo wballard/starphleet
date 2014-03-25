@@ -36,14 +36,17 @@ ORDERS="${orders_dir}/orders"
 CONTAINER_BUILD_SCRIPT=${STARPHLEET_TMP}/${container_name}.build
 cat << EOF > ${CONTAINER_BUILD_SCRIPT}
 #source to get the headquarters and default environment
+set -e
 sudo cp "${CONTAINER_ORDERS_SCRIPT}" /.orders
 source /usr/bin/tools
 trace "HOME=\${HOME}"
 
+trace Fetching service
 starphleet-git-synch "${git_url}" "\${HOME}/app"
 #source again, we may now have orders which change the environment
 source /usr/bin/tools
 
+trace Fetching buildpacks
 #set up a place onboard for possible custom buildpacks
 mkdir -p "\${HOME}/build"
 rsync -az "${BUILDPACKS}/" "\${HOME}/build/buildpacks"
@@ -52,6 +55,7 @@ EOF
 #This *really needs* to be unescaped, notice the \$@ passed along
 #to git SSH and ... there are no variables to escape :)
 cat << 'EOF' >> ${CONTAINER_BUILD_SCRIPT}
+trace Preparing SSH 
 #buildpacks may pull git and need ssh identity
 starphleet-git-config > /tmp/gitsshconfig
 export GIT_SSH=/tmp/gitssh
@@ -61,6 +65,7 @@ EOF
 
 cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 #now hand off to buildstep builder
+trace Running buildpack
 export BUILDPACK_CACHE_DIR="${orders_dir}/.cache"
 sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
 sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
@@ -69,7 +74,7 @@ builder
 #have the tools script sourced early in the buildpack environment sequence
 cp /usr/bin/tools "\${HOME}/app/.profile.d/__starphleet"
 #build variables
-echo "export STARPHLEET_DEPLOY_TIME='$(date)'" >> "\${HOME}/app/.profile.d/__starphleetenv"
+echo "export STARPHLEET_DEPLOY_TIME=\"$(date)\"" >> "\${HOME}/app/.profile.d/__starphleetenv"
 echo "export STARPHLEET_DEPLOY_GITURL=${git_url}" >> "\${HOME}/app/.profile.d/__starphleetenv"
 echo "export STARPHLEET_ENV=${orders_dir}/.starphleetenv" >> "\${HOME}/app/.profile.d/__starphleetenv"
 source /usr/bin/tools
@@ -79,6 +84,8 @@ EOF
 #actually make a container here
 if lxc-ls | grep "^${container_name}$" > /dev/null; then
   warn already built ${container_name}
+  warn restarting the container to get a clean port state
+  lxc-stop --name ${container_name}
   lxc-start --name ${container_name} -d
   starphleet-lxc-wait ${container_name} RUNNING
   lxc-attach --name ${container_name} -- bash starphleet-wait-network

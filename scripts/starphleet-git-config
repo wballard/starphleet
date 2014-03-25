@@ -20,10 +20,10 @@ if [ -d "${PRIVATE_KEYS}" ]; then
     if [ -f "${key}" ]; then
       get_HASH "${key}${USER}"
       if grep "PRIVATE KEY" "${key}" > /dev/null; then
-        cp "${key}" /tmp/${HASH}
-        chown ${USER}:${USER} /tmp/${HASH}
-        chmod 0400 /tmp/${HASH}
-        echo "IdentityFile /tmp/${HASH}"
+        cp "${key}" /var/tmp/${HASH}
+        chown ${USER}:${USER} /var/tmp/${HASH}
+        chmod 0400 /var/tmp/${HASH}
+        echo "IdentityFile /var/tmp/${HASH}"
       fi
     fi
   done

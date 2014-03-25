@@ -8,7 +8,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
-scripts/starphleet-containerize|21 col 1| trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
+trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 
 PORT=${container_port:-${PORT}}
 URL=${url:-/}
@@ -34,5 +34,4 @@ if [ ! TEST_PASSED ]; then
   exit 1
 fi
 
-info "service is ready"
-exit 0
+info "${container_name} is ready"

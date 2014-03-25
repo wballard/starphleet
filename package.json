@@ -29,7 +29,6 @@
     "starphleet-status": "./scripts/starphleet-status",
     "starphleet-git": "./scripts/starphleet-git",
     "starphleet-git-config": "./scripts/starphleet-git-config",
-    "starphleet-nuc": "./scripts/starphleet-nuc",
     "starphleet-git-synch": "./scripts/starphleet-git-synch",
     "starphleet-cleanup": "./scripts/starphleet-cleanup",
     "starphleet-public-keys": "./scripts/starphleet-public-keys",
