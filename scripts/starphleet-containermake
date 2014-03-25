@@ -46,9 +46,8 @@ else
   #special case to make the base, so we can always snapshot
   if [ -z "${base_container_name}" ]; then
     if lxc-ls | grep "ubuntu" > /dev/null; then
-      trace ubuntu container available
+      :
     else
-      trace ubuntu container building
       lxc-create --name "ubuntu" -t ubuntu
     fi
     base_container_name="ubuntu"
