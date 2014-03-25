@@ -17,4 +17,4 @@ do
   stop starphleet_serve_order name="${name}"
   starphleet-lxc-destroy "${name}"
 done
-info "reapder complete"
+info "reaper complete"
