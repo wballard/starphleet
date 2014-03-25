@@ -35,16 +35,21 @@ ORDERS="${orders_dir}/orders"
 #the second most important thing is to know that this runs on the container
 CONTAINER_BUILD_SCRIPT=${STARPHLEET_TMP}/${container_name}.build
 cat << EOF > ${CONTAINER_BUILD_SCRIPT}
+set -e
 #source to get the headquarters and default environment
 sudo cp "${CONTAINER_ORDERS_SCRIPT}" /.orders
 source /usr/bin/tools
+info Starting container buildpack sequence
 trace "HOME=\${HOME}"
 
+
+trace Pulling service to container
 starphleet-git-synch "${git_url}" "\${HOME}/app"
 #source again, we may now have orders which change the environment
 source /usr/bin/tools
 
 #set up a place onboard for possible custom buildpacks
+trace Preparing buildpacks
 mkdir -p "\${HOME}/build"
 rsync -az "${BUILDPACKS}/" "\${HOME}/build/buildpacks"
 EOF
@@ -52,7 +57,8 @@ EOF
 #This *really needs* to be unescaped, notice the \$@ passed along
 #to git SSH and ... there are no variables to escape :)
 cat << 'EOF' >> ${CONTAINER_BUILD_SCRIPT}
-#buildpacks may pull git and need ssh identity
+#buildpacks and referenced packages may pull git and need ssh identity
+trace Configuring git for SSH access
 starphleet-git-config > /tmp/gitsshconfig
 export GIT_SSH=/tmp/gitssh
 echo "ssh -F /tmp/gitsshconfig \$@" > /tmp/gitssh
@@ -61,6 +67,7 @@ EOF
 
 cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 #now hand off to buildstep builder
+trace Running the buildpack
 export BUILDPACK_CACHE_DIR="${orders_dir}/.cache"
 sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
 sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
@@ -69,11 +76,12 @@ builder
 #have the tools script sourced early in the buildpack environment sequence
 cp /usr/bin/tools "\${HOME}/app/.profile.d/__starphleet"
 #build variables
-echo "export STARPHLEET_DEPLOY_TIME='$(date)'" >> "\${HOME}/app/.profile.d/__starphleetenv"
+echo "export STARPHLEET_DEPLOY_TIME=\'$(date)\'" >> "\${HOME}/app/.profile.d/__starphleetenv"
 echo "export STARPHLEET_DEPLOY_GITURL=${git_url}" >> "\${HOME}/app/.profile.d/__starphleetenv"
 echo "export STARPHLEET_ENV=${orders_dir}/.starphleetenv" >> "\${HOME}/app/.profile.d/__starphleetenv"
 source /usr/bin/tools
 [ -d "${orders_dir}" ] && env | sudo bash -c "sort > \"${orders_dir}/.starphleetenv\""
+info Buildpack complete
 EOF
 
 #actually make a container here
