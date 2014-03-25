@@ -48,6 +48,8 @@ EOF
     ORDER_LOCAL=$(dirname "${status}")/git
     if [ -f $(dirname "${status}")/.container ]; then
       CONTAINER=$(cat $(dirname "${status}")/.container)
+    else
+      CONTAINER="<none>"
     fi
     ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
     get_CURRENT_SHA "${ORDER_LOCAL}"
@@ -58,7 +60,7 @@ EOF
 cat << EOF
   -
     order: ${ORDER}
-    container: ${CONTAINER:-<none>}
+    container: ${CONTAINER}
     sha: ${CURRENT_SHA}
     author: ${AUTHOR}
     text: >
