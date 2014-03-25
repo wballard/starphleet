@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 stop starphleet
+rm /var/log/upstart/*
 /starphleet/scripts/starphleet-install
