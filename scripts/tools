@@ -120,15 +120,13 @@ function make_admiral() {
   info admiral created
 }
 
-function apply_order_exports()
+function mail_log()
 {
-  # export the three key variables from the orders file (PORT, PUBLISH_PORT, CREW_MEMBERS)
-  $(awk '/^[ \t]*export[ \t]+(PORT|PUBLISH_PORT|CREW_MEMBERS)[ \t]*=/ {print $0}' "${1}")
-  
-  if [ "${CREW_MEMBERS}" -gt "${CREW_MEMBER_MAX}" ]; then 
-    echo "You have too many crew members - cap crew members to ${CREW_MEMBER_MAX}"
-    export CREW_MEMBERS="${CREW_MEMBER_MAX}" 
-  fi
+  ORDER_LOCAL="${CURRENT_ORDERS}/${order}/git"
+  AUTHOR=$(git --git-dir "${ORDER_LOCAL}/.git" --work-tree "${ORDER_LOCAL}" log -1 --format='%ae')
+  cat /var/log/upstart/${UPSTART_JOB}-${name}.log \
+  | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
+  | mail -s "Starphleet Build Failure: ${name}" "${AUTHOR}"
 }
 
 # environment, enforced by our buildpack script, so the preference order is:

@@ -9,6 +9,8 @@ source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
+#it is really important to note that the output of this goes into
+#the .sshconfig by piping
 
 echo "StrictHostKeyChecking no"
 echo "CheckHostIP no"
@@ -20,10 +22,12 @@ if [ -d "${PRIVATE_KEYS}" ]; then
     if [ -f "${key}" ]; then
       get_HASH "${key}${USER}"
       if grep "PRIVATE KEY" "${key}" > /dev/null; then
-        cp "${key}" /var/tmp/${HASH}
-        chown ${USER}:${USER} /var/tmp/${HASH}
-        chmod 0400 /var/tmp/${HASH}
-        echo "IdentityFile /var/tmp/${HASH}"
+        if [ ! -f /var/tmp/${HASH} ]; then
+          cp "${key}" /var/tmp/${HASH}
+          chown ${USER}:${USER} /var/tmp/${HASH}
+          chmod 0400 /var/tmp/${HASH}
+          echo "IdentityFile /var/tmp/${HASH}"
+        fi
       fi
     fi
   done

@@ -29,31 +29,31 @@ if [ -d "${local}/.git" ]; then
     warn repository url differs, reclone needed
     cd ..
     rm -rf "${local}"
-    starphleet-git clone "${REMOTE}" "${local}" > /dev/null
+    starphleet-git clone "${REMOTE}" "${local}" &> /dev/null || fatal clone error
     exit 0
   fi
   CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
   if [ -n "${BRANCH}" ]; then
     if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
       warn specified branch changed, checkout out ${BRANCH}
-      git checkout "${BRANCH}" > /dev/null
+      git checkout "${BRANCH}" &> /dev/null
       exit 0
     fi
   fi
   CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
-  starphleet-git fetch --all > /dev/null || fatal fetch error
+  starphleet-git fetch --all &> /dev/null || fatal fetch error
   HAS_CHANGES=`git diff HEAD...origin/${CURRENT_BRANCH} --raw`
   if [ "${HAS_CHANGES}x" != "x" ]; then
     warn new code detected, pulling
-    starphleet-git pull > /dev/null
+    starphleet-git pull &> /dev/null || fatal pull error
     exit 0
   fi
 else
   warn ${local} not found, initial clone needed from "${REMOTE}"
-  starphleet-git clone "${REMOTE}" "${local}" > /dev/null
+  starphleet-git clone "${REMOTE}" "${local}" &> /dev/null  || fatal clone error
   cd "${local}"
   if [ -n "${BRANCH}" ]; then
-    git checkout "${BRANCH}" > /dev/null
+    git checkout "${BRANCH}" &> /dev/null
   fi
   exit 0
 fi

@@ -35,6 +35,8 @@ cp -R ${DIR}/../overlay/* /
 if [ -f /var/starphleet/.system ]; then
   info base apt packages already installed
   warn delete /var/starphleet/.system to force reinstall
+  #TODO -- move this into the main packages list once we have everyone updated
+  sudo apt-get -y install --force-yes mailutils
 else
   apt-get -y update
   apt-get -y install --force-yes software-properties-common
