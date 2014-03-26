@@ -26,8 +26,8 @@ if [ -d "${PRIVATE_KEYS}" ]; then
           cp "${key}" /var/tmp/${HASH}
           chown ${USER}:${USER} /var/tmp/${HASH}
           chmod 0400 /var/tmp/${HASH}
-          echo "IdentityFile /var/tmp/${HASH}"
         fi
+        echo "IdentityFile /var/tmp/${HASH}"
       fi
     fi
   done
