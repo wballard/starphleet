@@ -78,6 +78,8 @@ echo "export STARPHLEET_DEPLOY_TIME=\"$(date)\"" >> "\${HOME}/app/.profile.d/__s
 echo "export STARPHLEET_DEPLOY_GITURL=${git_url}" >> "\${HOME}/app/.profile.d/__starphleetenv"
 echo "export STARPHLEET_ENV=${orders_dir}/.starphleetenv" >> "\${HOME}/app/.profile.d/__starphleetenv"
 source /usr/bin/tools
+#this is now good to go, and this environment file is the marker for
+#a fully ready container
 [ -d "${orders_dir}" ] && env | sudo bash -c "sort > \"${orders_dir}/.starphleetenv\""
 EOF
 
