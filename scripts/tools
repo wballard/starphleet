@@ -122,11 +122,13 @@ function make_admiral() {
 
 function mail_log()
 {
-  ORDER_LOCAL="${CURRENT_ORDERS}/${order}/git"
-  AUTHOR=$(git --git-dir "${ORDER_LOCAL}/.git" --work-tree "${ORDER_LOCAL}" log -1 --format='%ae')
-  cat /var/log/upstart/${UPSTART_JOB}-${name}.log \
-  | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
-  | mail -s "Starphleet Build Failure: ${name}" "${AUTHOR}"
+  if which mail; then
+    ORDER_LOCAL="${CURRENT_ORDERS}/${order}/git"
+    AUTHOR=$(git --git-dir "${ORDER_LOCAL}/.git" --work-tree "${ORDER_LOCAL}" log -1 --format='%ae')
+    cat /var/log/upstart/${UPSTART_JOB}-${name}.log \
+    | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
+    | mail -s "Starphleet Build Failure: ${name}" "${AUTHOR}"
+  fi
 }
 
 # environment, enforced by our buildpack script, so the preference order is:
