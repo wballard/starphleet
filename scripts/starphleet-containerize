@@ -28,7 +28,11 @@ STARPHLEET_BASE="${STARPHLEET_BASE:-starphleet-base}"
 #get the orders copied to a place where the will be visible to the container
 CONTAINER_ORDERS_SCRIPT=${STARPHLEET_TMP}/${container_name}.orders
 ORDERS="${orders_dir}/orders"
-[ -f "${ORDERS}" ] && cp "${ORDERS}" "${CONTAINER_ORDERS_SCRIPT}"
+cp "${ORDERS}" "${CONTAINER_ORDERS_SCRIPT}"
+#copy in a post install script if it is specified in the order directory
+CONTAINER_POSTINSTALL_SCRIPT=${STARPHLEET_TMP}/${container_name}.postinstall
+POSTINSTALL="${orders_dir}/postinstall"
+[ -f "${POSTINSTALL}" ] && cp "${POSTINSTALL}" "${CONTAINER_POSTINSTALL_SCRIPT}"
 
 #build script for our service container, the most important thing is that
 #it gets the source from git
@@ -37,7 +41,9 @@ CONTAINER_BUILD_SCRIPT=${STARPHLEET_TMP}/${container_name}.build
 cat << EOF > ${CONTAINER_BUILD_SCRIPT}
 #source to get the headquarters and default environment
 set -e
-sudo cp "${CONTAINER_ORDERS_SCRIPT}" /.orders
+sudo [ -f "${CONTAINER_ORDERS_SCRIPT}" ] && sudo cp "${CONTAINER_ORDERS_SCRIPT}" /.orders
+sudo [ -f "${CONTAINER_POSTINSTALL_SCRIPT}" ] && sudo cp "${CONTAINER_POSTINSTALL_SCRIPT}" /.postinstall
+sudo touch /.postinstall && sudo chmod +x /.postinstall
 source /usr/bin/tools
 trace "HOME=\${HOME}"
 
@@ -76,6 +82,7 @@ cp /usr/bin/tools "\${HOME}/app/.profile.d/__starphleet"
 #build variables
 echo "export STARPHLEET_DEPLOY_GITURL=${git_url}" >> "\${HOME}/app/.profile.d/__starphleetenv"
 source /usr/bin/tools
+sudo /.postinstall
 #this is now good to go, and this environment file is the marker for
 #a fully ready container
 [ -d "${orders_dir}" ] && env | sudo bash -c "sort > \"${orders_dir}/.starphleetenv\""

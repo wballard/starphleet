@@ -122,7 +122,7 @@ function make_admiral() {
 
 function mail_log()
 {
-  if which mail; then
+  if which mail > /dev/null; then
     ORDER_LOCAL="${CURRENT_ORDERS}/${order}/git"
     AUTHOR=$(git --git-dir "${ORDER_LOCAL}/.git" --work-tree "${ORDER_LOCAL}" log -1 --format='%ae')
     cat /var/log/upstart/${UPSTART_JOB}-${name}.log \
