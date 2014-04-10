@@ -52,6 +52,7 @@ else
     fi
     base_container_name="ubuntu"
   fi
+  lxc-stop --name "${base_container_name}" || true
   lxc-clone --snapshot -B overlayfs -o "${base_container_name}" -n "${CONTAINER_NAME}"
   #make a directory where we can mount back to the ship and a config file to mount
   test -d "${CONTAINER_OVERLAY}/var/starphleet" || mkdir -p "${CONTAINER_OVERLAY}/var/starphleet"
