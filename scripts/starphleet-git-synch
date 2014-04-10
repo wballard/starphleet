@@ -16,6 +16,7 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 REMOTE=$(echo "${remote//$'\r'/}" | awk -F '#' '{print $1;}')
 BRANCH=$(echo "${remote//$'\r'/}" | awk -F '#' '{print $2;}')
+BRANCH="${BRANCH:-master}"
 local="${local:-$(basename ${REMOTE})}"
 
 set -e
@@ -33,12 +34,10 @@ if [ -d "${local}/.git" ]; then
     exit 0
   fi
   CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
-  if [ -n "${BRANCH}" ]; then
-    if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
-      warn specified branch changed, checkout out ${BRANCH}
-      git checkout "${BRANCH}" &> /dev/null
-      exit 0
-    fi
+  if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
+    warn specified branch changed, checkout out ${BRANCH}
+    git checkout "${BRANCH}" &> /dev/null
+    exit 0
   fi
   CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
   starphleet-git fetch --all &> /dev/null || fatal fetch error
