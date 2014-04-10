@@ -92,7 +92,8 @@ EOF
 if lxc-ls | grep "^${container_name}$" > /dev/null; then
   warn already built ${container_name}
   warn restarting the container to get a clean port state
-  lxc-stop --name ${container_name}
+  lxc-stop --name ${container_name} || true
+  starphleet-lxc-wait ${container_name} STOPPED
   lxc-start --name ${container_name} -d
   starphleet-lxc-wait ${container_name} RUNNING
   lxc-attach --name ${container_name} -- bash starphleet-wait-network
