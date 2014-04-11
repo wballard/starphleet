@@ -69,10 +69,9 @@ ruby -e "require 'yaml';(YAML.load_file('$build_root/.release')['config_vars'] |
 cat << EOF > "${HOME}/start"
 #!/bin/bash
 export HOME=$build_root
+export ORDERS_IN=$build_root
+source /usr/bin/tools
 for file in $build_root/.profile.d/*; do source \$file; done
-env | sort
-env | sudo bash -c "sort > \"\${STARPHLEET_ENV}\""
-hash -r
 cd $build_root
 if [[ -f Procfile ]]; then
     ruby -e "require 'yaml';puts YAML.load_file('Procfile')['\$1']" | bash

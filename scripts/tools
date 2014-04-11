@@ -1,8 +1,8 @@
 # vim: set ft=sh : #main include file for starphleet scripts
 export version=0.0.1
 #a default port for the forgetful order:wa
-export PORT=3000
-export PUBLIHSH_PORT=0
+export PORT=3001
+export PUBLISH_PORT=0
 export LXC_ROOT="/var/lib/lxc"
 export STARPHLEET_SHARED_DATA="${LXC_ROOT}/data"
 export STARPHLEET_PULSE="10"
@@ -30,9 +30,6 @@ if [ "${TERM}" == "unknown" ]; then
 fi
 export SHIP=ship-$(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub | awk '{ print $2; }' | sed -e 's/://g')
 export STARPHLEET_APP_USER="ubuntu"
-export CREW_MEMBERS="1"
-
-export CREW_MEMBER_MAX="$(($(grep "processor" "/proc/cpuinfo" | wc -l) * 2))"
 
 ulimit -n ${MAX_OPEN_FILES}
 

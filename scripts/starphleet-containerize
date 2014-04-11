@@ -84,14 +84,10 @@ trace Running buildpack
 export BUILDPACK_CACHE_DIR="${orders_dir}/.cache"
 sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
 sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
-builder
 
-#have the tools script sourced early in the buildpack environment sequence
-cp /usr/bin/tools "\${HOME}/app/.profile.d/__starphleet"
-#build variables
-echo "export STARPHLEET_DEPLOY_GITURL=${git_url}" >> "\${HOME}/app/.profile.d/__starphleetenv"
-source /usr/bin/tools
+builder
 sudo \${ORDERS_IN}/postinstall
+
 #this is now good to go, and this environment file is the marker for
 #a fully ready container
 [ -d "${orders_dir}" ] && env | sudo bash -c "sort > \"${orders_dir}/.starphleetenv\""
