@@ -33,8 +33,6 @@ cp "${ORDERS}" "${CONTAINER_ORDERS_SCRIPT}"
 CONTAINER_POSTINSTALL_SCRIPT=${STARPHLEET_TMP}/${container_name}.postinstall
 POSTINSTALL="${orders_dir}/postinstall"
 [ -f "${POSTINSTALL}" ] && cp "${POSTINSTALL}" "${CONTAINER_POSTINSTALL_SCRIPT}"
-#copy in nginx
-cp `which nginx` ${STARPHLEET_TMP}/nginx
 
 #build script for our service container, the most important thing is that
 #it gets the source from git
@@ -48,7 +46,7 @@ set -e
 source /usr/bin/tools
 trace app will be in ${HOME}/app
 export ORDERS_IN=${HOME}/app
-trace app will be in ${ORDERS_IN}
+trace ${ORDERS_IN} ...
 EOF
 
 #now -- this is escaped, lots of variables included from this script
@@ -67,14 +65,12 @@ trace Fetching buildpacks
 #set up a place onboard for possible custom buildpacks
 mkdir -p "\${HOME}/build"
 rsync -az "${BUILDPACKS}/" "\${HOME}/build/buildpacks"
-sudo cp ${STARPHLEET_TMP}/nginx /usr/sbin/nginx
-sudo mkdir -p /var/log/nginx /usr/share/nginx /var/lib/nginx
 EOF
 
 #This *really needs* to be unescaped, notice the \$@ passed along
 #to git SSH and ... there are no variables to escape :)
 cat << 'EOF' >> ${CONTAINER_BUILD_SCRIPT}
-trace Preparing SSH
+trace Preparing SSH 
 #buildpacks may pull git and need ssh identity
 starphleet-git-config > /tmp/gitsshconfig
 export GIT_SSH=/tmp/gitssh

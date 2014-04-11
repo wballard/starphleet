@@ -51,7 +51,7 @@ function fatal() {
 }
 
 function trace() {
-  echo -e  '\E[35m'"\033[1m$*\033[0m" 1>&2
+  echo -e  '\E[35m'"\033[1m$*\033[0m"
 }
 
 function info() {
