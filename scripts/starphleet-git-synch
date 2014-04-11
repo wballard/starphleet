@@ -48,7 +48,7 @@ if [ -d "${local}/.git" ]; then
     exit 0
   fi
 else
-  warn ${local} not found, initial clone needed from "${REMOTE}"
+  warn ${local} not found, initial clone needed from "${REMOTE}" to "${local}"
   starphleet-git clone "${REMOTE}" "${local}" &> /dev/null  || fatal clone error
   cd "${local}"
   if [ -n "${BRANCH}" ]; then

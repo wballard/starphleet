@@ -38,17 +38,26 @@ POSTINSTALL="${orders_dir}/postinstall"
 #it gets the source from git
 #the second most important thing is to know that this runs on the container
 CONTAINER_BUILD_SCRIPT=${STARPHLEET_TMP}/${container_name}.build
-cat << EOF > ${CONTAINER_BUILD_SCRIPT}
-#source to get the headquarters and default environment
+
+#This *really needs* to be unescaped, need to get HOME from the point of view
+#of the container
+cat << 'EOF' > ${CONTAINER_BUILD_SCRIPT}
 set -e
-sudo [ -f "${CONTAINER_ORDERS_SCRIPT}" ] && sudo cp "${CONTAINER_ORDERS_SCRIPT}" /.orders
-sudo [ -f "${CONTAINER_POSTINSTALL_SCRIPT}" ] && sudo cp "${CONTAINER_POSTINSTALL_SCRIPT}" /.postinstall
-sudo touch /.postinstall && sudo chmod +x /.postinstall
 source /usr/bin/tools
-trace "HOME=\${HOME}"
+trace app will be in ${HOME}/app
+export ORDERS_IN=${HOME}/app
+trace ${ORDERS_IN} ...
+EOF
+
+#now -- this is escaped, lots of variables included from this script
+cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 
 trace Fetching service
-starphleet-git-synch "${git_url}" "\${HOME}/app"
+starphleet-git-synch "${git_url}" \${ORDERS_IN}
+trace Configuring environment
+sudo [ -f "${CONTAINER_ORDERS_SCRIPT}" ] && sudo cp "${CONTAINER_ORDERS_SCRIPT}" \${ORDERS_IN}/orders
+sudo [ -f "${CONTAINER_POSTINSTALL_SCRIPT}" ] && sudo cp "${CONTAINER_POSTINSTALL_SCRIPT}" \${ORDERS_IN}/postinstall
+sudo touch \${ORDERS_IN}/postinstall && sudo chmod +x \${ORDERS_IN}/postinstall
 #source again, we may now have orders which change the environment
 source /usr/bin/tools
 
@@ -82,13 +91,15 @@ cp /usr/bin/tools "\${HOME}/app/.profile.d/__starphleet"
 #build variables
 echo "export STARPHLEET_DEPLOY_GITURL=${git_url}" >> "\${HOME}/app/.profile.d/__starphleetenv"
 source /usr/bin/tools
-sudo /.postinstall
+sudo \${ORDERS_IN}/postinstall
 #this is now good to go, and this environment file is the marker for
 #a fully ready container
 [ -d "${orders_dir}" ] && env | sudo bash -c "sort > \"${orders_dir}/.starphleetenv\""
 EOF
 
 #actually make a container here
+trap "starphleet-lxc-destroy ${container_name}" ERR
+
 if lxc-ls | grep "^${container_name}$" > /dev/null; then
   warn already built ${container_name}
   warn restarting the container to get a clean port state

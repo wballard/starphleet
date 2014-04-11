@@ -48,12 +48,12 @@ pushd "${CHECKOUT_PATH}" > /dev/null
 git checkout "${revision}"
 popd > /dev/null
 #resource tools, we now have a cloned repository locally to pick up env
+export ORDERS_IN="${CHECKOUT_PATH}"
 source ${DIR}/tools
 info cleaning up existing push container
 starphleet-lxc-destroy "${container_name}"
 info making this push into a container
 starphleet-containerize "${CHECKOUT_PATH}#${revision}" "${container_name}" "${CHECKOUT_PATH}"
-source "${CHECKOUT_PATH}/.starphleetenv"
 starphleet-publish "${container_name}" "${PORT}" "${PUBLISH_PORT}" "/${container_name}"
 
 info "starting your pushed container"

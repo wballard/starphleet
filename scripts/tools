@@ -138,7 +138,7 @@ function mail_log()
 [ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"
 [ -f "/${CHECKOUT_PATH}/.env" ] && source "/${CHECKOUT_PATH}/.env"
 [ -f "${HOME}/app/.env" ] && source "${HOME}/app/.env"
-[ -f "/.orders" ] && source "/.orders"
+[ -f "${ORDERS_IN}/orders" ] && source "${ORDERS_IN}/orders"
 [ -f "${HEADQUARTERS_ENV}" ] && source "${HEADQUARTERS_ENV}"
 [ -f "/etc/starphleet" ] && source "/etc/starphleet"
 :

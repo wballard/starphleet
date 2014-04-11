@@ -20,8 +20,3 @@ test -d "${ADMIRAL_HOME}/.npm" && rm -rf "${ADMIRAL_HOME}/.npm"
 test -d "${NGINX_CONF}/published" && rm -rf "${NGINX_CONF}/published"
 test -d "${NGINX_CONF}/published_bare" && rm -rf "${NGINX_CONF}/published_bare"
 test -d "${NGINX_CONF}/upstream" && rm -rf "${NGINX_CONF}/upstream"
-for container in $(lxc-ls | grep '\.orders')
-do
-  warn need to destroy ${container}
-  starphleet-lxc-destroy ${container}
-done

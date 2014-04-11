@@ -53,7 +53,6 @@ EOF
     fi
     ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
     get_CURRENT_SHA "${ORDER_LOCAL}"
-    CURRENT_ENV="$(dirname ${status})/.starphleetenv"
     cd "$(dirname "${status}")/git"
     AUTHOR=$(git log -1 --format='%ae')
     TEXT=$(git log -1 --format='%s')
@@ -66,7 +65,6 @@ cat << EOF
     text: >
       ${TEXT}
     status: $(cat "${status}")
-    env: ${CURRENT_ENV}
 EOF
 
   done
