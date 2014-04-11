@@ -29,7 +29,9 @@ if [ -n "$BUILDPACK_URL" ]; then
   buildpack_name=$($buildpack/bin/detect "$build_root") && selected_buildpack=$buildpack
 else
   for buildpack in "${buildpacks[@]}"; do
-    buildpack_name=$($buildpack/bin/detect "$build_root") && selected_buildpack=$buildpack && break
+    if [ -x $buildpack/bin/detect ]; then
+      buildpack_name=$($buildpack/bin/detect "$build_root") && selected_buildpack=$buildpack && break
+    fi
   done
 fi
 
