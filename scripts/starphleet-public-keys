@@ -24,18 +24,20 @@ HQAUTHKEYS="${HEADQUARTERS_LOCAL}/authorized_keys"
 # base touch on auth file to create
 touch ${AUTHFILE}
 #look for public keys pushed on the ship as well as in the headquarters
-for f in $(find "${HQAUTHKEYS}" "${PUBLIC_KEYS}")
-do
-  if ssh-keygen -l -f "${f}" > /dev/null; then
-    #direct ssh as the admiral
-    cat "${f}" >> ${AUTHFILE}
-    echo '' >> ${AUTHFILE}
-    #git push based build/serve sequence, much like a manual
-    #interactive heroku style
-    cat "${f}" | gitreceive upload-key $(basename "${f}")
-    cat "${f}" | sshcommand acl-add update $(basename "${f}")
-  fi
-done
+if [ -d "${HQAUTHKEYS}" ]; then
+  for f in $(find "${HQAUTHKEYS}" "${PUBLIC_KEYS}")
+  do
+    if ssh-keygen -l -f "${f}" > /dev/null; then
+      #direct ssh as the admiral
+      cat "${f}" >> ${AUTHFILE}
+      echo '' >> ${AUTHFILE}
+      #git push based build/serve sequence, much like a manual
+      #interactive heroku style
+      cat "${f}" | gitreceive upload-key $(basename "${f}")
+      cat "${f}" | sshcommand acl-add update $(basename "${f}")
+    fi
+  done
+fi
 
 chmod 600 ${AUTHFILE}
 chown ${ADMIRAL}:${ADMIRAL} ${AUTHFILE}
