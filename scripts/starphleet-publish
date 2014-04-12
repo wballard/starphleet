@@ -108,10 +108,10 @@ if [ -n "${htpasswd}" ]; then
   echo "  auth_basic_user_file ${htpasswd};" >> "${MOUNT_CONF}"
 fi
 echo '}' >> "${MOUNT_CONF}"
-
+info "published ${container_name}:${container_port} to ${public_url}"
 
 #port publication, this is optional if a port is set
-if [ "${publish_port}" != "${PUBLISH_PORT}" ]
+if [ "${publish_port}" != "0" ]
 then
 cat << EOF > "${BARE_CONF}"
 server {
@@ -131,21 +131,16 @@ server {
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "upgrade";
 EOF
-if [ -n "${htpasswd}" ]; then
-  echo "  auth_basic \"\";" >> "${BARE_CONF}"
-  echo "  auth_basic_user_file ${htpasswd};" >> "${BARE_CONF}"
-fi
-echo -e "  }\n}" >> "${BARE_CONF}"
+  if [ -n "${htpasswd}" ]; then
+    echo "  auth_basic \"\";" >> "${BARE_CONF}"
+    echo "  auth_basic_user_file ${htpasswd};" >> "${BARE_CONF}"
+  fi
+  echo -e "  }\n}" >> "${BARE_CONF}"
+  info "published ${container_name}:${container_port} :${publish_port}"
 else
   rm -f "${BARE_CONF}"
 fi
 
 reload starphleet_nginx || start starphleet_nginx
-if [ "${publish_port}" != "${PUBLISH_PORT}" ]
-then
-  info "published ${container_name}:${container_port} to ${public_url} and :${publish_port}"
-else
-  info "published ${container_name}:${container_port} to ${public_url}"
-fi
 
 # vi: set ft=sh ts=2 et sw=2 sts=2 :

@@ -87,39 +87,21 @@ sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_
 
 builder
 sudo \${ORDERS_IN}/postinstall
-
-#this is now good to go, and this environment file is the marker for
-#a fully ready container
-[ -d "${orders_dir}" ] && env | sudo bash -c "sort > \"${orders_dir}/.starphleetenv\""
 EOF
 
-#actually make a container here
-trap "starphleet-lxc-destroy ${container_name}" ERR
-
-if lxc-ls | grep "^${container_name}$" > /dev/null; then
-  warn already built ${container_name}
-  warn restarting the container to get a clean port state
-  lxc-stop --name ${container_name} || true
-  starphleet-lxc-wait ${container_name} STOPPED
-  lxc-start --name ${container_name} -d
-  starphleet-lxc-wait ${container_name} RUNNING
-  lxc-attach --name ${container_name} -- bash starphleet-wait-network
-  exit 0
+info building ${container_name}
+#making base containers as needed, base container serves as the source for
+#and we clone the service container on top, the idea is the base container
+#can be re-used and thus improve build time
+if [ -f "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}" ]
+then
+  #base container from a headquarters container script
+  starphleet-containermake "${STARPHLEET_BASE}" "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}"
+elif [ -f "/var/starphleet/containers/${STARPHLEET_BASE}" ]
+then
+  #base container from a starphleet provided container script
+  starphleet-containermake "${STARPHLEET_BASE}" "/var/starphleet/containers/${STARPHLEET_BASE}"
 else
-  info building ${container_name}
-  #making base containers as needed, base container serves as the source for
-  #and we clone the service container on top, the idea is the base container
-  #can be re-used and thus improve build time
-  if [ -f "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}" ]
-  then
-    #base container from a headquarters container script
-    starphleet-containermake "${STARPHLEET_BASE}" "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}"
-  elif [ -f "/var/starphleet/containers/${STARPHLEET_BASE}" ]
-  then
-    #base container from a starphleet provided container script
-    starphleet-containermake "${STARPHLEET_BASE}" "/var/starphleet/containers/${STARPHLEET_BASE}"
-  else
-    fatal no base container script ${STARPHLEET_BASE} is available
-  fi
-  starphleet-containermake --run "${container_name}" "${CONTAINER_BUILD_SCRIPT}" "${STARPHLEET_BASE}"
+  fatal no base container script ${STARPHLEET_BASE} is available
 fi
+starphleet-containermake --run "${container_name}" "${CONTAINER_BUILD_SCRIPT}" "${STARPHLEET_BASE}"
