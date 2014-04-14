@@ -103,6 +103,7 @@ adduser git sudo
 sshcommand create update "sudo starphleet-update"
 adduser update sudo
 
+starphleet-buildpacks
 
 touch /var/starphleet/.system
 start starphleet
