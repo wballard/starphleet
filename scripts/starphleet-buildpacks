@@ -14,5 +14,5 @@ mkdir -p "${BUILDPACKS}"
 cd "${BUILDPACKS}"
 for buildpack in $(cat "${DIR}/buildpacks"); do
   info installing $buildpack ...
-  starphleet-git-synch "${buildpack}" || true
+  git clone --depth=1 "${buildpack}" || true
 done
