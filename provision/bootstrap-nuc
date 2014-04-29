@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-update-grub
-dd if=/dev/sdb of=/dev/sda bs=1M
-parted --script /dev/sda rm 1
-parted --script /dev/sda mkpart primary 1 100%
-reboot
