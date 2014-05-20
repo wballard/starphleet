@@ -30,13 +30,13 @@ if [ -d "${local}/.git" ]; then
     warn repository url differs, reclone needed
     cd ..
     rm -rf "${local}"
-    starphleet-git clone "${REMOTE}" "${local}" &> /dev/null || fatal clone error
+    starphleet-git clone "${REMOTE}" "${local}" || fatal clone error
     exit 0
   fi
   CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
   if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
     warn specified branch changed, checkout out ${BRANCH}
-    git checkout "${BRANCH}" &> /dev/null
+    git checkout "${BRANCH}" || fatal checkout error
     exit 0
   fi
   CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
@@ -44,15 +44,15 @@ if [ -d "${local}/.git" ]; then
   HAS_CHANGES=`git diff HEAD...origin/${CURRENT_BRANCH} --raw`
   if [ "${HAS_CHANGES}x" != "x" ]; then
     warn new code detected, pulling
-    starphleet-git pull &> /dev/null || fatal pull error
+    starphleet-git pull || fatal pull error
     exit 0
   fi
 else
   warn ${local} not found, initial clone needed from "${REMOTE}" to "${local}"
-  starphleet-git clone "${REMOTE}" "${local}" &> /dev/null  || fatal clone error
+  starphleet-git clone "${REMOTE}" "${local}" || fatal clone error
   cd "${local}"
   if [ -n "${BRANCH}" ]; then
-    git checkout "${BRANCH}" &> /dev/null
+    git checkout "${BRANCH}" || fatal checkout error
   fi
   exit 0
 fi
