@@ -35,9 +35,8 @@ if [ -d "${local}/.git" ]; then
   fi
   CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
   if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
-    warn specified branch changed, checkout out ${BRANCH}
+    warn specified branch changed, checking out ${BRANCH}
     git checkout "${BRANCH}" || fatal checkout error
-    exit 0
   fi
   CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
   starphleet-git fetch --all &> /dev/null || fatal fetch error
