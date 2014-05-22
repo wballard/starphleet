@@ -31,7 +31,7 @@ if [ -d "${local}/.git" ]; then
     warn repository url differs, reclone needed
     cd ..
     rm -rf "${local}"
-    starphleet-git clone "${REMOTE}" "${local}" || fatal clone error
+    starphleet-git clone --depth 1000 "${REMOTE}" "${local}" || fatal clone error
     exit 0
   fi
   CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
