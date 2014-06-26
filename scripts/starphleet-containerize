@@ -70,7 +70,7 @@ EOF
 #This *really needs* to be unescaped, notice the \$@ passed along
 #to git SSH and ... there are no variables to escape :)
 cat << 'EOF' >> ${CONTAINER_BUILD_SCRIPT}
-trace Preparing SSH 
+trace Preparing SSH
 #buildpacks may pull git and need ssh identity
 starphleet-git-config > /tmp/gitsshconfig
 export GIT_SSH=/tmp/gitssh
@@ -82,6 +82,10 @@ cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 #now hand off to buildstep builder
 trace Running buildpack
 export BUILDPACK_CACHE_DIR="${orders_dir}/.cache"
+if [ -d "\${BUILDPACK_CACHE_DIR}" ]
+then
+  sudo rm -rf "\${BUILDPACK_CACHE_DIR}"
+fi
 sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
 sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
 
