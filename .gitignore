@@ -5,3 +5,4 @@ src
 .server
 .starphleet*
 .vagrant*
+*.DS_Store
