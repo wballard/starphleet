@@ -1,321 +1,170 @@
-<h1>Starphleet</h1>
-<div class="jumbotron">
-Containers + Buildpacks + Repositories = Autodeploy Services
-</div>
+# Starphleet
+**Containers + Buildpacks + Repositories = Autodeploy Services**
 
-This is a toolkit for turning virtual or physical machine infrastructure
-into a continuous deployment stack. Here are some of the observed
-problems in autodeployment:
+Starphleet is a toolkit for turning [virtual](http://aws.amazon.com/ec2/) or physical machine infrastructure into a continuous deployment stack for multiple git projects using [OS-level virtualization](https://linuxcontainers.org/) to provide multiple services per node, avoiding many of the problems inherent in existing autodeployment solutions:
 
-* Virtualization wastes resources, specifically RAM and CPU running
-  multiple operating system images, which costs real money
+* Conventional virtualization, with multiple operating systems running on shared
+  physical hardware, wastes resources, specifically RAM and CPU.  This costs real money.
 * Autodeploy PaaS has the same vendor lock-in risks of old proprietary software
 * Continous deployment is almost always a custom scripting exercise
 * Multiple machine / clustered deployment is extra work
 * Making many small services is more work than making megalith services
 * Seeing what is going on across multiple machines is hard
-* Deployment system all seem to be at the *system* not *service* level
+* Deployment systems all seem to be at the *system* not *service* level
 * Every available autodeploy system requires that you set up servers to
   deploy your servers, which themselves aren't autodeployed
 
+# Concepts
+
+* **The Twelve-Factor App**: Starphleet owes a lot to the [Twelve-Factor App](http://12factor.net). Learn about it.
+* **Orders**: The atomic unit of Starphleet.  An individual Ruby, Python, Node, or plain HTML service run in a [Linux container](https://linuxcontainers.org/).
+* **Ship**: A virtual machine instances with one or more running orders.
+* **Phleet**: A collection of one or more ships
+* **Headquarters**: A git repository that instructs the phleet how to operate.
+
 # Get Started
-You need a git repository that defines your **starphleet headquarters**,
-you can start up by forking our [base
-headquarters](https://github.com/wballard/starphleet.headquarters.git).
+Starphleet is configured entirely by environmental variables.  We are big fans of environment variables, as they save you from the chore of repeatedly typing the same text.
 
-Keep track of where you fork it, you'll need that git url.
-**Important**: the git url must be network reachable from your hosting
-cloud, often the best thing to do is use public git hosting services.
+1.  Clone the Starphleet repository to your workstation, then change your current directory to the cloned folder.
 
-I'm a big fan of environment variables, it saves typing repeated stuff.
-Paste in your url from above into your shell like this:
+  ```bash
+  $ git clone https://github.com/wballard/starphleet.git
+  $ cd starphleet
+  ```
 
-```bash
-export STARPHLEET_HEADQUARTERS=<git_url>
-```
+1.  Set the environment variable for the Git URL to your Starphleet headquarters, which is a git repository providing operating instructions for your servers and associated [Linux containers](https://linuxcontainers.org/).  We suggest you start by forking our [base headquarters](https://github.com/wballard/starphleet.headquarters.git).  This Git URL must be network reachable from your hosting cloud, making [public git hosting services](https://github.com/) a natural fit for Starphleet.
 
-OK -- so that might not work for you, particularly if your
-`STARPHLEET_HEADQUARTERS` was a git/ssh url. To make that work, you need
-to have the private key file you use with github, something like mine:
 
-```bash
-export STARPHLEET_PRIVATE_KEY=~/.ssh/wballard@mailframe.net
-```
+  ```bash
+  $ export STARPHLEET_HEADQUARTERS=<git_url>
+  ```
 
-And, you will want to be able to SSH to your ships, that's one of the
-big benefits!
+1.  Set the environment variable for the locations of your public and private key files which are associated with the git repository for your Starphleet headquarters.  If you have not yet generated these files, you can do so using [ssh-keygen](https://help.github.com/articles/generating-ssh-keys).  
 
-```bash
-export STARPHLEET_PUBLIC_KEY=~/.ssh/wballard@mailframe.net.pub
-```
+  ```bash
+  $ export STARPHLEET_PRIVATE_KEY=~/.ssh/<private_keyfile>
+  $ export STARPHLEET_PUBLIC_KEY=~/.ssh/<public_keyfile>
+  ```
 
-Yeah, go ahead. Spam me, that's my real email :)
+After completing the above configuration steps, you can choose to deploy Starphleet on your local workstation using Vagrant or into the cloud with Amazon Web Services (AWS).
 
 ## Locally, Vagrant
-Vagrant is a handy way to get a working autodeployment system right on
-your laptop inside a virtual machine. Prebuilt base images are provided
-in the `Vagrantfile` for both VMWare, VirtualBox and Parallels. Great
-for figuring if your services will autodeploy/start/run without worrying
-about load balancing.
 
-```bash
-git clone https://github.com/wballard/starphleet.git
-cd starphleet
-vagrant up
-vagrant ssh -c "ifconfig eth0 | grep 'inet addr'"
-```
+Vagrant is a handy way to get a working autodeployment system right on your laptop inside a virtual machine. Prebuilt base images are provided in the `Vagrantfile` for both VMWare, VirtualBox and Parallels. This Vagrant option is great for figuring if your services will start/run/autodeploy without worrying about cloud configuration.
 
-Note the IP address from the last command, you can see the dashboard at
-http://ip-address/starphleet/dashboard. This will take a few minutes the
-first time.
+1.  From the cloned [Starphleet](https://github.com/wballard/starphleet) directory, run `$ vagrant up` in your shell, which will start a new virtual machine instance, perform a git pull on your `STARPHLEET_HEADQUARTERS`, and configure the application(s) specificed in the Starphleet headquarters.
 
-Super magic is happening here pulling in the `STARPHLEET_HEADQUARTERS`
-and `STARPHLEET_PRIVATE_KEY` specified before as environment variables.
+  ```bash
+  $ vagrant up
+  ```
+1.  Get the IP address of your new virtual machine instance
 
-If you would like to set the memory footprint of your ship you can run:
-```bash
-export STARPHLEET_VAGRANT_MEMSIZE=8192
-```
+  ```bash
+  $ vagrant ssh -c "ifconfig eth0 | grep 'inet addr'"
+  ```
+1.  Navigate in your web browser to `http://<ip_address>/echo`, where `<ip_address>` is returned in the previous step, in order to verify the deployment completed successfully.
 
 ## In the Cloud, AWS
-Running on a cloud is ready to go with AWS. In order to get started, you
-need to have an AWS account, and the environment variables:
+Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support out of the box.  To initialize your phleet, you need to have an AWS account.
 
-```bash
-#these are to appease AWS
-export AWS_ACCESS_KEY_ID=xxx
-export AWS_SECRET_ACCESS_KEY=xxx
-#git url used to clone your headquarters
-export STARPHLEET_HEADQUARTERS=git@github.com:wballard/starphleet.headquarters.git
-#set a key path here if you have a private headquarters
-export STARPHLEET_PRIVATE_KEY=~/.ssh/wballard@mailframe.net
-#a public key that goes with your private key, use this to ssh to ships
-export STARPHLEET_PUBLIC_KEY=~/.ssh/wballard@mailframe.net.pub
-```
+1.  Set additional environment variables required for AWS use.
 
-And, to get going
+  ```bash
+  export AWS_ACCESS_KEY_ID=<your_aws_key_id>
+  export AWS_SECRET_ACCESS_KEY=<your_aws_access_key>
+  ```
 
-```bash
-npm install -g starphleet-cli
-starphleet --help
+1.  Install the Starphleet command line interface (CLI) tool
 
-starphleet init ec2
-starphleet add ship ec2 us-west-1
-starphleet info ec2
-```
+  ```bash
+  $ npm install -g starphleet-cli
+  ```
 
-This will take a bit to launch up the nodes, but note that once you have
-em running, additional service deployments are going to be a lot quicker
-as the virtual machines are already built. Way better than making new
-VMs each time!
+1.  Use the Starphleet CLI to initialize EC2 and add a ship (virtual machine instance).  Some time will be required while EC2 initially launches the ships, but subsequent service deployments will be fast.
+
+  ```bash
+  $ starphleet init ec2
+  $ starphleet add ship ec2 us-west-1
+  ```
+
+1.  Get the IP address of your virtual machine instance(s)
+
+  ```bash
+  $ starphleet info ec2
+  ```
+
+1.  Navigate in your web browser to `http://<ip_address>/echo`, where `<ip_address>` can be any of those returned in the previous step, in order to verify the deployment completed successfully.
 
 ## All Running?
-Once you are up and running, look in your forked headquarters at
-`echo/orders`. This is all it takes to get a web service automatically
-deploying:
-* `export PORT=` to have a network port for your service
-* `autodeploy git_url` to know what to deploy
+Once you are up and running, look in your forked headquarters repository at `echo/orders`. The contents of the orders directory are all that is required to get a web service automatically deploying on the virtualized instances:
 
-Ordering up your own services is just as easy as adding a directory
-where the service will mount, and plopping in an `orders` file. Add.
-Commit. Push. Magic, any time that referenced git repo is updated, it
-will be redeployed to every ship watching your headquarters.
+* `export PORT=3000` to know on what port your service runs.  This port is mapped, by Starphleet, back to `http://<hostname>/echo` (on port 80).
+* `autodeploy https://github.com/wballard/echo.git` to know what to deploy.  Starphleet will automatically deploy your Ruby, Python, Node, and static NGNIX projects (see [buildpacks](#buildbpacks))
 
-# Concepts
-The grand tour so you know what we are talking about with all of our
-silly names.
+Ordering up your own services is just as easy as adding a new directory and creating the `orders` file. Add. Commit. Push. Magic.  Your service will be available , any time that referenced git repo is updated, it will be redeployed to every ship watching your headquarters.
 
-## The 12-Factor App
-Starphleet owes a lot to the [12 factor app](http://12factor.net). Learn
-about it.
-
-## Phleet
-The top level grouping. You manage starphleet at this level. You can
-make as many phleets as you like to arrange different groupings of
-services.
-
-Phleets are analagous to a single root URL, like
-`http://services.myorg.com` would be one fleet, with multiple ships and
-multiple services.
+# Reference
 
 ## Headquarters
-A git repository that instructs a phleet how to operate. Using git in
-this way gives a versioned database of your configuation, allows you to
-edit and work with your own tools, and allows multiple hosting options.
+A headquarters is a git repository that instructs the phleet (one or more virtual machine instances) how to operate. Using git in this manner
 
-Using git as the database avoids the need for a *starphleet server*.
+* Provides a versioned database of your configuation
+* Allows editing and working with your own tools
+* Provides multiple hosting options
+* Avoids the need for a separate Starphleet server
 
-### Security
-**No Fooling Important** -- your `<headquarters_url>` git repo needs to be
-reachable by each ship running the starphleet software.
+By default, all services are federated together behind one host name. This is particularly useful for single page applications making use of a set of small, sharp back end services, without all the fuss of CORS or other cross domain technique.  Note that the Git URL value assigned to `STARPHLEET_HEADQUARTERS` **needs to be reachable** from each ship in the phleet.
 
-The simple thing to do is use a public git repository via `https`. If you
-really need a private repository, or security, you can specify a private
-key and access git via `git+ssh`.
+### File Structure
 
-And, in the cases when you need it, you can host your phleet and
-headquarters entierly inside your own firewall.
-
-## Ship
-Our cute name for a host computer or virtual machine, it goes with the
-phleet metaphor. There are many ships in a fleet to provide scale and
-geographic distribution.
-
-## Orders
-An individual program, run in a container, supported by a buildpack, on
-a ship, autodeployed across a phleet. Services provide your application
-functionality over HTTP, including the use of server sent events and
-websockets.
-
-You can also order scheduled tasks, which may or may not offer a port
-and run on the clock with `cron`.
-
-# Phleets
-Check the main [readme](https://github.com/wballard/starphleet). In
-particular pay attention to the environment variables for public and
-private keys.
-
-# Headquarters
-A headquarters instructs a phleet with orders to deploy and how to serve
-them. A headquarters is a git repository, and hosted in a location on
-the internet where each ship in the phleet can reach it. The easiest
-thing to do is host on [github](http://www.github.com) or
-[bitbucket](http://www.bitbucket.com).
-
-## Mounting Services to URLs
-The simplest possible phleet has a directory structure like:
+Using our [base headquarters](https://github.com/wballard/starphleet.headquarters.git) as an example,
 
 ```
 authorized_keys/
+  wballard@mailframe.net.pub
 containers/
-.starphleet
-orders
-```
-
-Which will serve exactly one service at `/` as specified by `orders`.
-The path structure of the headquarters creates the virtual HTTP path
-structure of your services.
-
-By default, all services are federated together behind one host name. This is
-particularly useful for single page applications making use of a set of
-small, sharp back end services, without all the fuss of CORS or other
-cross domain technique. *This may not be what you expect if you are used
-to hooking up one hostname per service.* (And there is a hostname per service
-override if needed)
-
-As an example, imagine an application that has a front end, and three back
-end web services: `/`, `/workflow`, and `/users`.
-
-```
-/
+echo/
+  .htpasswd
   orders
-  workflow/
-    orders
-  users/
-    orders
+starphleet/
+.starphleet
 ```
 
-### .htpasswd
+* authorized\_keys/ - A directory whose files which contains public keys for user ssh access to the ships.
+
+Each file should contain one public key.
+These special users are called `admirals`.
+Users get to a ship with `ssh admiral@ship`.
+The admiral account is a member of `sudoers`.
+The same process used to autodeploy new services is also used to update the authorized keys, and happens in seconds
+In practice, this open access to the base machine lets you do what you want, when you want, truly open.  If you manage to wreck a ship, you can always just add a new one using [Starphleet CLI](https://github.com/wballard/starphleet-cli)
+
+### containers
+
+### echo (The Service Directory)
+
+Starphleet services correspond to directory names.  Starphleet will attempt to autodeploy any service (`authorized_keys`, `containers`, and `remote`)It is also possible to launch a service on `/`, by including an `orders` file at the root of your Starphleet headquarters repository.
+
+
+#### .htpasswd
 Similar to good old fashioned Apache setups, you can put an `.htpasswd`
 file in each order directory, right next to `orders`. This will
-automaticially protect that service with HTTP basic, useful to limit
+automatically protect that service with HTTP basic, useful to limit
 access to an API.
 
-### orders
-An `orders` file is simply a shell script run in the context of
-starphleet, at a given path, to control the autodeployment of a service.
-You can put anything in the script you like, it is just a shell script
-after all, but in practice there are only two things to do:
+#### orders
+An `orders` file is a shell script which controls the autodeployment of a service inside a [Linux container](https://linuxcontainers.org/) on a ship.  We chose to make the orders files shell scripts to allow your creativity to run wild without needing to learn another autodeployment tool, as they run in the context of Starphleet.  In practice, however, there are only two things to put in an `orders` file:
 
 ```bash
-export PORT
+export PORT=<service_port>
 autodeloy <git_url>
 ```
-
-Setting up orders as a shell script is to allow your creativity to run
-wild, but without you needing to learn a custom tool, DSL, scripting
-language, config database, or API.
-
-**No Fooling Important**, `autodeploy <git_url>`, just like your
-`<headquarters_url>` needs to be reachable from each ship in the fleet.
-
-You can specify your `<git_url>` like `<git_url>#<branch>`, where branch can
-be a branch, a tag, or a commit sha -- anything you can check out. This
-hashtag approach lets you specify a deployment branch, as well as pin
-services to specific versions when needed.
+You can specify your `<git_url>` like `<git_url>#<branch>`, where branch can be a branch, a tag, or a commit sha -- anything you can check out. This hashtag approach lets you specify a deployment branch, as well as pin services to specific versions when needed.  Note that your `<git_url>` **needs to be reachable** from each ship in the phleet.
 
 
-### remote
-Starphleet provides a shared data directory to each container at
-`/var/data` inside the container. This is a mount back to the ship, and
-is a perfect place to store shared data files.
 
-And, this data can be autodeployed. You set this up with a folder tree
-similar to mounting services, and in each directory, provide an `orders`
-script. As an example:
 
-```
-/
-  remote
-  templates/
-    remote
-```
 
-This will result in data looking like:
-
-```
-/var/data/
-  ...synched files from remote
-  templates/
-    ...synched files from remote
-```
-
-Individal `remote` scripts are really just shell scripts with a special
-`autodeploy` command:
-
-```bash
-autodeploy <git_url>
-```
-
-## jobs
-Jobs leverage cron and urls, implement your jobs as a service. Schedule
-them by hitting and url. This also lets you easily run the job manually
-with curl when needed.
-
-The `jobs` file uses cron syntax, with the 'command' simply being an url:
-
-```
-* * * * * http://localhost/workflow?do=stuff
-* * * 1 * http://localhost/workflow?do=modaystuff
-```
-
-This dodges a few common problems with cron that folks run into:
-
-* The logging gets captured to syslog for you automatically, piped to
-  `logger`
-* The environment is fixed inside your container for your service
-* You don't need to think about 'who' the job runs as
-
-## authorized\_keys/
-A big difference form other PaaS: the ships are yours, and you can `ssh`
-to them. Specifically, you can put as many public keys in the
-`authorized_keys` folder of your headquarters, one per file, to let in
-other users as you see fit via ssh.
-
-These special users are called `admirals`, again sticking with our
-nautical theme.
-
-Users get to a ship with `ssh admiral@ship`. The admiral account is a
-member of `sudoers`.
-
-In practice, this open access to the base machine lets you do what you
-want, when you want, truly open. And if you use this power to somehow
-destroy a ship -- somebody has to wreck the ship -- you can always just
-add a new one.
-
-And, even more fun -- the `authorized_keys` themselves are continuously
-deployed, just add and remove admirals by adding and removing public key
-files in your github repository. Updates in seconds.
 
 ## containers/
 Given any shell script script in your headquarters named
@@ -362,18 +211,22 @@ where you can keep variables, with different security thoughts.
 ## Environment Variables
 Name | Value | Description
 --- | --- | ---
+AWS_ACCESS_KEY_ID | string | Used for AWS access
+AWS_SECRET_ACCESS_KEY | string | Used for AWS access
+BUILDPACK_URL | &lt;git_url&gt; | Set this when you want to use a custom buildpack
+EC2_INSTANCE_SIZE | string | Override the size of EC2 instance with this variable
+NPM_FLAGS | string | Starphleet uses a custom `npm` registry to just plain run faster, you can use your own here with `--registry <url>`
 PORT | number | This is an all important environment variable, and it is expected your service will honor it, publishing traffic here. This `PORT` is used to know where to connect the ship's proxy to your individual service.
 PUBLISH_PORT | number | Allows your service to be accessible on the ship at `http://<SHIP_DNS>:PUBLISH_PORT` in addition to `http://<SHIP_DNS/orders`.
 STARPHLEET_BASE | name | Either a `name` matching `HQ/containers/name, or an URL to download a prebuilt container image. Defaults to the starphleet provided base container
-STARPHLEET_REMOTE | &lt;git_url&gt; | Set this in your .starphleet to use your own fork of starphleet itself
-STARPHLEET_PULSE | int | Default 5, number of seconds between autodeploy checks
-BUILDPACK_URL | &lt;git_url&gt; | Set this when you want to use a custom buildpack
-NPM_FLAGS | string | Starphleet uses a custom `npm` registry to just plain run faster, you can use your own here with `--registry <url>`
-AWS_ACCESS_KEY_ID | string | Used for AWS access
-AWS_SECRET_ACCESS_KEY | string | Used for AWS access
-EC2_INSTANCE_SIZE | string | Override the size of EC2 instance with this variable
 STARPHLEET_DEPLOY_TIME | date string | Set in your service environment to let you know when it was deployed
 STARPHLEET_DEPLOY_GITURL | string | Set in your service environment to let you know where the code came from
+STARPHLEET_HEADQUARTERS | string | <git_url>
+STARPHLEET_PRIVATE_KEY | string | ~/.ssh/<private_keyfile>
+STARPHLEET_PUBLIC_KEY | string | ~/.ssh/<public_keyfile>
+STARPHLEET_PULSE | int | Default 5, number of seconds between autodeploy checks
+STARPHLEET_REMOTE | &lt;git_url&gt; | Set this in your .starphleet to use your own fork of starphleet itself
+STARPHLEET_VAGRANT_MEMSIZE | number | Set vagrant instance memory size, in megabytes
 
 ## .env
 Services themselves can have variables, these are inspired by Heroku,
@@ -444,6 +297,9 @@ as a Linux environment without the kernel.
 Containers are thrown away often, on each new version, and each server
 reboot. So, while you do have local filesystem access inside a container
 running a service, don't count on it living any lenght of time.
+
+## Phleet
+A collection of one or more virtual machine instances managed by instructions from the headquarters.  The intended design of Starphleet is that phleets correspond to a single root URL, such as `http://services.myorg.com`.
 
 ## Autodeploy
 This is the most interesting feature, automatic upgrades, check the
@@ -640,9 +496,8 @@ Think a bit like Heroku, where the version of the OS is a decision made
 for you to save time.
 
 ## EC2 Instance Sizes
-Please, don't cheap out and go to small. The recommended minimum size is an
-m2.xlarge -- which is roughly the power of a decent laptop, so this is
-the default. You can change this with `EC2_INSTANCE_SIZE`.
+Please, don't cheap out and go to small. The recommended minimum size (and default in Starphleet) is an
+m2.xlarge, which is roughly the power of a decent laptop.  You can change this with `EC2_INSTANCE_SIZE`.
 
 # Phleets
 Don't feel limited to just one phleet. Part of making your own PaaS is
@@ -653,4 +508,3 @@ By default, starphleet sets up four zones, three US, one Europe. Ships
 are added explicitly to zones, and you aren't required to use them all.
 It's OK for you to set up just in one location if you like. Or even have
 a phleet with one ship.
-
