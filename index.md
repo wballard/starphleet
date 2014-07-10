@@ -52,7 +52,7 @@ After completing the above configuration steps, you can choose to deploy Starphl
 
 Vagrant is a handy way to get a working autodeployment system inside a virtual machine right on your local workstation. Prebuilt base images are provided in the `Vagrantfile` for VMWare, VirtualBox and Parallels. The Vagrant option is great for figuring if your services will start/run/autodeploy without worrying about cloud configuration.
 
-1.  From the cloned [Starphleet](https://github.com/wballard/starphleet) directory, run `$ vagrant up` in your shell, which will start a new virtual machine instance, perform a git pull on your `STARPHLEET_HEADQUARTERS`, deploy the [Linux containers](https://linuxcontainers.org/), and configure the service(s) specified in the Starphleet headquarters.
+1.  From the cloned [Starphleet](https://github.com/wballard/starphleet) directory, run `$ vagrant up` in your shell, which will start a new virtual machine instance, perform a git pull on your `STARPHLEET_HEADQUARTERS`, deploy the [Linux container](https://linuxcontainers.org/), and configures the service specified in the Starphleet headquarters (including automatically running `npm install` and `npm start`).
 
   ```bash
   $ vagrant up
@@ -80,7 +80,7 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
   $ npm install -g starphleet-cli
   ```
 
-1.  Use the Starphleet CLI to initialize EC2 and add a ship (virtual machine instance).  Some time will be required while EC2 initially launches the ships, deploys the [Linux containers](https://linuxcontainers.org/), and configures the service(s) specified in the Starphleet headquarters, but subsequent service deployments will be fast.
+1.  Use the Starphleet CLI to initialize EC2 and add a ship (virtual machine instance).  Some time will be required while EC2 initially launches the ships, deploys the [Linux container](https://linuxcontainers.org/), and configures the service specified in the Starphleet headquarters (including automatically running `npm install` and `npm start`), but subsequent service deployments will be fast.
 
   ```bash
   $ starphleet init ec2
