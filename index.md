@@ -292,7 +292,7 @@ Starphleet monitors running services and will restarts them on failure.
 To check for the latest version of Starphleet and install an update, if needed, run the following:
 
 ```bash
-$ ssh update@ship
+$ ssh update@<ship_ip>
 ```
 
 You will need to run this command on each ship you wish to update and ensure your public key has been added to the authorized\_users/ directory in your Starphleet headquarters.
