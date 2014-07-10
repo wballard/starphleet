@@ -258,11 +258,11 @@ In the above example, the `name` can be anything you like.
 ## Maintenance
 
 ### Service Start
-No need to code in `nodemon` or `forever` or any other keep alive system in your services, Starphleet will fulfill your dependencies and spin your service up automatically.  In order to use the automatic start functionality, ensure
+No need to code in `nodemon` or `forever` or any other keep alive system in your services, Starphleet will fulfill your dependencies and start your service automatically.  For example, in NodeJS projects, this means Starphleet will load the proper buildpack (NodeJS), resolve dependencies by issuing an `npm install` command, and then (absent a procfile, see below) start your service by issuing an `npm start` command.  In order to use the automatic start functionality, ensure one of the following is true:
+
 1.  You include functional [procfiles](https://devcenter.heroku.com/articles/procfile) in your service repository, or
 2.  You use package manager specific features, such as `npm start` and `npm install` scripts.
 
-For node projects, Starphleet will load the proper buildpack (node), resolve dependencies by issuing an `npm install` command, and then, in the absence of a procfile, issue an `npm start` command.
 
 ### Service Updates
 Just commit and push to the repository referenced in the orders, `<service_git_url>`, which will result in a service autodeployment to every associated ship, even across phleets (if a service is used in more than one phleet).  As new versions of services are updated, fresh containers are built and run in parallel to prior versions with a drainstop. As a result, in-process requests to existing services should not interrupted, with one caveat: database and storage systems maintained outside of Starphleet.  Many software components are developed in a database-heavy manner with no real notion of backward compatibility from a data standpoint.  In order to unlock the full benefit of autodeployment and rolling upgrades in Starphleet, you must think about how different versions of your code will interact with your database and storage systems.
