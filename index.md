@@ -14,6 +14,8 @@ Starphleet is a toolkit for turning [virtual](http://aws.amazon.com/ec2/) or phy
 * Every available autodeploy system requires that you set up servers to
   deploy your servers, which themselves aren't autodeployed
 
+
+
 # Concepts
 
 * **The Twelve-Factor App**: Starphleet owes a lot to the [Twelve-Factor App](http://12factor.net). Learn about it.
@@ -21,6 +23,8 @@ Starphleet is a toolkit for turning [virtual](http://aws.amazon.com/ec2/) or phy
 * **Ship**: A virtual machine instances with one or more running orders.
 * **Phleet**: A collection of one or more ships.  Phleets are intended to correspond to a single load-and-geo-balanced resource, such as `services.example.com`.
 * **Headquarters**: A git repository that instructs the phleet how to operate.
+
+
 
 # Get Started
 Starphleet is configured entirely by environmental variables.  We are big fans of environment variables, as they save you from the chore of repeatedly typing the same text.
@@ -48,6 +52,7 @@ Starphleet is configured entirely by environmental variables.  We are big fans o
 
 After completing the above configuration steps, you can choose to deploy Starphleet (a) on your local workstation using Vagrant, or (b) into the cloud with Amazon Web Services (AWS).
 
+
 ## Locally (Vagrant)
 
 Vagrant is a handy way to get a working autodeployment system inside a virtual machine right on your local workstation. Prebuilt base images are provided in the `Vagrantfile` for VMWare, VirtualBox and Parallels. The Vagrant option is great for figuring if your services will start/run/autodeploy without worrying about cloud configuration.
@@ -63,6 +68,7 @@ Vagrant is a handy way to get a working autodeployment system inside a virtual m
   $ vagrant ssh -c "ifconfig eth0 | grep 'inet addr'"
   ```
 1.  Navigate in your web browser to `http://<ip_address>/echo`, where `<ip_address>` is returned in the previous step, in order to verify the deployment completed successfully.
+
 
 ## In the Cloud (AWS)
 Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support out of the box.  To initialize your phleet, you need to have an AWS account.
@@ -95,6 +101,7 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
 
 1.  Navigate in your web browser to `http://<ip_address>/echo`, where `<ip_address>` can be any of those returned in the previous step, in order to verify the deployment completed successfully.
 
+
 ## All Running?
 Once you are up and running, look in your forked headquarters repository at `echo/orders`. The contents of the orders directory are all that is required to get a web service automatically deploying on the virtualized instances:
 
@@ -103,7 +110,10 @@ Once you are up and running, look in your forked headquarters repository at `ech
 
 Ordering up your own services is just as easy as adding a new directory and creating the `orders` file. Add. Commit. Push. Magic.  Your service will be available , any time that referenced git repo is updated, it will be redeployed to every ship watching your headquarters.
 
+
+
 # Reference
+
 
 ## Headquarters
 A headquarters is a git repository that instructs the phleet (one or more virtual machine instances) how to operate. Using git in this manner
@@ -204,6 +214,7 @@ A directory containing scripts which will run on individual ships when:
 
 Scripts in this folder can be used to implement many different kinds of functionality, including dynamic DNS registration.  If you want to simulate dynamic DNS with Amazon Route53, look at the [starphleet-cli](https://github.com/wballard/starphleet-cli) command `starphleet name ship ec2`.  Note that scripts in this directory **must be marked as [executable](http://www.dslreports.com/faq/linux/7.1_chmod_-_Make_a_file_executable)** in order to run on the ships.  Scripts also run as root on the ships - take care to avoid a shipwreck.
 
+
 ## Environment Variables
 Starphleet is configured entirely by environmental variables and encourages the use of custom environment variables.  Some environment variables may apply to certain levels (an individual service or a phleet) or may need to remain private for security reasons (login credentials), and as a result Starphleet will apply environment variables in the following order:
 
@@ -239,6 +250,7 @@ STARPHLEET_PULSE | int | Default 5, number of seconds between autodeploy checks
 STARPHLEET_REMOTE | &lt;starphleet_git_url&gt; | Set this in your .starphleet to use your own fork of starphleet itself
 STARPHLEET_VAGRANT_MEMSIZE | number | Set vagrant instance memory size, in megabytes
 
+
 ## Buildpacks
 Buildpacks autodetect and provision services in containers for you.  We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the starphleet orders file so simple is the use of buildpacks and platform package managers to get your dependencies running.  Buildpacks serve to install dynamic, service specific code such as `npm` or `rubygems` that may vary with each push of your service.  Note that **Starphleet will only deploy one buildpack per Linux container** - for services which are written in multiple languages, extra configuration in the `orders` file may be necessary.
 
@@ -255,6 +267,7 @@ $ git push ship master
 
 In the above example, the `name` can be anything you like.
 
+
 ## Maintenance
 
 ### Service Start
@@ -262,7 +275,6 @@ No need to code in `nodemon` or `forever` or any other keep alive system in your
 
 1.  You include functional [procfiles](https://devcenter.heroku.com/articles/procfile) in your service repository, or
 2.  You use package manager specific features, such as `npm start` and `npm install` scripts.
-
 
 ### Service Updates
 Just commit and push to the repository referenced in the orders, `<service_git_url>`, which will result in a service autodeployment to every associated ship, even across phleets (if a service is used in more than one phleet).  As new versions of services are updated, fresh containers are built and run in parallel to prior versions with a drainstop. As a result, in-process requests to existing services should not interrupted, with one caveat: database and storage systems maintained outside of Starphleet.  Many software components are developed in a database-heavy manner with no real notion of backward compatibility from a data standpoint.  In order to unlock the full benefit of autodeployment and rolling upgrades in Starphleet, you must think about how different versions of your code will interact with your database and storage systems.
@@ -293,8 +305,6 @@ Each ship uses a pull strategy to keep up to date. This strategy has been chosen
 * Ships go [up and down](http://en.wikipedia.org/wiki/Heavy-lift_ship#Submerging_types), and a pull-based strategy lets ships catch up easily if they are offline when a new version of a service is released.
 * After a new ship is added to the phleet (`$ starphleet add ship`), the pull mechanism will catch it up automatically.
 * The developer does not have to wait for a Heroku-style push completes, watching the build go by, and can instead move on to developing the next feature.
-
-
 
 
 ## Amazon Web Services
