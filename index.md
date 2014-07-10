@@ -70,8 +70,8 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
 1.  Set additional environment variables required for AWS use.
 
   ```bash
-  export AWS_ACCESS_KEY_ID=<your_aws_key_id>
-  export AWS_SECRET_ACCESS_KEY=<your_aws_access_key>
+  $ export AWS_ACCESS_KEY_ID=<your_aws_key_id>
+  $ export AWS_SECRET_ACCESS_KEY=<your_aws_access_key>
   ```
 
 1.  Install the Starphleet command line interface (CLI) tool
@@ -155,8 +155,8 @@ A directory which defines the relative path from which your service is served (`
   We chose to use shell scripts for the orders files to allow your creativity to run wild without needing to learn another autodeployment tool, as they run in the context of Starphleet.  In practice, however, there are only two items normally present in an `orders` file:
 
   ```bash
-  export PORT=<service_port>
-  autodeploy <service_git_url>
+  $ export PORT=<service_port>
+  $ autodeploy <service_git_url>
   ```
 
   You can specify your `<service_git_url>` like `<service_git_url>#<branch>`, where branch can be a branch, a tag, or a commit sha -- anything you can check out. This hashtag approach lets you specify a deployment branch, as well as pin services to specific versions when needed.  The service specified in the orders file with the `<service_git_url>` must support the following:
@@ -249,8 +249,8 @@ Starphleet currently includes support for Ruby, Python, Node, and NGINX static b
 Sometimes you just want to see the build, or figure out what is going on.  Starphleet lets you directly push to a ship and run a service outside the autodeploy process via a git push.  You will need to have a public key in the `authorized_keys` that is matched up with a private key in your local ssh configuration. Remember, you are pushing to the ship -- so this is just like pushing to any other git server over ssh.
 
 ```bash
-git remote add ship git@<ship_ip>:<name>
-git push ship master
+$ git remote add ship git@<ship_ip>:<name>
+$ git push ship master
 ```
 
 In the above example, the `name` can be anything you like.
