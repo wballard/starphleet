@@ -114,7 +114,7 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
 Once you are up and running, look in your `<headquarters_git_url>` repository at `echo/orders`. The contents of the orders directory are all that is required to get a web service automatically deploying on a ship (virtualized machine instance).
 
 * `export PORT=3000` to know on what port your service runs.  This port is mapped, by Starphleet, back to `http://<ship_ip>/echo` (on port 80).
-* `autodeploy https://github.com/wballard/echo.git` to know what to deploy.  Starphleet will automatically deploy your Ruby, Python, NodeJS, and static NGNIX projects (see [buildpacks](#buildbpacks)).
+* `autodeploy https://github.com/wballard/echo.git` to know what to deploy.  Starphleet will automatically deploy your Ruby, Python, NodeJS, and static NGNIX projects with buildpacks.
 
 Order-ing up your own service is just as easy as adding a new directory and creating the `orders` file. Add. Commit. Push. Magic, your service will be available.  Any time that a Git repository referenced in an orders file is updated, for example `github.com/wballard/echo.git`, it will be autodeployed to every ship watching your headquarters.
 
@@ -212,12 +212,12 @@ The ships themselves are created from a set of virtual machine images in compati
 
 Each ship in the phleet runs every ordered service. This makes things nice and symmetrical, and simplifies scaling. Just add more ships if you need more capacity. If you need full tilt performance, you can easily make a phleet with just one ordered service at `/`. Need a different mixture of services? Launch another phleet!
 
-While each [Linux container](https://linuxcontainers.org/) (and by extension, service) has its own independent directory structure, Starphleet symlinks `/var/data` in each [Linux container](https://linuxcontainers.org/)  to `/var/data` on the ship, allowing
+While each [Linux container](https://linuxcontainers.org/) (and by extension, service) has its own independent directory structure, Starphleet symlinks `/var/data/` in each [Linux container](https://linuxcontainers.org/)  to `/var/data/` on the ship, allowing
 
   1. Data that lives between autodeploys of your service.
   1. Collaboration between services
 
-As `/var/data` is persistent across autodeploys, care must be taken to ensure the ship's storage does not become full.  Also, note that `/var/data/` is a shared **local** fileystem across [Linux containers](https://linuxcontainers.org/) on the same ship.  It does not provide a shared filesystem between ships in a phleet.
+As `/var/data/` is persistent across autodeploys, care must be taken to ensure the ship's storage does not become full.  Also, note that `/var/data/` is a shared **local** fileystem across [Linux containers](https://linuxcontainers.org/) on the same ship.  It does not provide a shared filesystem between ships in a phleet.
 
 
 #### shipscripts/
