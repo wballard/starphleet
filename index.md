@@ -22,7 +22,7 @@ Starphleet borrows heavily from the concepts of the [Twelve-Factor App](http://1
 
 **Orders**: The atomic unit of Starphleet.  An individual Ruby, Python, NodeJS, or plain HTML **service** run in a [Linux container](https://linuxcontainers.org/).
 
-**Ship**: A virtual machine instances with one or more running orders.
+**Ship**: A virtual machine instances with one or more running orders.  Lanched manually with '$ vagrant up' or the [Starphleet CLI](https://github.com/wballard/starphleet-cli) tool.
 
 **Phleet**: A collection of one or more ships.  Phleets are intended to correspond to a single load-and-geo-balanced resource, such as `services.example.com`.
 
@@ -30,7 +30,7 @@ Starphleet borrows heavily from the concepts of the [Twelve-Factor App](http://1
 
   * **Starphleet Core**: Hosted by us and accessed at `github.com/wballard/starphleet.git`, contains the source code for Starphleet allowing you to bootstrap your headquarters repository.  The Starphleet Core repository should exist in one location.
   * **Headquarters**: Hosted by you at `<headquarters_git_url>` (with an example  [available](https://github.com/wballard/starphleet.headquarters.git) from us), contains the configuration for the ships (virtual machine instances) and associated [Linux containers](https://linuxcontainers.org/).  You will need one headquarters repository per phleet.
-  * **Services**: Hosted by you at `<service_git_url>` and referenced in your headquarter's **orders** files, contains the source code for your individual services.  Service repositories can be referenced by multiple orders files across phleets.
+  * **Services**: Hosted by you at `<service_git_url>` and referenced in your headquarter's **orders** files, contains the source code for the individual services which run in [Linux containers](https://linuxcontainers.org/) on ships.  Service repositories can be referenced by multiple orders files across phleets.
 
 **Environment Variables**: Starphleet is configured entirely by environmental variables, saving you the chore of repeatedly typing the same text.
 
