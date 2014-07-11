@@ -61,7 +61,7 @@ After completing the above configuration steps, you can choose to deploy Starphl
 
 [Vagrant](http://www.vagrantup.com) is a handy way to get a working autodeployment system inside a virtual machine right on your local workstation. Prebuilt base images are provided in the `Vagrantfile` for VMWare, VirtualBox and Parallels. The [Vagrant](http://www.vagrantup.com) option is great for figuring if your services will start/run/autodeploy without worrying about cloud configuration.
 
-1.  From the cloned [Starphleet](https://github.com/wballard/starphleet) directory, run `$ vagrant up` in your shell, which will start a new ship (virtual machine instance), perform a git pull on your `STARPHLEET_HEADQUARTERS`, deploy the [Linux container](https://linuxcontainers.org/), and configures the service specified in the Starphleet headquarters (including automatically running `npm install` and `npm start`).
+1.  From the cloned [Starphleet](https://github.com/wballard/starphleet) directory, us Vagrant's `up` command, which will launch a new ship (virtual machine instance), perform a git pull on your `STARPHLEET_HEADQUARTERS`, deploy a new [Linux container](https://linuxcontainers.org/), and configure the service specified in the Starphleet headquarters (including automatically running `$ npm install` and `$ npm start`).
 
   ```bash
   $ vagrant up
@@ -90,7 +90,8 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
   $ npm install -g starphleet-cli
   ```
 
-1.  Use the Starphleet CLI to initialize EC2 and add a ship (virtual machine instance).
+1.  Use the Starphleet CLI's `init` and `add` commands to launch a new ship (virtual machine instance), perform a git pull on your `STARPHLEET_HEADQUARTERS`, deploy a new [Linux container](https://linuxcontainers.org/), and configure the service specified in the Starphleet headquarters (including automatically running `$ npm install` and `$ npm start`).
+
   ```bash
   $ starphleet init ec2
   $ starphleet add ship ec2 us-west-1
@@ -132,7 +133,7 @@ By default, all services are federated together behind one host name. This is pa
 
 ### File Structure
 
-The `STARPHLEET_HEADQUARTERS` repository is the primary location for phleet, ship, and service configuration, and can contain the following files and directories:
+The `STARPHLEET_HEADQUARTERS` repository is the primary location for phleet, ship, and service configuration, and can contain the following directories and files:
 
 ```
 authorized_keys/
@@ -203,7 +204,7 @@ The ships themselves are created from a set of virtual machine images in compati
 
 Each ship in the phleet runs every ordered service. This makes things nice and symmetrical, and simplifies scaling. Just add more ships if you need more capacity. If you need full tilt performance, you can easily make a phleet with just one ordered service at `/`. Need a different mixture of services? Launch another phleet!
 
-While each [Linux container](https://linuxcontainers.org/) (and by extension, service) has its own independnet directory structure, Starphleet symlinks `/var/data` in each [Linux container](https://linuxcontainers.org/)  to `/var/data` on the ship, allowing
+While each [Linux container](https://linuxcontainers.org/) (and by extension, service) has its own independent directory structure, Starphleet symlinks `/var/data` in each [Linux container](https://linuxcontainers.org/)  to `/var/data` on the ship, allowing
 
   1. Data that lives between autodeploys of your service.
   1. Collaboration between services
