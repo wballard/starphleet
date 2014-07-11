@@ -22,7 +22,7 @@ Starphleet borrows heavily from the concepts of the [Twelve-Factor App](http://1
 
 **Orders**: The atomic unit of Starphleet.  An individual Ruby, Python, NodeJS, or plain HTML **service** run in a [Linux container](https://linuxcontainers.org/).
 
-**Ship**: A virtual machine instances with one or more running orders.  Lanched manually with '$ vagrant up' or the [Starphleet CLI](https://github.com/wballard/starphleet-cli) tool.
+**Ship**: A virtual machine instances with one or more running orders.  Lanched manually with `$ vagrant up` or the [Starphleet CLI](https://github.com/wballard/starphleet-cli) tool.
 
 **Phleet**: A collection of one or more ships.  Phleets are intended to correspond to a single load-and-geo-balanced resource, such as `services.example.com`.
 
