@@ -86,7 +86,7 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
   $ export AWS_SECRET_ACCESS_KEY=<your_aws_access_key>
   ```
 
-1.  Install the Starphleet command line interface (CLI) tool
+1.  Install the Starphleet command line interface (CLI) tool.
 
   ```bash
   $ npm install -g starphleet-cli
@@ -193,7 +193,7 @@ A directory which defines the relative path from which your service is served (`
   ```
 
   You can specify your `<service_git_url>` like `<service_git_url>#<branch>`, where branch can be a branch, a tag, or a commit sha -- anything you can check out. This hashtag approach lets you specify a deployment branch, as well as pin services to specific versions when needed.  The service specified in the orders file with the `<service_git_url>` must support the following:
-  1. Serve HTTP traffic to the port number specified in the `PORT` environment variable.  Websockets can also be utilized, but only if the service is served from `/`
+  1. Serve HTTP traffic to the port number specified in the `PORT` environment variable.  Websockets can also be utilized, but only if the service is served from `/`.
   1. Be hosted in a git repository, either publicly available or accessible via key-authenticated git+ssh.
   1. Able to be installed and run with a buildpack.
 
@@ -214,7 +214,7 @@ Each ship in the phleet runs every ordered service. This makes things nice and s
 
 While each [Linux container](https://linuxcontainers.org/) (and by extension, service) has its own independent directory structure, Starphleet symlinks `/var/data/` in each [Linux container](https://linuxcontainers.org/)  to `/var/data/` on the ship, allowing
 
-  1. Data that lives between autodeploys of your service.
+  1. Data that lives between autodeploys of your service
   1. Collaboration between services
 
 As `/var/data/` is persistent across autodeploys, care must be taken to ensure the ship's storage does not become full.  Also, note that `/var/data/` is a shared **local** fileystem across [Linux containers](https://linuxcontainers.org/) on the same ship.  It does not provide a shared filesystem between ships in a phleet.
@@ -323,7 +323,7 @@ Upon deployment of a service update, Starphleet will issue a GET request to `htt
 If bad update goes out to a service, it can be easily reverted by using `$ git revert` to pull out the problem commits, then re-pushing to the `<service_git_url>` referenced in `<headquarters_git_url>/<service_name>/orders`.  This approach also preserves your commit and deploy history.
 
 ### Service Crashes
-Starphleet monitors running services and will restarts them on failure.
+Starphleet monitors running services and will restart them on failure.
 
 ### Starphleet Updates
 To check for the latest version of Starphleet on a ship and install an update, if needed, run the following:
