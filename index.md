@@ -132,7 +132,7 @@ By default, all services are federated together behind one host name. This is pa
 
 ### File Structure
 
-The Starphleet headquarters is the primary location for phleet, ship, and service configuration.  Let us review the files a Starphleet repository can contain:
+The `STARPHLEET_HEADQUARTERS` repository is the primary location for phleet, ship, and service configuration, and can contain the following files and directories:
 
 ```
 authorized_keys/
