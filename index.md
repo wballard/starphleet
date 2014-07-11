@@ -288,14 +288,14 @@ Starphleet currently includes support for Ruby, Python, NodeJS, and NGINX static
 
 
 ### Testing Buildpacks
-Sometimes you just want to see the build, or figure out what is going on.  Starphleet lets you directly push to a ship and run a service outside the autodeploy process via a `$ git push`.  You will need to have a public key in the headquarter's `authorized_keys` folder that is matched up with a private key in your local ssh configuration. Remember, you are pushing to the ship, which is just like pushing to any other Git server over ssh.
+Sometimes you just want to see the build, or figure out what is going on.  Starphleet lets you directly push to a ship and run a service outside the autodeploy process via a `$ git push`.  You will need to have a public key in the headquarter's `authorized_keys` folder that is matched up with a private key in your local ssh configuration. Remember, you are pushing to the ship, which is just like pushing to any other Git server over SSH.
 
 ```bash
 $ git remote add ship git@<ship_ip>:<name>
 $ git push ship master
 ```
 
-In the above example, the `name` can be anything you like.
+In the above example, the `<name>` can be anything you like.
 
 
 ## Maintenance
@@ -304,7 +304,7 @@ In the above example, the `name` can be anything you like.
 There is no need in Starphleet to explicitly call `nodemon`, `forever`, or any other keep alive system with your services, Starphleet will fulfill your dependencies and start your service automatically.  In NodeJS projects, this means Starphleet will load the proper buildpack (NodeJS), resolve dependencies by issuing an `$ npm install` command, and then (absent a procfile, see below) start your service by issuing an `$ npm start` command.  In order to use the automatic start functionality, ensure that:
 
 1.  You include functional [procfiles](https://devcenter.heroku.com/articles/procfile) in your service repository, or
-2.  You use package manager specific features, such as `npm start` and `npm install` scripts.
+2.  Your project can be built and run with package manager specific features, such as `npm start` and `npm install`.
 
 ### Service Updates
 Just commit and push to the repository referenced in your orders file, `<service_git_url>`, which will result in a service autodeployment to every associated ship (even across phleets if a service is used in more than one phleet).  As new versions of services are updated, fresh containers are built and run in parallel to prior versions with a drainstop. As a result, in-process requests to existing services should not interrupted, with one caveat: database and storage systems maintained outside of Starphleet.  Many software components are developed in a database-heavy manner with no real notion of backward compatibility for data storage.  In order to unlock the full benefit of autodeployment and rolling upgrades in Starphleet, you must think about how different versions of your code will interact with your database and storage systems.
@@ -312,10 +312,10 @@ Just commit and push to the repository referenced in your orders file, `<service
 #### Healthcheck
 Each service repository can supply a `healthcheck` file, located at `<service_git_url>/healthcheck`, which contains a the following content:
   ```bash
-  /`<snippet>`
+  /<snippet>
   ```
 
-Upon deployment of a service update, Starphleet will issue a GET request to `http://<container_ip>:PORT/<snippet>`, and will expect an HTTP 200 response within 60 seconds.  The PORT in the preceding URL will have the value of the PORT environment variable specified in your headquarter's `orders` file.
+Upon deployment of a service update, Starphleet will issue a GET request to `http://<container_ip>:PORT/<snippet>`, and will expect an HTTP 200 response within 60 seconds.  The PORT in the preceding URL will have the value of the PORT environment variable specified in your service's `orders` file.
 
 ### Service Rollbacks
 If bad update goes out to a service, it can be easily reverted by using `$ git revert` to pull out the problem commits, then re-pushing to the `<service_git_url>` referenced in `<headquarters_git_url>/<service_name>/orders`.  This approach also preserves your commit and deploy history.
@@ -324,13 +324,13 @@ If bad update goes out to a service, it can be easily reverted by using `$ git r
 Starphleet monitors running services and will restarts them on failure.
 
 ### Starphleet Updates
-To check for the latest version of Starphleet and install an update, if needed, run the following:
+To check for the latest version of Starphleet on a ship and install an update, if needed, run the following:
 
 ```bash
 $ ssh update@<ship_ip>
 ```
 
-You will need to run this command on each ship you wish to update and ensure your public key has been added to the authorized\_users/ directory in your Starphleet headquarters.
+You will need to ensure your public key has been added to the authorized\_users/ directory in your Starphleet headquarters.
 
 ### Self Healing Phleet
 Each ship uses a pull strategy to keep up to date. This strategy has been chosen over push deployments for the following reasons:
@@ -343,10 +343,10 @@ Each ship uses a pull strategy to keep up to date. This strategy has been chosen
 ## Amazon Web Services
 
 ### EC2 Instance Sizes
-Don't cheap out and go small. The default instance size in Starphleet is m2.xlarge, which is roughly the power of a decent laptop.  You can change this with by setting the `EC2_INSTANCE_SIZE` environment variable.
+Don't cheap out and go small. The default instance size in Starphleet is `m2.xlarge`, which is roughly the power of a decent laptop.  You can change this with by setting the `EC2_INSTANCE_SIZE` environment variable.
 
 ### Phleets
 Don't feel limited to just one phleet. Part of making your own PaaS is to give you the freedom to mix and match services across phleets as you see fit.
 
 ### Geo Scaling AWS
-By default, Starphleet sets up four zones, three US, one Europe. Ships are not added to these zones automatically, but instead must be added explicitly.  Again, mix and match zones with phleets as you see fit.  It's OK for you to set up just in one location if you like. Or even have a phleet with one ship.
+By default, Starphleet sets up four zones, three US, one Europe. Ships are not added to these zones automatically, but instead must be added explicitly.  Again, mix and match zones with phleets as you see fit.  It's OK for you to set up just in one location if you like, or even have a phleet with one ship.
