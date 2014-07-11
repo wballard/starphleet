@@ -18,7 +18,7 @@ Starphleet is a toolkit for turning [virtual](http://aws.amazon.com/ec2/) or phy
 
 # Overview
 
-**Orders**: The atomic unit of Starphleet.  An individual Ruby, Python, Node, or plain HTML **service** run in a [Linux container](https://linuxcontainers.org/).
+**Orders**: The atomic unit of Starphleet.  An individual Ruby, Python, NodeJS, or plain HTML **service** run in a [Linux container](https://linuxcontainers.org/).
 
 **Ship**: A virtual machine instances with one or more running orders.
 
@@ -111,7 +111,7 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
 Once you are up and running, look in your `<headquarters_git_url>` repository at `echo/orders`. The contents of the orders directory are all that is required to get a web service automatically deploying on a ship (virtualized machine instance).
 
 * `export PORT=3000` to know on what port your service runs.  This port is mapped, by Starphleet, back to `http://<ship_ip>/echo` (on port 80).
-* `autodeploy https://github.com/wballard/echo.git` to know what to deploy.  Starphleet will automatically deploy your Ruby, Python, Node, and static NGNIX projects (see [buildpacks](#buildbpacks)).
+* `autodeploy https://github.com/wballard/echo.git` to know what to deploy.  Starphleet will automatically deploy your Ruby, Python, NodeJS, and static NGNIX projects (see [buildpacks](#buildbpacks)).
 
 Order-ing up your own service is just as easy as adding a new directory and creating the `orders` file. Add. Commit. Push. Magic, your service will be available.  Any time that a Git repository referenced in an orders file is updated, for example `github.com/wballard/echo.git`, it will be autodeployed to every ship watching your headquarters.
 
@@ -265,21 +265,21 @@ STARPHLEET_BASE | name | Sets the base Starphleet container, and is either a `na
 STARPHLEET_DEPLOY_TIME | date string | Starphleet sets this variable in the [Linux container](https://linuxcontainers.org/) environment for your service to let you know the time of the last deployment.
 STARPHLEET_DEPLOY_GITURL | string | Starphleet sets this variable in the [Linux container](https://linuxcontainers.org/) environment to let you know where your running service code came from.
 STARPHLEET_HEADQUARTERS | string | <headquarters_git_url>.  Set this on your workstation prior to using Starphleet.
-STARPHLEET_PRIVATE_KEY | string | ~/.ssh/<private_keyfile>.  Set this on your workstation prior to using Starphleet.
-STARPHLEET_PUBLIC_KEY | string | ~/.ssh/<public_keyfile>.  Set this on your workstation prior to using Starphleet.
+STARPHLEET_PRIVATE_KEY | string | The path to the private keyfile associated with your git repository, such as `~/.ssh/<private_keyfile>`.  Set this on your workstation prior to using Starphleet.
+STARPHLEET_PUBLIC_KEY | string | The path to the public keyfile associated with your git repository, such as `~/.ssh/<public_keyfile>`.  Set this on your workstation prior to using Starphleet.
 STARPHLEET_PULSE | number | The number of seconds between autodeploy checks, defaulting to a value of 5.  Set this in your Starphleet headquarters or in your service Git repository.
 STARPHLEET_REMOTE | &lt;starphleet_git_url&gt; | Allows you to use your own fork of Starphleet itself.  Set this in the .starphleet file in your Starphleet headquarters repository.
 STARPHLEET_VAGRANT_MEMSIZE | number | The memory size, in megabytes, of the Vagrant instance.  Set this on your workstation prior to using Starphleet.
 
 
 ## Buildpacks
-Buildpacks autodetect and provision services in containers for you.  We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet orders file so simple is the use of buildpacks and platform package managers to install dynamic, service specific code such as `rubygems` or` `npm` and associated dependencies that may vary with each push of your service.  Note that **Starphleet will only deploy one buildpack per Linux container** - for services which are written in multiple languages, extra configuration in the `orders` file may be necessary.
+Buildpacks autodetect and provision services in containers for you.  We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet orders file so simple is the use of buildpacks and platform package managers to install dynamic, service specific code, such as `rubygems` or` `npm` and associated dependencies, that may vary with each push of your service.  Note that **Starphleet will only deploy one buildpack per Linux container** - for services which are written in multiple languages, extra configuration in the `orders` file may be necessary.
 
-Starphleet currently includes support for Ruby, Python, Node, and NGINX static buildpacks.
+Starphleet currently includes support for Ruby, Python, NodeJS, and NGINX static buildpacks.
 
 
 ### Testing Buildpacks
-Sometimes you just want to see the build, or figure out what is going on.  Starphleet lets you directly push to a ship and run a service outside the autodeploy process via a git push.  You will need to have a public key in the `authorized_keys` that is matched up with a private key in your local ssh configuration. Remember, you are pushing to the ship -- so this is just like pushing to any other git server over ssh.
+Sometimes you just want to see the build, or figure out what is going on.  Starphleet lets you directly push to a ship and run a service outside the autodeploy process via a `$ git push`.  You will need to have a public key in the headquarter's `authorized_keys` folder that is matched up with a private key in your local ssh configuration. Remember, you are pushing to the ship, which is just like pushing to any other Git server over ssh.
 
 ```bash
 $ git remote add ship git@<ship_ip>:<name>
@@ -292,16 +292,21 @@ In the above example, the `name` can be anything you like.
 ## Maintenance
 
 ### Service Start
-No need to code in `nodemon` or `forever` or any other keep alive system in your services, Starphleet will fulfill your dependencies and start your service automatically.  For example, in NodeJS projects, this means Starphleet will load the proper buildpack (NodeJS), resolve dependencies by issuing an `npm install` command, and then (absent a procfile, see below) start your service by issuing an `npm start` command.  In order to use the automatic start functionality, ensure one of the following is true:
+There is no need in Starphleet to explicitly call `nodemon`, `forever`, or any other keep alive system with your services, Starphleet will fulfill your dependencies and start your service automatically.  In NodeJS projects, this means Starphleet will load the proper buildpack (NodeJS), resolve dependencies by issuing an `$ npm install` command, and then (absent a procfile, see below) start your service by issuing an `$ npm start` command.  In order to use the automatic start functionality, ensure that:
 
 1.  You include functional [procfiles](https://devcenter.heroku.com/articles/procfile) in your service repository, or
 2.  You use package manager specific features, such as `npm start` and `npm install` scripts.
 
 ### Service Updates
-Just commit and push to the repository referenced in the orders, `<service_git_url>`, which will result in a service autodeployment to every associated ship, even across phleets (if a service is used in more than one phleet).  As new versions of services are updated, fresh containers are built and run in parallel to prior versions with a drainstop. As a result, in-process requests to existing services should not interrupted, with one caveat: database and storage systems maintained outside of Starphleet.  Many software components are developed in a database-heavy manner with no real notion of backward compatibility from a data standpoint.  In order to unlock the full benefit of autodeployment and rolling upgrades in Starphleet, you must think about how different versions of your code will interact with your database and storage systems.
+Just commit and push to the repository referenced in your orders file, `<service_git_url>`, which will result in a service autodeployment to every associated ship (even across phleets if a service is used in more than one phleet).  As new versions of services are updated, fresh containers are built and run in parallel to prior versions with a drainstop. As a result, in-process requests to existing services should not interrupted, with one caveat: database and storage systems maintained outside of Starphleet.  Many software components are developed in a database-heavy manner with no real notion of backward compatibility for data storage.  In order to unlock the full benefit of autodeployment and rolling upgrades in Starphleet, you must think about how different versions of your code will interact with your database and storage systems.
 
 #### Healthcheck
-Each service repository can supply a `healthcheck` file, located at `<service_git_url>/healthcheck`, which contains a partial URL snippet, `<snippet>`.  Upon deployment of a service update, Starphleet will issue a GET request to `http://<container_ip>:PORT/<snippet>`, and will expect an HTTP 200 response within 60 seconds.  The PORT in the preceding URL will have the value of the PORT environment variable specified in your `orders` file.
+Each service repository can supply a `healthcheck` file, located at `<service_git_url>/healthcheck`, which contains a the following content:
+  ```bash
+  /`<snippet>`
+  ```
+
+Upon deployment of a service update, Starphleet will issue a GET request to `http://<container_ip>:PORT/<snippet>`, and will expect an HTTP 200 response within 60 seconds.  The PORT in the preceding URL will have the value of the PORT environment variable specified in your headquarter's `orders` file.
 
 ### Service Rollbacks
 If bad update goes out to a service, it can be easily reverted by using `$ git revert` to pull out the problem commits, then re-pushing to the `<service_git_url>` referenced in `<headquarters_git_url>/<service_name>/orders`.  This approach also preserves your commit and deploy history.
@@ -329,7 +334,7 @@ Each ship uses a pull strategy to keep up to date. This strategy has been chosen
 ## Amazon Web Services
 
 ### EC2 Instance Sizes
-Don't cheap out and go small. The default instance size in Starphleet is m2.xlarge, which is roughly the power of a decent laptop.  You can change this with `EC2_INSTANCE_SIZE`.
+Don't cheap out and go small. The default instance size in Starphleet is m2.xlarge, which is roughly the power of a decent laptop.  You can change this with by setting the `EC2_INSTANCE_SIZE` environment variable.
 
 ### Phleets
 Don't feel limited to just one phleet. Part of making your own PaaS is to give you the freedom to mix and match services across phleets as you see fit.
