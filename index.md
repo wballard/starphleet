@@ -1,7 +1,9 @@
 # Starphleet
 **Repositories + Buildpacks + Containers = Autodeploy Services**
 
-Starphleet is a toolkit for turning [virtual](http://aws.amazon.com/ec2/) or physical machine infrastructure into a continuous deployment stack, running multiple Git-backed services on one more more nodes via [OS-level virtualization](https://linuxcontainers.org/).  Starphleet borrows heavily from the concepts of the [Twelve-Factor App](http://12factor.net), and uses an approach that avoids many of the problems inherent in existing autodeployment solutions:
+Starphleet is a toolkit for turning [virtual](http://aws.amazon.com/ec2/) or physical machine infrastructure into a continuous deployment stack, running multiple Git-backed services on one more more nodes via [Linux containers](https://linuxcontainers.org/).
+
+Starphleet borrows heavily from the concepts of the [Twelve-Factor App](http://12factor.net), and uses an approach that avoids many of the problems inherent in existing autodeployment solutions:
 
 * Conventional virtualization, with multiple operating systems running on shared
   physical hardware, wastes resources, specifically RAM and CPU.  This costs real money.
