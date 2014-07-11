@@ -107,7 +107,7 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
   $ starphleet info ec2
   ```
 
-1.  Navigate in your web browser to `http://<ip_address>/echa/helloo`, where `<ip_address>` can be any of those returned in the previous step, in order to verify the deployment completed successfully.
+1.  Navigate in your web browser to `http://<ip_address>/echa/hello`, where `<ip_address>` can be any of those returned in the previous step, in order to verify the deployment completed successfully.
 
 
 ## All Running?
