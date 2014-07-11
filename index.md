@@ -7,14 +7,14 @@ Starphleet borrows heavily from the concepts of the [Twelve-Factor App](http://1
 
 * Conventional virtualization, with multiple operating systems running on shared
   physical hardware, wastes resources, specifically RAM and CPU.  This costs real money.
-* Autodeploy PaaS has the same vendor lock-in risks of old proprietary software
-* Continous deployment is almost always a custom scripting exercise
-* Multiple machine / clustered deployment is extra work
-* Making many small services is more work than making megalith services
-* Seeing what is going on across multiple machines is hard
-* Deployment systems all seem to be at the *system* not *service* level
+* Autodeploy PaaS has the same vendor lock-in risks of old proprietary software.
+* Continous deployment is almost always a custom scripting exercise.
+* Multiple machine / clustered deployment is extra work.
+* Making many small services is more work than making megalith services.
+* Seeing what is going on across multiple machines is hard.
+* Deployment systems all seem to be at the *system* not *service* level.
 * Every available autodeploy system requires that you set up servers to
-  deploy your servers, which themselves aren't autodeployed
+  deploy your servers, which themselves aren't autodeployed.
 
 
 
