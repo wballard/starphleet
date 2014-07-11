@@ -267,13 +267,13 @@ STARPHLEET_DEPLOY_GITURL | string | Starphleet sets this variable in the [Linux 
 STARPHLEET_HEADQUARTERS | string | <headquarters_git_url>.  Set this on your workstation prior to using Starphleet.
 STARPHLEET_PRIVATE_KEY | string | ~/.ssh/<private_keyfile>.  Set this on your workstation prior to using Starphleet.
 STARPHLEET_PUBLIC_KEY | string | ~/.ssh/<public_keyfile>.  Set this on your workstation prior to using Starphleet.
-STARPHLEET_PULSE | int | The number of seconds between autodeploy checks, defaulting to a value of 5.  Set this in your Starphleet headquarters or in your service Git repository.
+STARPHLEET_PULSE | number | The number of seconds between autodeploy checks, defaulting to a value of 5.  Set this in your Starphleet headquarters or in your service Git repository.
 STARPHLEET_REMOTE | &lt;starphleet_git_url&gt; | Allows you to use your own fork of Starphleet itself.  Set this in the .starphleet file in your Starphleet headquarters repository.
 STARPHLEET_VAGRANT_MEMSIZE | number | The memory size, in megabytes, of the Vagrant instance.  Set this on your workstation prior to using Starphleet.
 
 
 ## Buildpacks
-Buildpacks autodetect and provision services in containers for you.  We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the starphleet orders file so simple is the use of buildpacks and platform package managers to get your dependencies running.  Buildpacks serve to install dynamic, service specific code such as `npm` or `rubygems` that may vary with each push of your service.  Note that **Starphleet will only deploy one buildpack per Linux container** - for services which are written in multiple languages, extra configuration in the `orders` file may be necessary.
+Buildpacks autodetect and provision services in containers for you.  We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet orders file so simple is the use of buildpacks and platform package managers to install dynamic, service specific code such as `rubygems` or` `npm` and associated dependencies that may vary with each push of your service.  Note that **Starphleet will only deploy one buildpack per Linux container** - for services which are written in multiple languages, extra configuration in the `orders` file may be necessary.
 
 Starphleet currently includes support for Ruby, Python, Node, and NGINX static buildpacks.
 
