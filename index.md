@@ -55,7 +55,7 @@ Starphleet is a toolkit for turning [virtual](http://aws.amazon.com/ec2/) or phy
   $ export STARPHLEET_PUBLIC_KEY=~/.ssh/<public_keyfile>
   ```
 
-After completing the above configuration steps, you can choose to deploy Starphleet (a) on your local workstation using [Vagrant](http://www.vagrantup.com), or (b) into the cloud with Amazon Web Services (AWS).
+After completing the above configuration steps, you can choose to deploy Starphleet (a) on your local workstation using **[Vagrant](http://www.vagrantup.com)**, or (b) into the cloud with **[Amazon Web Services (AWS)](http://aws.amazon.com)**.
 
 ## Locally (Vagrant)
 
@@ -254,8 +254,8 @@ Starphleet is configured entirely by environmental variables and encourages the 
 ### Environment Variable Reference
 Name | Value | Description
 --- | --- | ---
-AWS_ACCESS_KEY_ID | string | Used for AWS access.  Set this on your workstation prior to using Starphleet.
-AWS_SECRET_ACCESS_KEY | string | Used for AWS access.  Set this on your workstation prior to using Starphleet.
+AWS_ACCESS_KEY_ID | string | Used for [AWS](http://aws.amazon.com) access.  Set this on your workstation prior to using Starphleet.
+AWS_SECRET_ACCESS_KEY | string | Used for [AWS](http://aws.amazon.com) access.  Set this on your workstation prior to using Starphleet.
 BUILDPACK_URL | &lt;git_url&gt; | Specifies a custom buildpack to be used for autodeployment.  Set this in your Starphleet headquarters or in your service Git repository.
 EC2_INSTANCE_SIZE | string | Override the size of EC2 instance with this variable.  Set this on your workstation prior to using Starphleet.
 NPM_FLAGS | string | Starphleet uses a custom `npm` registry to just plain run faster, you can use your own here with `--registry <url>`.
