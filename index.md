@@ -43,14 +43,14 @@ Starphleet borrows heavily from the concepts of the [Twelve-Factor App](http://1
   $ cd starphleet
   ```
 
-1.  Set the environment variable for the Git URL to your Starphleet headquarters, which contain the configuration for your phleet.  We suggest you start by forking our [base headquarters](https://github.com/wballard/starphleet.headquarters.git).  Your headquarters git URL **must be network reachable** from your hosting cloud, making [public git hosting services](https://github.com/) a natural fit for Starphleet.
+1.  Set the environment variable for the Git URL to your Starphleet headquarters, which contain the configuration for your phleet.  We suggest you start by forking our [base headquarters](https://github.com/wballard/starphleet.headquarters.git).  Your headquarters Git URL **must be network reachable** from your hosting cloud, making [public git hosting services](https://github.com/) a natural fit for Starphleet.
 
 
   ```bash
   $ export STARPHLEET_HEADQUARTERS=<headquarters_git_url>
   ```
 
-1.  Set the environment variable for the locations of your public and private key files which are associated with the git repository for your Starphleet headquarters.  If you have not yet generated these files, you can do so using [ssh-keygen](https://help.github.com/articles/generating-ssh-keys).  
+1.  Set the environment variable for the locations of your public and private key files which are associated with the Git repository for your Starphleet headquarters.  If you have not yet generated these files, you can do so using [ssh-keygen](https://help.github.com/articles/generating-ssh-keys).  
 
   ```bash
   $ export STARPHLEET_PRIVATE_KEY=~/.ssh/<private_keyfile>
@@ -63,7 +63,7 @@ After completing the above configuration steps, you can choose to deploy Starphl
 
 [Vagrant](http://www.vagrantup.com) is a handy way to get a working autodeployment system inside a virtual machine right on your local workstation. Prebuilt base images are provided in the `Vagrantfile` for VMWare, VirtualBox and Parallels. The [Vagrant](http://www.vagrantup.com) option is great for figuring if your services will start/run/autodeploy without worrying about cloud configuration.
 
-1.  From the cloned [Starphleet](https://github.com/wballard/starphleet) directory, us Vagrant's `up` command, which will launch a new ship (virtual machine instance), perform a git pull on your `STARPHLEET_HEADQUARTERS`, deploy a new [Linux container](https://linuxcontainers.org/), and configure the service specified in the Starphleet headquarters (including automatically running `$ npm install` and `$ npm start`).
+1.  From the cloned [Starphleet](https://github.com/wballard/starphleet) directory, us Vagrant's `up` command, which will launch a new ship (virtual machine instance), perform a `$ git pull` on your `STARPHLEET_HEADQUARTERS`, deploy a new [Linux container](https://linuxcontainers.org/), and configure the service specified in the Starphleet headquarters (including automatically running `$ npm install` and `$ npm start`).
 
   ```bash
   $ vagrant up
@@ -92,7 +92,7 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
   $ npm install -g starphleet-cli
   ```
 
-1.  Use the Starphleet CLI's `init` and `add` commands to launch a new ship (virtual machine instance), perform a git pull on your `STARPHLEET_HEADQUARTERS`, deploy a new [Linux container](https://linuxcontainers.org/), and configure the service specified in the Starphleet headquarters (including automatically running `$ npm install` and `$ npm start`).
+1.  Use the Starphleet CLI's `init` and `add` commands to launch a new ship (virtual machine instance), perform a `$ git pull` on your `STARPHLEET_HEADQUARTERS`, deploy a new [Linux container](https://linuxcontainers.org/), and configure the service specified in the Starphleet headquarters (including automatically running `$ npm install` and `$ npm start`).
 
   ```bash
   $ starphleet init ec2
@@ -124,7 +124,7 @@ Order-ing up your own service is just as easy as adding a new directory and crea
 
 
 ## Headquarters
-A headquarters is a Git repository that instructs the phleet (one or more virtual machine instances) how to operate. Using git in this manner
+A headquarters is a Git repository that instructs the phleet (one or more virtual machine instances) how to operate. Using Git in this manner
 
 * Provides a versioned database of your configuation
 * Allows editing and working with your own tools
@@ -194,7 +194,7 @@ A directory which defines the relative path from which your service is served (`
 
   You can specify your `<service_git_url>` like `<service_git_url>#<branch>`, where branch can be a branch, a tag, or a commit sha -- anything you can check out. This hashtag approach lets you specify a deployment branch, as well as pin services to specific versions when needed.  The service specified in the orders file with the `<service_git_url>` must support the following:
   1. Serve HTTP traffic to the port number specified in the `PORT` environment variable.  Websockets can also be utilized, but only if the service is served from `/`.
-  1. Be hosted in a git repository, either publicly available or accessible via key-authenticated git+ssh.
+  1. Be hosted in a Git repository, either publicly available or accessible via key-authenticated git+ssh.
   1. Able to be installed and run with a buildpack.
 
   The [Linux containers](https://linuxcontainers.org/) which run the services are thrown away on each new service deployment and on each ship reboot.  While local filesystem access is available with a container, it is not persistent and should not be relied upon for persistent data storage.  Note that your `<service_git_url>` **must be network reachable** from each ship in the phleet.
@@ -276,8 +276,8 @@ STARPHLEET_BASE | name | Sets the base Starphleet container, and is either a `na
 STARPHLEET_DEPLOY_TIME | date string | Starphleet sets this variable in the [Linux container](https://linuxcontainers.org/) environment for your service to let you know the time of the last deployment.
 STARPHLEET_DEPLOY_GITURL | string | Starphleet sets this variable in the [Linux container](https://linuxcontainers.org/) environment to let you know where your running service code came from.
 STARPHLEET_HEADQUARTERS | string | The Git repository URL to your phleet's headquarters.  Set this on your workstation prior to using Starphleet.
-STARPHLEET_PRIVATE_KEY | string | The path to the private keyfile associated with your git repository, such as `~/.ssh/<private_keyfile>`.  Set this on your workstation prior to using Starphleet.
-STARPHLEET_PUBLIC_KEY | string | The path to the public keyfile associated with your git repository, such as `~/.ssh/<public_keyfile>`.  Set this on your workstation prior to using Starphleet.
+STARPHLEET_PRIVATE_KEY | string | The path to the private keyfile associated with your Git repository, such as `~/.ssh/<private_keyfile>`.  Set this on your workstation prior to using Starphleet.
+STARPHLEET_PUBLIC_KEY | string | The path to the public keyfile associated with your Git repository, such as `~/.ssh/<public_keyfile>`.  Set this on your workstation prior to using Starphleet.
 STARPHLEET_PULSE | number | The number of seconds between autodeploy checks, defaulting to a value of 5.  Set this in your Starphleet headquarters or in your service Git repository.
 STARPHLEET_REMOTE | &lt;starphleet_git_url&gt; | Allows you to use your own fork of Starphleet itself.  Set this in the .starphleet file in your Starphleet headquarters repository.
 STARPHLEET_VAGRANT_MEMSIZE | number | The memory size, in megabytes, of the [Vagrant](http://www.vagrantup.com) instance.  Set this on your workstation prior to using Starphleet.
