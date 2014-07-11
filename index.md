@@ -55,11 +55,11 @@ Starphleet is a toolkit for turning [virtual](http://aws.amazon.com/ec2/) or phy
   $ export STARPHLEET_PUBLIC_KEY=~/.ssh/<public_keyfile>
   ```
 
-After completing the above configuration steps, you can choose to deploy Starphleet (a) on your local workstation using Vagrant, or (b) into the cloud with Amazon Web Services (AWS).
+After completing the above configuration steps, you can choose to deploy Starphleet (a) on your local workstation using [Vagrant](http://www.vagrantup.com), or (b) into the cloud with Amazon Web Services (AWS).
 
 ## Locally (Vagrant)
 
-Vagrant is a handy way to get a working autodeployment system inside a virtual machine right on your local workstation. Prebuilt base images are provided in the `Vagrantfile` for VMWare, VirtualBox and Parallels. The Vagrant option is great for figuring if your services will start/run/autodeploy without worrying about cloud configuration.
+[Vagrant](http://www.vagrantup.com) is a handy way to get a working autodeployment system inside a virtual machine right on your local workstation. Prebuilt base images are provided in the `Vagrantfile` for VMWare, VirtualBox and Parallels. The [Vagrant](http://www.vagrantup.com) option is great for figuring if your services will start/run/autodeploy without worrying about cloud configuration.
 
 1.  From the cloned [Starphleet](https://github.com/wballard/starphleet) directory, run `$ vagrant up` in your shell, which will start a new ship (virtual machine instance), perform a git pull on your `STARPHLEET_HEADQUARTERS`, deploy the [Linux container](https://linuxcontainers.org/), and configures the service specified in the Starphleet headquarters (including automatically running `npm install` and `npm start`).
 
@@ -269,7 +269,7 @@ STARPHLEET_PRIVATE_KEY | string | The path to the private keyfile associated wit
 STARPHLEET_PUBLIC_KEY | string | The path to the public keyfile associated with your git repository, such as `~/.ssh/<public_keyfile>`.  Set this on your workstation prior to using Starphleet.
 STARPHLEET_PULSE | number | The number of seconds between autodeploy checks, defaulting to a value of 5.  Set this in your Starphleet headquarters or in your service Git repository.
 STARPHLEET_REMOTE | &lt;starphleet_git_url&gt; | Allows you to use your own fork of Starphleet itself.  Set this in the .starphleet file in your Starphleet headquarters repository.
-STARPHLEET_VAGRANT_MEMSIZE | number | The memory size, in megabytes, of the Vagrant instance.  Set this on your workstation prior to using Starphleet.
+STARPHLEET_VAGRANT_MEMSIZE | number | The memory size, in megabytes, of the [Vagrant](http://www.vagrantup.com) instance.  Set this on your workstation prior to using Starphleet.
 
 
 ## Buildpacks
