@@ -145,9 +145,11 @@ containers/
   orders
   remote
 ships/
-
+  ship-17bqr3zgg2d11ttcl133h2111p98qrt1
+  ship-93ojdlkv9083lkd92klf90399fl39fjs
 shipscripts/
-
+  dynamic_dns_example.sh
+  maintenance_example.sh
 jobs
 .starphleet
 ```
