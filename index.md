@@ -156,7 +156,13 @@ jobs
 ```
 
 #### authorized\_keys/
-A directory containing containing public key files, one key per file, which allows ssh access to the ships as follows: `ssh admiral@<ship_ip>`.  Every user shares the same username, `admiral`, which is a member of the sudoers group.  Once pushed to your headquarters, updates to the authorized\_keys/ directory will be reflected on your ships within seconds.  This open ssh access to each ship lets you do what you want, when you want.  If you manage to wreck a ship, you can always add a new one using the [Starphleet CLI](https://github.com/wballard/starphleet-cli).
+A directory containing containing public key files, one key per file, which allows ssh access to the ships as follows:
+
+```bash
+$ ssh admiral@<ship_ip>
+```
+
+Every user shares the same username, `admiral`, which is a member of the sudoers group.  Once pushed to your headquarters, updates to the authorized\_keys/ directory will be reflected on your ships within seconds.  This open ssh access to each ship lets you do what you want, when you want.  If you manage to wreck a ship, you can always add a new one using the [Starphleet CLI](https://github.com/wballard/starphleet-cli).
 
 #### containers/
 A directory containing shell scripts to configure a custom [Linux container](https://linuxcontainers.org/) upon which your services will run.  These shell scripts are run as the `ubuntu` user inside the default Starphleet-provided base container, and serve to create fixed, cached sets of software such as compilers, that don't vary with each push of your service.  Note that to use one of these custom containers with your phleet, the `STARPHLEET_BASE` environment variable must be set to match `<starphleet_headquarters_uri>/containers/<container_name>.` Script containers diff the script, so as you update the script the container will rebuild.
@@ -171,7 +177,7 @@ Custom containers can also be stored and served outside your Starphleet headquar
 URL/tarball containers hash the URL, so you can old school cache bust by taking on ?xxx type verison numbers or #hash.  The [starphleet-base](https://s3-us-west-2.amazonaws.com/starphleet/starphleet-base.tgz) container is set up to run with buildpacks, and the container itself is built from this [script](https://github.com/wballard/starphleet/blob/master/overlay/var/starphleet/containers/starphleet-base).
 
 #### `<service_name>/`
-A directory which defines the relative path from which your service is served (`echo/` in the case of the [base headquarters](https://github.com/wballard/starphleet.headquarters.git)) and which contains the service configuration files (.htpasswd and orders) as its contents.  Starphleet will treat as a service any root directory in your headquarters which contains an orders file and which does not use a reserved name (`authorized_keys`, `containers`, `remote`, `ships`, `ssl`, `.*`).  It is also possible to launch a service on `/`, by including an `orders` file at the root of your Starphleet headquarters repository.
+A directory which defines the relative path from which your service is served (`echo/` in the case of the [base headquarters](https://github.com/wballard/starphleet.headquarters.git)) and which contains the service configuration files (.htpasswd and orders) as its contents.  Starphleet will treat as a service any root directory in your headquarters which contains an orders file and which does not use a reserved name (which are the other folder names in this section).  It is also possible to launch a service on `/`, by including an `orders` file at the root of your Starphleet headquarters repository.
 
 * **.htpasswd**: Similar to good old fashioned Apache setups, you can put an `.htpasswd` file in each order directory, right next to `orders`. This will automatically protect that service with HTTP basic, useful to limit access to an API.
 
@@ -180,8 +186,8 @@ A directory which defines the relative path from which your service is served (`
   We chose to use shell scripts for the orders files to allow your creativity to run wild without needing to learn another autodeployment tool, as they run in the context of Starphleet.  In practice, however, there are only two items normally present in an `orders` file:
 
   ```bash
-  $ export PORT=<service_port>
-  $ autodeploy <service_git_url>
+  export PORT=<service_port>
+  autodeploy <service_git_url>
   ```
 
   You can specify your `<service_git_url>` like `<service_git_url>#<branch>`, where branch can be a branch, a tag, or a commit sha -- anything you can check out. This hashtag approach lets you specify a deployment branch, as well as pin services to specific versions when needed.  The service specified in the orders file with the `<service_git_url>` must support the following:
@@ -200,7 +206,7 @@ A directory which defines the relative path from which your service is served (`
 #### ships/
 A directory containing files which identify the ships in the phleet.  When configured with a proper `<headquarters_git_url>` and `STARPHLEET_PRIVATE_KEY`, each ship will push back its configuration to a file in this folder.  The name of the file corresponds to the ship's hostname; the file contents contain the IP address to the ship.
 
-The ships themselves are created from a set of virtual machine images in compatible EC2, VMWare, and VirtualBox format. For simplicity, and in the hopes of saving you configuration time, these images are standardized on a single Linux version.  Some may wish to use different base images - all of starphleet is open, feel free to modify as you see fit.
+The ships themselves are created from a set of virtual machine images in compatible EC2, VMWare, and VirtualBox format. For simplicity, and in the hopes of saving you configuration time, these images are standardized on a single Linux version.  Some may wish to use different base images - all of Starphleet is open, feel free to modify as you see fit.
 
 Each ship in the phleet runs every ordered service. This makes things nice and symmetrical, and simplifies scaling. Just add more ships if you need more capacity. If you need full tilt performance, you can easily make a phleet with just one ordered service at `/`. Need a different mixture of services? Launch another phleet!
 
@@ -209,7 +215,7 @@ While each [Linux container](https://linuxcontainers.org/) (and by extension, se
   1. Data that lives between autodeploys of your service.
   1. Collaboration between services
 
-  As `/var/data` is persistent across autodeploys, care must be taken to ensure the ship's storage does not become full.  Also, note that `/var/data/` is a shared **local** fileystem across [Linux containers](https://linuxcontainers.org/) on the same ship.  It does not provide a shared filesystem between ships in a phleet.
+As `/var/data` is persistent across autodeploys, care must be taken to ensure the ship's storage does not become full.  Also, note that `/var/data/` is a shared **local** fileystem across [Linux containers](https://linuxcontainers.org/) on the same ship.  It does not provide a shared filesystem between ships in a phleet.
 
 
 #### shipscripts/
@@ -267,7 +273,7 @@ PUBLISH_PORT | number | Allows your service to be accessible on the ship at `htt
 STARPHLEET_BASE | name | Sets the base Starphleet container, and is either a `name` matching `<starphleet_headquarters_uri>/containers/<container_name>` or a URL to download a prebuilt container image. Defaults to the Starphleet-provided base container.
 STARPHLEET_DEPLOY_TIME | date string | Starphleet sets this variable in the [Linux container](https://linuxcontainers.org/) environment for your service to let you know the time of the last deployment.
 STARPHLEET_DEPLOY_GITURL | string | Starphleet sets this variable in the [Linux container](https://linuxcontainers.org/) environment to let you know where your running service code came from.
-STARPHLEET_HEADQUARTERS | string | <headquarters_git_url>.  Set this on your workstation prior to using Starphleet.
+STARPHLEET_HEADQUARTERS | string | The Git repository URL to your phleet's headquarters.  Set this on your workstation prior to using Starphleet.
 STARPHLEET_PRIVATE_KEY | string | The path to the private keyfile associated with your git repository, such as `~/.ssh/<private_keyfile>`.  Set this on your workstation prior to using Starphleet.
 STARPHLEET_PUBLIC_KEY | string | The path to the public keyfile associated with your git repository, such as `~/.ssh/<public_keyfile>`.  Set this on your workstation prior to using Starphleet.
 STARPHLEET_PULSE | number | The number of seconds between autodeploy checks, defaulting to a value of 5.  Set this in your Starphleet headquarters or in your service Git repository.
@@ -276,7 +282,7 @@ STARPHLEET_VAGRANT_MEMSIZE | number | The memory size, in megabytes, of the [Vag
 
 
 ## Buildpacks
-Buildpacks autodetect and provision services in containers for you.  We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet orders file so simple is the use of buildpacks and platform package managers to install dynamic, service specific code, such as `rubygems` or` `npm` and associated dependencies, that may vary with each push of your service.  Note that **Starphleet will only deploy one buildpack per Linux container** - for services which are written in multiple languages, extra configuration in the `orders` file may be necessary.
+Buildpacks autodetect and provision services in containers for you.  We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet orders file so simple is the use of buildpacks and platform package managers to install dynamic, service specific code, such as `rubygems` or `npm` and associated dependencies, that may vary with each push of your service.  Note that **Starphleet will only deploy one buildpack per Linux container** - for services which are written in multiple languages, extra configuration in the `orders` file may be necessary.
 
 Starphleet currently includes support for Ruby, Python, NodeJS, and NGINX static buildpacks.
 
