@@ -312,7 +312,7 @@ There is no need in Starphleet to explicitly call `nodemon`, `forever`, or any o
 Just commit and push to the repository referenced in your orders file, `<service_git_url>`, which will result in a service autodeployment to every associated ship (even across phleets if a service is used in more than one phleet).  As new versions of services are updated, fresh containers are built and run in parallel to prior versions with a drainstop. As a result, in-process requests to existing services should not interrupted, with one caveat: database and storage systems maintained outside of Starphleet.  Many software components are developed in a database-heavy manner with no real notion of backward compatibility for data storage.  In order to unlock the full benefit of autodeployment and rolling upgrades in Starphleet, you must think about how different versions of your code will interact with your database and storage systems.
 
 #### Healthcheck
-Each service repository can supply a `healthcheck` file, located at `<service_git_url>/healthcheck`, which contains a the following content:
+Each service repository can supply a `healthcheck` file, located at `<service_git_url>/healthcheck`, which contains the following content:
   ```bash
   /<snippet>
   ```
