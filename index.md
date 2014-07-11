@@ -19,7 +19,7 @@ Starphleet is a toolkit for turning [virtual](http://aws.amazon.com/ec2/) or phy
 # Concepts
 
 * **The Twelve-Factor App**: Starphleet owes a lot to the [Twelve-Factor App](http://12factor.net). Learn about it.
-* **Orders/Services**: The atomic unit of Starphleet.  An individual Ruby, Python, Node, or plain HTML service run in a [Linux container](https://linuxcontainers.org/).
+* **Orders**: The atomic unit of Starphleet.  An individual Ruby, Python, Node, or plain HTML service run in a [Linux container](https://linuxcontainers.org/).
 * **Ship**: A virtual machine instances with one or more running orders.
 * **Phleet**: A collection of one or more ships.  Phleets are intended to correspond to a single load-and-geo-balanced resource, such as `services.example.com`.
 * **Headquarters**: A git repository that instructs the phleet how to operate.
@@ -27,7 +27,12 @@ Starphleet is a toolkit for turning [virtual](http://aws.amazon.com/ec2/) or phy
 
 
 # Get Started
-Starphleet is configured entirely by environmental variables.  We are big fans of environment variables, as they save you from the chore of repeatedly typing the same text.
+Starphleet encompasses at a minimum three git repo's that will get you up and running.
+* The starphleet repo from which you will bootstrap your starphleet headquarters.
+* Your starphleet headquarters repo from which you will deploy your services via starphleet orders.
+* Your service repos containing the services which will be autodeployed by starphleet as referenced from the starphleet orders.
+
+To get going:
 
 1.  Clone the Starphleet repository to your workstation, then change your current directory to the cloned folder.
 
@@ -35,6 +40,8 @@ Starphleet is configured entirely by environmental variables.  We are big fans o
   $ git clone https://github.com/wballard/starphleet.git
   $ cd starphleet
   ```
+
+Starphleet is configured entirely by environmental variables.  We are big fans of environment variables, as they save you from the chore of repeatedly typing the same text.
 
 1.  Set the environment variable for the Git URL to your Starphleet headquarters, which is a git repository providing operating instructions for your ships (virtual machine instances) and associated [Linux containers](https://linuxcontainers.org/).  We suggest you start by forking our [base headquarters](https://github.com/wballard/starphleet.headquarters.git).  Your headquarters git URL **must be network reachable** from your hosting cloud, making [public git hosting services](https://github.com/) a natural fit for Starphleet.
 
@@ -52,6 +59,7 @@ Starphleet is configured entirely by environmental variables.  We are big fans o
 
 After completing the above configuration steps, you can choose to deploy Starphleet (a) on your local workstation using Vagrant, or (b) into the cloud with Amazon Web Services (AWS).
 
+Initial deployments, whether to AWS or Vagrant, will require time to launch the ships, deploy the [Linux container](https://linuxcontainers.org/), and configure the orders specified in the Starphleet headquarters (tasks such as automatically running `npm install` and `npm start`), but subsequent service deployments will be fast.
 
 ## Locally (Vagrant)
 
@@ -62,12 +70,13 @@ Vagrant is a handy way to get a working autodeployment system inside a virtual m
   ```bash
   $ vagrant up
   ```
+
 1.  Get the IP address of your new virtual machine instance
 
   ```bash
   $ vagrant ssh -c "ifconfig eth0 | grep 'inet addr'"
   ```
-1.  Navigate in your web browser to `http://<ip_address>/echo`, where `<ip_address>` is returned in the previous step, in order to verify the deployment completed successfully.
+1.  Navigate in your web browser to `http://<ip_address>/echo/hello`, where `<ip_address>` is returned in the previous step, in order to verify the deployment completed successfully.
 
 
 ## In the Cloud (AWS)
@@ -86,8 +95,7 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
   $ npm install -g starphleet-cli
   ```
 
-1.  Use the Starphleet CLI to initialize EC2 and add a ship (virtual machine instance).  Some time will be required while EC2 initially launches the ships, deploys the [Linux container](https://linuxcontainers.org/), and configures the service specified in the Starphleet headquarters (including automatically running `npm install` and `npm start`), but subsequent service deployments will be fast.
-
+1.  Use the Starphleet CLI to initialize EC2 and add a ship (virtual machine instance).
   ```bash
   $ starphleet init ec2
   $ starphleet add ship ec2 us-west-1
@@ -99,16 +107,16 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
   $ starphleet info ec2
   ```
 
-1.  Navigate in your web browser to `http://<ip_address>/echo`, where `<ip_address>` can be any of those returned in the previous step, in order to verify the deployment completed successfully.
+1.  Navigate in your web browser to `http://<ip_address>/echa/helloo`, where `<ip_address>` can be any of those returned in the previous step, in order to verify the deployment completed successfully.
 
 
 ## All Running?
 Once you are up and running, look in your forked headquarters repository at `echo/orders`. The contents of the orders directory are all that is required to get a web service automatically deploying on the virtualized instances:
 
 * `export PORT=3000` to know on what port your service runs.  This port is mapped, by Starphleet, back to `http://<hostname>/echo` (on port 80).
-* `autodeploy https://github.com/wballard/echo.git` to know what to deploy.  Starphleet will automatically deploy your Ruby, Python, Node, and static NGNIX projects (see [buildpacks](#buildbpacks))
+* `autodeploy https://github.com/wballard/echo.git` to know what to deploy.  Starphleet will automatically deploy your Ruby, Python, Node, and static NGNIX projects (see [buildpacks](#buildbpacks)).
 
-Ordering up your own services is just as easy as adding a new directory and creating the `orders` file. Add. Commit. Push. Magic.  Your service will be available , any time that referenced git repo is updated, it will be redeployed to every ship watching your headquarters.
+Order-ing up your own service is just as easy as adding a new directory and creating the `orders` file. Add. Commit. Push. Magic. Your service will be available, any time that referenced git repo is updated, it will be redeployed to every ship watching your headquarters.
 
 
 
@@ -144,7 +152,7 @@ starphleet/
 A directory containing containing public key files, one key per file, which allows ssh access to the ships as follows: `ssh admiral@<ship_uri>`.  Every user shares the same username, `admiral`, which is a member of the sudoers group.  Once pushed to your headquarters, updates to the authorized\_keys/ directory will be reflected on your ships within seconds.  This open ssh access to each ship lets you do what you want, when you want.  If you manage to wreck a ship, you can always add a new one using the [Starphleet CLI](https://github.com/wballard/starphleet-cli).
 
 #### containers/
-A directory containing shell scripts to configure a custom [Linux container](https://linuxcontainers.org/) upon which your services will run.  These shell scripts are run as the `ubuntu` user inside the default Starphleet-provided base container, and serve to create fixed, cached sets of software such as compilers, that don't vary with each push of your service.  Note that to use one of these custom containers with your phleet, the `STARPHLEET_BASE` environment variable must be set to match `<starphleet_headquarters_uri>/containers/<container_name>.` container .  script containers diff the script, so as you update the script the container will rebuild
+A directory containing shell scripts to configure a custom [Linux container](https://linuxcontainers.org/) upon which your services will run.  These shell scripts are run as the `ubuntu` user inside the default Starphleet-provided base container, and serve to create fixed, cached sets of software such as compilers, that don't vary with each push of your service.  Note that to use one of these custom containers with your phleet, the `STARPHLEET_BASE` environment variable must be set to match `<starphleet_headquarters_uri>/containers/<container_name>.` Script containers diff the script, so as you update the script the container will rebuild.
 
 Custom containers can also be stored and served outside your Starphleet headquarters repository, by saving a container to a tarball, and making this tarball reachable by URL.  Specifically, this alternate tarball approach involves:
 
@@ -172,7 +180,7 @@ A directory which defines the relative path from which your service is served (`
   You can specify your `<service_git_url>` like `<service_git_url>#<branch>`, where branch can be a branch, a tag, or a commit sha -- anything you can check out. This hashtag approach lets you specify a deployment branch, as well as pin services to specific versions when needed.  The service specified in the orders file with the `<service_git_url>` must support the following:
   1. Serve HTTP traffic to the port number specified in the `PORT` environment variable.  Websockets can also be utilized, but only if the service is served from `/`
   1. Be hosted in a git repository, either publicly available or accessible via key-authenticated git+ssh.
-  1. Able to be installed and run with a buildpack
+  1. Able to be installed and run with a buildpack.
 
   The [Linux containers](https://linuxcontainers.org/) which run the services are thrown away on each new service deployment and on each ship reboot.  While local filesystem access is available with a container, it is not persistent and should not be relied upon for persistent data storage.  Note that your `<service_git_url>` **must be network reachable** from each ship in the phleet.
 
@@ -182,7 +190,7 @@ Each [Linux container](https://linuxcontainers.org/) (and by extension, service)
 1. Save data that lives between autodeploys of your service.
 2. Collaborate between services if necessary
 
-As `var\data` is persistent across autodeploys, care must be taken to ensure the ship's storage does not become full.  Also, note that this is a shared local fileystem across [Linux containers](https://linuxcontainers.org/) on the same ship.  It does not provide a shared filesystem between ships in a phleet.
+As `/var/data` is persistent across autodeploys, care must be taken to ensure the ship's storage does not become full.  Also, note that this is a shared local fileystem across [Linux containers](https://linuxcontainers.org/) on the same ship.  It does not provide a shared filesystem between ships in a phleet.
 
 #### jobs
 A file which allows scheduling of phleet-level cron tasks to call specified service endpoints.  The `jobs` file uses cron syntax, the only difference being a URL in place of a local command.
@@ -202,7 +210,7 @@ All [Linux containers](https://linuxcontainers.org/) support `cron`, but the job
 #### ships/
 A directory containing files which identify the ships in the phleet.  When configured with an appropriate git url and private key, each ship will push back its configuration to a file in this folder.  The name of the file corresponds to the ship's hostname and the file contents contain the IP address to the ship.
 
-The ships themselves are created from a set of virtual machine images compatible EC2, VMWare, and VirtualBox format. For simplicity, and in the hopes of saving you configuration time, these images are standardized on a single Linux version.  Some may wish to use different base images - all of starphleet is open, feel free to modify as you see fit.
+The ships themselves are created from a set of virtual machine images in compatible EC2, VMWare, and VirtualBox format. For simplicity, and in the hopes of saving you configuration time, these images are standardized on a single Linux version.  Some may wish to use different base images - all of starphleet is open, feel free to modify as you see fit.
 
 Each ship in the phleet runs every ordered service. This makes things nice and symmetrical, and simplifies scaling. Just add more ships if you need more capacity. If you need full tilt performance, you can easily make a phleet with just one ordered service at `/`. Need a different mixture of services? Launch another phleet!
 
