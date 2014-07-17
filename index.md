@@ -1,14 +1,14 @@
 # Starphleet
 **Repositories + Buildpacks + Containers = Autodeploy Services**
 
-Starphleet is a toolkit for turning [virtual](http://aws.amazon.com/ec2/) or physical machine infrastructure into a continuous deployment stack, running multiple Git-backed services on one more more nodes via [Linux containers](https://linuxcontainers.org/).
+Starphleet is a toolkit for turning [virtual](http://aws.amazon.com/ec2/) or physical machine infrastructure into a continuous deployment stack, running multiple Git-backed services on one more nodes via [Linux containers](https://linuxcontainers.org/).
 
 Starphleet borrows heavily from the concepts of the [Twelve-Factor App](http://12factor.net), and uses an approach that avoids many of the problems inherent in existing autodeployment solutions:
 
 * Conventional virtualization, with multiple operating systems running on shared
   physical hardware, wastes resources, specifically RAM and CPU.  This costs real money.
 * Autodeploy PaaS has the same vendor lock-in risks of old proprietary software.
-* Continous deployment is almost always a custom scripting exercise.
+* Continuous deployment is almost always a custom scripting exercise.
 * Multiple machine / clustered deployment is extra work.
 * Making many small services is more work than making megalith services.
 * Seeing what is going on across multiple machines is hard.
@@ -126,7 +126,7 @@ Order-ing up your own service is just as easy as adding a new directory and crea
 ## Headquarters
 A headquarters is a Git repository that instructs the phleet (one or more virtual machine instances) how to operate. Using Git in this manner
 
-* Provides a versioned database of your configuation
+* Provides a versioned database of your configuration
 * Allows editing and working with your own tools
 * Provides multiple hosting options
 * Avoids the need for a separate Starphleet server
@@ -158,7 +158,7 @@ jobs
 ```
 
 #### authorized\_keys/
-A directory containing containing public key files, one key per file, which allows ssh access to the ships as follows:
+A directory containing public key files, one key per file, which allows ssh access to the ships as follows:
 
 ```bash
 $ ssh admiral@<ship_ip>
@@ -176,7 +176,7 @@ Custom containers can also be stored and served outside your Starphleet headquar
 1. Publish the tarball to a URL reachable via http(s)
 1. Use this published URL as `STARPHLEET_BASE`
 
-URL/tarball containers hash the URL, so you can old school cache bust by taking on ?xxx type verison numbers or #hash.  The [starphleet-base](https://s3-us-west-2.amazonaws.com/starphleet/starphleet-base.tgz) container is set up to run with buildpacks, and the container itself is built from this [script](https://github.com/wballard/starphleet/blob/master/overlay/var/starphleet/containers/starphleet-base).
+URL/tarball containers hash the URL, so you can old school cache bust by taking on ?xxx type version numbers or #hash.  The [starphleet-base](https://s3-us-west-2.amazonaws.com/starphleet/starphleet-base.tgz) container is set up to run with buildpacks, and the container itself is built from this [script](https://github.com/wballard/starphleet/blob/master/overlay/var/starphleet/containers/starphleet-base).
 
 #### `<service_name>/`
 A directory which defines the relative path from which your service is served (`echo/` in the case of the [base headquarters](https://github.com/wballard/starphleet.headquarters.git)) and which contains the service configuration files (.htpasswd and orders) as its contents.  Starphleet will treat as a service any root directory in your headquarters which contains an orders file and which does not use a reserved name (which are the other folder names in this section).  It is also possible to launch a service on `/`, by including an `orders` file at the root of your Starphleet headquarters repository.
@@ -221,7 +221,7 @@ As `/var/data/` is persistent across autodeploys, care must be taken to ensure t
 
 
 #### shipscripts/
-A directory containing scripts which will run on individual ships when:
+A directory containing scripts, which will run on individual ships when:
 
 * Starphleet starts
 * A change in IP address is detected
