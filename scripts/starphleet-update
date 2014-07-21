@@ -19,4 +19,3 @@ if starphleet-git-synch "${REMOTE}" "${LOCAL}"; then
 else
   info you have the latest starphleet
 fi
-

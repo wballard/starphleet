@@ -21,6 +21,9 @@ local="${local:-$(basename ${REMOTE})}"
 
 set -e
 
+STARTING_DIRECTORY=$(pwd)
+trap 'cd "${STARTING_DIRECTORY}"' EXIT
+
 if [ -d "${local}/.git" ]; then
   info synch ${remote} to ${local}
   cd "${local}"
