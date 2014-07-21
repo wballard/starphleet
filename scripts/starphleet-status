@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-status
+###    starphleet-status [<service_name>]
 ### --help
 ###
 ### Dump out handy statistics about your ship
@@ -8,6 +8,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
 
 ##basic computer stats
 [ -f "${STARPHLEET_CPU_STATS}" ] && source "${STARPHLEET_CPU_STATS}"
@@ -30,7 +31,12 @@ cat << EOF
 services:
 EOF
 IFS=$'\n'
-for service in $(initctl list | grep starphleet | sort)
+if [ -n "${service_name}" ]; then
+  FILTER="${service_name}"
+else
+  FILTER="starphleet"
+fi
+for service in $(initctl list | grep ${FILTER} | sort)
 do
 cat << EOF
   - ${service}
@@ -43,7 +49,12 @@ if [ -d "${CURRENT_ORDERS}" ]; then
 cat << EOF
 orders:
 EOF
-  for status in $(find "${CURRENT_ORDERS}" -name '*.starphleetstatus')
+  if [ -n "${service_name}" ]; then
+    FILTER="${service_name}"
+  else
+    FILTER="starphleetstatus"
+  fi
+  for status in $(find "${CURRENT_ORDERS}" | grep starphleetstatus | grep ${FILTER})
   do
     ORDER_LOCAL=$(dirname "${status}")/git
     if [ -f $(dirname "${status}")/.container ]; then
