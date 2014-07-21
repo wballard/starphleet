@@ -30,7 +30,7 @@ cat << EOF
 services:
 EOF
 IFS=$'\n'
-for service in $(initctl list | grep starphleet)
+for service in $(initctl list | grep starphleet | sort)
 do
 cat << EOF
   - ${service}
@@ -43,7 +43,7 @@ if [ -d "${CURRENT_ORDERS}" ]; then
 cat << EOF
 orders:
 EOF
-  for status in $(find "${CURRENT_ORDERS}" -name '*.starphleetstatus' | sort)
+  for status in $(find "${CURRENT_ORDERS}" -name '*.starphleetstatus')
   do
     ORDER_LOCAL=$(dirname "${status}")/git
     if [ -f $(dirname "${status}")/.container ]; then
