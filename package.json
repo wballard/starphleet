@@ -21,6 +21,7 @@
     "starphleet-wait-network": "./scripts/starphleet-wait-network",
     "starphleet-lxc-wait": "./scripts/starphleet-lxc-wait",
     "starphleet-lxc-destroy": "./scripts/starphleet-lxc-destroy",
+    "starphleet-lxc-stop": "./scripts/starphleet-lxc-stop",
     "starphleet-lxc-backup": "./scripts/starphleet-lxc-backup",
     "starphleet-lxc-restore": "./scripts/starphleet-lxc-restore",
     "starphleet-buildpacks": "./scripts/starphleet-buildpacks",

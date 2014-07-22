@@ -128,14 +128,22 @@ function mail_log()
   fi
 }
 
-# environment, enforced by our buildpack script, so the preference order is:
-# * repository specific variables, basically our dev settings
-# * headquarters/.../orders variables, service level overrides
-# * headquarters/.starphleet variables, global overrides
-[ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"
-[ -f "/${CHECKOUT_PATH}/.env" ] && source "/${CHECKOUT_PATH}/.env"
-[ -f "${HOME}/app/.env" ] && source "${HOME}/app/.env"
-[ -f "${ORDERS_IN}/orders" ] && source "${ORDERS_IN}/orders"
-[ -f "${HEADQUARTERS_ENV}" ] && source "${HEADQUARTERS_ENV}"
+function run_orders()
+{
+  autodeploy () {
+    info autodeploy from "${1}"
+    [ -n "${AUTODEPLOY}" ] && echo "${1}" > "${AUTODEPLOY}";
+  }
+
+  stop_before_autodeploy () {
+    STOP_BEFORE_AUTODEPLOY=1
+  }
+
+  source "${1}" || true
+}
+
+# environment set up each time we ask for tools
 [ -f "/etc/starphleet" ] && source "/etc/starphleet"
+[ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"
+[ -f "${HEADQUARTERS_ENV}" ] && source "${HEADQUARTERS_ENV}"
 :

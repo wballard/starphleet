@@ -12,7 +12,6 @@
 ### The container will have a layout with the following special directories:
 ### /var/starphleet - This mounts back to /var/starphleet on the host
 ### ${HOME}/app - Your git repository will be here
-### /block - Handy way to block until the container has networking
 ### ${HOME}/start - This is the Heroku style start script
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
@@ -29,11 +28,6 @@ STARPHLEET_BASE="${STARPHLEET_BASE:-starphleet-base}"
 CONTAINER_ORDERS_SCRIPT=${STARPHLEET_TMP}/${container_name}.orders
 ORDERS="${orders_dir}/orders"
 cp "${ORDERS}" "${CONTAINER_ORDERS_SCRIPT}"
-#copy in a post install script if it is specified in the order directory
-CONTAINER_POSTINSTALL_SCRIPT=${STARPHLEET_TMP}/${container_name}.postinstall
-POSTINSTALL="${orders_dir}/postinstall"
-[ -f "${POSTINSTALL}" ] && cp "${POSTINSTALL}" "${CONTAINER_POSTINSTALL_SCRIPT}"
-
 #build script for our service container, the most important thing is that
 #it gets the source from git
 #the second most important thing is to know that this runs on the container
@@ -56,10 +50,11 @@ trace Fetching service
 starphleet-git-synch "${git_url}" \${ORDERS_IN}
 trace Configuring environment
 sudo [ -f "${CONTAINER_ORDERS_SCRIPT}" ] && sudo cp "${CONTAINER_ORDERS_SCRIPT}" \${ORDERS_IN}/orders
-sudo [ -f "${CONTAINER_POSTINSTALL_SCRIPT}" ] && sudo cp "${CONTAINER_POSTINSTALL_SCRIPT}" \${ORDERS_IN}/postinstall
-sudo touch \${ORDERS_IN}/postinstall && sudo chmod +x \${ORDERS_IN}/postinstall
-#source again, we may now have orders which change the environment
-source /usr/bin/tools
+chown ${STARPHLEET_APP_USER} \${ORDERS_IN}
+sudo chmod a+x  \${ORDERS_IN}/orders
+sudo ls -lah \${ORDERS_IN}
+trace Running orders
+run_orders \${ORDERS_IN}/orders
 
 trace Fetching buildpacks
 #set up a place onboard for possible custom buildpacks
@@ -90,7 +85,6 @@ sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
 sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
 
 builder
-sudo \${ORDERS_IN}/postinstall
 EOF
 
 info building ${container_name}
