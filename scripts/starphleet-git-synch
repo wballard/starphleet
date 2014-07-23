@@ -19,35 +19,50 @@ BRANCH=$(echo "${remote//$'\r'/}" | awk -F '#' '{print $2;}')
 BRANCH="${BRANCH:-master}"
 local="${local:-$(basename ${REMOTE})}"
 
-set -e
-
 STARTING_DIRECTORY=$(pwd)
 trap 'cd "${STARTING_DIRECTORY}"' EXIT
+
+reclone () {
+  cd ..
+  rm -rf "${local}"
+  starphleet-git clone --depth 100 "${REMOTE}" "${local}" || fatal clone error
+}
 
 if [ -d "${local}/.git" ]; then
   info synch ${remote} to ${local}
   cd "${local}"
   #make sure we have the correct repository and branch
-  ORIGIN_URL=`git config remote.origin.url`
+  ORIGIN_URL=$(git config remote.origin.url)
   #make sure we have the correct repository and branch
   if [ "${ORIGIN_URL}" != "${REMOTE}" ]; then
     warn repository url differs, reclone needed
-    cd ..
-    rm -rf "${local}"
-    starphleet-git clone --depth 1000 "${REMOTE}" "${local}" || fatal clone error
+    reclone
     exit 0
   fi
-  CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
+  CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
   if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
     warn specified branch changed, checking out ${BRANCH}
     git checkout "${BRANCH}" || fatal checkout error
   fi
-  CURRENT_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
+  CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
   starphleet-git fetch --all &> /dev/null || fatal fetch error
-  HAS_CHANGES=`git diff HEAD...origin/${CURRENT_BRANCH} --raw`
+  HAS_CHANGES=$(git diff HEAD...origin/${CURRENT_BRANCH} --raw)
   if [ "${HAS_CHANGES}x" != "x" ]; then
     warn new code detected, pulling
     starphleet-git pull || fatal pull error
+    exit 0
+  fi
+  GIT_STATUS=$(git status)
+  remote_pattern="Your branch is (.*) of (.*) by ([0-9]*) commit"
+  diverge_pattern="Your branch and (.*) have diverged"
+  if [[ ${GIT_STATUS} =~ "${remote_pattern}" ]]; then
+    warn this clone is not current, reclone needed
+    reclone
+    exit 0
+  fi
+  if [[ ${GIT_STATUS} =~ "${diverge_pattern}" ]]; then
+    warn this clone is diverged, reclone needed
+    reclone
     exit 0
   fi
 else
