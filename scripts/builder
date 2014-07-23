@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+orders="${1}"
 app_root="${HOME}/app"
 build_root="${app_root}"
 cache_root="${BUILDPACK_CACHE_DIR:-${HOME}/cache/app}"
@@ -68,11 +69,13 @@ ruby -e "require 'yaml';(YAML.load_file('$build_root/.release')['config_vars'] |
 
 cat << EOF > "${HOME}/start"
 #!/bin/bash
-export HOME=$build_root
-export ORDERS_IN=$build_root
+export HOME=${build_root}
+export ORDERS_IN=${build_root}
 source /usr/bin/tools
-for file in $build_root/.profile.d/*; do source \$file; done
-cd $build_root
+trace running orders ${orders}
+run_orders ${orders}
+for file in ${build_root}/.profile.d/*; do source \$file; done
+cd ${build_root}
 if [[ -f Procfile ]]; then
     ruby -e "require 'yaml';puts YAML.load_file('Procfile')['\$1']" | bash
 else

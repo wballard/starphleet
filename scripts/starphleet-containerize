@@ -40,7 +40,6 @@ set -e
 source /usr/bin/tools
 trace app will be in ${HOME}/app
 export ORDERS_IN=${HOME}/app
-trace ${ORDERS_IN} ...
 EOF
 
 #now -- this is escaped, lots of variables included from this script
@@ -50,7 +49,7 @@ trace Fetching service
 starphleet-git-synch "${git_url}" \${ORDERS_IN}
 trace Configuring environment
 sudo [ -f "${CONTAINER_ORDERS_SCRIPT}" ] && sudo cp "${CONTAINER_ORDERS_SCRIPT}" \${ORDERS_IN}/orders
-chown ${STARPHLEET_APP_USER} \${ORDERS_IN}
+sudo chown ${STARPHLEET_APP_USER} \${ORDERS_IN}/orders
 sudo chmod a+x  \${ORDERS_IN}/orders
 sudo ls -lah \${ORDERS_IN}
 trace Running orders
@@ -84,7 +83,7 @@ fi
 sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
 sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
 
-builder
+builder \${ORDERS_IN}/orders
 EOF
 
 info building ${container_name}
