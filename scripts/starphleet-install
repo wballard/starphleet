@@ -100,13 +100,13 @@ Defaults env_keep="sSH_AUTH_SOCK"
 Defaults !requiretty
 EOF
 
-#role account for git push manual deployment
-gitreceive init
-adduser git sudo
-
 #role account to serve orders by hand
 sshcommand create update "sudo starphleet-update"
 adduser update sudo
+sshcommand create status "sudo starphleet-status"
+adduser status sudo
+sshcommand create syslog "sudo tail -F /var/log/syslog"
+adduser status syslog
 
 starphleet-buildpacks
 

@@ -15,9 +15,7 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 # When there are no authkeys in the HQ repo, no ssh access is left around
 ADMIRALSSH="${ADMIRAL_HOME}/.ssh"
 AUTHFILE="${ADMIRALSSH}/authorized_keys"
-test -f "${AUTHFILE}"  && rm "${AUTHFILE}"
-gitreceive reset
-sshcommand reset update
+test -f "${AUTHFILE}" && rm "${AUTHFILE}"
 
 # look for some auth keys in the HQ repo, when found add them all to the ssh auth keys to allow ssh access
 HQAUTHKEYS="${HEADQUARTERS_LOCAL}/authorized_keys"
@@ -34,6 +32,8 @@ do
     #interactive heroku style
     cat "${f}" | gitreceive upload-key $(basename "${f}")
     cat "${f}" | sshcommand acl-add update $(basename "${f}")
+    cat "${f}" | sshcommand acl-add status $(basename "${f}")
+    cat "${f}" | sshcommand acl-add syslog $(basename "${f}")
   fi
 done
 
@@ -53,4 +53,3 @@ if [ -f "${HEADQUARTERS_LOCAL}/ssl/crt" ] && [ -f "${HEADQUARTERS_LOCAL}/ssl/key
     restart starphleet_nginx
   fi
 fi
-
