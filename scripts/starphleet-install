@@ -57,6 +57,11 @@ else
   pip install awscli
 fi
 
+#install mail
+debconf-set-selections <<< "postfix postfix/mailname string ${SHIP}"
+debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
+apt-get install -y mailutils
+
 #starphleet lives here
 [ -d ${STARPHLEET_ROOT} ] || mkdir -p ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_TMP} ] || mkdir -p ${STARPHLEET_TMP}
