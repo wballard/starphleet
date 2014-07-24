@@ -36,6 +36,7 @@ echo "127.0.0.1 ${SHIP} localhost" > /etc/hosts
 #for the starphleet jobs
 rm -f /etc/init/starphleet*
 cp -R ${DIR}/../overlay/* /
+cp -R ${DIR}/../nginx/* /var/starphleet/nginx/
 
 #packages
 debconf-set-selections <<< "postfix postfix/mailname string '${SHIP}'"
@@ -45,7 +46,7 @@ add-apt-repository -y ppa:chris-lea/node.js
 apt-get -y update
 apt-get -y install --force-yes $(cat "${DIR}/packages")
 
-pushd ${DIR}/../nginx
+pushd /var/starphleet/nginx
 set -e
 make
 set +e
