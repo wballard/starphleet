@@ -8,7 +8,6 @@
     "tools": "./scripts/tools",
     "urldecode": "./scripts/urldecode",
     "urlencode": "./scripts/urlencode",
-    "gitreceive": "./scripts/gitreceive",
     "sshcommand": "./scripts/sshcommand",
     "buildpacks": "./scripts/buildpacks",
     "builder": "./scripts/builder",

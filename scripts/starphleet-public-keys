@@ -30,7 +30,6 @@ do
     echo '' >> ${AUTHFILE}
     #git push based build/serve sequence, much like a manual
     #interactive heroku style
-    cat "${f}" | gitreceive upload-key $(basename "${f}")
     cat "${f}" | sshcommand acl-add update $(basename "${f}")
     cat "${f}" | sshcommand acl-add status $(basename "${f}")
     cat "${f}" | sshcommand acl-add syslog $(basename "${f}")
