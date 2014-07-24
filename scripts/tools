@@ -69,7 +69,7 @@ function make_admiral() {
   useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
   adduser ${ADMIRAL} sudo
   adduser ${ADMIRAL} adm
-  adduser ${ADMIRAL} root
+  adduser ${ADMIRAL} root 
   test -d ${ADMIRAL_HOME}/.ssh || mkdir -p ${ADMIRAL_HOME}/.ssh
   mkdir -p ${STARPHLEET_ROOT}
   chown -R ${ADMIRAL}:${ADMIRAL} ${STARPHLEET_ROOT}
