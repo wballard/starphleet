@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-logs
+### --help
+###
+### Tail the logs for starphleet services.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+tail -F /var/log/upstart/*starphleet*.log
