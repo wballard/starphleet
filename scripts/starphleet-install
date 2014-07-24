@@ -9,6 +9,7 @@ source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
+
 #flush out caches, I know, I know -- but really if you don't do this
 #Linux would rather swap than let go
 sync && echo 3 | sudo tee /proc/sys/vm/drop_caches
@@ -36,31 +37,24 @@ echo "127.0.0.1 ${SHIP} localhost" > /etc/hosts
 rm -f /etc/init/starphleet*
 cp -R ${DIR}/../overlay/* /
 
-if [ -f /var/starphleet/.system ]; then
-  info base apt packages already installed
-  warn delete /var/starphleet/.system to force reinstall
-else
-  apt-get -y update
-  apt-get -y install --force-yes software-properties-common
-  add-apt-repository -y ppa:nginx/stable
-  add-apt-repository -y ppa:chris-lea/node.js
-  apt-get -y update
-  for package in $(cat "${DIR}/packages"); do
-    apt-get -y install --force-yes ${package}
-  done
-
-  #we will be using bash. period
-  rm /bin/sh
-  ln /bin/bash /bin/sh
-
-  #aws command line tools anyone, the non java ones...
-  pip install awscli
-fi
-
-#install mail
-debconf-set-selections <<< "postfix postfix/mailname string ${SHIP}"
+#packages
+debconf-set-selections <<< "postfix postfix/mailname string '${SHIP}'"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
-apt-get install -y postfix
+apt-get -y install --force-yes software-properties-common
+add-apt-repository -y ppa:chris-lea/node.js
+apt-get -y update
+apt-get -y install --force-yes $(cat "${DIR}/packages")
+
+pushd ${DIR}/../nginx
+set -e
+make
+set +e
+popd
+
+#we will be using bash. period
+rm /bin/sh
+ln /bin/bash /bin/sh
+
 
 #starphleet lives here
 [ -d ${STARPHLEET_ROOT} ] || mkdir -p ${STARPHLEET_ROOT}
@@ -86,6 +80,7 @@ fi
 if find /starphleet/public_keys/* > /dev/null ; then
   [ -d "${PUBLIC_KEYS}" ] && cp /starphleet/public_keys/* "${PUBLIC_KEYS}"
 fi
+
 
 #allow passwordless sudoers
 cat > ${ROOT}/etc/sudoers <<'EOF'
