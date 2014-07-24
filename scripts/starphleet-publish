@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-publish <container_name> <container_port> <publish_port> <public_url> [<htpasswd>]
+###    starphleet-publish <container_name> <container_port> <publish_port> <public_url> <htpasswd> <ldap>
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
@@ -14,6 +14,7 @@ help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 set -e
+
 
 order_name=${public_url}
 if [ "${public_url}" == "/" ]; then
@@ -108,8 +109,15 @@ location ${public_url}/ {
   proxy_set_header Connection "upgrade";
 EOF
 if [ -n "${htpasswd}" ]; then
+  info password file enabled
   echo "  auth_basic \"\";" >> "${MOUNT_CONF}"
   echo "  auth_basic_user_file ${htpasswd};" >> "${MOUNT_CONF}"
+fi
+if [ -n "${ldap}" ]; then
+  info LDAP enabled
+  echo "  auth_ldap \"Forbidden!\";" >> "${MOUNT_CONF}"
+  echo "  auth_ldap_servers $(cat ${ldap});" >> "${MOUNT_CONF}"
+  echo "  add_header X-glgauthuser \$remote_user;" >> "${MOUNT_CONF}"
 fi
 echo '}' >> "${MOUNT_CONF}"
 info "published ${container_name}:${container_port} to ${public_url}"
@@ -143,6 +151,11 @@ EOF
   if [ -n "${htpasswd}" ]; then
     echo "  auth_basic \"\";" >> "${BARE_CONF}"
     echo "  auth_basic_user_file ${htpasswd};" >> "${BARE_CONF}"
+  fi
+  if [ -n "${ldap}" ]; then
+    echo "  auth_ldap \"Forbidden!\";" >> "${BARE_CONF}"
+    echo "  auth_ldap_servers $(cat ${ldap});" >> "${BARE_CONF}"
+    echo "  add_header X-glgauthuser \$remote_user;" >> "${BARE_CONF}"
   fi
   echo -e "  }\n}" >> "${BARE_CONF}"
   info "published ${container_name}:${container_port} :${publish_port}"
