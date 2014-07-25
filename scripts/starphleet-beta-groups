@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-beta-groups
+### --help
+###
+### Configure named beta group maps.
+###
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
+set -e
+
+[ -d "${NGINX_CONF}/beta_groups" ]  && rm -rf "${NGINX_CONF}/beta_groups"
+mkdir -p "${NGINX_CONF}/beta_groups"
+
+for BETA_GROUP in $(find "${HEADQUARTERS_LOCAL}/beta_groups" -type f)
+do
+  info beta group $(basename ${BETA_GROUP})
+  BETA_GROUP_CONF="${NGINX_CONF}/beta_groups/$(basename ${BETA_GROUP}).conf"
+  echo "  map \$remote_user \$$(basename ${BETA_GROUP}) {" >> "${BETA_GROUP_CONF}"
+  echo "   default 1;" >> "${BETA_GROUP_CONF}"
+  for BETA_USER in $(cat "${BETA_GROUP}")
+  do
+    echo "   ${BETA_USER} 0;" >> "${BETA_GROUP_CONF}"
+  done
+  echo "  }" >> "${BETA_GROUP_CONF}"
+done

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-publish <container_name> <container_port> <publish_port> <public_url> <htpasswd> <ldap>
+###    starphleet-publish <container_name> <public_url> <orders> <htpasswd> <ldap>
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
@@ -15,14 +15,12 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 set -e
 
+run_orders "${orders}"
 
 order_name=${public_url}
 if [ "${public_url}" == "/" ]; then
   public_url=""
 fi
-#pulling out any nested quotes
-container_port=$(eval echo ${container_port})
-publish_port=$(eval echo ${publish_port})
 MOUNT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
 BARE_CONF="${NGINX_CONF}/published_bare/$(urlencode \"${public_url}\").conf"
 IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
@@ -38,20 +36,16 @@ test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_ba
 cat << EOF > "${MOUNT_CONF}"
 
 location ${public_url}/ {
+  set \$true 1;
   gzip on;
   gzip_types *;
   gzip_proxied any;
   gzip_comp_level 6;
   include ${NGINX_CONF}/cors.conf;
-  # Path rewriting to hide mount prefix
-  rewrite ${public_url}/(.*) /\$1 break;
   proxy_set_header X-Forwarded-Host \$host;
   proxy_set_header X-Forwarded-Server \$host;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_set_header Host \$http_host;
-  proxy_pass http://${IP_ADDRESS}:${container_port};
-  add_header X-CONTAINER ${container_name};
-  add_header X-SHIP $(hostname);
   # WebSocket support (nginx 1.4)
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
@@ -71,15 +65,23 @@ if [ -n "${ldap}" ]; then
   echo "  add_header X-GLGAuthUser \$remote_user;" >> "${MOUNT_CONF}"
   echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${MOUNT_CONF}"
 fi
+#beta handling is a bit tricky, the if must be inverted to appease nginx
+echo "  if ( \$${BETA_GROUP:-true} ) {" >> "${MOUNT_CONF}"
+echo "    rewrite ${public_url}/(.*) /\$1 break;" >> "${MOUNT_CONF}"
+echo "    proxy_pass http://${IP_ADDRESS}:${PORT}; break;" >> "${MOUNT_CONF}"
+echo "  }" >> "${MOUNT_CONF}"
+if [ -n "${BETA_PROXY}" ]; then
+  echo "  rewrite ${public_url}/(.*) ${BETA_PROXY}/\$1;" >> "${MOUNT_CONF}"
+fi
 echo '}' >> "${MOUNT_CONF}"
-info "published ${container_name}:${container_port} to ${public_url}"
+info "published ${container_name}:${PORT} to ${public_url}"
 
 #port publication, this is optional if a port is set
-if [ "${publish_port}" != "0" ]
+if [ "${PUBLISH_PORT}" != "0" ]
 then
 cat << EOF > "${BARE_CONF}"
 server {
-  listen ${publish_port};
+  listen ${PUBLISH_PORT};
 
   location / {
     gzip on;
@@ -91,10 +93,8 @@ server {
     proxy_set_header X-Forwarded-Server \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
     proxy_set_header Host \$http_host;
-    proxy_pass http://${IP_ADDRESS}:${container_port};
+    proxy_pass http://${IP_ADDRESS}:${PORT};
     proxy_redirect \$scheme://\$host:\$server_port/ \$scheme://\$host/;
-    add_header X-CONTAINER ${container_name};
-    add_header X-SHIP $(hostname);
     # WebSocket support (nginx 1.4)
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
@@ -113,7 +113,7 @@ EOF
     echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
   fi
   echo -e "  }\n}" >> "${BARE_CONF}"
-  info "published ${container_name}:${container_port} :${publish_port}"
+  info "published ${container_name}:${PORT} :${PUBLISH_PORT}"
 else
   rm -f "${BARE_CONF}"
 fi

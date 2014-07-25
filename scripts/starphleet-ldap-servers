@@ -31,5 +31,3 @@ cat << EOF > "${NGINX_CONF}/ldap_servers/$(basename ${LDAP_SERVER}).conf"
   }
 EOF
 done
-
-reload starphleet_nginx || start starphleet_nginx

@@ -105,10 +105,9 @@ function run_orders()
   }
 
   beta () {
-    BETA_PROXY="${1}"
-    BETA_USERS="${@:2}"
-    trace beta test "${BETA_PROXY}"
-    trace users "${BETA_USERS}"
+    BETA_GROUP="${1}"
+    BETA_PROXY="${2}"
+    trace beta test "${BETA_GROUP}" "${BETA_PROXY}"
   }
 
   source "${1}" || true

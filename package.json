@@ -24,6 +24,7 @@
     "starphleet-buildpacks": "./scripts/starphleet-buildpacks",
     "starphleet-publish": "./scripts/starphleet-publish",
     "starphleet-ldap-servers": "./scripts/starphleet-ldap-servers",
+    "starphleet-beta-groups": "./scripts/starphleet-beta-groups",
     "starphleet-unpublish": "./scripts/starphleet-unpublish",
     "starphleet-status": "./scripts/starphleet-status",
     "starphleet-logs": "./scripts/starphleet-logs",
