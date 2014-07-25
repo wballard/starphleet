@@ -44,6 +44,7 @@ debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Si
 apt-get -y install --force-yes software-properties-common
 add-apt-repository -y ppa:chris-lea/node.js
 apt-get -y update
+apt-get -y upgrade
 apt-get -y install --force-yes $(cat "${DIR}/packages")
 
 pushd /var/starphleet/nginx

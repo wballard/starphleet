@@ -36,57 +36,6 @@ test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_ba
 
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
-location ${public_url}/cache1h/ {
-    proxy_buffering on;
-    proxy_cache primary_zone;
-    proxy_cache_lock on;
-    proxy_cache_methods GET HEAD POST;
-    # this is the default, but I want to be explicit so it's clear
-    # what's going on here
-    proxy_cache_lock_timeout 5s;
-    proxy_cache_use_stale updating error timeout;
-    proxy_cache_valid 1h;
-    proxy_pass http://${IP_ADDRESS}:${container_port};
-}
-
-location ${public_url}/cache2h/ {
-    proxy_buffering on;
-    proxy_cache primary_zone;
-    proxy_cache_lock on;
-    proxy_cache_methods GET HEAD POST;
-    # this is the default, but I want to be explicit so it's clear
-    # what's going on here
-    proxy_cache_lock_timeout 5s;
-    proxy_cache_use_stale updating error timeout;
-    proxy_cache_valid 2h;
-    proxy_pass http://${IP_ADDRESS}:${container_port};
-}
-
-location ${public_url}/cache4h/ {
-    proxy_buffering on;
-    proxy_cache primary_zone;
-    proxy_cache_lock on;
-    proxy_cache_methods GET HEAD POST;
-    # this is the default, but I want to be explicit so it's clear
-    # what's going on here
-    proxy_cache_lock_timeout 5s;
-    proxy_cache_use_stale updating error timeout;
-    proxy_cache_valid 4h;
-    proxy_pass http://${IP_ADDRESS}:${container_port};
-}
-
-location ${public_url}/cache365d/ {
-    proxy_buffering on;
-    proxy_cache primary_zone;
-    proxy_cache_lock on;
-    proxy_cache_methods GET HEAD POST;
-    # this is the default, but I want to be explicit so it's clear
-    # what's going on here
-    proxy_cache_lock_timeout 5s;
-    proxy_cache_use_stale updating error timeout;
-    proxy_cache_valid 365d;
-    proxy_pass http://${IP_ADDRESS}:${container_port};
-}
 
 location ${public_url}/ {
   gzip on;
@@ -112,15 +61,15 @@ if [ -n "${htpasswd}" ]; then
   info password file enabled
   echo "  auth_basic \"\";" >> "${MOUNT_CONF}"
   echo "  auth_basic_user_file ${htpasswd};" >> "${MOUNT_CONF}"
-  echo "  add_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
-  echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
+  echo "  add_header X-GLGAuthUser \$remote_user;" >> "${MOUNT_CONF}"
+  echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${MOUNT_CONF}"
 fi
 if [ -n "${ldap}" ]; then
   info LDAP enabled
   echo "  auth_ldap \"Forbidden!\";" >> "${MOUNT_CONF}"
   echo "  auth_ldap_servers $(cat ${ldap});" >> "${MOUNT_CONF}"
-  echo "  add_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
-  echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
+  echo "  add_header X-GLGAuthUser \$remote_user;" >> "${MOUNT_CONF}"
+  echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${MOUNT_CONF}"
 fi
 echo '}' >> "${MOUNT_CONF}"
 info "published ${container_name}:${container_port} to ${public_url}"
