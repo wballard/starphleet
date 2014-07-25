@@ -112,12 +112,15 @@ if [ -n "${htpasswd}" ]; then
   info password file enabled
   echo "  auth_basic \"\";" >> "${MOUNT_CONF}"
   echo "  auth_basic_user_file ${htpasswd};" >> "${MOUNT_CONF}"
+  echo "  add_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
+  echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
 fi
 if [ -n "${ldap}" ]; then
   info LDAP enabled
   echo "  auth_ldap \"Forbidden!\";" >> "${MOUNT_CONF}"
   echo "  auth_ldap_servers $(cat ${ldap});" >> "${MOUNT_CONF}"
-  echo "  add_header X-glgauthuser \$remote_user;" >> "${MOUNT_CONF}"
+  echo "  add_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
+  echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
 fi
 echo '}' >> "${MOUNT_CONF}"
 info "published ${container_name}:${container_port} to ${public_url}"
@@ -151,11 +154,14 @@ EOF
   if [ -n "${htpasswd}" ]; then
     echo "  auth_basic \"\";" >> "${BARE_CONF}"
     echo "  auth_basic_user_file ${htpasswd};" >> "${BARE_CONF}"
+    echo "  add_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
+    echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
   fi
   if [ -n "${ldap}" ]; then
     echo "  auth_ldap \"Forbidden!\";" >> "${BARE_CONF}"
     echo "  auth_ldap_servers $(cat ${ldap});" >> "${BARE_CONF}"
-    echo "  add_header X-glgauthuser \$remote_user;" >> "${BARE_CONF}"
+    echo "  add_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
+    echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
   fi
   echo -e "  }\n}" >> "${BARE_CONF}"
   info "published ${container_name}:${container_port} :${publish_port}"
@@ -164,5 +170,3 @@ else
 fi
 
 reload starphleet_nginx || start starphleet_nginx
-
-# vi: set ft=sh ts=2 et sw=2 sts=2 :

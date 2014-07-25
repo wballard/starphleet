@@ -51,7 +51,6 @@ trace Configuring environment
 sudo [ -f "${CONTAINER_ORDERS_SCRIPT}" ] && sudo cp "${CONTAINER_ORDERS_SCRIPT}" \${ORDERS_IN}/orders
 sudo chown ${STARPHLEET_APP_USER} \${ORDERS_IN}/orders
 sudo chmod a+x  \${ORDERS_IN}/orders
-sudo ls -lah \${ORDERS_IN}
 trace Running orders
 run_orders \${ORDERS_IN}/orders
 
