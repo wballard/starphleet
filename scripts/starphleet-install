@@ -45,6 +45,7 @@ apt-get -y install --force-yes software-properties-common
 add-apt-repository -y ppa:chris-lea/node.js
 apt-get -y update
 for package in $(cat "${DIR}/packages")
+do
   apt-get -y install --force-yes "${package}"
 done
 
