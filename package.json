@@ -34,6 +34,7 @@
     "starphleet-cleanup": "./scripts/starphleet-cleanup",
     "starphleet-public-keys": "./scripts/starphleet-public-keys",
     "starphleet-update": "./scripts/starphleet-update",
+    "starphleet-install": "./scripts/starphleet-install",
     "starphleet-ready": "./scripts/starphleet-ready",
     "starphleet-jobs": "./scripts/starphleet-jobs"
   },
