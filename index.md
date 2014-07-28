@@ -309,16 +309,11 @@ Buildpacks autodetect and provision services in containers for you.  We would li
 
 Starphleet currently includes support for Ruby, Python, NodeJS, and NGINX static buildpacks.
 
+### NodeJS
+You will need a proper, working `package.json`. The buildpack will call `npm install` and `npm start`, with the `PORT` environment variable set.
 
-### Testing Buildpacks
-Sometimes you just want to see the build, or figure out what is going on.  Starphleet lets you directly push to a ship and run a service outside the autodeploy process via a `$ git push`.  You will need to have a public key in the headquarter's `authorized_keys` folder that is matched up with a private key in your local ssh configuration. Remember, you are pushing to the ship, which is just like pushing to any other Git server over SSH.
+Been at this a while? You can check in your `node_modules` directory, and the buildpack will call `npm reinstall`. This can speed up deployment greatly.
 
-```bash
-$ git remote add ship git@<ship_ip>:<name>
-$ git push ship master
-```
-
-In the above example, the `<name>` can be anything you like.
 
 
 ## Maintenance
