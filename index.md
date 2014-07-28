@@ -119,7 +119,7 @@ Once you are up and running, look in your `<headquarters_git_url>` repository at
 Order-ing up your own service is just as easy as adding a new directory and creating the `orders` file. Add. Commit. Push. Magic, your service will be available.  Any time that a Git repository referenced in an orders file is updated, for example `github.com/wballard/echo.git`, it will be autodeployed to every ship watching your headquarters.
 
 # MicroService Clouds
-The primary idea of Starphleet is to let you quickly a cloud of related microservice. To make this easier, the key abstraction is that your services are at **paths** not **ports** by default. This lets you order up a series of services and have them all on one DNS name, saving you a lot of heartache with CORS, load balancers, and DNS configuration.
+The primary idea of Starphleet is to let you quickly create a cloud of related microservice. To make this easier, the key abstraction is that your services are at **paths** not **ports** by default. This lets you order up a series of services and have them all on one DNS name, saving you a lot of heartache with CORS, load balancers, and DNS configuration.
 
 Say you have a simple service with a todo list, a mail queue, and a website. You can set up a headquarters like:
 
