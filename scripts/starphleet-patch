@@ -19,4 +19,7 @@ pushd "${DIR}/.."
 npm ${NPM_FLAGS} install -g
 popd
 
+sudo restart starphleet_monitor_orders
+sudo restart starphleet_monitor_headquarters
+
 announce *Starphleet Patched*
