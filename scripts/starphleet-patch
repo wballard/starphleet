@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-patch
+### --help
+###
+### Just the basics of a startphleet install, without a restart.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+
+#put in the system overlay, gets all the files in place
+#for the starphleet jobs
+cp -R ${DIR}/../overlay/* /
+
+#starphleet and all of its scripts
+pushd "${DIR}/.."
+npm ${NPM_FLAGS} install -g
+popd
+
+announce *Starphleet Patched*
