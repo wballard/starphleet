@@ -305,16 +305,23 @@ STARPHLEET_VAGRANT_MEMSIZE | number | The memory size, in megabytes, of the [Vag
 
 
 ## Buildpacks
-Buildpacks autodetect and provision services in containers for you.  We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet orders file so simple is the use of buildpacks and platform package managers to install dynamic, service specific code, such as `rubygems` or `npm` and associated dependencies, that may vary with each push of your service.  Note that **Starphleet will only deploy one buildpack per Linux container** - for services which are written in multiple languages, extra configuration in the `orders` file may be necessary.
+Buildpacks autodetect and provision services in containers for you.  We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet orders file so simple is the use of buildpacks and platform package managers to install dynamic, service specific code, such as `rubygems` or `npm` and associated dependencies, that may vary with each push of your service.  Note that **Starphleet will only deploy one buildpack per Linux container** - for services which are written in multiple languages, custom buildpacks may be required.
 
-Starphleet currently includes support for Ruby, Python, NodeJS, and NGINX static buildpacks.
+Starphleet currently includes support for Ruby, Python, NodeJS, and NGINX static buildpacks. You can specify your own in your `orders` with `export BUILDPACK_URL=`.
 
-### NodeJS
+### [Procfile](https://devcenter.heroku.com/articles/procfile)
+Starphleet only supports `web` process types.
+
+### [NodeJS](https://github.com/heroku/heroku-buildpack-nodejs.git)
 You will need a proper, working `package.json`. The buildpack will call `npm install` and `npm start`, with the `PORT` environment variable set.
 
 Been at this a while? You can check in your `node_modules` directory, and the buildpack will call `npm reinstall`. This can speed up deployment greatly.
 
+### [Ruby](https://github.com/heroku/heroku-buildpack-ruby.git)
+This will run `bundle install` and make use of your `Procfile`.
 
+### [NGINX](https://github.com/wballard/nginx-buildpack.git)
+This looks for a `nginx.conf.erb` template. The configuration will be rendered with all available environment variables.
 
 ## Maintenance
 
