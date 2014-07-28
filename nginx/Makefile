@@ -8,7 +8,7 @@ NGINX=$(CURDIR)/nginx
 .EXPORT_ALL_VARIABLES:
 
 ${NGINX}: ${INSTALL_LOCATION}
-	cd ${NGINX_ROOT} && ./configure  --with-mail --with-mail_ssl_module --with-http_ssl_module \
+	cd ${NGINX_ROOT} && ./configure --with-http_spdy_module --with-mail --with-mail_ssl_module --with-http_ssl_module \
 	 	--prefix=${INSTALL_LOCATION} \
 		--add-module=${BUILD_ROOT}/nginx-auth-ldap \
 		--with-pcre
