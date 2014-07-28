@@ -348,10 +348,18 @@ Starphleet monitors running services and will restart them on failure.
 To check for the latest version of Starphleet on a ship and install an update, if needed, run the following:
 
 ```bash
-$ ssh update@<ship_ip>
+$ ssh admiral@<ship> sudo starphleet_update
 ```
 
-You will need to ensure your public key has been added to the authorized\_users/ directory in your Starphleet headquarters.
+You will need to ensure your public key has been added to the `authorized_users/` directory in your Starphleet headquarters.
+
+### Starphleet Status
+You can always see what is going on with your ship using:
+
+```bash
+$ ssh admiral@<ship> starphleet_status
+$ ssh admiral@<ship> starphleet_logs
+```
 
 ### Self Healing Phleet
 Each ship uses a pull strategy to keep up to date. This strategy has been chosen over push deployments for the following reasons:
