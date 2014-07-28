@@ -118,7 +118,20 @@ Once you are up and running, look in your `<headquarters_git_url>` repository at
 
 Order-ing up your own service is just as easy as adding a new directory and creating the `orders` file. Add. Commit. Push. Magic, your service will be available.  Any time that a Git repository referenced in an orders file is updated, for example `github.com/wballard/echo.git`, it will be autodeployed to every ship watching your headquarters.
 
+# MicroService Clouds
+The primary idea of Starphleet is to let you quickly a cloud of related microservice. To make this easier, the key abstraction is that your services are at **paths** not **ports** by default. This lets you order up a series of services and have them all on one DNS name, saving you a lot of heartache with CORS, load balancers, and DNS configuration.
 
+Say you have a simple service with a todo list, a mail queue, and a website. You can set up a headquarters like:
+
+```
+./orders
+./todo
+  orders
+./mail
+  orders
+```
+
+Then when running you get your site at `http://example.co/`, and your services at `http://example.co/todo` and `http://example.co/mail`.
 
 # Reference
 
@@ -190,7 +203,7 @@ export LDAP_PASSWORD='****'
 You can have multiple LDAP servers. Individual user authentication will be cached, so that services with the same `.ldap` value will not multiply prompt for login.
 
 #### `<service_name>/`
-A directory which defines the relative path from which your service is served (`echo/` in the case of the [base headquarters](https://github.com/wballard/starphleet.headquarters.git)) and which contains the service configuration files (.htpasswd and orders) as its contents.  Starphleet will treat as a service any root directory in your headquarters which contains an orders file and which does not use a reserved name (which are the other folder names in this section).  It is also possible to launch a service on `/`, by including an `orders` file at the root of your Starphleet headquarters repository.
+A directory which defines the relative path from which your service is served (`echo/` in the case of the [base headquarters](https://github.com/wballard/starphleet.headquarters.git)) and which contains the service configuration files as its contents.  Starphleet will treat as a service any root directory in your headquarters which contains an orders file and which does not use a reserved name (which are the other folder names in this section).  It is also possible to launch a service on `/`, by including an `orders` file at the root of your Starphleet headquarters repository.
 
 * **.htpasswd**: Similar to good old fashioned Apache setups, you can put an `.htpasswd` file in each order directory, right next to `orders`. This will automatically protect that service with HTTP basic, useful to limit access to an API.
 
@@ -198,7 +211,7 @@ A directory which defines the relative path from which your service is served (`
 
 * **orders**:  An `orders` file is a shell script which controls the autodeployment of a service inside a [Linux container](https://linuxcontainers.org/) on a ship.
 
-  We chose to use shell scripts for the orders files to allow your creativity to run wild without needing to learn another autodeployment tool, as they run in the context of Starphleet.
+  We chose to use shell scripts for the orders files to allow your creativity to run wild without needing to learn another autodeployment tool.
 
   ```bash
   export PORT=<service_port>
