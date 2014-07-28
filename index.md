@@ -224,11 +224,6 @@ A directory which defines the relative path from which your service is served (`
   autodeploy <data_git_url>
   ```
 
-#### ships/
-A directory containing files which identify the ships in the phleet.  When configured with a proper `<headquarters_git_url>` and `STARPHLEET_PRIVATE_KEY`, each ship will push back its configuration to a file in this folder.  The name of the file corresponds to the ship's hostname; the file contents contain the IP address to the ship.
-
-The ships themselves are created from a set of virtual machine images in compatible EC2, VMWare, and VirtualBox format. For simplicity, and in the hopes of saving you configuration time, these images are standardized on a single Linux version.  Some may wish to use different base images - all of Starphleet is open, feel free to modify as you see fit.
-
 Each ship in the phleet runs every ordered service. This makes things nice and symmetrical, and simplifies scaling. Just add more ships if you need more capacity. If you need full tilt performance, you can easily make a phleet with just one ordered service at `/`. Need a different mixture of services? Launch another phleet!
 
 While each [Linux container](https://linuxcontainers.org/) (and by extension, service) has its own independent directory structure, Starphleet symlinks `/var/data/` in each [Linux container](https://linuxcontainers.org/)  to `/var/data/` on the ship, allowing
@@ -242,12 +237,13 @@ As `/var/data/` is persistent across autodeploys, care must be taken to ensure t
 This is a directory full of any files you see fit. Whenever the headquarters is updated, these files are recursively copied, as root from the the headquarters to `/` on your ship, such that a file at `<headquarters/overlay/hi_mom` ends up at `/hi_mom` on your running ship.
 
 #### shipscripts/
-A directory containing scripts, which will run on individual ships when:
-
-* Starphleet starts
-* A change in IP address is detected
+A directory containing scripts, which will run on individual ships when the headquarters is updated.
 
 Scripts in this folder can be used to implement many different kinds of functionality, including dynamic DNS registration.  If you want to simulate dynamic DNS with Amazon Route53, look at the [starphleet-cli](https://github.com/wballard/starphleet-cli) command `starphleet name ship ec2`.  Note that scripts in this directory **must be marked as [executable](http://www.dslreports.com/faq/linux/7.1_chmod_-_Make_a_file_executable)** in order to run on the ships.  Scripts also run as root on the ships - take care to avoid a shipwreck.
+
+#### ssl/
+Provide two files `crt` and `key`, which must be set to not need a password, in order to enable
+the ship to service SSL.
 
 #### jobs
 A file which allows scheduling of phleet-level cron tasks to call specified service endpoints.  The `jobs` file uses cron syntax, the only difference being a URL in place of a local command.
