@@ -178,10 +178,23 @@ wballard
 fred
 ```
 
+#### ldap\_servers/
+Authenticate users to your services via LDAP by specifying LDAP servers. Each named file in this directory requires three environment variables to connect a service account for end user LDAP Authentication. Here is how we hook up to our active directory:
+
+```bash
+export LDAP_URL='ldap://guardian-gc.glgresearch.com:3268/dc=glgroup,dc=com?sAMAccountName?sub?(objectCategory=person)(objectClass=User)'
+export LDAP_USER='glgroup\\sampleServiceAccount'
+export LDAP_PASSWORD='****'
+```
+
+You can have multiple LDAP servers. Individual user authentication will be cached, so that services with the same `.ldap` value will not multiply prompt for login.
+
 #### `<service_name>/`
 A directory which defines the relative path from which your service is served (`echo/` in the case of the [base headquarters](https://github.com/wballard/starphleet.headquarters.git)) and which contains the service configuration files (.htpasswd and orders) as its contents.  Starphleet will treat as a service any root directory in your headquarters which contains an orders file and which does not use a reserved name (which are the other folder names in this section).  It is also possible to launch a service on `/`, by including an `orders` file at the root of your Starphleet headquarters repository.
 
 * **.htpasswd**: Similar to good old fashioned Apache setups, you can put an `.htpasswd` file in each order directory, right next to `orders`. This will automatically protect that service with HTTP basic, useful to limit access to an API.
+
+  **.ldap**: Place a single string in here that matches a file name under `<headquarters>/ldap_servers`. This will require users to be authenticated against LDAP.
 
 * **orders**:  An `orders` file is a shell script which controls the autodeployment of a service inside a [Linux container](https://linuxcontainers.org/) on a ship.
 
@@ -357,6 +370,3 @@ Don't cheap out and go small. The default instance size in Starphleet is `m2.xla
 
 ### Phleets
 Don't feel limited to just one phleet. Part of making your own PaaS is to give you the freedom to mix and match services across phleets as you see fit.
-
-### Geo Scaling AWS
-By default, Starphleet sets up four zones, three US, one Europe. Ships are not added to these zones automatically, but instead must be added explicitly.  Again, mix and match zones with phleets as you see fit.  It's OK for you to set up just in one location if you like, or even have a phleet with one ship.
