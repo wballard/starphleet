@@ -8,10 +8,7 @@
 ### The <url> can include a #branch on the end which will refer to that specific
 ### branch rather than default master.
 ###
-### If <url> is not specified, this script will try to figure the headquarters
-### for you by:
-### * looking at EC2 metadata, including grabbing a private key
-### * looking on all attached volumes for
+### If <url> is not specified, this script will try to print the headquarters.
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${DIR}/tools"
 help=$(grep "^### " "$0" | cut -c 5-)

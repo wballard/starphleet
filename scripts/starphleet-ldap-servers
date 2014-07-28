@@ -3,7 +3,7 @@
 ###    starphleet-ldap-servers
 ### --help
 ###
-### Configure named LDAP server entries that can be referneced by individual
+### Configure named LDAP server entries that can be referenced by individual
 ### services.
 ###
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

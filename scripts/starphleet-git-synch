@@ -6,7 +6,7 @@
 ### Make sure a git repo, with an option #[branch|tag] is
 ### pulled and merged into the specified local
 ###
-### This exist 0 if there were changes, 1 if not, easier
+### This exits 0 if there were changes, 1 if not, easier
 ### to use in a shell script if this way
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
