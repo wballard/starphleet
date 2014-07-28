@@ -51,14 +51,14 @@ location ${public_url}/ {
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "upgrade";
 EOF
-if [ -n "${htpasswd}" ]; then
+if [ "${htpasswd}" != '-' ]; then
   info password file enabled
   echo "  auth_basic \"\";" >> "${MOUNT_CONF}"
   echo "  auth_basic_user_file ${htpasswd};" >> "${MOUNT_CONF}"
   echo "  add_header X-GLGAuthUser \$remote_user;" >> "${MOUNT_CONF}"
   echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${MOUNT_CONF}"
 fi
-if [ -n "${ldap}" ]; then
+if [ "${ldap}" != '-' ]; then
   info LDAP enabled
   echo "  auth_ldap \"Forbidden!\";" >> "${MOUNT_CONF}"
   echo "  auth_ldap_servers $(cat ${ldap});" >> "${MOUNT_CONF}"
