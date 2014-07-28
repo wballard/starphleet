@@ -141,15 +141,15 @@ The `STARPHLEET_HEADQUARTERS` repository is the primary location for phleet, shi
 authorized_keys/
   user1@example.com.pub
   user2@example.com.pub
-containers/
-  example_container.sh
+beta_groups/
+  friends
+ldap_servers/
+  boss
 <service_name>/
   .htpasswd
+  .ldap
   orders
   remote
-ships/
-  ship-17bqr3zgg2d11ttcl133h2111p98qrt1
-  ship-93ojdlkv9083lkd92klf90399fl39fjs
 shipscripts/
   dynamic_dns_example.sh
   maintenance_example.sh
@@ -165,18 +165,6 @@ $ ssh admiral@<ship_ip>
 ```
 
 Every user shares the same username, `admiral`, which is a member of the sudoers group.  Once pushed to your headquarters, updates to the authorized\_keys/ directory will be reflected on your ships within seconds.  This open ssh access to each ship lets you do what you want, when you want.  If you manage to wreck a ship, you can always add a new one using the [Starphleet CLI](https://github.com/wballard/starphleet-cli).
-
-#### containers/
-A directory containing shell scripts to configure a custom [Linux container](https://linuxcontainers.org/) upon which your services will run.  These shell scripts are run as the `ubuntu` user inside the default Starphleet-provided base container, and serve to create fixed, cached sets of software such as compilers, that don't vary with each push of your service.  Note that to use one of these custom containers with your phleet, the `STARPHLEET_BASE` environment variable must be set to match `<starphleet_headquarters_uri>/containers/<container_name>.` Script containers diff the script, so as you update the script the container will rebuild.
-
-Custom containers can also be stored and served outside your Starphleet headquarters repository, by saving a container to a tarball, and making this tarball reachable by URL.  Specifically, this alternate tarball approach involves:
-
-1. Creating [Linux container](https://linuxcontainers.org/), however you see fit
-1. Use `starphleet-lxc-backup` to create a tarball of the container
-1. Publish the tarball to a URL reachable via http(s)
-1. Use this published URL as `STARPHLEET_BASE`
-
-URL/tarball containers hash the URL, so you can old school cache bust by taking on ?xxx type version numbers or #hash.  The [starphleet-base](https://s3-us-west-2.amazonaws.com/starphleet/starphleet-base.tgz) container is set up to run with buildpacks, and the container itself is built from this [script](https://github.com/wballard/starphleet/blob/master/overlay/var/starphleet/containers/starphleet-base).
 
 #### `<service_name>/`
 A directory which defines the relative path from which your service is served (`echo/` in the case of the [base headquarters](https://github.com/wballard/starphleet.headquarters.git)) and which contains the service configuration files (.htpasswd and orders) as its contents.  Starphleet will treat as a service any root directory in your headquarters which contains an orders file and which does not use a reserved name (which are the other folder names in this section).  It is also possible to launch a service on `/`, by including an `orders` file at the root of your Starphleet headquarters repository.
