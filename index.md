@@ -150,9 +150,13 @@ ldap_servers/
   .ldap
   orders
   remote
+overlay/
 shipscripts/
   dynamic_dns_example.sh
   maintenance_example.sh
+ssl/
+  crt
+  key
 jobs
 .starphleet
 ```
@@ -164,7 +168,15 @@ A directory containing public key files, one key per file, which allows ssh acce
 $ ssh admiral@<ship_ip>
 ```
 
-Every user shares the same username, `admiral`, which is a member of the sudoers group.  Once pushed to your headquarters, updates to the authorized\_keys/ directory will be reflected on your ships within seconds.  This open ssh access to each ship lets you do what you want, when you want.  If you manage to wreck a ship, you can always add a new one using the [Starphleet CLI](https://github.com/wballard/starphleet-cli).
+Every user shares the same username, `admiral`, which is a member of the sudoers group.  Once pushed to your headquarters, updates to the `authorized_keys/` directory will be reflected on your ships within seconds.  This open ssh access to each ship lets you do what you want, when you want.  If you manage to wreck a ship, you can always add a new one using the [Starphleet CLI](https://github.com/wballard/starphleet-cli).
+
+#### beta\_groups/
+Working together with authentication, you can create **beta groups**. These groups provide a named list of users.
+
+```
+wballard
+fred
+```
 
 #### `<service_name>/`
 A directory which defines the relative path from which your service is served (`echo/` in the case of the [base headquarters](https://github.com/wballard/starphleet.headquarters.git)) and which contains the service configuration files (.htpasswd and orders) as its contents.  Starphleet will treat as a service any root directory in your headquarters which contains an orders file and which does not use a reserved name (which are the other folder names in this section).  It is also possible to launch a service on `/`, by including an `orders` file at the root of your Starphleet headquarters repository.
@@ -173,19 +185,22 @@ A directory which defines the relative path from which your service is served (`
 
 * **orders**:  An `orders` file is a shell script which controls the autodeployment of a service inside a [Linux container](https://linuxcontainers.org/) on a ship.
 
-  We chose to use shell scripts for the orders files to allow your creativity to run wild without needing to learn another autodeployment tool, as they run in the context of Starphleet.  In practice, however, there are only two items normally present in an `orders` file:
+  We chose to use shell scripts for the orders files to allow your creativity to run wild without needing to learn another autodeployment tool, as they run in the context of Starphleet.
 
   ```bash
   export PORT=<service_port>
   autodeploy <service_git_url>
+  beta <beta_group> <service_url>
   ```
 
   You can specify your `<service_git_url>` like `<service_git_url>#<branch>`, where branch can be a branch, a tag, or a commit sha -- anything you can check out. This hashtag approach lets you specify a deployment branch, as well as pin services to specific versions when needed.  The service specified in the orders file with the `<service_git_url>` must support the following:
-  1. Serve HTTP traffic to the port number specified in the `PORT` environment variable.  Websockets can also be utilized, but only if the service is served from `/`.
+  1. Serve HTTP traffic to the port number specified in the `PORT` environment variable.  Websockets can also be utilized, it is just http after all.
   1. Be hosted in a Git repository, either publicly available or accessible via key-authenticated git+ssh.
   1. Able to be installed and run with a buildpack.
 
   The [Linux containers](https://linuxcontainers.org/) which run the services are thrown away on each new service deployment and on each ship reboot.  While local filesystem access is available with a container, it is not persistent and should not be relied upon for persistent data storage.  Note that your `<service_git_url>` **must be network reachable** from each ship in the phleet.
+
+  The `beta` command references a `beta_group` by name, and will transparently send any user identified in the group to the alternate `service_url`. Users are identified vit `.htpasswd` or `.ldap`. The `service_url` is just another ordered service on the ship, most likely a different branch to test a new feature.
 
 * **remote**: A file specifying data to be autodeployed to to `/var/data/<service_name>` inside the [Linux container](https://linuxcontainers.org/) for `service_name`.  Starphleet symlinks `/var/data/` for all [Linux containers](https://linuxcontainers.org/) to `/var/data/` on the parent ship.  As a result, data specified by the `remote` file is visible to all [Linux container](https://linuxcontainers.org/) instances on a ship.  Only one item is needed inside a `remote` file:
 
