@@ -10,7 +10,6 @@
     "urlencode": "./scripts/urlencode",
     "buildpacks": "./scripts/buildpacks",
     "builder": "./scripts/builder",
-    "starphleet-addresses": "./scripts/starphleet-addresses",
     "starphleet-headquarters": "./scripts/starphleet-headquarters",
     "starphleet-containerize": "./scripts/starphleet-containerize",
     "starphleet-containermake": "./scripts/starphleet-containermake",
