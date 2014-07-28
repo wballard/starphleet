@@ -225,6 +225,8 @@ While each [Linux container](https://linuxcontainers.org/) (and by extension, se
 
 As `/var/data/` is persistent across autodeploys, care must be taken to ensure the ship's storage does not become full.  Also, note that `/var/data/` is a shared **local** fileystem across [Linux containers](https://linuxcontainers.org/) on the same ship.  It does not provide a shared filesystem between ships in a phleet.
 
+#### overlay/
+This is a directory full of any files you see fit. Whenever the headquarters is updated, these files are recursively copied, as root from the the headquarters to `/` on your ship, such that a file at `<headquarters/overlay/hi_mom` ends up at `/hi_mom` on your running ship.
 
 #### shipscripts/
 A directory containing scripts, which will run on individual ships when:
