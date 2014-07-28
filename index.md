@@ -284,25 +284,25 @@ Starphleet is configured entirely by environmental variables and encourages the 
   The environment variable file which applies to all services in your phleet.  This file is a good place to store usernames, passwords, and connection strings, if your headquarters is in a private, hidden repository reachable by `git+ssh`.  These variables have the highest precedence and apply to every service deployment within a phleet.
 
 ### Environment Variable Reference
+
+#### For Your Workstation
 Name | Value | Description
 --- | --- | ---
-AWS_ACCESS_KEY_ID | string | Used for [AWS](http://aws.amazon.com) access.  Set this on your workstation prior to using Starphleet.
-AWS_SECRET_ACCESS_KEY | string | Used for [AWS](http://aws.amazon.com) access.  Set this on your workstation prior to using Starphleet.
+AWS_ACCESS_KEY_ID | string | Used for [AWS](http://aws.amazon.com) access.  Set this on your workstation prior to using Starphleet CLI.
+AWS_SECRET_ACCESS_KEY | string | Used for [AWS](http://aws.amazon.com) access.  Set this on your workstation prior to using Starphleet CLI.
+EC2_INSTANCE_SIZE | string | Override the size of EC2 instance with this variable.  Set this on your workstation prior to using Starphleet CLI.
+STARPHLEET_HEADQUARTERS | string | The Git repository URL to your phleet's headquarters.  Set this on your workstation prior to using Starphleet CLI.
+STARPHLEET_PRIVATE_KEY | string | The path to the private keyfile associated with your Git repository, such as `~/.ssh/<private_keyfile>`.  Set this on your workstation prior to using Starphleet CLI.
+STARPHLEET_PUBLIC_KEY | string | The path to the public keyfile associated with your Git repository, such as `~/.ssh/<public_keyfile>`.  Set this on your workstation prior to using Starphleet CLI.
+STARPHLEET_VAGRANT_MEMSIZE | number | The memory size, in megabytes, of the [Vagrant](http://www.vagrantup.com) instance.  Set this on your workstation prior to using Starphleet Vagrant for testing.
+#### For Your Headquarters
+These variables can be set in your headquarters `.starphleet` or `orders`.
+Name | Value | Description
+--- | --- | ---
 BUILDPACK_URL | &lt;git_url&gt; | Specifies a custom buildpack to be used for autodeployment.  Set this in your Starphleet headquarters or in your service Git repository.
-EC2_INSTANCE_SIZE | string | Override the size of EC2 instance with this variable.  Set this on your workstation prior to using Starphleet.
-NPM_FLAGS | string | Starphleet uses a custom `npm` registry to just plain run faster, you can use your own here with `--registry <url>`.
 PORT | number | This is an **all important environment variable**, and it is expected your service will honor it, publishing traffic here. This `PORT` is used to know where to connect the ship's proxy to your individual service.  Set this in your orders file.
-PUBLISH_PORT | number | Allows your service to be accessible on the ship at `http://<SHIP_DNS>:PUBLISH_PORT` in addition to `http://<SHIP_DNS/<service_name>`.  Set this in your orders file.
-STARPHLEET_BASE | name | Sets the base Starphleet container, and is either a `name` matching `<starphleet_headquarters_uri>/containers/<container_name>` or a URL to download a prebuilt container image. Defaults to the Starphleet-provided base container.
-STARPHLEET_DEPLOY_TIME | date string | Starphleet sets this variable in the [Linux container](https://linuxcontainers.org/) environment for your service to let you know the time of the last deployment.
-STARPHLEET_DEPLOY_GITURL | string | Starphleet sets this variable in the [Linux container](https://linuxcontainers.org/) environment to let you know where your running service code came from.
-STARPHLEET_HEADQUARTERS | string | The Git repository URL to your phleet's headquarters.  Set this on your workstation prior to using Starphleet.
-STARPHLEET_PRIVATE_KEY | string | The path to the private keyfile associated with your Git repository, such as `~/.ssh/<private_keyfile>`.  Set this on your workstation prior to using Starphleet.
-STARPHLEET_PUBLIC_KEY | string | The path to the public keyfile associated with your Git repository, such as `~/.ssh/<public_keyfile>`.  Set this on your workstation prior to using Starphleet.
-STARPHLEET_PULSE | number | The number of seconds between autodeploy checks, defaulting to a value of 5.  Set this in your Starphleet headquarters or in your service Git repository.
-STARPHLEET_REMOTE | &lt;starphleet_git_url&gt; | Allows you to use your own fork of Starphleet itself.  Set this in the .starphleet file in your Starphleet headquarters repository.
-STARPHLEET_VAGRANT_MEMSIZE | number | The memory size, in megabytes, of the [Vagrant](http://www.vagrantup.com) instance.  Set this on your workstation prior to using Starphleet.
-
+PUBLISH_PORT | number | Allows your service to be accessible on the ship at `http://<SHIP_DNS>:PUBLISH_PORT` in addition to `http://<SHIP_DNS>/<service_name>`.  Set this in your orders file.
+STARPHLEET_PULSE | number | The number of seconds between autodeploy checks, defaulting to a value of 10.
 
 ## Buildpacks
 Buildpacks autodetect and provision services in containers for you.  We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet orders file so simple is the use of buildpacks and platform package managers to install dynamic, service specific code, such as `rubygems` or `npm` and associated dependencies, that may vary with each push of your service.  Note that **Starphleet will only deploy one buildpack per Linux container** - for services which are written in multiple languages, custom buildpacks may be required.
@@ -335,7 +335,7 @@ There is no need in Starphleet to explicitly call `nodemon`, `forever`, or any o
 Just commit and push to the repository referenced in your orders file, `<service_git_url>`, which will result in a service autodeployment to every associated ship (even across phleets if a service is used in more than one phleet).  As new versions of services are updated, fresh containers are built and run in parallel to prior versions with a drainstop. As a result, in-process requests to existing services should not interrupted, with one caveat: database and storage systems maintained outside of Starphleet.  Many software components are developed in a database-heavy manner with no real notion of backward compatibility for data storage.  In order to unlock the full benefit of autodeployment and rolling upgrades in Starphleet, you must think about how different versions of your code will interact with your database and storage systems.
 
 #### Healthcheck
-Each service repository can supply a `healthcheck` file, located at `<service_git_url>/healthcheck`, which contains the following content:
+Each service repository can supply a `healthcheck` file, located at `/healthcheck`, which contains the following content:
   ```bash
   /<snippet>
   ```
