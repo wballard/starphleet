@@ -191,6 +191,7 @@ A directory which defines the relative path from which your service is served (`
   export PORT=<service_port>
   autodeploy <service_git_url>
   beta <beta_group> <service_url>
+  stop-before-autodeploy
   ```
 
   You can specify your `<service_git_url>` like `<service_git_url>#<branch>`, where branch can be a branch, a tag, or a commit sha -- anything you can check out. This hashtag approach lets you specify a deployment branch, as well as pin services to specific versions when needed.  The service specified in the orders file with the `<service_git_url>` must support the following:
@@ -201,6 +202,8 @@ A directory which defines the relative path from which your service is served (`
   The [Linux containers](https://linuxcontainers.org/) which run the services are thrown away on each new service deployment and on each ship reboot.  While local filesystem access is available with a container, it is not persistent and should not be relied upon for persistent data storage.  Note that your `<service_git_url>` **must be network reachable** from each ship in the phleet.
 
   The `beta` command references a `beta_group` by name, and will transparently send any user identified in the group to the alternate `service_url`. Users are identified vit `.htpasswd` or `.ldap`. The `service_url` is just another ordered service on the ship, most likely a different branch to test a new feature.
+
+  The `stop-before-autodeploy` command is useful for services that are not rolling deployment friendly. For example, we have an index service we call `pi` that uses [SOLR](http://lucene.apache.org/solr/) that has a nasty habit of not retrying to get at locked files. So, this makes sure to stop first, releasing the file lock.
 
 * **remote**: A file specifying data to be autodeployed to to `/var/data/<service_name>` inside the [Linux container](https://linuxcontainers.org/) for `service_name`.  Starphleet symlinks `/var/data/` for all [Linux containers](https://linuxcontainers.org/) to `/var/data/` on the parent ship.  As a result, data specified by the `remote` file is visible to all [Linux container](https://linuxcontainers.org/) instances on a ship.  Only one item is needed inside a `remote` file:
 
