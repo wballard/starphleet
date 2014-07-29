@@ -100,13 +100,13 @@ server {
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "upgrade";
 EOF
-  if [ -n "${htpasswd}" ]; then
+  if [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
     echo "  auth_basic \"\";" >> "${BARE_CONF}"
     echo "  auth_basic_user_file ${htpasswd};" >> "${BARE_CONF}"
     echo "  add_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
     echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
   fi
-  if [ -n "${ldap}" ]; then
+  if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
     echo "  auth_ldap \"Forbidden!\";" >> "${BARE_CONF}"
     echo "  auth_ldap_servers $(cat ${ldap});" >> "${BARE_CONF}"
     echo "  add_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
