@@ -27,6 +27,7 @@ cat << EOF > "${NGINX_CONF}/ldap_servers/$(basename ${LDAP_SERVER}).conf"
    binddn_passwd "${LDAP_PASSWORD}";
    group_attribute uniquemember;
    group_attribute_is_dn on;
+   connections 8;
    require valid_user;
   }
 EOF

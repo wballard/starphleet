@@ -7,9 +7,9 @@ INSTALL_LOCATION=$(CURDIR)/build_output
 NGINX=$(CURDIR)/nginx
 .EXPORT_ALL_VARIABLES:
 
-${NGINX}: ${INSTALL_LOCATION}
+${NGINX}: ${INSTALL_LOCATION} ${BUILD_ROOT}/nginx-auth-ldap/ngx_http_auth_ldap_module.c
 	cd ${NGINX_ROOT} && ./configure --with-http_spdy_module --with-mail --with-mail_ssl_module --with-http_ssl_module \
-	 	--prefix=${INSTALL_LOCATION} \
+		--prefix=${INSTALL_LOCATION} \
 		--add-module=${BUILD_ROOT}/nginx-auth-ldap \
 		--with-pcre
 	cd ${NGINX_ROOT} && make install

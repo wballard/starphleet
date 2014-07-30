@@ -766,6 +766,7 @@ ngx_http_auth_ldap_init_cache(ngx_cycle_t *cycle)
 
     conf = (ngx_http_auth_ldap_main_conf_t *) ngx_http_cycle_get_module_main_conf(cycle, ngx_http_auth_ldap_module);
     if (conf == NULL || !conf->cache_enabled) {
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, cycle->log, 0, "http_auth_ldap: Caching disabled.");
         return NGX_OK;
     }
 
@@ -992,8 +993,8 @@ ngx_http_auth_ldap_close_connection(ngx_http_auth_ldap_connection_t *c)
     c->rctx = NULL;
     if (c->state != STATE_DISCONNECTED) {
         c->state = STATE_DISCONNECTED;
-        ngx_add_timer(&c->reconnect_event, 10000); /* TODO: Reconnect timeout */
-        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, c->log, 0, "http_auth_ldap: Connection scheduled for reconnection in 10000 ms");
+        ngx_add_timer(&c->reconnect_event, 1000); /* TODO: Reconnect timeout */
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, c->log, 0, "http_auth_ldap: Connection scheduled for reconnection");
     }
 }
 
@@ -1410,7 +1411,7 @@ ngx_http_auth_ldap_connect(ngx_http_auth_ldap_connection_t *c)
     if (rc == NGX_ERROR || rc == NGX_BUSY || rc == NGX_DECLINED) {
         ngx_log_error(NGX_LOG_ERR, c->log, 0, "http_auth_ldap: Unable to connect to LDAP server \"%V\".",
             &addr->name);
-        ngx_add_timer(&c->reconnect_event, 10000); /* TODO: Reconnect timeout */
+        ngx_add_timer(&c->reconnect_event, 1000); /* TODO: Reconnect timeout */
         return;
     }
 
@@ -1419,7 +1420,7 @@ ngx_http_auth_ldap_connect(ngx_http_auth_ldap_connection_t *c)
     conn->pool = c->pool;
     conn->write->handler = ngx_http_auth_ldap_connect_handler;
     conn->read->handler = ngx_http_auth_ldap_read_handler;
-    ngx_add_timer(conn->read, 10000); /* TODO: Connect timeout */
+    ngx_add_timer(conn->read, 1000); /* TODO: Connect timeout */
 
     c->state = STATE_CONNECTING;
 }
@@ -1952,7 +1953,7 @@ ngx_http_auth_ldap_check_bind(ngx_http_request_t *r, ngx_http_auth_ldap_ctx_t *c
             ctx->c->msgid);
         ctx->c->state = STATE_BINDING;
         ctx->iteration++;
-        
+
 	// added by prune - 20140227
 	// we have to rebind THIS SAME connection as admin user or the next search could be
 	// made as non privileged user
@@ -1962,7 +1963,7 @@ ngx_http_auth_ldap_check_bind(ngx_http_request_t *r, ngx_http_auth_ldap_ctx_t *c
         cred.bv_val = (char *) ctx->server->bind_dn_passwd.data;
         cred.bv_len = ctx->server->bind_dn_passwd.len;
         rc = ldap_sasl_bind(ctx->c->ld,(const char *) ctx->server->bind_dn.data, LDAP_SASL_SIMPLE, &cred, NULL, NULL, &rebind_msgid);
-        
+
         return NGX_AGAIN;
     }
 
