@@ -72,7 +72,11 @@ else
   lxc-start --name ${CONTAINER_NAME} -d
   starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
   lxc-attach --name ${CONTAINER_NAME} -- bash starphleet-wait-network
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n127.0.0.1    $(< /etc/hostname)" >> /etc/hosts'
+  #host file updates
+  bridge_ip
+  lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n${BRIDGE_IP}  localship' >> /etc/hosts"
+  lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n127.0.0.1  $(< /etc/hostname)' >> /etc/hosts"
+
   lxc-attach --name ${CONTAINER_NAME} -- bash -c 'chmod 777 /var/log/'
   lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'
   lxc-attach --name ${CONTAINER_NAME} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "source /usr/bin/tools; /build_script"

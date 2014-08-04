@@ -113,6 +113,12 @@ function run_orders()
   source "${1}" || true
 }
 
+#Load up BRIDGE_IP with the address of the bridge loopback. This is the
+#way to easily let containers speak to the ship
+function bridge_ip() {
+  BRIDGE_IP=$(ifconfig | grep -A 1 'lxcbr0' | tail -1 | cut -d ':' -f 2 | cut -d ' ' -f 1)
+}
+
 # environment set up each time we ask for tools
 [ -f "/etc/starphleet" ] && source "/etc/starphleet"
 [ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"

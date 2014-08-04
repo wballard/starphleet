@@ -19,6 +19,7 @@ sync && echo 3 | sudo tee /proc/sys/vm/drop_caches
 
 #role account for folks acting as the admiral, do this really early
 #as it will provide the home directory
+info here
 make_admiral
 
 mkdir -p "${LXC_ROOT}"
