@@ -266,8 +266,8 @@ The jobs file uses cron syntax, the only difference being a URL in place of a lo
 
 
 ```shell
-\* \* \* \* \* http://localhost/workflow?do=stuff
-\* \* \* 1 \* http://localhost/workflow?do=modaystuff
+* * * * * http://localhost/workflow?do=stuff
+* * * 1 * http://localhost/workflow?do=modaystuff
 ```
 
 All [Linux containers](https://linuxcontainers.org/) support `cron`, but the jobs file allows you to dodge a few common problems with cron:

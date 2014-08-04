@@ -723,6 +723,7 @@ table {
 code,
 pre {
   font-family: 'Anonymous Pro', 'monospace';
+  font-weight: 700;
   margin-right: 0;
   margin-bottom: 0;
   margin-left: 0;
@@ -743,6 +744,9 @@ li {
   padding-top: .25em;
   padding-bottom: .25em;
   border-bottom: 1px dotted rgba(51, 51, 51, 0.1);
+}
+li[dotted] {
+  list-style-type: square;
 }
 li:last-child {
   border-bottom: 0;
@@ -847,8 +851,7 @@ ul,
 ol,
 dl,
 blockquote {
-  line-height: 1.2em;
-  letter-spacing: .035em;
+  line-height: 1.4em;
   clear: inherit;
   margin-bottom: 0;
   margin-top: 0.61em;
@@ -3718,6 +3721,9 @@ li {
   padding-top: .25em;
   padding-bottom: .25em;
   border-bottom: 1px dotted rgba(51, 51, 51, 0.1);
+}
+li[dotted] {
+  list-style-type: square;
 }
 li:last-child {
   border-bottom: 0;
@@ -10672,6 +10678,7 @@ Polymer('ui-toc', {
 code,
 pre {
   font-family: 'Anonymous Pro', 'monospace';
+  font-weight: 700;
   margin-right: 0;
   margin-bottom: 0;
   margin-left: 0;
@@ -27426,8 +27433,8 @@ renderer.code = function(code, language) {
   return "<ui-code language='" + language + "'>" + code + "</ui-code>";
 };
 
-renderer.codespan = function(code) {
-  return "<ui-code inline>" + code + "</ui-code>";
+renderer.listitem = function(text) {
+  return "<li dotted>" + text + "</li>";
 };
 
 Polymer('ui-markdown', {
@@ -39258,6 +39265,7 @@ stack > :nth-child(2) {
 code,
 pre {
   font-family: 'Anonymous Pro', 'monospace';
+  font-weight: 700;
   margin-right: 0;
   margin-bottom: 0;
   margin-left: 0;
@@ -39278,6 +39286,9 @@ li {
   padding-top: .25em;
   padding-bottom: .25em;
   border-bottom: 1px dotted rgba(51, 51, 51, 0.1);
+}
+li[dotted] {
+  list-style-type: square;
 }
 li:last-child {
   border-bottom: 0;
@@ -39382,8 +39393,7 @@ ul,
 ol,
 dl,
 blockquote {
-  line-height: 1.2em;
-  letter-spacing: .035em;
+  line-height: 1.4em;
   clear: inherit;
   margin-bottom: 0;
   margin-top: 0.61em;
@@ -66007,8 +66017,8 @@ The jobs file uses cron syntax, the only difference being a URL in place of a lo
 
 
 ```shell
-\* \* \* \* \* http://localhost/workflow?do=stuff
-\* \* \* 1 \* http://localhost/workflow?do=modaystuff
+* * * * * http://localhost/workflow?do=stuff
+* * * 1 * http://localhost/workflow?do=modaystuff
 ```
 
 All [Linux containers](https://linuxcontainers.org/) support `cron`, but the jobs file allows you to dodge a few common problems with cron:
