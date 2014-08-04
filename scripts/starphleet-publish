@@ -55,15 +55,13 @@ if [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
   info password file enabled
   echo "  auth_basic \"\";" >> "${MOUNT_CONF}"
   echo "  auth_basic_user_file ${htpasswd};" >> "${MOUNT_CONF}"
-  echo "  add_header X-GLGAuthUser \$remote_user;" >> "${MOUNT_CONF}"
-  echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${MOUNT_CONF}"
+  echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
 fi
 if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
   info LDAP enabled
   echo "  auth_ldap \"Forbidden!\";" >> "${MOUNT_CONF}"
   echo "  auth_ldap_servers $(cat ${ldap});" >> "${MOUNT_CONF}"
-  echo "  add_header X-GLGAuthUser \$remote_user;" >> "${MOUNT_CONF}"
-  echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${MOUNT_CONF}"
+  echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
 fi
 #beta handling is a bit tricky, the if must be inverted to appease nginx
 echo "  if ( \$${BETA_GROUP:-true} ) {" >> "${MOUNT_CONF}"
@@ -103,14 +101,12 @@ EOF
   if [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
     echo "  auth_basic \"\";" >> "${BARE_CONF}"
     echo "  auth_basic_user_file ${htpasswd};" >> "${BARE_CONF}"
-    echo "  add_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
-    echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
+    echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${BARE_CONF}"
   fi
   if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
     echo "  auth_ldap \"Forbidden!\";" >> "${BARE_CONF}"
     echo "  auth_ldap_servers $(cat ${ldap});" >> "${BARE_CONF}"
-    echo "  add_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
-    echo "  proxy_set_header X-GLGAuthUser \$remote_user;" >> "${BARE_CONF}"
+    echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${BARE_CONF}"
   fi
   echo -e "  }\n}" >> "${BARE_CONF}"
   info "published ${container_name}:${PORT} :${PUBLISH_PORT}"

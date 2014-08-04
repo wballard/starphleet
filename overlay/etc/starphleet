@@ -29,3 +29,4 @@ if [ "${TERM}" == "unknown" ]; then
 fi
 export SHIP=ship-$(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub | awk '{ print $2; }' | sed -e 's/://g')
 export STARPHLEET_APP_USER="ubuntu"
+export USER_IDENTITY_HEADER="x-identity"
