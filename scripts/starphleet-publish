@@ -72,6 +72,12 @@ if [ -n "${BETA_PROXY}" ]; then
   echo "  rewrite ${public_url}/(.*) ${BETA_PROXY}/\$1;" >> "${MOUNT_CONF}"
 fi
 echo '}' >> "${MOUNT_CONF}"
+#redirect to forgive a lack of trailing slash
+cat << EOF >> "${MOUNT_CONF}"
+location ~* ${public_url}$ {
+  rewrite .* ${public_url}/ redirect;
+}
+EOF
 info "published ${container_name}:${PORT} to ${public_url}"
 
 #port publication, this is optional if a port is set
