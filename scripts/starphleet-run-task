@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-run-task <script>
+### --help
+###
+### Run a script as a task, meaning three things:
+### * Lock with flock, so that only one is running at a time
+### * tee through to logger to support syslog
+### * capture both stderr and stdout
+### with syslog logging
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+#stdout to a pipe for logger
+exec > >(logger --stderr -t $(basename ${script}))
+#and stderr too!
+exec 2>&1
+
+
+get_SHASUM "${script}"
+
+(
+ flock -n 9 || exit 1
+ info running ${script}
+ 2>&1 ${script}
+) 9>/var/tmp/${SHASUM}
