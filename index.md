@@ -14,13 +14,13 @@ Starphleet borrows heavily from the concepts of the [Twelve-Factor App](http://1
 * Continuous deployment is almost always a custom scripting exercise.
 * Multiple machine / clustered deployment is extra work.
 * Making many small services is more work than making megalith services.
-* Seeing what is going on across multiple machines is hard.
 * Deployment systems all seem to be at the *system* not *service* level.
 * Every available autodeploy system requires that you set up servers to
   deploy your servers, which themselves aren't autodeployed.
 
-
 # Overview
+A few definitions and concepts so that the rest of the documentation makes
+more sense.
 
 * **Orders**: The atomic unit of Starphleet.  An individual Ruby, Python, NodeJS, or plain HTML **service** run in a [Linux container](https://linuxcontainers.org/).
 
@@ -30,9 +30,9 @@ Starphleet borrows heavily from the concepts of the [Twelve-Factor App](http://1
 
 * **Git Repositories**: Starphleet requires the use of the following types of repositories.
 
-  * **Starphleet Core**: Hosted by us and accessed at `github.com/wballard/starphleet.git`, contains the source code for Starphleet allowing you to bootstrap your headquarters repository.  The Starphleet Core repository should exist in one location.
+  * **Starphleet**: Hosted by us and accessed at `github.com/wballard/starphleet.git`, contains the source code for Starphleet allowing you to bootstrap your headquarters repository.
   * **Headquarters**: Hosted by you at `{headquarters_git_url}` (with an example  [available](https://github.com/wballard/starphleet.headquarters.git) from us), contains the configuration for the ships (virtual machine instances) and associated [Linux containers](https://linuxcontainers.org/).  You will need one headquarters repository per phleet.
-  * **Services**: Hosted by you at `{service_git_url}` and referenced in your headquarter's **orders** files, contains the source code for the individual services which run in [Linux containers](https://linuxcontainers.org/) on ships.  Service repositories can be referenced by multiple orders files across phleets.
+  * **Services**: Hosted by you at `{service_git_url}` and referenced in your headquarter's **orders** files, contains the source code for the individual services which run in [Linux containers](https://linuxcontainers.org/) on ships.
 
 * **Environment Variables**: Starphleet is configured entirely by environmental variables, saving you the chore of repeatedly typing the same text.
 
@@ -47,7 +47,6 @@ Starphleet borrows heavily from the concepts of the [Twelve-Factor App](http://1
 
 1.  Set the environment variable for the Git URL to your Starphleet headquarters, which contain the configuration for your phleet.  We suggest you start by forking our [base headquarters](https://github.com/wballard/starphleet.headquarters.git).  Your headquarters Git URL **must be network reachable** from your hosting cloud, making [public git hosting services](https://github.com/) a natural fit for Starphleet.
 
-
   ```bash
   $ export STARPHLEET_HEADQUARTERS={headquarters_git_url}
   ```
@@ -59,13 +58,13 @@ Starphleet borrows heavily from the concepts of the [Twelve-Factor App](http://1
   $ export STARPHLEET_PUBLIC_KEY=~/.ssh/{public_keyfile}
   ```
 
-After completing the above configuration steps, you can choose to deploy Starphleet (a) on your local workstation using **[Vagrant](http://www.vagrantup.com)**, or (b) into the cloud with **[Amazon Web Services (AWS)](http://aws.amazon.com)**.
+After completing the above configuration steps, you can choose to deploy Starphleet (a) on your local workstation using [Vagrant](http://www.vagrantup.com), or (b) into the cloud with [Amazon Web Services (AWS)](http://aws.amazon.com).
 
 ## Locally (Vagrant)
 
 [Vagrant](http://www.vagrantup.com) is a handy way to get a working autodeployment system inside a virtual machine right on your local workstation. Prebuilt base images are provided in the `Vagrantfile` for VMWare, VirtualBox and Parallels. The [Vagrant](http://www.vagrantup.com) option is great for figuring if your services will start/run/autodeploy without worrying about cloud configuration.
 
-1.  From the cloned [Starphleet](https://github.com/wballard/starphleet) directory, us Vagrant's `up` command, which will launch a new ship (virtual machine instance), perform a `$ git pull` on your `STARPHLEET_HEADQUARTERS`, deploy a new [Linux container](https://linuxcontainers.org/), and configure the service specified in the Starphleet headquarters (including automatically running `$ npm install` and `$ npm start`).
+1.  From the cloned [Starphleet](https://github.com/wballard/starphleet) directory, `vagrant up` command, which will launch a new ship (virtual machine instance), get your `${STARPHLEET_HEADQUARTERS}`, deploy [Linux containers](https://linuxcontainers.org/) for each service, and configure an HTTP proxy for the ship, allowing access to each service.
 
   ```bash
   $ vagrant up
@@ -94,7 +93,7 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
   $ npm install -g starphleet-cli
   ```
 
-1.  Use the Starphleet CLI's `init` and `add` commands to launch a new ship (virtual machine instance), perform a `$ git pull` on your `STARPHLEET_HEADQUARTERS`, deploy a new [Linux container](https://linuxcontainers.org/), and configure the service specified in the Starphleet headquarters (including automatically running `$ npm install` and `$ npm start`).
+1.  Use the Starphleet CLI's `init` and `add` commands to launch a new ship (virtual machine instance).
 
   ```bash
   $ starphleet init ec2
@@ -110,17 +109,55 @@ Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support o
 1.  Navigate in your web browser to `http://{ship_ip}/echo/hello_world`.  There will be an availability delay while Starphleet runs bootstrap code, however subsequent service deployments and updates will completely quickly.
 
 
-
-
 ## All Running?
-Once you are up and running, look in your `{headquarters_git_url}` repository at `echo/orders`. The contents of the orders directory are all that is required to get a web service automatically deploying on a ship (virtualized machine instance).
+Once you are up and running, look in your `${STARPHLEET_HEADQUARTERS}` repository at `echo/orders`. The contents of the orders directory are all that is required to get a web service automatically deploying on a ship (virtualized machine instance).
 
 * `export PORT=3000` to know on what port your service runs.  This port is mapped, by Starphleet, back to `http://{ship_ip}/echo` (on port 80).
 * `autodeploy https://github.com/wballard/echo.git` to know what to deploy.  Starphleet will automatically deploy your Ruby, Python, NodeJS, and static NGNIX projects with buildpacks.
 
 Order-ing up your own service is just as easy as adding a new directory and creating the `orders` file. Add. Commit. Push. Magic, your service will be available.  Any time that a Git repository referenced in an orders file is updated, for example `github.com/wballard/echo.git`, it will be autodeployed to every ship watching your headquarters.
 
-# MicroService Clouds
+# How To
+Lots of reference later in the documentation, but this is where you go to get things done.
+
+## Launch a new NodeJS Service
+Given that you have a program that listens for HTTP/HTTPS traffic, setting it up has a few things to know.
+
+* Make sure your `npm install` works, most likely mistake is you have global packages on your workstations.
+* Make sure your `npm start` works, the most likely mistake is you don't honor the `${PORT}` variable.
+* Create a new directory in your headquarters, and within that make an `orders` file.
+
+  ```bash
+  $ mkdir myservice
+  $ touch myservice/orders
+  ```
+
+* Configure your orders with an editor. This is a sample service.
+
+  ```bash
+  export PORT=3000
+  autodeploy https://github.com/wballard/echo
+  ```
+
+* Check that things are running
+
+  ```bash
+  $ curl http://ship/starphleet/status
+  ```
+
+## Debug a Service
+Services log -- and you must log to `stderr` and `stdout`. With that, your running
+service will forward to syslog on each ship.
+
+* Configure SSH access by placing your public key file in `${STARPHLEET_HEADQUARTERS}/authorized_keys`
+
+* Tail syslog, grepping for your `${SERVICE_NAME}`
+
+  ```bash
+  $ ssh admiral@ship tail -f /var/log/syslog | grep ${SERVICE_NAME}
+  ```
+
+## Make a MicroService Cloud
 The primary idea of Starphleet is to let you quickly create a cloud of related microservice. To make this easier, the key abstraction is that your services are at **paths** not **ports** by default. This lets you order up a series of services and have them all on one DNS name, saving you a lot of heartache with CORS, load balancers, and DNS configuration.
 
 Say you have a simple service with a todo list, a mail queue, and a website. You can set up a headquarters like:
