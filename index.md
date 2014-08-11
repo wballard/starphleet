@@ -369,7 +369,7 @@ These variables can be set in your headquarters `.starphleet` or `orders`.
 
 | Name | Value | Description
 | --- | --- | ---
-| BUILDPACK_URL | &lt;git_url&gt; | Specifies a custom buildpack to be used for autodeployment.  Set this in your Starphleet headquarters or in your service Git repository.
+| BUILDPACK_URL | git_url | Specifies a custom buildpack to be used for autodeployment.  Set this in your Starphleet headquarters or in your service Git repository.
 | PORT | number | This is an **all important environment variable**, and it is expected your service will honor it, publishing traffic here. This `PORT` is used to know where to connect the ship's proxy to your individual service.  Set this in your orders file.
 | PUBLISH_PORT | number | Allows your service to be accessible on the ship at `http://{SHIP_DNS}:PUBLISH_PORT` in addition to `http://{SHIP_DNS}/{service_name}`.  Set this in your orders file.
 | STARPHLEET_PULSE | number | The number of seconds between autodeploy checks, defaulting to a value of 10.
