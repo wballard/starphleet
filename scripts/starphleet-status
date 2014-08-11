@@ -58,7 +58,7 @@ EOF
   else
     FILTER="starphleetstatus"
   fi
-  for status in $(find "${CURRENT_ORDERS}" | grep starphleetstatus | grep ${FILTER})
+  for status in $(find "${CURRENT_ORDERS}" | grep 'starphleetstatus$' | grep ${FILTER})
   do
     ORDER_LOCAL=$(dirname "${status}")/git
     if [ -f $(dirname "${status}")/.container ]; then
@@ -67,6 +67,7 @@ EOF
       CONTAINER="<none>"
     fi
     ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
+    LOCAL_IP=$([ -f "${status}.ip" ] && cat "${status}.ip")
     get_CURRENT_SHA "${ORDER_LOCAL}"
     cd "$(dirname "${status}")/git"
     AUTHOR=$(git log -1 --format='%ae')
@@ -75,6 +76,7 @@ cat << EOF
   -
     order: ${ORDER}
     container: ${CONTAINER}
+    local_ip: ${LOCAL_IP}
     sha: ${CURRENT_SHA}
     author: ${AUTHOR}
     text: >
