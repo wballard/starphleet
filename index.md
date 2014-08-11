@@ -117,7 +117,7 @@ Once you are up and running, look in your `${STARPHLEET_HEADQUARTERS}` repositor
 
 Order-ing up your own service is just as easy as adding a new directory and creating the `orders` file. Add. Commit. Push. Magic, your service will be available.  Any time that a Git repository referenced in an orders file is updated, for example `github.com/wballard/echo.git`, it will be autodeployed to every ship watching your headquarters.
 
-# How To
+# How Do I?
 Lots of reference later in the documentation, but this is where you go to get things done.
 
 ## Work on a Ship
@@ -133,6 +133,15 @@ easily get and grant ssh access.
   ```
 
 * Revoke access by deleting public key files in `${STARPHLEET_HEADQUARTERS}/authorized_keys`
+
+## See What's Up
+Once you have an ssh public key in `${STARPHLEET_HEADQUARTERS}/authorized_keys`, you can:
+
+```bash
+$ ssh admiral@ship starphleet-status
+```
+
+This gives you a quick snapshot of what is happening.
 
 ## Launch a new NodeJS Service
 Given that you have a program that listens for HTTP/HTTPS traffic, setting it up has a few things to know.
@@ -156,7 +165,7 @@ Given that you have a program that listens for HTTP/HTTPS traffic, setting it up
 * Check that things are running
 
   ```bash
-  $ curl http://ship/starphleet/status
+  $ ssh admiral@ship starphleet-status
   ```
 
 ## Debug a Service
