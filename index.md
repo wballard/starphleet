@@ -341,6 +341,19 @@ This will run `bundle install` and make use of your `Procfile`.
 ### [NGINX](https://github.com/wballard/nginx-buildpack.git)
 This looks for a `nginx.conf.erb` template. The configuration will be rendered with all available environment variables.
 
+### [Makefile](https://github.com/wballard/makefile-buildpack)
+This is a handy old school way to run pretty much any kind of service you like.
+
+This follows the classic formula, working on a Makefile in the root of your
+service.
+
+```bash
+./configure
+make
+make install
+make start
+```
+
 ## Maintenance
 
 ### Service Start
