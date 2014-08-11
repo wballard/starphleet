@@ -42,6 +42,17 @@ trace app will be in ${HOME}/app
 export ORDERS_IN=${HOME}/app
 EOF
 
+#This *really needs* to be unescaped, notice the \$@ passed along
+#to git SSH and ... there are no variables to escape :)
+cat << 'EOF' >> ${CONTAINER_BUILD_SCRIPT}
+trace Preparing SSH
+#buildpacks may pull git and need ssh identity
+sudo starphleet-git-config ${STARPHLEET_APP_USER} > /tmp/gitsshconfig
+export GIT_SSH=/tmp/gitssh
+echo "ssh -F /tmp/gitsshconfig \$@" > /tmp/gitssh
+chmod +x /tmp/gitssh
+EOF
+
 #now -- this is escaped, lots of variables included from this script
 cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 
@@ -58,17 +69,6 @@ trace Fetching buildpacks
 #set up a place onboard for possible custom buildpacks
 mkdir -p "\${HOME}/build"
 rsync -az "${BUILDPACKS}/" "\${HOME}/build/buildpacks"
-EOF
-
-#This *really needs* to be unescaped, notice the \$@ passed along
-#to git SSH and ... there are no variables to escape :)
-cat << 'EOF' >> ${CONTAINER_BUILD_SCRIPT}
-trace Preparing SSH
-#buildpacks may pull git and need ssh identity
-starphleet-git-config > /tmp/gitsshconfig
-export GIT_SSH=/tmp/gitssh
-echo "ssh -F /tmp/gitsshconfig \$@" > /tmp/gitssh
-chmod +x /tmp/gitssh
 EOF
 
 cat << EOF >> ${CONTAINER_BUILD_SCRIPT}

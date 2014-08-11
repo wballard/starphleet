@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Usage:
-###    starphleet-git-config
+###    starphleet-git-config [<user>]
 ### --help
 ###
 ### Generate git configuration to override ssh.
@@ -8,6 +8,10 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+USER=${user:-${USER}}
+
+trace configuring keys for ${USER}
 
 #it is really important to note that the output of this goes into
 #the .sshconfig by piping
