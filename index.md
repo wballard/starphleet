@@ -168,6 +168,17 @@ Given that you have a program that listens for HTTP/HTTPS traffic, setting it up
   $ ssh admiral@ship starphleet-status
   ```
 
+## See Why a Service Failed
+Services have build logs and run logs. Run logs are in syslog, but build logs
+can be had with.
+
+* Configure SSH access by placing your public key file in `${STARPHLEET_HEADQUARTERS}/authorized_keys`
+* View and tail build logs
+
+  ```bash
+  $ ssh admiral@ship starphleet-logs ${SERVICE_NAME}
+  ```
+
 ## Debug a Service
 Services log -- and you must log to `stderr` and `stdout`. With that, your running
 service will forward to syslog on each ship.
