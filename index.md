@@ -120,6 +120,20 @@ Order-ing up your own service is just as easy as adding a new directory and crea
 # How To
 Lots of reference later in the documentation, but this is where you go to get things done.
 
+## Work on a Ship
+Much different than other PaaS, Starphleet treats you like an adult. So, you can
+easily get and grant ssh access.
+
+* Multiple users can log in and control the fleet, they are called **admirals**.
+* Configure SSH access by placing public key files in `${STARPHLEET_HEADQUARTERS}/authorized_keys`
+* Access a ship with
+
+  ```bash
+  $ ssh admiral@ship
+  ```
+
+* Revoke access by deleting public key files in `${STARPHLEET_HEADQUARTERS}/authorized_keys`
+
 ## Launch a new NodeJS Service
 Given that you have a program that listens for HTTP/HTTPS traffic, setting it up has a few things to know.
 
@@ -156,6 +170,9 @@ service will forward to syslog on each ship.
   ```bash
   $ ssh admiral@ship tail -f /var/log/syslog | grep ${SERVICE_NAME}
   ```
+
+## Talk to Other Services
+On the same ship, all services are published and can be reached at `http://localship/${service}/`. Just plug in your `${service}`, the name `localship` will refer to the ship, while `localhost` refers to the service container.
 
 ## Make a MicroService Cloud
 The primary idea of Starphleet is to let you quickly create a cloud of related microservice. To make this easier, the key abstraction is that your services are at **paths** not **ports** by default. This lets you order up a series of services and have them all on one DNS name, saving you a lot of heartache with CORS, load balancers, and DNS configuration.
