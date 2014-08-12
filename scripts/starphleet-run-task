@@ -6,15 +6,17 @@
 ### Run a script as a task, meaning three things:
 ### * Lock with flock, so that only one is running at a time
 ### * tee through to logger to support syslog
-### * capture both stderr and stdout
-### with syslog logging
+### * capture both stderr and stdout with syslog logging
+###
+### Variables
+###   SYSLOG_TAG  include this in the syslog messagse
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 #stdout to a pipe for logger
-exec > >(logger --stderr -t $(basename ${script}))
+exec > >(logger --stderr -t "${SYSLOG_TAG} $(basename ${script})")
 #and stderr too!
 exec 2>&1
 
