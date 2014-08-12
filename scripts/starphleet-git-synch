@@ -25,7 +25,7 @@ trap 'cd "${STARTING_DIRECTORY}"' EXIT
 reclone () {
   cd ..
   rm -rf "${local}"
-  starphleet-git clone --depth 100 "${REMOTE}" "${local}" || fatal clone error
+  starphleet-git clone "${REMOTE}" "${local}" || fatal clone error
 }
 
 if [ -d "${local}/.git" ]; then
