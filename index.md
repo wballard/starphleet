@@ -206,6 +206,23 @@ This synchronizes a git repository to your ship that isn't a **service**, it is 
   * Place `autodeploy ${your_git_url}` in that file
 * Your data will be available at `/var/data/${name}` inside your containers
 
+## Authenticate with LDAP
+Starphleet can talk to your LDAP servers, authenticating on a per service basis. Set it up:
+
+* Make sure your headquarters has a `/ldap_servers` folder
+* Make a file in that folder, here is our example `guardian`
+  ```bash
+  export LDAP_URL='ldap://guardian-gc.glgresearch.com:3268/dc=glgroup,dc=com?sAMAccountName?sub?(objectCategory=person)(objectClass=User)'
+  export LDAP_USER='glgroup\\sampleServiceAccount'
+  export LDAP_PASSWORD='****'
+  ```
+* Now you have a named LDAP server
+* In your service, make a file `/${service_name}/.ldap`
+* In that file, pase the name of the LDAP server, in this case
+  ```bash
+  guardian
+  ```
+
 ## Talk to Other Services
 On the same ship, all services are published and can be reached at `http://localship/${service}/`. Just plug in your `${service}`, the name `localship` will refer to the ship, while `localhost` refers to the service container.
 
