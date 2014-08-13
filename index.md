@@ -143,6 +143,12 @@ $ ssh admiral@ship starphleet-status
 
 This gives you a quick snapshot of what is happening.
 
+And, to look into a running service:
+
+```bash
+$ ssh admiral@ship tail -f  /var/log/syslog | grep ${SERVICE_NAME}
+```
+
 ## Launch a new NodeJS Service
 Given that you have a program that listens for HTTP/HTTPS traffic, setting it up has a few things to know.
 
@@ -168,7 +174,7 @@ Given that you have a program that listens for HTTP/HTTPS traffic, setting it up
   $ ssh admiral@ship starphleet-status
   ```
 
-## See Why a Service Failed
+## See Why a Service Failed To Start
 Services have build logs and run logs. Run logs are in syslog, but build logs
 can be had with.
 
@@ -190,6 +196,15 @@ service will forward to syslog on each ship.
   ```bash
   $ ssh admiral@ship tail -f /var/log/syslog | grep ${SERVICE_NAME}
   ```
+
+## Reference Other Data Files
+If your service needs data files, for example templates, you can deploy them as shared data as a **remote**.
+This synchronizes a git repository to your ship that isn't a **service**, it is just **data**.
+
+* In your headquarters make a folder called '${name}'
+* In that folder, make a file called `remote`
+  * Place `autodeploy ${your_git_url}` in that file
+* Your data will be available at `/var/data/${name}` inside your containers
 
 ## Talk to Other Services
 On the same ship, all services are published and can be reached at `http://localship/${service}/`. Just plug in your `${service}`, the name `localship` will refer to the ship, while `localhost` refers to the service container.
