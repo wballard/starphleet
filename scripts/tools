@@ -42,6 +42,10 @@ function get_CURRENT_SHA() {
   export CURRENT_SHA=$(git --git-dir "$1/.git" --work-tree "$1" rev-parse --short HEAD)
 }
 
+function get_VERSION_DIFF() {
+  export VERSION_DIFF=$(git --git-dir "$1/.git" --work-tree "$1" diff ${2} ${3} "${4}"
+}
+
 function get_SHASUM() {
   export SHASUM=$(sha1sum "${1}" | awk '{ print substr($1,1,7); }')
 }
