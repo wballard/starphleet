@@ -13,8 +13,10 @@ trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 ENCODED_ORDER=$(urlencode "${order}")
 for name in $(lxc-ls | grep -e "service-${ENCODED_ORDER}-" | grep --invert-match "${current_service_name}")
 do
-  info "reaping ${name}"
-  stop starphleet_serve_order name="${name}" || true
-  starphleet-lxc-destroy "${name}"
+  if [[  $(echo ${name} | rev | cut -d '-' -f3- | rev | cut -d '-' -f2-) = ${ENCODED_ORDER} ]]; then
+    info "reaping ${name}"
+    stop starphleet_serve_order name="${name}" || true
+    starphleet-lxc-destroy "${name}"
+  fi
 done
 info "reaper complete"
