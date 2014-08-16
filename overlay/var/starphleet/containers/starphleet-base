@@ -52,4 +52,3 @@ echo -n ${PACKAGES}  | tr ' ' '\n' | xargs -I % xargs sudo apt-get install -y --
 #ruby superstition
 export HOME=/
 sudo gem install bundler
-

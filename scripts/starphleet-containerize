@@ -24,10 +24,8 @@ set -e
 #places for things to live
 STARPHLEET_BASE="${STARPHLEET_BASE:-starphleet-base}"
 
-#get the orders copied to a place where the will be visible to the container
-CONTAINER_ORDERS_SCRIPT=${STARPHLEET_TMP}/${container_name}.orders
 ORDERS="${orders_dir}/orders"
-cp "${ORDERS}" "${CONTAINER_ORDERS_SCRIPT}"
+
 #build script for our service container, the most important thing is that
 #it gets the source from git
 #the second most important thing is to know that this runs on the container
@@ -59,7 +57,7 @@ cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 trace Fetching service
 starphleet-git-synch "${git_url}" \${ORDERS_IN}
 trace Configuring environment
-sudo [ -f "${CONTAINER_ORDERS_SCRIPT}" ] && sudo cp "${CONTAINER_ORDERS_SCRIPT}" \${ORDERS_IN}/orders
+sudo [ -f "${ORDERS}" ] && sudo cp "${ORDERS}" \${ORDERS_IN}/orders
 sudo chown ${STARPHLEET_APP_USER} \${ORDERS_IN}/orders
 sudo chmod a+x  \${ORDERS_IN}/orders
 trace Running orders
@@ -71,8 +69,8 @@ mkdir -p "\${HOME}/build"
 rsync -az "${BUILDPACKS}/" "\${HOME}/build/buildpacks"
 EOF
 
-cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 #now hand off to buildstep builder
+cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 trace Running buildpack
 export BUILDPACK_CACHE_DIR="${orders_dir}/.cache"
 if [ -d "\${BUILDPACK_CACHE_DIR}" ]
@@ -83,6 +81,19 @@ sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
 sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
 
 builder \${ORDERS_IN}/orders
+EOF
+
+#and look for any sh-at jobs
+cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
+trace Looking for scheduled tasks in ${orders_dir}
+for file in \$(find ${orders_dir} -maxdepth 1 -type f)
+do
+  get_sh_at "\${file}"
+  if [ -n "\${SH_AT}" ]; then
+    echo "\${SH_AT}" starphleet-run-task "\${file}" >> \${HOME}/sh_at
+  fi
+  crontab \${HOME}/sh_at
+done
 EOF
 
 info building ${container_name}
