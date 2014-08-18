@@ -43,7 +43,7 @@ function get_CURRENT_SHA() {
 }
 
 function get_VERSION_DIFF() {
-  export VERSION_DIFF=$(git --git-dir "$1/.git" --work-tree "$1" diff ${2} ${3} "${4}"
+  export VERSION_DIFF=$(git --git-dir ${1}/.git --work-tree ${1} diff ${2} ${3} ${4})
 }
 
 function get_SHASUM() {

@@ -11,6 +11,7 @@ lxc
 man
 python-pip
 nodejs
+libpcre3
 libpcre3-dev
 libssl-dev
 lib64z1-dev

@@ -22,9 +22,8 @@ exec 2>&1
 
 
 get_SHASUM "${script}"
+exec 200>/var/tmp/${SHASUM}
+flock -n 200 || exit 1
 
-(
- flock -n 9 || exit 1
- info running ${script}
- 2>&1 ${script}
-) 9>/var/tmp/${SHASUM}
+info running ${script}
+2>&1 ${script}
