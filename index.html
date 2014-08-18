@@ -9354,6 +9354,28 @@ Starphleet can talk to your LDAP servers, authenticating on a per service basis.
 ## Talk to Other Services
 On the same ship, all services are published and can be reached at `http://localship/${service}/`. Just plug in your `${service}`, the name `localship` will refer to the ship, while `localhost` refers to the service container.
 
+## Schedule a Task
+Starphleet lets you specific `#@` directives in shell scripts in order to schedule
+jobs in a container. These with in containers with services, so the most common
+thing you do is curl yourself:
+
+```bash
+#!/usr/bin/env bash
+#@ * * * * 1
+
+#This is a simple sh-at scheduled job example, it just hits the local
+#service -- which is on the container itself and so isn&apos;t at /echo
+curl http://localhost/on_container
+
+#and you can always hit the ship, in which case you need to use the service
+#url /echo
+curl http://localship/echo/on_ship
+
+```
+
+The `#@` directive is just a cron scheduling expression captured inside the
+script itself.
+
 ## Make a MicroService Cloud
 The primary idea of Starphleet is to let you quickly create a cloud of related microservice. To make this easier, the key abstraction is that your services are at **paths** not **ports** by default. This lets you order up a series of services and have them all on one DNS name, saving you a lot of heartache with CORS, load balancers, and DNS configuration.
 
@@ -9406,11 +9428,10 @@ shipscripts/
 ssl/
   crt
   key
-jobs
 .starphleet
 ```
 
-#### authorized\_keys/
+#### authorized_keys/
 A directory containing public key files, one key per file, which allows ssh access to the ships as follows:
 
 ```bash
@@ -9419,7 +9440,7 @@ $ ssh admiral@{ship_ip}
 
 Every user shares the same username, `admiral`, which is a member of the sudoers group.  Once pushed to your headquarters, updates to the `authorized_keys/` directory will be reflected on your ships within seconds.  This open ssh access to each ship lets you do what you want, when you want.  If you manage to wreck a ship, you can always add a new one using the [Starphleet CLI](https://github.com/wballard/starphleet-cli).
 
-#### beta\_groups/
+#### beta_groups/
 Working together with authentication, you can create **beta groups**. These groups provide a named list of users.
 
 ```
@@ -9427,7 +9448,7 @@ wballard
 fred
 ```
 
-#### ldap\_servers/
+#### ldap_servers/
 Authenticate users to your services via LDAP by specifying LDAP servers. Each named file in this directory requires three environment variables to connect a service account for end user LDAP Authentication. Here is how we hook up to our active directory:
 
 ```bash
@@ -9473,6 +9494,16 @@ A directory which defines the relative path from which your service is served (`
   autodeploy {data_git_url}
   ```
 
+* **jobs**
+  Any shell script that contains a `@#` cron directive, and is executable, will be scheduled
+  to run in the container.
+
+  All [Linux containers](https://linuxcontainers.org/) support `cron`, but the jobs file allows you to dodge a few common problems with cron:
+
+  * The logging gets captured to syslog for you automatically and then piped to `logger`.
+  * The environment is fixed inside your container for your service.
+  * You don&apos;t need to think about which account runs the jobs.
+
 Each ship in the phleet runs every ordered service. This makes things nice and symmetrical, and simplifies scaling. Just add more ships if you need more capacity. If you need full tilt performance, you can easily make a phleet with just one ordered service at `/`. Need a different mixture of services? Launch another phleet!
 
 While each [Linux container](https://linuxcontainers.org/) (and by extension, service) has its own independent directory structure, Starphleet symlinks `/var/data/` in each [Linux container](https://linuxcontainers.org/)  to `/var/data/` on the ship, allowing
@@ -9494,22 +9525,7 @@ Scripts in this folder can be used to implement many different kinds of function
 Provide two files `crt` and `key`, which must be set to not need a password, in order to enable
 the ship to service SSL.
 
-#### jobs
-A file which allows scheduling of phleet-level cron tasks to call specified service endpoints.  
-The jobs file uses cron syntax, the only difference being a URL in place of a local command.
 
-
-```shell
-* * * * * http://localhost/workflow?do=stuff
-* * * 1 * http://localhost/workflow?do=modaystuff
-```
-
-All [Linux containers](https://linuxcontainers.org/) support `cron`, but the jobs file allows you to dodge a few common problems with cron:
-
-* The logging gets captured to syslog for you automatically and then piped to `logger`.
-* The environment is fixed inside your container for your service.
-* You don&apos;t need to think about which account runs the jobs.
-* One-off instances of the jobs can be run manually with curl.
 
 #### .starphleet
 A file which contains environment variables that apply to all services in your phleet.  This file is a good place to store usernames, passwords, and connection strings, if your headquarters is in a private, hidden repository reachable by `git+ssh`.  The environment variables set in this file take precedence over all others set elsewhere, and apply to every service deployment within a phleet.
