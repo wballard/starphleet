@@ -34,10 +34,9 @@ lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data no
 EOF
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
+(
 #flocked, parallel container build is a race condition on start
-exec 200>/var/lock/${CONTAINER_NAME}
 flock 200
-
 if [ -f "${CONTAINER_OVERLAY}/build_script" ] && diff "${CONTAINER_OVERLAY}/build_script" "${build_script}"; then
   info container is up to date
   exit 0
@@ -66,6 +65,7 @@ else
   cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/builder "${CONTAINER_OVERLAY}/usr/bin/"
+  cp -R ${STARPHLEET_ROOT}/containers/overlay/* ${CONTAINER_OVERLAY}/
   #this is the build script for the container itself
   cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
   chmod +x "${CONTAINER_OVERLAY}/build_script"
@@ -89,3 +89,4 @@ else
   fi
   info made container ${CONTAINER_NAME}
 fi
+) 200>/var/lock/${CONTAINER_NAME}

@@ -92,8 +92,10 @@ do
   if [ -n "\${SH_AT}" ]; then
     echo "\${SH_AT}" starphleet-run-task "\${file}" >> \${HOME}/sh_at
   fi
-  crontab \${HOME}/sh_at
 done
+if [ -f "\${HOME}/sh_at" ]; then
+  crontab \${HOME}/sh_at
+fi
 EOF
 
 info building ${container_name}
