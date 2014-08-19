@@ -25,17 +25,16 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
 
   config.vm.provider :vmware_fusion do |f, override|
     override.vm.network "public_network"
-    override.vm.box = ENV['BOX_NAME'] || 'saucy-vmware'
-    override.vm.box_url = "http://brennovich.s3.amazonaws.com/saucy64_vmware_fusion.box"
+    override.vm.box = ENV['BOX_NAME'] || 'trusty-vmware'
+    override.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/latest/ubuntu-14.04-amd64-vmwarefusion.box"
     f.vmx["displayName"] = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
     f.vmx["memsize"] = VAGRANT_MEMSIZE
   end
 
   config.vm.provider :virtualbox do |f, override|
     override.vm.network "public_network"
-    override.vm.box = ENV['BOX_NAME'] || 'saucy-virtualbox'
-    override.vm.box_url = "https://s3.amazonaws.com/glg_starphleet/saucy-13.10-vbox-4.3.6.box"
-    f.vmx["displayName"] = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
+    override.vm.box = ENV['BOX_NAME'] || 'trusty-virtualbox'
+    override.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
     f.customize ["modifyvm", :id, "--memory", VAGRANT_MEMSIZE]
   end
 

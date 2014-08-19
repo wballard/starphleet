@@ -15,16 +15,16 @@ source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
+#stderr too!
+exec 2>&1
 #stdout to a pipe for logger
 exec > >(logger --stderr -t "${SYSLOG_TAG} $(basename ${script})")
-#and stderr too!
-exec 2>&1
-
 
 get_SHASUM "${script}"
-
 (
- flock -n 9 || exit 1
- info running ${script}
- 2>&1 ${script}
-) 9>/var/tmp/${SHASUM}
+#flocked, parallel container build is a race condition on start
+flock -n 200 || exit 1
+
+info running ${script}
+${script}
+) 200>/var/lock/${SHASUM}

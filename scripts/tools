@@ -42,6 +42,10 @@ function get_CURRENT_SHA() {
   export CURRENT_SHA=$(git --git-dir "$1/.git" --work-tree "$1" rev-parse --short HEAD)
 }
 
+function get_VERSION_DIFF() {
+  export VERSION_DIFF=$(git --git-dir ${1}/.git --work-tree ${1} diff ${2} ${3} ${4})
+}
+
 function get_SHASUM() {
   export SHASUM=$(sha1sum "${1}" | awk '{ print substr($1,1,7); }')
 }
@@ -117,6 +121,11 @@ function run_orders()
 #way to easily let containers speak to the ship
 function bridge_ip() {
   BRIDGE_IP=$(ifconfig | grep -A 1 'lxcbr0' | tail -1 | cut -d ':' -f 2 | cut -d ' ' -f 1)
+}
+
+#Get any sh-at #@ scheduling expression
+function get_sh_at() {
+  SH_AT=$(grep -E '^#@ .*$' "${1}" | tail -n 1 | sed -e 's[^#@ [[g')
 }
 
 # environment set up each time we ask for tools
