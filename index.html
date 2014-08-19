@@ -9351,6 +9351,18 @@ Starphleet can talk to your LDAP servers, authenticating on a per service basis.
   guardian
   ```
 
+## Health Check my Service
+Orders service repository can supply a `{HEALTHCHECK}` like:
+
+```bash
+export HEALTHCHECK=&apos;/&apos;
+```
+
+Upon deployment of a service update, Starphleet will issue a GET request to `http://{container_ip}:{PORT}/{HEALTHCHECK}`, and will expect an HTTP 200 response within 60 seconds.
+The `{PORT}` in the preceding URL will have the value specified in your orders.
+
+If you fail the check, the service doesn&apos;t deploy.
+
 ## Talk to Other Services
 On the same ship, all services are published and can be reached at `http://localship/${service}/`. Just plug in your `${service}`, the name `localship` will refer to the ship, while `localhost` refers to the service container.
 
@@ -9616,13 +9628,7 @@ There is no need in Starphleet to explicitly call `nodemon`, `forever`, or any o
 Just commit and push to the repository referenced in your orders file, `{service_git_url}`, which will result in a service autodeployment to every associated ship (even across phleets if a service is used in more than one phleet).  As new versions of services are updated, fresh containers are built and run in parallel to prior versions with a drainstop. As a result, in-process requests to existing services should not interrupted, with one caveat: database and storage systems maintained outside of Starphleet.  Many software components are developed in a database-heavy manner with no real notion of backward compatibility for data storage.  In order to unlock the full benefit of autodeployment and rolling upgrades in Starphleet, you must think about how different versions of your code will interact with your database and storage systems.
 
 #### Healthcheck
-Each service repository can supply a `healthcheck` file, located at `/healthcheck`, which contains the following content:
-  ```bash
-  /{snippet}
-  ```
-
-Upon deployment of a service update, Starphleet will issue a GET request to `http://{container_ip}:PORT/{snippet}`, and will expect an HTTP 200 response within 60 seconds.  The PORT in the preceding URL will have the value of the PORT environment variable specified in your service&apos;s `orders` file.
-
+E
 ### Service Rollbacks
 If bad update goes out to a service, it can be easily reverted by using `$ git revert` to pull out the problem commits, then re-pushing to the `{service_git_url}` referenced in `{headquarters_git_url}/{service_name}/orders`.  This approach also preserves your commit and deploy history.
 
