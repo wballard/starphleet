@@ -12,14 +12,22 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 #flush out caches, I know, I know -- but really if you don't do this
 #Linux would rather swap than let go
-sync && echo 3 | sudo tee /proc/sys/vm/drop_caches
+sync && echo 3 > /proc/sys/vm/drop_caches
+
+#put in the system overlay, gets all the files in place
+#for the starphleet jobs
+rm -f /etc/init/starphleet*
+cp -R ${DIR}/../overlay/* /
+cp -R ${DIR}/../nginx/* /var/starphleet/nginx/
+
+#source again, yep -- now the environment is in place
+source ${DIR}/tools
 
 #this is a provisioning script for the base system/host/vm
 #run as root, with the starphleet source tree at /starphleet
 
 #role account for folks acting as the admiral, do this really early
 #as it will provide the home directory
-info here
 make_admiral
 
 mkdir -p "${LXC_ROOT}"
@@ -33,11 +41,6 @@ hostname "${SHIP}"
 echo "${SHIP}" > /etc/hostname
 echo "127.0.0.1 ${SHIP} localhost" > /etc/hosts
 
-#put in the system overlay, gets all the files in place
-#for the starphleet jobs
-rm -f /etc/init/starphleet*
-cp -R ${DIR}/../overlay/* /
-cp -R ${DIR}/../nginx/* /var/starphleet/nginx/
 
 #packages
 debconf-set-selections <<< "postfix postfix/mailname string '${SHIP}'"
