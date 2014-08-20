@@ -11,7 +11,7 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 
 ENCODED_ORDER=$(urlencode "${order}")
-for name in $(lxc-ls | grep -e "service-${ENCODED_ORDER}-" | grep --fixed-strings --invert-match "${current_service_name}")
+for name in $(lxc-ls | grep -e "service-${ENCODED_ORDER}-([a-f0-9]){7}-([a-f0-9]){7}" | grep --invert-match "${current_service_name}")
 do
   info "reaping ${name}"
   stop starphleet_serve_order name="${name}" || true
