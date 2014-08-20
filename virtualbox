@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-vagrant up
+vagrant up --provider virtualbox
