@@ -34,8 +34,7 @@
     "starphleet-install": "./scripts/starphleet-install",
     "starphleet-patch": "./scripts/starphleet-patch",
     "starphleet-ready": "./scripts/starphleet-ready",
-    "starphleet-run-task": "./scripts/starphleet-run-task",
-    "starphleet-run-web": "./scripts/starphleet-run-web"
+    "starphleet-run-task": "./scripts/starphleet-run-task"
   },
   "repository": {
     "type": "git",
