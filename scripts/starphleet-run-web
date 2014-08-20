@@ -13,10 +13,5 @@ help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 
-#stderr too!
-exec 2>&1
-#stdout to a pipe for logger
-exec > >(logger --stderr -t "${order}")
-
 set -e
-lxc-attach --name ${container} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "setsid ~/start web"
+2>&1 lxc-attach --name ${container} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "setsid ~/start web" | logger --stderr -t "${order}"
