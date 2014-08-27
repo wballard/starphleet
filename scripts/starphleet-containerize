@@ -37,7 +37,7 @@ cat << 'EOF' > ${CONTAINER_BUILD_SCRIPT}
 set -e
 source /usr/bin/tools
 trace app will be in ${HOME}/app
-export ORDERS_IN=${HOME}/app
+export APP_IN=${HOME}/app
 EOF
 
 #This *really needs* to be unescaped, notice the \$@ passed along
@@ -54,14 +54,13 @@ EOF
 #now -- this is escaped, lots of variables included from this script
 cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 
-trace Fetching service
-starphleet-git-synch "${git_url}" \${ORDERS_IN}
-trace Configuring environment
-sudo [ -f "${ORDERS}" ] && sudo cp "${ORDERS}" \${ORDERS_IN}/orders
-sudo chown ${STARPHLEET_APP_USER} \${ORDERS_IN}/orders
-sudo chmod a+x  \${ORDERS_IN}/orders
+trace Fetching service to \${APP_IN}
+starphleet-git-synch "${git_url}" \${APP_IN}
 trace Running orders
-run_orders \${ORDERS_IN}/orders
+run_orders ${ORDERS}
+
+trace Prepping container
+[ -x ${orders_dir}/on_containerize ] && sudo ${orders_dir}/on_containerize
 
 trace Fetching buildpacks
 #set up a place onboard for possible custom buildpacks
@@ -80,7 +79,7 @@ fi
 sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
 sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
 
-builder \${ORDERS_IN}/orders
+builder ${ORDERS}
 EOF
 
 #and look for any sh-at jobs

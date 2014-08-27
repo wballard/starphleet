@@ -72,7 +72,7 @@ cat << EOF > "${HOME}/start"
 export HOME=${build_root}
 export ORDERS_IN=${build_root}
 source /usr/bin/tools
-trace running orders ${orders}
+trace Running orders
 run_orders ${orders}
 for file in ${build_root}/.profile.d/*; do source \$file; done
 cd ${build_root}
