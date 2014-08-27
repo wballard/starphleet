@@ -149,6 +149,17 @@ And, to look into a running service:
 $ ssh admiral@ship tail -f  /var/log/syslog | grep ${SERVICE_NAME}
 ```
 
+## Customize a Container
+You can do anything you like to a container with simple shell scripting by creating a
+`on_containerize` script right next to your `orders`. This will be run right before the buildpacks,
+so it is a great place to toss on additional packages or make directories you need.
+
+  ```bash
+  #!/usr/bin/env bash
+  #a sample script that is run when a container is built
+  apt-get install -y freetds-dev libmysqlclient-dev
+  ```
+
 ## Launch a new NodeJS Service
 Given that you have a program that listens for HTTP/HTTPS traffic, setting it up has a few things to know.
 
