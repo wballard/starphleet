@@ -7,13 +7,12 @@ source ${DIR}/tools
 
 container_environment ${app_root} ${orders}
 
+get_SHASUM "${script}"
+(
 #stderr too!
 exec 2>&1
 #stdout to a pipe for logger
 exec > >(logger --stderr -t "$(basename ${script})")
-
-get_SHASUM "${script}"
-(
 #flocked, this will exit right away rather than run, but no error code
 #otherwise cron will want to email you
 flock -n 200 || exit 0
