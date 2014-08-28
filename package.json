@@ -10,6 +10,8 @@
     "urlencode": "./scripts/urlencode",
     "buildpacks": "./scripts/buildpacks",
     "builder": "./scripts/builder",
+    "cronner": "./scripts/cronner",
+    "runner": "./scripts/runner",
     "starphleet-headquarters": "./scripts/starphleet-headquarters",
     "starphleet-containerize": "./scripts/starphleet-containerize",
     "starphleet-containermake": "./scripts/starphleet-containermake",
@@ -33,8 +35,7 @@
     "starphleet-update": "./scripts/starphleet-update",
     "starphleet-install": "./scripts/starphleet-install",
     "starphleet-patch": "./scripts/starphleet-patch",
-    "starphleet-ready": "./scripts/starphleet-ready",
-    "starphleet-run-task": "./scripts/starphleet-run-task"
+    "starphleet-ready": "./scripts/starphleet-ready"
   },
   "repository": {
     "type": "git",

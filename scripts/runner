@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+app_root="${1}"
+orders="${2}"
+script="${3}"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+
+container_environment ${app_root} ${orders}
+
+#stderr too!
+exec 2>&1
+#stdout to a pipe for logger
+exec > >(logger --stderr -t "$(basename ${script})")
+
+get_SHASUM "${script}"
+(
+#flocked, this will exit right away rather than run, but no error code
+#otherwise cron will want to email you
+flock -n 200 || exit 0
+
+info running ${script}
+${script}
+) 200>/var/lock/${SHASUM}

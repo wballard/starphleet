@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -e
+orders_dir="${1}"
+orders="${2}"
+app_root="${HOME}/app"
+
+#Get any sh-at #@ scheduling expression
+function get_sh_at() {
+  SH_AT=$(grep -E '^#@ .*$' "${1}" | tail -n 1 | sed -e 's[^#@ [[g')
+}
+
+for file in $(find ${orders_dir} -maxdepth 1 -type f)
+do
+  get_sh_at "${file}"
+  if [ -n "${SH_AT}" ]; then
+    echo "${SH_AT}" runner "${app_root}" "${orders}" "${file}" >> "${HOME}/sh_at"
+  fi
+done
+if [ -f "${HOME}/sh_at" ]; then
+  crontab "${HOME}/sh_at"
+fi

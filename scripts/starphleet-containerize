@@ -80,21 +80,7 @@ sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
 sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
 
 builder ${ORDERS}
-EOF
-
-#and look for any sh-at jobs
-cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
-trace Looking for scheduled tasks in ${orders_dir}
-for file in \$(find ${orders_dir} -maxdepth 1 -type f)
-do
-  get_sh_at "\${file}"
-  if [ -n "\${SH_AT}" ]; then
-    echo "\${SH_AT}" starphleet-run-task "\${file}" >> \${HOME}/sh_at
-  fi
-done
-if [ -f "\${HOME}/sh_at" ]; then
-  crontab \${HOME}/sh_at
-fi
+cronner ${orders_dir} ${ORDERS}
 EOF
 
 info building ${container_name}

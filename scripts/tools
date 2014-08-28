@@ -123,9 +123,11 @@ function bridge_ip() {
   BRIDGE_IP=$(ifconfig | grep -A 1 'lxcbr0' | tail -1 | cut -d ':' -f 2 | cut -d ' ' -f 1)
 }
 
-#Get any sh-at #@ scheduling expression
-function get_sh_at() {
-  SH_AT=$(grep -E '^#@ .*$' "${1}" | tail -n 1 | sed -e 's[^#@ [[g')
+#set the environment up for the app_root and orders
+function container_environment() {
+  cd ${1}
+  run_orders ${2}
+  for file in ${1}/.profile.d/*; do source ${file}; done
 }
 
 # environment set up each time we ask for tools

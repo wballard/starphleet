@@ -65,6 +65,8 @@ else
   cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/builder "${CONTAINER_OVERLAY}/usr/bin/"
+  cp /usr/bin/cronner "${CONTAINER_OVERLAY}/usr/bin/"
+  cp /usr/bin/runner "${CONTAINER_OVERLAY}/usr/bin/"
   cp -R ${STARPHLEET_ROOT}/containers/overlay/* ${CONTAINER_OVERLAY}/
   #this is the build script for the container itself
   cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
