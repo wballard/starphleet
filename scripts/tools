@@ -128,6 +128,7 @@ function container_environment() {
   cd ${1}
   run_orders ${2}
   for file in ${1}/.profile.d/*; do source ${file}; done
+  export PATH=${PATH}:/usr/local/bin
 }
 
 # environment set up each time we ask for tools
