@@ -84,7 +84,7 @@ function make_admiral() {
 function mail_log()
 {
   if which mail > /dev/null; then
-    ORDER_LOCAL="${CURRENT_ORDERS}/${order}/git"
+    ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
     latest_AUTHOR "${ORDER_LOCAL}"
     cat /var/log/upstart/${UPSTART_JOB}-${name}.log \
     | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \

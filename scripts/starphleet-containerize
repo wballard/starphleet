@@ -84,18 +84,5 @@ cronner ${orders_dir} ${ORDERS}
 EOF
 
 info building ${container_name}
-#making base containers as needed, base container serves as the source for
-#and we clone the service container on top, the idea is the base container
-#can be re-used and thus improve build time
-if [ -f "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}" ]
-then
-  #base container from a headquarters container script
-  starphleet-containermake "${STARPHLEET_BASE}" "${HEADQUARTERS_LOCAL}/containers/${STARPHLEET_BASE}"
-elif [ -f "/var/starphleet/containers/${STARPHLEET_BASE}" ]
-then
-  #base container from a starphleet provided container script
-  starphleet-containermake "${STARPHLEET_BASE}" "/var/starphleet/containers/${STARPHLEET_BASE}"
-else
-  fatal no base container script ${STARPHLEET_BASE} is available
-fi
+#and now, actually make the container for your application
 starphleet-containermake --run "${container_name}" "${CONTAINER_BUILD_SCRIPT}" "${STARPHLEET_BASE}"

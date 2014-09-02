@@ -21,7 +21,6 @@ chmod 777 /var/lib/lxc/data
 
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
-CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
 #configuration, this is the place to mount directories on the host computer
 #into the container
 #note: this takes effect after the initial create, which generates the
@@ -37,22 +36,19 @@ trap 'rm -rf ${CONTAINER_CONF}' EXIT
 (
 #flocked, parallel container build is a race condition on start
 flock 200
-if [ -f "${CONTAINER_OVERLAY}/build_script" ] && diff "${CONTAINER_OVERLAY}/build_script" "${build_script}"; then
-  info container is up to date
+if lxc-ls | grep "^${container_name}$"; then
+  info container exists
   exit 0
 else
   info making a new container ${CONTAINER_NAME}
   starphleet-lxc-destroy ${CONTAINER_NAME}
-  #special case to make the base, so we can always snapshot
   if [ -z "${base_container_name}" ]; then
-    if lxc-ls | grep "ubuntu" > /dev/null; then
-      :
-    else
-      lxc-create --name "ubuntu" -t ubuntu
-    fi
-    base_container_name="ubuntu"
+    lxc-create --name "${container_name}" -t ubuntu
+    CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
+  else
+    lxc-clone --snapshot -B overlayfs -o "${base_container_name}" -n "${container_name}"
+    CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
   fi
-  lxc-clone --snapshot -B overlayfs -o "${base_container_name}" -n "${CONTAINER_NAME}"
   #make a directory where we can mount back to the ship and a config file to mount
   test -d "${CONTAINER_OVERLAY}/var/starphleet" || mkdir -p "${CONTAINER_OVERLAY}/var/starphleet"
   test -d "${CONTAINER_OVERLAY}/var/data" || mkdir -p "${CONTAINER_OVERLAY}/var/data"
@@ -79,6 +75,7 @@ else
   bridge_ip
   lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n${BRIDGE_IP}  localship' >> /etc/hosts"
   lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n127.0.0.1  $(< /etc/hostname)' >> /etc/hosts"
+  lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n127.0.0.1  ${CONTAINER_NAME}' >> /etc/hosts"
 
   lxc-attach --name ${CONTAINER_NAME} -- bash -c 'chmod 777 /var/log/'
   lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'

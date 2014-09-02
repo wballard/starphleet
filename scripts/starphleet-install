@@ -105,6 +105,11 @@ EOF
 
 starphleet-buildpacks
 
-touch /var/starphleet/.system
+#making base containers as needed, base container serves as the source for
+#and we clone the service container on top, the idea is the base container
+#can be re-used and thus improve build time
+starphleet-containermake "${STARPHLEET_BASE}" "/var/starphleet/containers/${STARPHLEET_BASE}"
+
+
 start starphleet
 announce *Welcome to Starphleet*

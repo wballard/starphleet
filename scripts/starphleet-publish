@@ -25,6 +25,8 @@ MOUNT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
 BARE_CONF="${NGINX_CONF}/published_bare/$(urlencode \"${public_url}\").conf"
 IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
 
+info publishing to ${IP_ADDRESS}
+
 test ! -d "${NGINX_CONF}/published" && mkdir -p "${NGINX_CONF}/published"
 test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_bare"
 
