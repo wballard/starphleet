@@ -48,6 +48,11 @@ debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Si
 apt-get -y install --force-yes software-properties-common
 add-apt-repository -y ppa:chris-lea/node.js
 apt-get -y update
+
+# Run Upgrade before before installing packages - which fixes this error
+# https://github.com/lxc/lxc/issues/247
+export DEBIAN_FRONTEND=noninteractive; apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes
+
 for package in $(cat "${DIR}/packages")
 do
   apt-get -y install --force-yes "${package}"
