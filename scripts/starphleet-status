@@ -10,7 +10,7 @@ help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 ##ssl stats
-SSL_EXPIRATION=$(openssl x509 -noout -in /var/starphleet/nginx/crt -dates | head -1 | awk 'BEGIN { FS = "=" } ; { print $2 }')
+SSL_EXPIRATION=$(openssl x509 -noout -in ${STARPHLEET_ROOT:-/var/starphleet}/nginx/crt -dates | head -1 | awk 'BEGIN { FS = "=" } ; { print $2 }')
 
 cat << EOF
 hostname: $(hostname)

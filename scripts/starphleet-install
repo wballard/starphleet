@@ -18,7 +18,7 @@ sync && echo 3 > /proc/sys/vm/drop_caches
 #for the starphleet jobs
 rm -f /etc/init/starphleet*
 cp -R ${DIR}/../overlay/* /
-cp -R ${DIR}/../nginx/* /var/starphleet/nginx/
+cp -R ${DIR}/../nginx/* ${STARPHLEET_ROOT:-/var/starphleet}/nginx/
 
 #source again, yep -- now the environment is in place
 source ${DIR}/tools
@@ -48,12 +48,17 @@ debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Si
 apt-get -y install --force-yes software-properties-common
 add-apt-repository -y ppa:chris-lea/node.js
 apt-get -y update
+
+# Run Upgrade before before installing packages - which fixes this error
+# https://github.com/lxc/lxc/issues/247
+export DEBIAN_FRONTEND=noninteractive; apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes
+
 for package in $(cat "${DIR}/packages")
 do
   apt-get -y install --force-yes "${package}"
 done
 
-pushd /var/starphleet/nginx
+pushd ${STARPHLEET_ROOT:-/var/starphleet}/nginx
 set -e
 make
 set +e
@@ -108,7 +113,7 @@ starphleet-buildpacks
 #making base containers as needed, base container serves as the source for
 #and we clone the service container on top, the idea is the base container
 #can be re-used and thus improve build time
-starphleet-containermake "${STARPHLEET_BASE}" "/var/starphleet/containers/${STARPHLEET_BASE}"
+starphleet-containermake "${STARPHLEET_BASE}" "${STARPHLEET_ROOT:-/var/starphleet}/containers/${STARPHLEET_BASE}"
 
 
 start starphleet

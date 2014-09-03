@@ -10,7 +10,7 @@
 ### Once this script is done, you will have a running container.
 ###
 ### The container will have a layout with the following special directories:
-### /var/starphleet - This mounts back to /var/starphleet on the host
+### ${STARPHLEET_ROOT} - This mounts back to ${STARPHLEET_ROOT} on the host
 ### ${HOME}/app - Your git repository will be here
 ### ${HOME}/start - This is the Heroku style start script
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

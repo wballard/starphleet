@@ -38,7 +38,6 @@ openssh-client
 openssh-server
 python-dev
 ruby1.9.1-dev
-rubygems
 socat
 sqlite3
 telnet
