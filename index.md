@@ -531,8 +531,8 @@ You will need to ensure your public key has been added to the `authorized_users/
 You can always see what is going on with your ship using:
 
 ```bash
-$ ssh admiral@{ship} starphleet_status
-$ ssh admiral@{ship} starphleet_logs
+$ ssh admiral@{ship} starphleet-status
+$ ssh admiral@{ship} starphleet-logs
 ```
 
 ### Self Healing Phleet
