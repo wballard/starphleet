@@ -14,6 +14,8 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 #Linux would rather swap than let go
 sync && echo 3 > /proc/sys/vm/drop_caches
 
+ec2_mounts
+
 #put in the system overlay, gets all the files in place
 #for the starphleet jobs
 rm -f /etc/init/starphleet*

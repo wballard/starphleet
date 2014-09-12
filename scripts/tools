@@ -131,6 +131,15 @@ function container_environment() {
   export PATH=${PATH}:/usr/local/bin
 }
 
+function ec2_mounts() {
+  if mount | grep '/var/lib/lxc'; then
+    :
+  else
+    #may have another device on ec2
+    [ -b /dev/xvdb ] && (mount | grep /mnt) &&  mount --bind /mnt /var/lib/lxc
+  fi
+}
+
 # environment set up each time we ask for tools
 [ -f "/etc/starphleet" ] && source "/etc/starphleet"
 [ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"
