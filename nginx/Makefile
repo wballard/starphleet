@@ -19,4 +19,5 @@ ${NGINX}:
 clean:
 	echo $(CURDIR)
 	-rm -rf ${INSTALL_LOCATION}
+	-rm -f ${NGINX}
 	cd ${NGINX_ROOT} && make clean
