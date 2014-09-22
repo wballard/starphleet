@@ -26,7 +26,7 @@ for c in {1..100}; do
   sleep .2;
 done
 
-if [ ! TEST_PASSED ]; then
+if [ "${TEST_PASSED}" != "true" ]; then
   error "service was not ready at ${IP_ADDRESS}:${PORT}"
   exit 1
 fi
