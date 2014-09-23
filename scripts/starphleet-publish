@@ -27,7 +27,9 @@ IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
 
 info publishing to ${IP_ADDRESS}
 
-if [ -z "${IP_ADDRESS}" ]; then
+# we seem to be able to get either an empty string or a - as the ip address
+# when things go 'wrong'
+if [ -z "${IP_ADDRESS}" -o "${IP_ADDRESS}" == "-" ]; then
   error "could not find ip address for container ${container_name} cannot publish"
   exit 1
 fi
