@@ -15,7 +15,7 @@ URL=${url:-/}
 IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
 
 TEST_PASSED=false
-for c in {1..100}; do
+for c in {1..180}; do
   TEST_GET="http://${IP_ADDRESS}:${PORT}${URL}"
   TEST_COMMAND="curl -X GET -o /dev/null -s -w %{response_code} ${TEST_GET}"
   RESULT=`${TEST_COMMAND}`
@@ -23,7 +23,14 @@ for c in {1..100}; do
     TEST_PASSED=true
     break;
   fi
-  sleep .2;
+  # we'll read a timeout configuration from our environment, and if its not
+  # specified, we'll just default to the actual controlling loop (for loop)
+  # boundary.  So this will allow you to specify some value other other than
+  # the default (180) without ever surpassing the default of 180.
+  # since our caller sources the orders file, this can be added to your orders
+  # for a specific service
+  [ $c -gt ${HEALTHCHECK_TIMEOUT:-180} ] && break
+  sleep 1;
 done
 
 if [ "${TEST_PASSED}" != "true" ]; then
