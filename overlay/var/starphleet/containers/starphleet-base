@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#apt packages
-read -r -d '' PACKAGES << FFF
+sudo apt-get -y update
+sudo apt-get install -y --force-yes $(cat << FFF
 autoconf
 bind9-host
 bison
@@ -44,9 +44,7 @@ telnet
 zlib1g-dev
 bsdmainutils
 FFF
-
-sudo apt-get -y update
-echo -n ${PACKAGES}  | tr ' ' '\n' | xargs -I % xargs sudo apt-get install -y --force-yes %
+)
 
 #ruby superstition
 export HOME=/
