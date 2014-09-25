@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
+[ -f "~/.starphleet" ] && source "~/.starphleet"
 vagrant up --provider vmware_fusion
