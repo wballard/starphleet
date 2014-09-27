@@ -136,7 +136,7 @@ function ec2_mounts() {
     :
   else
     #may have another device on ec2
-    [ -b /dev/xvdb ] && (mount | grep /mnt) &&  mount --bind /mnt /var/lib/lxc
+    [ -b /dev/xvdb ] && (mount | grep /mnt) &&  mount --bind /mnt /var/lib/lxc || true
   fi
 }
 
