@@ -81,6 +81,10 @@ sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_
 
 builder ${ORDERS}
 cronner ${orders_dir} ${ORDERS}
+
+trace Container ready
+[ -x ${orders_dir}/after_containerize ] && sudo ${orders_dir}/after_containerize
+
 EOF
 
 info building ${container_name}
