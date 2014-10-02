@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+
+if [ $(whoami) != "root" ]; then
+  echo "You'll need to be root to do this. Try again as root"
+  exit 1
+fi
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cp -R ${DIR}/../overlay/* /

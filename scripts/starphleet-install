@@ -19,6 +19,7 @@ ec2_mounts
 #put in the system overlay, gets all the files in place
 #for the starphleet jobs
 rm -f /etc/init/starphleet*
+${DIR}/perform-overlay
 cp -R ${DIR}/../overlay/* /
 cp -R ${DIR}/../nginx/* ${STARPHLEET_ROOT:-/var/starphleet}/nginx/
 
