@@ -116,7 +116,7 @@ starphleet-buildpacks
 #making base containers as needed, base container serves as the source for
 #and we clone the service container on top, the idea is the base container
 #can be re-used and thus improve build time
-starphleet-containermake "${STARPHLEET_BASE}" "${STARPHLEET_ROOT:-/var/starphleet}/containers/${STARPHLEET_BASE}"
+${DIR}/starphleet-build-base-container
 
 
 start starphleet
