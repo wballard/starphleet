@@ -56,10 +56,7 @@ apt-get -y update
 # https://github.com/lxc/lxc/issues/247
 export DEBIAN_FRONTEND=noninteractive; apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes
 
-for package in $(cat "${DIR}/packages")
-do
-  apt-get -y install --force-yes "${package}"
-done
+apt-get -y install --force-yes $(< "${DIR}/packages")
 
 pushd ${STARPHLEET_ROOT:-/var/starphleet}/nginx
 set -e
