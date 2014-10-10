@@ -74,7 +74,7 @@ function make_admiral() {
   adduser ${ADMIRAL} sudo
   adduser ${ADMIRAL} adm
   adduser ${ADMIRAL} root
-  test -d ${ADMIRAL_HOME}/.ssh || mkdir -p ${ADMIRAL_HOME}/.ssh
+  test -d ${ADMIRAL_HOME}/.ssh || mkdir -p ${ADMIRAL_HOME}/.ssh; ssh-keygen -t rsa -f "${ADMIRAL_HOME}/.ssh/id_rsa" -q -N "" -C 'admiral of the phleet'
   mkdir -p ${STARPHLEET_ROOT}
   chown -R ${ADMIRAL}:${ADMIRAL} ${STARPHLEET_ROOT}
   chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}
