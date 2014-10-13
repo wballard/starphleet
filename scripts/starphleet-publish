@@ -81,7 +81,7 @@ echo "    rewrite ${public_url}/(.*) /\$1 break;" >> "${MOUNT_CONF}"
 echo "    proxy_pass http://${IP_ADDRESS}:${PORT}; break;" >> "${MOUNT_CONF}"
 echo "  }" >> "${MOUNT_CONF}"
 if [ -n "${BETA_PROXY}" ]; then
-  echo "  rewrite ${public_url}/(.*) ${BETA_PROXY}/\$1;" >> "${MOUNT_CONF}"
+  echo "  rewrite ${public_url}/(.*) ${BETA_PROXY}/\$1 last;" >> "${MOUNT_CONF}"
 fi
 echo '}' >> "${MOUNT_CONF}"
 #redirect to forgive a lack of trailing slash
