@@ -1,0 +1,13 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-local-repo-update
+### --help
+###
+### This will update the starphleet source stored in $STARPHLEET_GITHUB_LOCAL
+
+run_as_root_or_die
+
+REMOTE="${STARPHLEET_REMOTE:-$(git remote -v | grep fetch | sed -r -e 's[origin\t[[g' -e 's[\(fetch\)[[g')}"
+LOCAL="${STARPHLEET_GITHUB_LOCAL}"
+echo "starphleet-git-synch ${REMOTE} ${LOCAL}"
+starphleet-git-synch "${REMOTE}" "${LOCAL}"

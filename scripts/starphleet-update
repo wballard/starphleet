@@ -10,7 +10,7 @@ help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 
-REMOTE="${STARPHLEET_REMOTE:-https://github.com/wballard/starphleet.git}"
+REMOTE="${STARPHLEET_REMOTE:-$(git remote -v | grep fetch | sed -r -e 's[origin\t[[g' -e 's[\(fetch\)[[g')}"
 LOCAL="${STARPHLEET_GITHUB_LOCAL:-/var/starphleet/github}"
 if starphleet-git-synch "${REMOTE}" "${LOCAL}"; then
   info updating starphleet from github
