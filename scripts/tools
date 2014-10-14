@@ -148,6 +148,7 @@ function run_as_root_or_die(){
 }
 
 function die_on_error(){
+  trap "echo 'script execution halted due to error' >&2" ERR
   set -e
 }
 
