@@ -20,7 +20,6 @@ ec2_mounts
 #for the starphleet jobs
 rm -f /etc/init/starphleet*
 ${DIR}/perform-overlay
-cp -R ${DIR}/../overlay/* /
 cp -R ${DIR}/../nginx/* ${STARPHLEET_ROOT:-/var/starphleet}/nginx/
 
 #source again, yep -- now the environment is in place
