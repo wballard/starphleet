@@ -140,6 +140,17 @@ function ec2_mounts() {
   fi
 }
 
+function run_as_root_or_die(){
+  if [ $(whoami) != "root" ]; then
+    echo "You'll need to be root to do this. Try again as root"
+    exit 1
+  fi
+}
+
+function die_on_error(){
+  set -e
+}
+
 # environment set up each time we ask for tools
 [ -f "/etc/starphleet" ] && source "/etc/starphleet"
 [ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"
