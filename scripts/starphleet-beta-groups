@@ -27,3 +27,16 @@ do
   done
   echo "  }" >> "${BETA_GROUP_CONF}"
 done
+
+for BETA_GROUP in $(find "${HEADQUARTERS_LOCAL}/beta_groups" -type f)
+do
+  info beta group $(basename ${BETA_GROUP})
+  BETA_GROUP_CONF="${NGINX_CONF}/beta_groups/$(basename ${BETA_GROUP}).conf"
+  echo "  map \$cookie_glg_beta_user \$$(basename ${BETA_GROUP}) {" >> "${BETA_GROUP_CONF}"
+  echo "   default 1;" >> "${BETA_GROUP_CONF}"
+  for BETA_USER in $(cat "${BETA_GROUP}")
+  do
+    echo "   ${BETA_USER} 0;" >> "${BETA_GROUP_CONF}"
+  done
+  echo "  }" >> "${BETA_GROUP_CONF}"
+done
