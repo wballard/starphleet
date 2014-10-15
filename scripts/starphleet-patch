@@ -10,10 +10,10 @@ run_as_root_or_die
 
 starphleet-local-repo-update
 
-pushd "${STARPHLEET_GITHUB_LOCAL}"
+silent_pushd "${STARPHLEET_GITHUB_LOCAL}"
 ./scripts/perform-overlay
 npm ${NPM_FLAGS} install -g
-popd
+silent_popd
 
 stop starphleet_monitor_orders || true
 start starphleet_monitor_orders
