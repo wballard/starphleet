@@ -8,6 +8,6 @@
 run_as_root_or_die
 
 # copy the contents of the overly on top of the root, this expects
-# run from a sibling directory
+# run from a sibling directory of the overlay
 
-cp -R ${STARPHLEET_GITHUB_LOCAL}/overlay/* /
+cp -R ${SCRIPT_DIR}/overlay/* /
