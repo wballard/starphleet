@@ -11,7 +11,7 @@ run_as_root_or_die
 LOCAL="${STARPHLEET_GITHUB_LOCAL}"
 
 if [ -d "${STARPHLEET_GITHUB_LOCAL}" ]; then
-  slient_pushd ${LOCAL}
+  silent_pushd ${LOCAL}
   git pull > /dev/null 2>&1
   silent_popd
   announce Starphleet Updated
