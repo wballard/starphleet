@@ -21,8 +21,13 @@ order_name=${public_url}
 if [ "${public_url}" == "/" ]; then
   public_url=""
 fi
+#mount this service over a path
 MOUNT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
+#mount this service over a port
 BARE_CONF="${NGINX_CONF}/published_bare/$(urlencode \"${public_url}\").conf"
+#rewrites for beta support
+BETA_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").beta"
+
 IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
 
 info publishing to ${IP_ADDRESS}
@@ -41,6 +46,15 @@ test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_ba
 [ -f "${NGINX_CONF}/published/key" ] || cp "${NGINX_CONF}/key" "${NGINX_CONF}/published/key"
 
 
+#redirect to forgive a lack of trailing slash
+if [ -n "${public_url}" ]; then
+cat << EOF >> "${MOUNT_CONF}"
+location ~* ${public_url}$ {
+  rewrite .* ${public_url}/ last;
+}
+EOF
+fi
+
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
 
@@ -51,6 +65,8 @@ location ${public_url}/ {
   gzip_proxied any;
   gzip_comp_level 6;
   include ${NGINX_CONF}/cors.conf;
+  rewrite ${public_url}/(.*) /\$1 break;
+  proxy_pass http://${IP_ADDRESS}:${PORT};
   proxy_set_header X-Forwarded-Host \$host;
   proxy_set_header X-Forwarded-Server \$host;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -59,6 +75,8 @@ location ${public_url}/ {
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "upgrade";
+  add_header X-Starphleet-Container "${container_name}";
+  add_header X-Starphleet-Beta "${starphleet_beta}";
 EOF
 if [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
   info password file enabled
@@ -73,25 +91,9 @@ if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
   echo "  auth_ldap_servers $(cat ${ldap});" >> "${MOUNT_CONF}"
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
-
-fi
-#beta handling is a bit tricky, the if must be inverted to appease nginx
-echo "  if ( \$${BETA_GROUP:-true} ) {" >> "${MOUNT_CONF}"
-echo "    rewrite ${public_url}/(.*) /\$1 break;" >> "${MOUNT_CONF}"
-echo "    proxy_pass http://${IP_ADDRESS}:${PORT}; break;" >> "${MOUNT_CONF}"
-echo "  }" >> "${MOUNT_CONF}"
-if [ -n "${BETA_PROXY}" ]; then
-  echo "  rewrite ${public_url}/(.*) ${BETA_PROXY}/\$1 last;" >> "${MOUNT_CONF}"
 fi
 echo '}' >> "${MOUNT_CONF}"
-#redirect to forgive a lack of trailing slash
-if [ -n "${public_url}" ]; then
-cat << EOF >> "${MOUNT_CONF}"
-location ~* ${public_url}$ {
-  rewrite .* ${public_url}/ redirect;
-}
-EOF
-fi
+
 info "published ${container_name}:${PORT} to ${public_url}"
 
 #port publication, this is optional if a port is set
@@ -136,4 +138,5 @@ else
   rm -f "${BARE_CONF}"
 fi
 
+#reload to get the newly generated settings
 reload starphleet_nginx || start starphleet_nginx
