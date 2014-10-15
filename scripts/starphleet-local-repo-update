@@ -14,7 +14,7 @@ if [ -d "${STARPHLEET_GITHUB_LOCAL}" ]; then
   silent_pushd ${LOCAL}
   git pull > /dev/null 2>&1
   silent_popd
-  announce Starphleet Updated
+  announce Starphleet Updated at ${STARPHLEET_GITHUB_LOCAL}
 else
   error "You must have a local copy of the starphleet repo at ${STARPHLEET_GITHUB_LOCAL}"
   error "  this may not be present due to historical limitations in the install script"
