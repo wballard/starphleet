@@ -14,7 +14,6 @@ nodejs
 libpcre3
 libpcre3-dev
 libssl-dev
-lib64z1-dev
 liblua5.1-0-dev
 libluajit-5.1-dev
 libldap2-dev
