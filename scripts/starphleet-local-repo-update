@@ -8,9 +8,16 @@
 die_on_error
 
 run_as_root_or_die
-
 LOCAL="${STARPHLEET_GITHUB_LOCAL}"
-slient_pushd ${LOCAL}
-git pull > /dev/null 2>&1
-silent_popd
-announce Starphleet Updated
+
+if [ -d "${STARPHLEET_GITHUB_LOCAL}" ]; then
+  slient_pushd ${LOCAL}
+  git pull > /dev/null 2>&1
+  silent_popd
+  announce Starphleet Updated
+else
+  error "You must have a local copy of the starphleet repo at ${STARPHLEET_GITHUB_LOCAL}"
+  error "  this may not be present due to historical limitations in the install script"
+  error "  please clone your starphleet repo into ${STARPHLEET_GITHUB_LOCAL}"
+  exit 1
+fi
