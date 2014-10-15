@@ -15,7 +15,9 @@ pushd "${STARPHLEET_GITHUB_LOCAL}"
 npm ${NPM_FLAGS} install -g
 popd
 
-restart starphleet_monitor_orders
-restart starphleet_monitor_headquarters
+stop starphleet_monitor_orders || true
+start starphleet_monitor_orders
+stop starphleet_monitor_headquarters || true
+start starphleet_monitor_headquarters
 
 announce *Starphleet Patched*
