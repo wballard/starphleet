@@ -9,16 +9,8 @@ die_on_error
 
 run_as_root_or_die
 
-REMOTE="${STARPHLEET_REMOTE:-$(git remote -v | grep fetch | sed -r -e 's[origin\t[[g' -e 's[\(fetch\)[[g' -e 's/\s//g')}"
-BRANCH="$(git branch --list | grep '*' | sed -e 's[* [[g')"
 LOCAL="${STARPHLEET_GITHUB_LOCAL}"
-
-info "starphleet-git-synch ${REMOTE} ${LOCAL}"
-starphleet-git-synch "${REMOTE}" "${LOCAL}"
-
 slient_pushd ${LOCAL}
-LOCAL_BRANCH="$(git branch --list | grep '*' | sed -e 's[* [[g')"
-if [ "${BRANCH}" != "${LOCAL_BRANCH}" ]; then
-  git checkout origin/${BRANCH}
-fi
+git pull > /dev/null 2>&1
 silent_popd
+announce Starphleet Updated
