@@ -8,10 +8,10 @@
 die_on_error
 run_as_root_or_die
 
-${SCRIPT_DIR}/perform-overlay
+starphleet-local-repo-update
 
-#starphleet and all of its scripts
 pushd "${STARPHLEET_GITHUB_LOCAL}"
+./scripts/perform-overlay
 npm ${NPM_FLAGS} install -g
 popd
 
