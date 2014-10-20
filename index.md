@@ -465,6 +465,7 @@ These variables can be set in your headquarters `.starphleet` or `orders`.
 | PUBLISH_PORT | number | Allows your service to be accessible on the ship at `http://{SHIP_DNS}:PUBLISH_PORT` in addition to `http://{SHIP_DNS}/{service_name}`.  Set this in your orders file.
 | STARPHLEET_PULSE | number | The number of seconds between autodeploy checks, defaulting to a value of 10.
 | USER_IDENTITY_HEADER | string | When using LDAP or basic authentication, Starphleet will write the user identity into this header so that your services can see it.
+| USER_IDENTITY_COOKIE | string | When using cookie based beta routing, Starphleet will look in this cookie for an identity string.
 
 
 ## Buildpacks
