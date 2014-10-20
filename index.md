@@ -299,18 +299,33 @@ fred
 wilma
 ```
 
+### /beta_groups/sharks
+```
+white
+hammerhead
+```
+
 Order your service twice, say at a branch
 
 ### /sample
 ```
 autodeploy http://github.com/you/sample
 beta stones /sample_beta
+beta sharks /sample_shark_beta
 ```
 
 ### /sample_beta
 ```
 autodeploy http://github.com/you/sample#beta
 ```
+
+### /sample_shark_beta
+```
+autodeploy http://github.com/you/sample#shark
+```
+
+OK -- so the service is there at three urls at threr branches. Beta users will
+go to the appropriate 'other' location with a server side rewrite. Cool!
 
 # Reference
 
