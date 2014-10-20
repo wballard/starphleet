@@ -175,7 +175,6 @@ Given that you have a program that listens for HTTP/HTTPS traffic, setting it up
 * Configure your orders with an editor. This is a sample service.
 
   ```bash
-  export PORT=3000
   autodeploy https://github.com/wballard/echo
   ```
 
@@ -286,6 +285,33 @@ Say you have a simple service with a todo list, a mail queue, and a website. You
 
 Then when running you get your site at `http://example.co/`, and your services at `http://example.co/todo` and `http://example.co/mail`.
 
+## Set up Multiversion Betas
+You can run more than one version of your service, and route users along to a different version based on their logged in HTTP identity.
+
+This requires LDAP or HTTP basic, or an optional cookie that your app will set. Inside the cookie, or auth header, the username drives the beta behavior.
+
+Set up a beta group in the headquarters repository in `beta_groups/`. This is just a text file, with one user identity per line.
+
+
+### /beta_groups/stones
+```
+fred
+wilma
+```
+
+Order your service twice, say at a branch
+
+### /sample
+```
+autodeploy http://github.com/you/sample
+beta stones /sample_beta
+```
+
+### /sample_beta
+```
+autodeploy http://github.com/you/sample#beta
+```
+
 # Reference
 
 
@@ -366,7 +392,6 @@ A directory which defines the relative path from which your service is served (`
   We chose to use shell scripts for the orders files to allow your creativity to run wild without needing to learn another autodeployment tool.
 
   ```bash
-  export PORT={service_port}
   autodeploy {service_git_url}
   beta {beta_group} {service_url}
   stop-before-autodeploy
@@ -461,8 +486,7 @@ These variables can be set in your headquarters `.starphleet` or `orders`.
 | Name | Value | Description
 | --- | --- | ---
 | BUILDPACK_URL | git_url | Specifies a custom buildpack to be used for autodeployment.  Set this in your Starphleet headquarters or in your service Git repository.
-| PORT | number | This is an **all important environment variable**, and it is expected your service will honor it, publishing traffic here. This `PORT` is used to know where to connect the ship's proxy to your individual service.  Set this in your orders file.
-| PUBLISH_PORT | number | Allows your service to be accessible on the ship at `http://{SHIP_DNS}:PUBLISH_PORT` in addition to `http://{SHIP_DNS}/{service_name}`.  Set this in your orders file.
+| PORT | number | This is an **all important environment variable**, and it is expected your service will honor it, publishing traffic here. This `PORT` is used to know where to connect the ship's proxy to your individual service.
 | STARPHLEET_PULSE | number | The number of seconds between autodeploy checks, defaulting to a value of 10.
 | USER_IDENTITY_HEADER | string | When using LDAP or basic authentication, Starphleet will write the user identity into this header so that your services can see it.
 | USER_IDENTITY_COOKIE | string | When using cookie based beta routing, Starphleet will look in this cookie for an identity string.
