@@ -160,6 +160,10 @@ so it is a great place to toss on additional packages or make directories you ne
   apt-get install -y freetds-dev libmysqlclient-dev
   ```
 
+You can also make an `after_containerize` script that well, runs right after a
+container is made, but right before your container starts as a service.
+
+
 ## Launch a new NodeJS Service
 Given that you have a program that listens for HTTP/HTTPS traffic, setting it up has a few things to know.
 
