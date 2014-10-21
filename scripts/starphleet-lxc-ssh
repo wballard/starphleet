@@ -16,45 +16,19 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 set -e
 
-get_ip()
-{
-    # Get init's PID
-    PID=$(sudo lxc-info -n ${FULL_LXCNAME} -p | awk '{print $2}')
-    [ "$PID" = "-1" ] && return 1
-
-    # Get some unique path
-    DST=$(sudo mktemp -u --tmpdir=/run/netns/)
-    NAME=$(basename $DST)
-
-    # Prepare the /run/netns entry for "ip netns"
-    sudo mkdir -p /run/netns
-    sudo ln -s /proc/$PID/ns/net $DST
-
-    # Grab all the public globally routed IPv4 and IPv6 addresses
-    (sudo ip netns exec $NAME ip -4 addr show scope global && \
-     sudo ip netns exec $NAME ip -6 addr show scope global) | grep inet | while read line; do
-        ip=$(echo $line | awk '{print $2}' | cut -d '/' -f1)
+get_ip(){
+  for name in $(sudo lxc-ls --running | grep --extended-regexp "service-${ENCODED_ORDER}-([a-f0-9]){7}-([a-f0-9]){7}")
+    do
+      ip=$(sudo lxc-ls --fancy -F ipv4 $name | tail -1)
+      if [ -n  ${ip} ]; then
         echo "$ip"
-    done
-
-    sudo rm $DST
-}
-
-get_full_lxcname()
-{
-  for name in $(sudo lxc-ls | grep --extended-regexp "service-${ENCODED_ORDER}-([a-f0-9]){7}-([a-f0-9]){7}")
-  do
-    echo "$name"
+        break;
+      fi
   done
-
 }
 
-do_ssh()
-{
+do_ssh(){
     
-    FULL_LXCNAME=$(get_full_lxcname $ENCODED_ORDER)
-    sudo lxc-wait -s RUNNING -n $FULL_LXCNAME
-
     # Use get_ip to wait for container's network to be up
     # and to obtain the ip address, then we can ssh to the lxc.
     TRIES=60
@@ -63,10 +37,7 @@ do_ssh()
     # Repeatedly try to connect over SSH until we either succeed
     # or time out.
     for i in $(seq 1 $TRIES); do
-        # We call get_ip inside the loop to ensure the correct ip
-        # is retrieved even in the case the DHCP ip assignment
-        # changes during the process.
-        IP_ADDRESS=$(get_ip $FULL_LXCNAME)
+        IP_ADDRESS=$(get_ip $ENCODED_ORDER)
         if [ -z "$IP_ADDRESS" ]; then
             sleep 1
             continue
