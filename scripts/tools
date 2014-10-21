@@ -109,9 +109,7 @@ function run_orders()
   }
 
   beta () {
-    BETA_GROUP="${1}"
-    BETA_PROXY="${2}"
-    trace beta test "${BETA_GROUP}" "${BETA_PROXY}"
+    BETAS[$1]=$2
   }
 
   source "${1}" || true

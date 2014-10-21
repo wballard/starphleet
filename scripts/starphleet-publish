@@ -15,6 +15,7 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 set -e
 
+declare -A BETAS
 run_orders "${orders}"
 
 order_name=${public_url}
@@ -55,11 +56,11 @@ location ~* ${public_url}$ {
 EOF
 fi
 
+
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
 
 location ${public_url}/ {
-  set \$true 1;
   gzip on;
   gzip_types *;
   gzip_proxied any;
@@ -75,8 +76,8 @@ location ${public_url}/ {
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "upgrade";
-  add_header X-Starphleet-Container "${container_name}";
-  add_header X-Starphleet-Beta "${starphleet_beta}";
+  more_set_headers 'X-Starphleet-Service: ${public_url}';
+  more_set_headers 'X-Starphleet-Container: ${container_name}';
 EOF
 if [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
   info password file enabled
@@ -92,6 +93,19 @@ if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
 fi
+
+echo "" > "${BETA_CONF}"
+for beta in "${!BETAS[@]}"
+do
+  echo "  if (\$starphleet_beta_${beta}) {" >> "${BETA_CONF}"
+  echo "    rewrite ${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
+  echo "  }" >> "${BETA_CONF}"
+  echo "  if (\$starphleet_beta_${beta}_cookie) {" >> "${BETA_CONF}"
+  echo "    rewrite ${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
+  echo "  }" >> "${BETA_CONF}"
+done
+
+#closing off the location
 echo '}' >> "${MOUNT_CONF}"
 
 info "published ${container_name}:${PORT} to ${public_url}"
