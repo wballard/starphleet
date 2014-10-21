@@ -1,25 +1,23 @@
-#!/usr/bin/env bash
+#!/usr/bin/env starphleet-launcher
 ### Usage:
 ###    starphleet-patch
 ### --help
 ###
-### Just the basics of a startphleet install, without a restart.
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-help=$(grep "^### " "$0" | cut -c 5-)
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+### Just the basics of a startphleet install, without a restart.  You'll need
+### to be root to do this, and it will refuse to run otherwise
+die_on_error
+run_as_root_or_die
 
+starphleet-local-repo-update
 
-#put in the system overlay, gets all the files in place
-#for the starphleet jobs
-cp -R ${DIR}/../overlay/* /
-
-#starphleet and all of its scripts
-pushd "${DIR}/.."
+silent_pushd "${STARPHLEET_GITHUB_LOCAL}"
+./scripts/perform-overlay
 npm ${NPM_FLAGS} install -g
-popd
+silent_popd
 
-sudo restart starphleet_monitor_orders
-sudo restart starphleet_monitor_headquarters
+stop starphleet_monitor_orders || true
+start starphleet_monitor_orders
+stop starphleet_monitor_headquarters || true
+start starphleet_monitor_headquarters
 
 announce *Starphleet Patched*
