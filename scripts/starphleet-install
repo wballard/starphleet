@@ -114,6 +114,6 @@ starphleet-buildpacks
 #can be re-used and thus improve build time
 ${DIR}/starphleet-build-base-container
 
-
+starphleet-cleanup
 start starphleet
 announce *Welcome to Starphleet*
