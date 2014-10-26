@@ -1,13 +1,10 @@
-#!/usr/bin/env bash
+#!/usr/bin/env starphleet-launcher
 ### Usage:
 ###    starphleet-install
 ### --help
 ###
 ### This will get starphleet on a base machine
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-help=$(grep "^### " "$0" | cut -c 5-)
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+run_as_root_or_die
 
 
 #flush out caches, I know, I know -- but really if you don't do this
@@ -19,7 +16,7 @@ ec2_mounts
 #put in the system overlay, gets all the files in place
 #for the starphleet jobs
 rm -f /etc/init/starphleet*
-${DIR}/perform-overlay
+cp -R ${DIR}/../overlay/* /
 cp -R ${DIR}/../nginx/* ${STARPHLEET_ROOT:-/var/starphleet}/nginx/
 
 #source again, yep -- now the environment is in place

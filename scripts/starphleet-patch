@@ -11,7 +11,7 @@ run_as_root_or_die
 starphleet-local-repo-update
 
 silent_pushd "${STARPHLEET_GITHUB_LOCAL}"
-./scripts/perform-overlay
+cp -R ./overlay/* /
 npm ${NPM_FLAGS} install -g
 silent_popd
 

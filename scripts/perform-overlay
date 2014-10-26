@@ -1,7 +1,7 @@
 #! /usr/bin/env starphleet-launcher
 ### Usage: perform-overlay
 ###
-###  
+###
 ### Applies the overlay to the current system. Requires root will refuse to run
 ### otherwise
 

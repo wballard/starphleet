@@ -15,6 +15,7 @@ LOCAL="${STARPHLEET_GITHUB_LOCAL:-/var/starphleet/github}"
 if starphleet-git-synch "${REMOTE}" "${LOCAL}"; then
   info updating starphleet from github
   stop starphleet
+  cd ${LOCAL}
   ${LOCAL}/scripts/starphleet-install
 else
   info you have the latest starphleet
