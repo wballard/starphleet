@@ -12,6 +12,7 @@
     "builder": "./scripts/builder",
     "cronner": "./scripts/cronner",
     "runner": "./scripts/runner",
+    "starphleet-redeploy": "./scripts/starphleet-redeploy",
     "starphleet-headquarters": "./scripts/starphleet-headquarters",
     "starphleet-containerize": "./scripts/starphleet-containerize",
     "starphleet-containermake": "./scripts/starphleet-containermake",

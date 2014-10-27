@@ -1,0 +1,13 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-redeploy <order>
+### --help
+###
+### Force a service to redeploy, without needing to strobe or push a new
+### version
+run_as_root_or_die
+
+rm -rf ${HEADQUARTERS_LOCAL}/${order}/git
+rm -rf ${CURRENT_ORDERS}/${order}/git
+echo 'building' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+starphleet-reaper zzzzzzzzz "${order}"
