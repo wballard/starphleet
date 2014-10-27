@@ -50,7 +50,7 @@ test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_ba
 #redirect to forgive a lack of trailing slash
 if [ -n "${public_url}" ]; then
 cat << EOF >> "${MOUNT_CONF}"
-location ~* ${public_url}$ {
+location = ${public_url} {
   rewrite .* ${public_url}/ last;
 }
 EOF
