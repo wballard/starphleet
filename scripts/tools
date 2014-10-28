@@ -131,6 +131,67 @@ function container_environment() {
   export PATH=${PATH}:/usr/local/bin
 }
 
+# If we detect more than one hard drive available
+#   First spare drive would be used for /var/lib/lxc
+#   Second spare drive would be used for /var/lib/lxc
+function reset_hard_drives {
+  # Remember the field separator
+  OLDIFS=${IFS}
+  # Change field separator to new lines
+  IFS=$'\r\n' GLOBIGNORE='*'
+  # Get all the HD's
+  HARD_DRIVES=($(blkid))
+  # Put back the old field separator
+  IFS=${OLDIFS}
+  # Remember the mount point for our ROOT FS
+  ROOT_MOUNT=$(mount|grep ' / '|cut -d' ' -f 1)
+  # Make sure we start with an empty list of EXTRA_DRIVES
+  EXTRA_DRIVES=()
+  
+  REBUILD_HARDDRIVES=True
+
+  # If we only have one Hard Drive or We aren't supposed
+  # to rebuild the HD's.. punt
+  if [ ${#HARD_DRIVES[@]} -le 1 ] || [ ! ${REBUILD_HARDDRIVES} ]; then
+    return
+  fi
+
+  # For all the HD's detected
+  for hd_line in "${HARD_DRIVES[@]}"; do
+    # If the HD is not the primary EC2 HD
+    if [[ ! ${hd_line} =~ ${ROOT_MOUNT} ]]; then
+      # Strip out the dev point for this drive
+      HD=$(echo ${hd_line} | cut -f1 -d":")
+      # Keep track of this mount point
+      EXTRA_DRIVES+=(${HD})
+      # Check if the HD is mounted
+      if [ $( mount | grep -q ${HD} ) ]; then
+        # Unmount the HD we are working on
+	umount ${HD} 
+      fi  
+      # Format the drive
+      echo mkfs.ext3 ${HD}
+      # Make sure we have a mount point
+      [ ! -d /mnt/${HD##*/} ] && echo mkdir /mnt/${HD##*/}
+      # Mount the drive into /mnt
+      echo mount ${HD} /mnt/${HD##*/}
+    fi
+  done
+
+  # Now all extra drives are reformatted and mounted in /mnt
+  # Bind them to the dirs we care about
+  # Most importantly - bind one to our lxc containers
+  if [ ${EXTRA_DRIVES[0]} ]; then
+    echo mount --bind ${EXTRA_DRIVES[0]} /var/lib/lxc
+  fi
+
+  # If we have more than one drive bind the other to our STARPHLEET_ROOT
+  if [ ${EXTRA_DRIVES[1]} ]; then
+    echo mount --bind ${EXTRA_DRIVES[1]} ${STARPHLEET_ROOT:-/var/starphleet}
+  fi
+
+}
+
 # environment set up each time we ask for tools
 [ -f "/etc/starphleet" ] && source "/etc/starphleet"
 [ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"
