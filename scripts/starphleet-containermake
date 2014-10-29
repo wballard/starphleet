@@ -82,6 +82,7 @@ else
   lxc-attach --name ${CONTAINER_NAME} -- bash -c 'useradd -s /bin/bash ${ADMIRAL} || true'
   lxc-attach --name ${CONTAINER_NAME} -- bash -c 'adduser ${ADMIRAL} sudo'
   lxc-attach --name ${CONTAINER_NAME} -- bash -c 'chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}/.ssh'
+  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${ADMIRAL} ALL=NOPASSWD:ALL" >> /etc/sudoers'
   lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'
   lxc-attach --name ${CONTAINER_NAME} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "source /usr/bin/tools; /build_script"
   if [ "${run}" == "true" ]; then
