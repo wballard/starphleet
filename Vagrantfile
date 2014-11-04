@@ -12,8 +12,8 @@ Vagrant::Config.run do |config|
   system "test -n \"${STARPHLEET_PUBLIC_KEY}\" && cp \"${STARPHLEET_PUBLIC_KEY}\" \"public_keys/\""
   system "test -n \"${STARPHLEET_HEADQUARTERS}\" && echo \"${STARPHLEET_HEADQUARTERS}\" > headquarters"
   config.vm.provision :shell, :inline => "
-  source /starphleet/overlay/etc/starphleet;
-  /starphleet/scripts/starphleet-install;
+  PATH=$PATH:/starphleet/scripts
+  sudo env PATH=$PATH /starphleet/scripts/starphleet-install;
   [ -n \"#{ENV['STARPHLEET_HEADQUARTERS']}\" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}"
 end
 
@@ -30,9 +30,6 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     override.vm.box_url = "https://s3.amazonaws.com/glg_starphleet/trusty-14.04-amd64-vmwarefusion.box"
     f.vmx["displayName"] = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
     f.vmx["memsize"] = VAGRANT_MEMSIZE
-    override.vm.provision :shell, :inline => "
-      apt-get update;
-      apt-get -y upgrade;"
   end
 
   config.vm.provider :virtualbox do |f, override|
