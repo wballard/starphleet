@@ -74,6 +74,11 @@ chmod 755 ${STARPHLEET_ROOT}/diagnostic
 
 #starphleet and all of its scripts
 pushd "${DIR}/.."
+# npm is a jerk, and if a file exists that it tries to write it dies
+# this should all be removeed ( the npm install )and replaced with overlay
+# but since the whole thing is currently busted I want to get it working 
+# at all first
+rm /usr/bin/starphleet-launcher || true
 npm ${NPM_FLAGS} install -g
 popd
 

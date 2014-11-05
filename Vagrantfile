@@ -12,9 +12,10 @@ Vagrant::Config.run do |config|
   system "test -n \"${STARPHLEET_PUBLIC_KEY}\" && cp \"${STARPHLEET_PUBLIC_KEY}\" \"public_keys/\""
   system "test -n \"${STARPHLEET_HEADQUARTERS}\" && echo \"${STARPHLEET_HEADQUARTERS}\" > headquarters"
   config.vm.provision :shell, :inline => "
-  PATH=$PATH:/starphleet/scripts
-  sudo env PATH=$PATH /starphleet/scripts/starphleet-install;
-  [ -n \"#{ENV['STARPHLEET_HEADQUARTERS']}\" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}"
+    export PATH=$PATH:/starphleet/scripts;
+    sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
+    sudo /starphleet/scripts/starphleet-install;
+    [ -n \"#{ENV['STARPHLEET_HEADQUARTERS']}\" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}"
 end
 
 Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|

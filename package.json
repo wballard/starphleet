@@ -18,7 +18,6 @@
     "starphleet-containermake": "./scripts/starphleet-containermake",
     "starphleet-reaper": "./scripts/starphleet-reaper",
     "starphleet-wait-network": "./scripts/starphleet-wait-network",
-    "starphleet-launcher": "./scripts/starphleet-launcher",
     "starphleet-lxc-wait": "./scripts/starphleet-lxc-wait",
     "starphleet-lxc-destroy": "./scripts/starphleet-lxc-destroy",
     "starphleet-lxc-stop": "./scripts/starphleet-lxc-stop",
