@@ -22,8 +22,6 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   config.vm.hostname = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
   config.vm.synced_folder ".", "/starphleet"
   config.vm.synced_folder "~", "/hosthome"
-  # This fixes an issue on OSX with parallels, when vagrant.pkg is still mounted
-  config.vm.synced_folder "./", "/vagrant", id: "some_id"
 
   config.vm.provider :vmware_fusion do |f, override|
     override.vm.network "public_network"
@@ -44,5 +42,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     override.vm.box = ENV['BOX_NAME'] || 'parallels/ubuntu-14.04'
     f.name = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
     f.customize ["set", :id, "--memsize", VAGRANT_MEMSIZE]
+      # This fixes an issue on OSX with parallels, when vagrant.pkg is still mounted
+    config.vm.synced_folder "./", "/vagrant", id: "some_id"
   end
 end
