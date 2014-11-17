@@ -112,6 +112,12 @@ function run_orders()
     STOP_BEFORE_AUTODEPLOY=1
   }
 
+  redirect () {
+    info redirect "${1} ${2}"
+    REDIRECT=${1}
+    REDIRECTTO=${2}
+  }
+
   beta () {
     BETAS[$1]=$2
   }
