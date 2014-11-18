@@ -142,6 +142,14 @@ function ec2_mounts() {
   fi
 }
 
+function vagrant_mounts() {
+  if mount | grep '/hosthome'; then
+    true
+  else
+    false
+  fi
+}
+
 function run_as_root_or_die(){
   if [ $(whoami) != "root" ]; then
     echo "You'll need to be root to do this. Try again as root"

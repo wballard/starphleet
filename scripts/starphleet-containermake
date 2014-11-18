@@ -28,8 +28,18 @@ CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
 #so we are starting the container twice
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs/${STARPHLEET_ROOT:-var/starphleet} none bind,rw 0 0
+#mounting host system dirs into the lxc container
+lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs/${STARPHLEET_ROOT} none bind,rw 0 0
 lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
+#following lines only fire if system is running under vagrant
+if [-d '/hosthome']; then
+  info hosthome directory detected - Vagrant build mode engaged
+  mkdir -p "/hosthome/vagrant_starph"
+  lxc.mount.entry = /hosthome/vagrant_starph/${container_name} ${CONTAINER_ROOT}/rootfs/ none bind,rw 0 0
+else
+  info hosthome directory not detected - standard build mode
+fi
+
 EOF
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
@@ -41,6 +51,7 @@ if lxc-ls | grep "^${container_name}$"; then
   exit 0
 else
   info making a new container ${CONTAINER_NAME}
+  #??? needed?
   starphleet-lxc-destroy ${CONTAINER_NAME}
   if [ -z "${base_container_name}" ]; then
     lxc-create --name "${container_name}" -t ubuntu
@@ -50,7 +61,7 @@ else
     CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
   fi
   #make a directory where we can mount back to the ship and a config file to mount
-  test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT:-/var/starphleet}" || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT:-/var/starphleet}"
+  test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}" || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}"
   test -d "${CONTAINER_OVERLAY}/var/data" || mkdir -p "${CONTAINER_OVERLAY}/var/data"
   cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/config
   #copy on the starphleet commands
