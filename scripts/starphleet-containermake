@@ -27,20 +27,25 @@ CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
 #inital container configuration, and this is tacked on the end
 #so we are starting the container twice
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
-cat << EOF > ${CONTAINER_CONF}
 #mounting host system dirs into the lxc container
+if [ ! -d '/hosthome' ]; then
+info hosthome directory not detected - standard build mode
+cat << EOF > ${CONTAINER_CONF}
 lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs/${STARPHLEET_ROOT} none bind,rw 0 0
 lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
-#following lines only fire if system is running under vagrant
-if [-d '/hosthome']; then
-  info hosthome directory detected - Vagrant build mode engaged
-  mkdir -p "/hosthome/vagrant_starph"
-  lxc.mount.entry = /hosthome/vagrant_starph/${container_name} ${CONTAINER_ROOT}/rootfs/ none bind,rw 0 0
+EOF
 else
-  info hosthome directory not detected - standard build mode
+#following lines only fire if system is running under vagrant
+info hosthome directory detected - Vagrant build mode engaged
+mkdir -p "/hosthome/vagrant_starph/${container_name}"
+  
+cat << EOF > ${CONTAINER_CONF}
+lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs/${STARPHLEET_ROOT} none bind,rw 0 0
+lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
+lxc.mount.entry = /hosthome/vagrant_starph/${container_name} ${CONTAINER_ROOT}/rootfs/ none bind,rw 0 0
+EOF
 fi
 
-EOF
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
 (
