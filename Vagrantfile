@@ -12,6 +12,7 @@ Vagrant::Config.run do |config|
   system "test -n \"${STARPHLEET_PUBLIC_KEY}\" && cp \"${STARPHLEET_PUBLIC_KEY}\" \"public_keys/\""
   system "test -n \"${STARPHLEET_HEADQUARTERS}\" && echo \"${STARPHLEET_HEADQUARTERS}\" > headquarters"
   config.vm.provision :shell, :inline => "
+    test -d /hosthome/vagrant_starph/ && rm -rf /hosthome/vagrant_starph/;
     export PATH=$PATH:/starphleet/scripts;
     sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
     sudo /starphleet/scripts/starphleet-install;
@@ -42,7 +43,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     override.vm.box = ENV['BOX_NAME'] || 'parallels/ubuntu-14.04'
     f.name = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
     f.customize ["set", :id, "--memsize", VAGRANT_MEMSIZE]
-      # This fixes an issue on OSX with parallels, when vagrant.pkg is still mounted
+    # This fixes an issue on OSX with parallels, when vagrant.pkg is still mounted
     config.vm.synced_folder "./", "/vagrant", id: "some_id"
   end
 end

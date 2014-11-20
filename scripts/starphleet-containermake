@@ -36,7 +36,7 @@ if [ -z "${base_container_name}" ]; then
     CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
 fi
 
-if [ ! -d /hostname ]; then
+if [ ! -d /hosthome ]; then
 info Standard container startup strategy
 
 cat << EOF > ${CONTAINER_CONF}
