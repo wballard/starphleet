@@ -28,21 +28,32 @@ CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
 #so we are starting the container twice
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 #mounting host system dirs into the lxc container
-if [ ! -d '/hosthome' ]; then
-info hosthome directory not detected - standard build mode
+
+#starphleet-base is a create, all orders are a clones to delta0
+if [ -z "${base_container_name}" ]; then
+    CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
+  else
+    CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
+fi
+
+if [ ! -d /hostname ]; then
+info Standard container startup strategy
+
 cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs/${STARPHLEET_ROOT} none bind,rw 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT} none bind,rw 0 0
 lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
 EOF
+
 else
-#following lines only fire if system is running under vagrant
-info hosthome directory detected - Vagrant build mode engaged
+info Vagrant container startup strategy
 mkdir -p "/hosthome/vagrant_starph/${container_name}"
-  
+info creating vm /hosthome/vagrant_starph/${container_name}
+info attaching ${CONTAINER_OVERLAY}
+
 cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs/${STARPHLEET_ROOT} none bind,rw 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT} none bind,rw 0 0
 lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
-lxc.mount.entry = /hosthome/vagrant_starph/${container_name} ${CONTAINER_ROOT}/rootfs/ none bind,rw 0 0
+lxc.mount.entry = /hosthome/vagrant_starph/${container_name} ${CONTAINER_OVERLAY}/home/ubuntu/app none bind,rw 0 0
 EOF
 fi
 
@@ -60,10 +71,10 @@ else
   starphleet-lxc-destroy ${CONTAINER_NAME}
   if [ -z "${base_container_name}" ]; then
     lxc-create --name "${container_name}" -t ubuntu
-    CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
+    #CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
   else
     lxc-clone --snapshot -B overlayfs -o "${base_container_name}" -n "${container_name}"
-    CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
+    #CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
   fi
   #make a directory where we can mount back to the ship and a config file to mount
   test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}" || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}"
