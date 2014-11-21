@@ -30,32 +30,10 @@ CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 #mounting host system dirs into the lxc container
 
 #starphleet-base is a create, all orders are a clones to delta0
-if [ -z "${base_container_name}" ]; then
-    CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
-  else
-    CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
-fi
-
-if [ ! -d /hosthome ]; then
-info Standard container startup strategy
-
 cat << EOF > ${CONTAINER_CONF}
 lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT} none bind,rw 0 0
 lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
 EOF
-
-else
-info Vagrant container startup strategy
-mkdir -p "/hosthome/vagrant_starph/${container_name}"
-info creating vm /hosthome/vagrant_starph/${container_name}
-info attaching ${CONTAINER_OVERLAY}
-
-cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT} none bind,rw 0 0
-lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
-lxc.mount.entry = /hosthome/vagrant_starph/${container_name} ${CONTAINER_OVERLAY}/home/ubuntu/app none bind,rw 0 0
-EOF
-fi
 
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
@@ -71,10 +49,10 @@ else
   starphleet-lxc-destroy ${CONTAINER_NAME}
   if [ -z "${base_container_name}" ]; then
     lxc-create --name "${container_name}" -t ubuntu
-    #CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
+    CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
   else
     lxc-clone --snapshot -B overlayfs -o "${base_container_name}" -n "${container_name}"
-    #CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
+    CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
   fi
   #make a directory where we can mount back to the ship and a config file to mount
   test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}" || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}"
@@ -113,6 +91,14 @@ else
     lxc-stop --name ${CONTAINER_NAME}
     starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
   fi
+  #if this came up under Vagrant, want to mount the apps where dev can access them
+  if [ -d /hosthome ]; then
+    info Vagrant container startup strategy
+    info mounting vm: /hosthome/vagrant_starph/${container_name} lxc: ${CONTAINER_OVERLAY}/home/ubuntu
+    mkdir -p "/hosthome/vagrant_starph/${container_name}"
+    mount -t vmhgfs "${CONTAINER_OVERLAY}/home/ubuntu" ".host:/-hosthome/vagrant_starph/${container_name}"
+  fi
+
   info made container ${CONTAINER_NAME}
 fi
 ) 200>/var/lock/${CONTAINER_NAME}
