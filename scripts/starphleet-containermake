@@ -61,7 +61,7 @@ if lxc-ls | grep "^${container_name}$"; then
 else
   info making a new container ${CONTAINER_NAME}
   #??? needed?
-  #starphleet-lxc-destroy ${CONTAINER_NAME}
+  starphleet-lxc-destroy ${CONTAINER_NAME}
   if [ -z "${base_container_name}" ]; then
     lxc-create --name "${container_name}" -t ubuntu
     CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
