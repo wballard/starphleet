@@ -20,6 +20,7 @@ test -f "${build_script}"
 chmod 777 /var/lib/lxc/data
 
 CONTAINER_NAME="${container_name}"
+
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
 #configuration, this is the place to mount directories on the host computer
 #into the container
@@ -72,6 +73,7 @@ else
   #this is the build script for the container itself
   cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
   chmod +x "${CONTAINER_OVERLAY}/build_script"
+
   #start up the container, waiting for the network, and then run the container build script
   lxc-start --name ${CONTAINER_NAME} -d
   starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
@@ -85,20 +87,20 @@ else
   lxc-attach --name ${CONTAINER_NAME} -- bash -c 'chmod 777 /var/log/'
   lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'
   lxc-attach --name ${CONTAINER_NAME} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "source /usr/bin/tools; /build_script"
+
+  if [ -d /hosthome ]; then
+    info Vagrant container startup strategy
+    info linking vm: /hosthome/vagrant_starph/${container_name} lxc: ${CONTAINER_OVERLAY}/home/ubuntu
+    [ -d /hosthome/vagrant_lxc ] || mkdir -p /hosthome/vagrant_lxc
+    ln -s "${CONTAINER_OVERLAY}/home" "/hosthome/vagrant_lxc/${container_name}"
+  fi
+
   if [ "${run}" == "true" ]; then
     info leaving ${CONTAINER_NAME} running
   else
     lxc-stop --name ${CONTAINER_NAME}
     starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
   fi
-  #if this came up under Vagrant, want to mount the apps where dev can access them
-  if [ -d /hosthome ]; then
-    info Vagrant container startup strategy
-    info mounting vm: /hosthome/vagrant_starph/${container_name} lxc: ${CONTAINER_OVERLAY}/home/ubuntu
-    mkdir -p "/hosthome/vagrant_starph/${container_name}"
-    mount -t vmhgfs "${CONTAINER_OVERLAY}/home/ubuntu" ".host:/-hosthome/vagrant_starph/${container_name}"
-  fi
-
   info made container ${CONTAINER_NAME}
 fi
 ) 200>/var/lock/${CONTAINER_NAME}
