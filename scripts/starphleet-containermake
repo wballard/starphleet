@@ -21,7 +21,21 @@ chmod 777 /var/lib/lxc/data
 
 CONTAINER_NAME="${container_name}"
 
-CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
+if [ ! -d /hosthome ]; then
+  CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
+else
+  if [ "${CONTAINER_NAME}" = "${STARPHLEET_BASE}" ]; then
+    info Installing starphleet_base
+    CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
+  else
+    CONTAINER_ROOT=/hosthome/vagrant_lxc/${CONTAINER_NAME}
+    info Vagrant container startup strategy: installing to vm: ${CONTAINER_ROOT}
+    [ -d ${CONTAINER_ROOT} ] || mkdir -p ${CONTAINER_ROOT}
+    chmod 777 ${CONTAINER_ROOT}
+    ln -s "${CONTAINER_ROOT}" "/var/lib/lxc/${CONTAINER_NAME}"
+  fi
+fi
+
 #configuration, this is the place to mount directories on the host computer
 #into the container
 #note: this takes effect after the initial create, which generates the
@@ -47,7 +61,7 @@ if lxc-ls | grep "^${container_name}$"; then
 else
   info making a new container ${CONTAINER_NAME}
   #??? needed?
-  starphleet-lxc-destroy ${CONTAINER_NAME}
+  #starphleet-lxc-destroy ${CONTAINER_NAME}
   if [ -z "${base_container_name}" ]; then
     lxc-create --name "${container_name}" -t ubuntu
     CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
@@ -87,13 +101,6 @@ else
   lxc-attach --name ${CONTAINER_NAME} -- bash -c 'chmod 777 /var/log/'
   lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'
   lxc-attach --name ${CONTAINER_NAME} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "source /usr/bin/tools; /build_script"
-
-  if [ -d /hosthome ]; then
-    info Vagrant container startup strategy
-    info linking vm: /hosthome/vagrant_starph/${container_name} lxc: ${CONTAINER_OVERLAY}/home/ubuntu
-    [ -d /hosthome/vagrant_lxc ] || mkdir -p /hosthome/vagrant_lxc
-    ln -s "${CONTAINER_OVERLAY}/home" "/hosthome/vagrant_lxc/${container_name}"
-  fi
 
   if [ "${run}" == "true" ]; then
     info leaving ${CONTAINER_NAME} running
