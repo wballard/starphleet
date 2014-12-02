@@ -20,21 +20,7 @@ test -f "${build_script}"
 chmod 777 /var/lib/lxc/data
 
 CONTAINER_NAME="${container_name}"
-
-if [ ! -d /hosthome ]; then
-  CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
-else
-  if [ "${CONTAINER_NAME}" = "${STARPHLEET_BASE}" ]; then
-    info Installing starphleet_base
-    CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
-  else
-    CONTAINER_ROOT=/hosthome/vagrant_lxc/${CONTAINER_NAME}
-    info Vagrant container startup strategy: installing to vm: ${CONTAINER_ROOT}
-    [ -d ${CONTAINER_ROOT} ] || mkdir -p ${CONTAINER_ROOT}
-    chmod 777 ${CONTAINER_ROOT}
-    ln -s "${CONTAINER_ROOT}" "/var/lib/lxc/${CONTAINER_NAME}"
-  fi
-fi
+CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
 
 #configuration, this is the place to mount directories on the host computer
 #into the container
@@ -60,7 +46,7 @@ if lxc-ls | grep "^${container_name}$"; then
   exit 0
 else
   info making a new container ${CONTAINER_NAME}
-  #??? needed?
+
   starphleet-lxc-destroy ${CONTAINER_NAME}
   if [ -z "${base_container_name}" ]; then
     lxc-create --name "${container_name}" -t ubuntu
