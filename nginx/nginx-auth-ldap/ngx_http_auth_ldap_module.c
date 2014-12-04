@@ -981,6 +981,9 @@ ngx_http_auth_ldap_close_connection(ngx_http_auth_ldap_connection_t *c)
         c->conn.connection = NULL;
     }
 
+    // Create a counter to track the interations in the following code
+    int counter = 0;
+
     q = ngx_queue_head(&c->server->free_connections);
     while (q != ngx_queue_sentinel(&c->server->free_connections)) {
         if (q == &c->queue) {
@@ -988,6 +991,20 @@ ngx_http_auth_ldap_close_connection(ngx_http_auth_ldap_connection_t *c)
             break;
         }
         q = ngx_queue_next(q);
+
+        // FIXME:  I do not know how to cause the scenario but frequently we get
+        //         into a scenario where this loop lives forever and locks
+        //         up nginx
+        //
+        //         We could exit here and let NGINX heal its worker but I'm hoping
+        //         we can just break here with the assumption that the queue object
+        //         disappeared in some way the original author didn't expect.
+        //         Otherwise, this is most likely a leak
+        
+        counter++;
+        if (counter > 1000) {
+          break;
+        }
     }
 
     c->rctx = NULL;
