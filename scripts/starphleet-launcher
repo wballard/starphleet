@@ -1,0 +1,42 @@
+#! /usr/bin/env bash
+# vim:ft=sh
+function abspath {
+    if [ -d "$1" ]; then
+        pushd "$1" >/dev/null
+        pwd
+        popd >/dev/null
+    elif [ -e "$1" ]; then
+        pushd "$(dirname "$1")" >/dev/null
+        echo "$(pwd)/$(basename "$1")"
+        popd >/dev/null
+    else
+        echo "$1" does not exist! >&2
+        return 127
+    fi
+}
+
+
+# traditionallly this would be dynamic, but it's really just starphleet here
+COMMAND_NAME=starphleet
+COMMAND_PATH=$(abspath $1)
+COMMAND_DIR=$(dirname ${COMMAND_PATH})
+export DIR="${COMMAND_DIR}"
+export SCRIPT_DIR="${COMMAND_DIR}"
+# throw away our self reference
+shift
+
+# we want our 'globals' to get loaded, and all be exported for use
+# in our called script
+set -a
+source ${DIR}/tools
+set +a
+
+# handle our docopt validation
+help="$(grep "^### " "${COMMAND_PATH}" | cut -c 5-)"
+# again, we want whatever comes out of docopt to be exported
+set -a
+eval "$(${DIR}/docopts -h "$help" : "$@")"
+set +a
+
+# execute our command!
+bash "${COMMAND_PATH}" "$@"

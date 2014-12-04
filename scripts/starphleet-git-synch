@@ -38,6 +38,8 @@ if [ -d "${local}/.git" ]; then
     warn repository url differs, reclone needed
     reclone
     exit 0
+  else
+    starphleet-git fetch --all &> /dev/null || fatal fetch error
   fi
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
   if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
@@ -45,7 +47,6 @@ if [ -d "${local}/.git" ]; then
     git checkout "${BRANCH}" || fatal checkout error
   fi
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
-  starphleet-git fetch --all &> /dev/null || fatal fetch error
   HAS_CHANGES=$(git diff HEAD...origin/${CURRENT_BRANCH} --raw)
   if [ "${HAS_CHANGES}x" != "x" ]; then
     warn new code detected, pulling

@@ -12,8 +12,10 @@ Vagrant::Config.run do |config|
   system "test -n \"${STARPHLEET_PUBLIC_KEY}\" && cp \"${STARPHLEET_PUBLIC_KEY}\" \"public_keys/\""
   system "test -n \"${STARPHLEET_HEADQUARTERS}\" && echo \"${STARPHLEET_HEADQUARTERS}\" > headquarters"
   config.vm.provision :shell, :inline => "
-  /starphleet/scripts/starphleet-install;
-  [ -n \"#{ENV['STARPHLEET_HEADQUARTERS']}\" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}"
+    export PATH=$PATH:/starphleet/scripts;
+    sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
+    sudo /starphleet/scripts/starphleet-install;
+    $([ -n \"#{ENV['STARPHLEET_HEADQUARTERS']}\" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true"
 end
 
 Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
@@ -26,7 +28,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   config.vm.provider :vmware_fusion do |f, override|
     override.vm.network "public_network"
     override.vm.box = ENV['BOX_NAME'] || 'trusty-vmware'
-    override.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/latest/ubuntu-14.04-amd64-vmwarefusion.box"
+    override.vm.box_url = "https://s3.amazonaws.com/glg_starphleet/trusty-14.04-amd64-vmwarefusion.box"
     f.vmx["displayName"] = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
     f.vmx["memsize"] = VAGRANT_MEMSIZE
   end
@@ -39,8 +41,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   end
 
   config.vm.provider :parallels do |f, override|
-    override.vm.box = ENV['BOX_NAME'] || 'saucy-parallels'
-    override.vm.box_url = "https://s3.amazonaws.com/glg_starphleet/saucy-server-parallels-9-amd64-vagrant-1.4.3.box"
+    override.vm.box = ENV['BOX_NAME'] || 'parallels/ubuntu-14.04'
     f.name = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
     f.customize ["set", :id, "--memsize", VAGRANT_MEMSIZE]
   end

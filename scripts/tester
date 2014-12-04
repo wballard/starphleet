@@ -1,0 +1,16 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    tester <name>
+###
+### --help
+###
+### Just the basics of a startphleet install, without a restart.
+
+#die_on_error
+echo "0: ${0}"
+grep "$(uuidgen)" "${0}"
+echo "rc: $?"
+echo "name is: $name"
+
+
+announce *Starphleet Patched*

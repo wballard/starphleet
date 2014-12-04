@@ -37,6 +37,10 @@ function code() {
   exit $*
 }
 
+silent_pushd(){ pushd $1 > /dev/null 2>&1; }
+
+silent_popd(){ popd $1 > /dev/null 2>&1 ; }
+
 #get the current sha for a given git repository
 function get_CURRENT_SHA() {
   export CURRENT_SHA=$(git --git-dir "$1/.git" --work-tree "$1" rev-parse --short HEAD)
@@ -109,9 +113,7 @@ function run_orders()
   }
 
   beta () {
-    BETA_GROUP="${1}"
-    BETA_PROXY="${2}"
-    trace beta test "${BETA_GROUP}" "${BETA_PROXY}"
+    BETAS[$1]=$2
   }
 
   source "${1}" || true
@@ -129,6 +131,27 @@ function container_environment() {
   run_orders ${2}
   for file in ${1}/.profile.d/*; do source ${file}; done
   export PATH=${PATH}:/usr/local/bin
+}
+
+function ec2_mounts() {
+  if mount | grep '/var/lib/lxc'; then
+    :
+  else
+    #may have another device on ec2
+    [ -b /dev/xvdb ] && (mount | grep /mnt) &&  mount --bind /mnt /var/lib/lxc || true
+  fi
+}
+
+function run_as_root_or_die(){
+  if [ $(whoami) != "root" ]; then
+    echo "You'll need to be root to do this. Try again as root"
+    exit 1
+  fi
+}
+
+function die_on_error(){
+  trap "error 'script execution halted due to error' >&2" ERR
+  set -e
 }
 
 # environment set up each time we ask for tools

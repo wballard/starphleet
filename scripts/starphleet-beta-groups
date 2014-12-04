@@ -15,15 +15,25 @@ set -e
 [ -d "${NGINX_CONF}/beta_groups" ]  && rm -rf "${NGINX_CONF}/beta_groups"
 mkdir -p "${NGINX_CONF}/beta_groups"
 
+#set a beta group if the remote user is in the list of beta users
 for BETA_GROUP in $(find "${HEADQUARTERS_LOCAL}/beta_groups" -type f)
 do
   info beta group $(basename ${BETA_GROUP})
+  #user authentication style
   BETA_GROUP_CONF="${NGINX_CONF}/beta_groups/$(basename ${BETA_GROUP}).conf"
-  echo "  map \$remote_user \$$(basename ${BETA_GROUP}) {" >> "${BETA_GROUP_CONF}"
-  echo "   default 1;" >> "${BETA_GROUP_CONF}"
+  echo "  map \$remote_user \$starphleet_beta_$(basename ${BETA_GROUP}) {" >> "${BETA_GROUP_CONF}"
+  echo "   default 0;" >> "${BETA_GROUP_CONF}"
+  for BETA_USER in $(cat "${BETA_GROUP}" | sort | uniq)
+  do
+    echo "   ${BETA_USER} 1;" >> "${BETA_GROUP_CONF}"
+  done
+  echo "  }" >> "${BETA_GROUP_CONF}"
+  #cookie style
+  echo "  map \$cookie_${USER_IDENTITY_COOKIE} \$starphleet_beta_$(basename ${BETA_GROUP})_cookie  {" >> "${BETA_GROUP_CONF}"
+  echo "   default 0;" >> "${BETA_GROUP_CONF}"
   for BETA_USER in $(cat "${BETA_GROUP}")
   do
-    echo "   ${BETA_USER} 0;" >> "${BETA_GROUP_CONF}"
+    echo "   ${BETA_USER} 1;" >> "${BETA_GROUP_CONF}"
   done
   echo "  }" >> "${BETA_GROUP_CONF}"
 done

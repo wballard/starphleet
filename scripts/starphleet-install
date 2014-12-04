@@ -1,18 +1,17 @@
-#!/usr/bin/env bash
+#!/usr/bin/env starphleet-launcher
 ### Usage:
 ###    starphleet-install
 ### --help
 ###
 ### This will get starphleet on a base machine
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-help=$(grep "^### " "$0" | cut -c 5-)
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+run_as_root_or_die
 
 
 #flush out caches, I know, I know -- but really if you don't do this
 #Linux would rather swap than let go
 sync && echo 3 > /proc/sys/vm/drop_caches
+
+ec2_mounts
 
 #put in the system overlay, gets all the files in place
 #for the starphleet jobs
@@ -53,10 +52,7 @@ apt-get -y update
 # https://github.com/lxc/lxc/issues/247
 export DEBIAN_FRONTEND=noninteractive; apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes
 
-for package in $(cat "${DIR}/packages")
-do
-  apt-get -y install --force-yes "${package}"
-done
+apt-get -y install --force-yes $(< "${DIR}/packages")
 
 pushd ${STARPHLEET_ROOT:-/var/starphleet}/nginx
 set -e
@@ -78,6 +74,11 @@ chmod 755 ${STARPHLEET_ROOT}/diagnostic
 
 #starphleet and all of its scripts
 pushd "${DIR}/.."
+# npm is a jerk, and if a file exists that it tries to write it dies
+# this should all be removeed ( the npm install )and replaced with overlay
+# but since the whole thing is currently busted I want to get it working 
+# at all first
+rm /usr/bin/starphleet-launcher || true
 npm ${NPM_FLAGS} install -g
 popd
 
@@ -113,8 +114,8 @@ starphleet-buildpacks
 #making base containers as needed, base container serves as the source for
 #and we clone the service container on top, the idea is the base container
 #can be re-used and thus improve build time
-starphleet-containermake "${STARPHLEET_BASE}" "${STARPHLEET_ROOT:-/var/starphleet}/containers/${STARPHLEET_BASE}"
+${DIR}/starphleet-build-base-container
 
-
+starphleet-cleanup
 start starphleet
 announce *Welcome to Starphleet*

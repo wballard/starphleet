@@ -1,0 +1,13 @@
+#! /usr/bin/env starphleet-launcher
+### Usage: perform-overlay
+###
+###
+### Applies the overlay to the current system. Requires root will refuse to run
+### otherwise
+
+run_as_root_or_die
+
+# copy the contents of the overly on top of the root, this expects
+# run from a sibling directory of the overlay
+
+cp -R ${SCRIPT_DIR}/../overlay/* /
