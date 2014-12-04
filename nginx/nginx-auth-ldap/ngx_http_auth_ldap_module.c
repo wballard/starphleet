@@ -981,7 +981,7 @@ ngx_http_auth_ldap_close_connection(ngx_http_auth_ldap_connection_t *c)
         c->conn.connection = NULL;
     }
 
-    // Create a counter to track the interations in the following code
+    // Create a counter to track the iterations in the following code
     int counter = 0;
 
     q = ngx_queue_head(&c->server->free_connections);
@@ -1000,7 +1000,6 @@ ngx_http_auth_ldap_close_connection(ngx_http_auth_ldap_connection_t *c)
         //         we can just break here with the assumption that the queue object
         //         disappeared in some way the original author didn't expect.
         //         Otherwise, this is most likely a leak
-        
         counter++;
         if (counter > 1000) {
           break;
