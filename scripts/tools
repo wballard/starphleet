@@ -142,8 +142,8 @@ function ec2_mounts() {
   fi
 }
 
-function vagrant_mounts() {
-  if mount | grep '/hosthome'; then
+function vagrant_mode() {
+  if [ -d /hosthome ]; then
     true
   else
     false

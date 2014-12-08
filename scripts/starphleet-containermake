@@ -55,6 +55,17 @@ else
     lxc-clone --snapshot -B overlayfs -o "${base_container_name}" -n "${container_name}"
     CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
   fi
+  
+  if vagrant_mode; then
+    info Vagrant container startup strategy: linking to vm: ${CONTAINER_ROOT}
+    #create dir to hold app source
+    mkdir -p "/hosthome/vagrant_lxc/${CONTAINER_NAME}"
+    #create symlink to source
+    test -d "${CONTAINER_OVERLAY}/var" || mkdir -p "${CONTAINER_OVERLAY}/var"
+    ln -s "/hosthome/vagrant_lxc/${CONTAINER_NAME}" "${CONTAINER_OVERLAY}/var/app"
+    touch "/hosthome/vagrant_lxc/${CONTAINER_NAME}/checkcheck.txt" 
+  fi
+
   #make a directory where we can mount back to the ship and a config file to mount
   test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}" || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}"
   test -d "${CONTAINER_OVERLAY}/var/data" || mkdir -p "${CONTAINER_OVERLAY}/var/data"
