@@ -62,8 +62,11 @@ else
     mkdir -p "/hosthome/vagrant_lxc/${CONTAINER_NAME}"
     #create symlink to source
     test -d "${CONTAINER_OVERLAY}/var" || mkdir -p "${CONTAINER_OVERLAY}/var"
-    ln -s "/hosthome/vagrant_lxc/${CONTAINER_NAME}" "${CONTAINER_OVERLAY}/var/app"
-    touch "/hosthome/vagrant_lxc/${CONTAINER_NAME}/checkcheck.txt" 
+    touch "${CONTAINER_OVERLAY}/var/.vagrant_mode"
+    cat << EOF > ${CONTAINER_CONF}
+      lxc.mount.entry = /hosthome/vagrant_lxc/${CONTAINER_NAME} ${CONTAINER_OVERLAY}/var/git none bind,rw 0 0
+    EOF
+    #ln -s "/hosthome/vagrant_lxc/${CONTAINER_NAME}" "${CONTAINER_OVERLAY}/var/git"
   fi
 
   #make a directory where we can mount back to the ship and a config file to mount
