@@ -1002,6 +1002,7 @@ ngx_http_auth_ldap_close_connection(ngx_http_auth_ldap_connection_t *c)
         //         Otherwise, this is most likely a leak
         counter++;
         if (counter > 1000) {
+          ngx_log_error(NGX_LOG_INFO, c->log, 0, "http_auth_ldap: GLG Hack - Punted on LDAP Disconnect");
           break;
         }
     }
