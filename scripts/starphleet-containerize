@@ -56,13 +56,12 @@ cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 
 trace Fetching service to \${APP_IN}
 
-info "CHECKING VAGRANT: {$APP_IN}"
 ls /var
 
-if [ -e /var/git/.vagrant_mode ]; then
+if [ -d /var/git ]; then
   #link /var/app to this point.  containermake has already mounted this to the host os for editting
-  starphleet-git-synch "${git_url}" "/var/git/app"
   trace VAGRANT - Mapping container /home/ubuntu/app to /var/git/app
+  starphleet-git-synch "${git_url}" "/var/git/app"
   ln -s "/var/git/app" "${APP_IN}"
 else
   trace NOT VAGRANT
