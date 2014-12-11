@@ -62,7 +62,8 @@ if [ -d /var/git ]; then
   #link /var/app to this point.  containermake has already mounted this to the host os for editting
   trace VAGRANT - Mapping container /home/ubuntu/app to /var/git/app
   starphleet-git-synch "${git_url}" "/var/git/app"
-  ln -s "/var/git/app" "${APP_IN}"
+  trace After git-synch
+  sudo ln -s "/var/git/app" "/home/ubuntu/app"
 else
   trace NOT VAGRANT
   starphleet-git-synch "${git_url}" \${APP_IN}
@@ -91,10 +92,11 @@ fi
 sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
 sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
 
+trace Calling Builder
 builder ${ORDERS}
 
-if ! vagrant_mode; then
-  # Enable cron for production mode, disable cron for local dev
+trace calling cronner
+if [ ! -d /var/git ]; then
   cronner ${orders_dir} ${ORDERS}
 fi
 
