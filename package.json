@@ -37,7 +37,8 @@
     "starphleet-local-repo-update": "./scripts/starphleet-local-repo-update",
     "starphleet-install": "./scripts/starphleet-install",
     "starphleet-patch": "./scripts/starphleet-patch",
-    "starphleet-ready": "./scripts/starphleet-ready"
+    "starphleet-ready": "./scripts/starphleet-ready",
+    "starphleet-launcher": "./scripts/starphleet-launcher"
   },
   "repository": {
     "type": "git",

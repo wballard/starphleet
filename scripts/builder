@@ -24,7 +24,7 @@ if [ -n "$BUILDPACK_URL" ]; then
   buildpack="$buildpack_root/custom"
   rm -rf "$buildpack"
   #mod here to allow #branch syntax
-  starphleet-git-synch "$BUILDPACK_URL" "$buildpack"
+  sudo starphleet-git-synch "$BUILDPACK_URL" "$buildpack"
   selected_buildpack="$buildpack"
   buildpack_name=$($buildpack/bin/detect "$app_root") && selected_buildpack=$buildpack
 else
