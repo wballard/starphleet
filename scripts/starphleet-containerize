@@ -78,14 +78,14 @@ trace Prepping container
 [ -x ${orders_dir}/on_containerize ] && sudo ${orders_dir}/on_containerize
 
 
+trace Fetching buildpacks
+#set up a place onboard for possible custom buildpacks
+mkdir -p "\${HOME}/build"
+rsync -az "${BUILDPACKS}/" "\${HOME}/build/buildpacks"
 if [ "${git_url}" == "-" ]; then
-  export BUILDPACK_URL="https://github.com/wballard/null-buildpack.git"
-else
-  trace Fetching buildpacks
-  #set up a place onboard for possible custom buildpacks
-  mkdir -p "\${HOME}/build"
-  rsync -az "${BUILDPACKS}/" "\${HOME}/build/buildpacks"
+  sudo starphleet-git-synch "https://github.com/wballard/null-buildpack.git"  "\${HOME}/build/buildpacks/ZZZ-NULL"
 fi
+
 EOF
 
 #now hand off to buildstep builder
