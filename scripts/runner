@@ -9,9 +9,13 @@ container_environment ${app_root} ${orders}
 
 get_SHASUM "${script}"
 (
-#flocked, this will exit right away rather than run, but no error code
-#otherwise cron will want to email you
-flock -n 200 || exit 0
+#flocked, this will exit right away rather than run
+flock -n 200
+if [ $? -ne 0 ]; then
+  echo "unable to aquire lock to run ${script}"
+  # no error code so cron won't try to email
+  exit 0
+fi
 
 2>&1 ${script} | logger --stderr -t "$(basename ${script})"
 ) 200>/var/lock/${SHASUM}
