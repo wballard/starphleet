@@ -1,0 +1,17 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-restart [<service_name>]
+### --help
+###
+### Restarts the process for your service
+run_as_root_or_die
+
+IFS=$'\n'
+
+for service in $(initctl list | grep ${service_name} | sort)
+do
+  pid=$(echo ${service} | awk '{print $5;}')
+  kill $pid
+done
+unset IFS
+

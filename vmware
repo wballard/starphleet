@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
-[ -f "~/.starphleet" ] && source "~/.starphleet"
-vagrant up --provider vmware_fusion
+if [ -f ~/.starphleet ] ; then
+  source ~/.starphleet && vagrant up --provider vmware_fusion
+else
+  echo "~/.starphleet not found"
+fi

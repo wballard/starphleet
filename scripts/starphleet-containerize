@@ -55,7 +55,18 @@ EOF
 cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 
 trace Fetching service to \${APP_IN}
-starphleet-git-synch "${git_url}" \${APP_IN}
+
+ls /var
+
+if [ -d /var/git ]; then
+  #link /var/app to this point.  containermake has already mounted this to the host os for editting
+  trace Local Dev mode
+  sudo starphleet-git-synch "${git_url}" "/var/git/${container_name}"
+  sudo ln -s "/var/git/${container_name}" \${APP_IN}
+else
+  starphleet-git-synch "${git_url}" \${APP_IN}
+fi
+
 trace Running orders
 run_orders ${ORDERS}
 
@@ -79,6 +90,7 @@ fi
 sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
 sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
 
+trace Calling Builder
 builder ${ORDERS}
 cronner ${orders_dir} ${ORDERS}
 
