@@ -10,7 +10,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${DIR}/tools"
 
 if [ -n "${GIT_SSH}" ]; then
-  info GIT_SSH already configured
+  info GIT_SSH already configured ${GIT_SSH}
 else
   info Configuring GIT_SSH
   #admiral config file generation
@@ -26,4 +26,5 @@ else
   trap 'rm "${GIT_SSH}";rm "${SSH_CONFIG}"; test -f "${SSH_CONFIG}.known_hosts" && rm "${SSH_CONFIG}.known_hosts"' EXIT
 fi
 # Run the git command
+whoami
 git "$@"

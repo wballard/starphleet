@@ -56,15 +56,16 @@ else
     CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
   fi
 
-if vagrant_mode; then
-  info VAGRANT mode appending mount to ${CONTAINER_CONF}
+if [ dev_mode ]; then
+  info Local Dev mode appending mount to ${CONTAINER_CONF}
+  STARPHLEET_DEV_DIR=/hosthome/starphleet_dev
   #create dir to hold app source and container mount point
-  [ -d "/hosthome/vagrant_lxc/${CONTAINER_NAME}" ] || mkdir -p "/hosthome/vagrant_lxc/${CONTAINER_NAME}"
-  chmod 777 "/hosthome/vagrant_lxc/${CONTAINER_NAME}"
+  [ -d "${STARPHLEET_DEV_DIR}" ] || mkdir -p "${STARPHLEET_DEV_DIR}"
+  chmod 777 "${STARPHLEET_DEV_DIR}"
   [ -d "${CONTAINER_OVERLAY}/var/git" ] || mkdir -p "${CONTAINER_OVERLAY}/var/git"
   chmod 777 "${CONTAINER_OVERLAY}/var/git"
   # add one additional mount point to the lxc container config.  Wil expose the container git dir to the host
-  echo "lxc.mount.entry = /hosthome/vagrant_lxc/${CONTAINER_NAME} ${CONTAINER_OVERLAY}/var/git none bind,rw 0 0" >> ${CONTAINER_CONF}
+  echo "lxc.mount.entry = ${STARPHLEET_DEV_DIR} ${CONTAINER_ROOT}/rootfs/var/git none bind,rw 0 0" >> ${CONTAINER_CONF}
 fi
 
 

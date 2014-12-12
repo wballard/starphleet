@@ -60,12 +60,10 @@ ls /var
 
 if [ -d /var/git ]; then
   #link /var/app to this point.  containermake has already mounted this to the host os for editting
-  trace VAGRANT - Mapping container /home/ubuntu/app to /var/git/app
-  starphleet-git-synch "${git_url}" "/var/git/app"
-  trace After git-synch
-  sudo ln -s "/var/git/app" "/home/ubuntu/app"
+  trace Local Dev mode
+  sudo starphleet-git-synch "${git_url}" "/var/git/${container_name}"
+  sudo ln -s "/var/git/${container_name}" \${APP_IN}
 else
-  trace NOT VAGRANT
   starphleet-git-synch "${git_url}" \${APP_IN}
 fi
 
@@ -94,11 +92,7 @@ sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_
 
 trace Calling Builder
 builder ${ORDERS}
-
-trace calling cronner
-if [ ! -d /var/git ]; then
-  cronner ${orders_dir} ${ORDERS}
-fi
+cronner ${orders_dir} ${ORDERS}
 
 trace Post-prepping container
 [ -x ${orders_dir}/after_containerize ] && sudo ${orders_dir}/after_containerize

@@ -12,7 +12,7 @@ Vagrant::Config.run do |config|
   system "test -n \"${STARPHLEET_PUBLIC_KEY}\" && cp \"${STARPHLEET_PUBLIC_KEY}\" \"public_keys/\""
   system "test -n \"${STARPHLEET_HEADQUARTERS}\" && echo \"${STARPHLEET_HEADQUARTERS}\" > headquarters"
   config.vm.provision :shell, :inline => "
-    test -d /hosthome/vagrant_lxc/ && rm -rf /hosthome/vagrant_lxc/;
+    test -d /hosthome/starphleet_dev/ && rm -rf /hosthome/starphleet_dev/;
     export PATH=$PATH:/starphleet/scripts;
     sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
     sudo /starphleet/scripts/starphleet-install;
