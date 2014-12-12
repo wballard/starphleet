@@ -58,13 +58,17 @@ trace Fetching service to \${APP_IN}
 
 ls /var
 
+#dev_mode detection here in containerworld
 if [ -d /var/git ]; then
-  #link /var/app to this point.  containermake has already mounted this to the host os for editting
   trace Local Dev mode
-  sudo starphleet-git-synch "${git_url}" "/var/git/${container_name}"
-  sudo ln -s "/var/git/${container_name}" \${APP_IN}
+  if [ "${git_url}" != "-" ]; then
+    sudo starphleet-git-synch "${git_url}" "/var/git/${container_name}"
+    sudo ln -s "/var/git/${container_name}" \${APP_IN}
+  fi
 else
-  starphleet-git-synch "${git_url}" \${APP_IN}
+  if [ "${git_url}" != "-" ]; then
+    starphleet-git-synch "${git_url}" \${APP_IN}
+  fi
 fi
 
 trace Running orders
@@ -73,10 +77,15 @@ run_orders ${ORDERS}
 trace Prepping container
 [ -x ${orders_dir}/on_containerize ] && sudo ${orders_dir}/on_containerize
 
-trace Fetching buildpacks
-#set up a place onboard for possible custom buildpacks
-mkdir -p "\${HOME}/build"
-rsync -az "${BUILDPACKS}/" "\${HOME}/build/buildpacks"
+
+if [ "${git_url}" == "-" ]; then
+  export BUILDPACK_URL="https://github.com/wballard/null-buildpack.git"
+else
+  trace Fetching buildpacks
+  #set up a place onboard for possible custom buildpacks
+  mkdir -p "\${HOME}/build"
+  rsync -az "${BUILDPACKS}/" "\${HOME}/build/buildpacks"
+fi
 EOF
 
 #now hand off to buildstep builder
