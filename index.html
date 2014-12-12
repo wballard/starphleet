@@ -9316,6 +9316,18 @@ Given that you have a program that listens for HTTP/HTTPS traffic, setting it up
   $ ssh admiral@ship starphleet-status
   ```
 
+## Make a Service with no Service
+Huh? So the idea is you can publish just raw shell scripts, no need for
+a buildpack to run at all.
+
+Make orders that just look like this:
+
+```bash
+unpublished
+```
+
+Then, in your orders directory, you can load up on `#@` scripts.
+
 ## See Why a Service Failed To Start
 Services have build logs and run logs. Run logs are in syslog, but build logs
 can be had with.
