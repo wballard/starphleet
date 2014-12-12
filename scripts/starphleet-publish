@@ -28,6 +28,8 @@ MOUNT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
 BARE_CONF="${NGINX_CONF}/published_bare/$(urlencode \"${public_url}\").conf"
 #rewrites for beta support
 BETA_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").beta"
+#redirect your urls to lxc
+REDIRECT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").redirect"
 
 IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
 
@@ -110,7 +112,7 @@ echo '}' >> "${MOUNT_CONF}"
 
 info "published ${container_name}:${PORT} to ${public_url}"
 
-#port publication, this is optional if a port is set
+#port publication, this is optional if a port is set - this code gets removed once everything is redirected
 if [ "${PUBLISH_PORT}" != "0" ]
 then
 cat << EOF > "${BARE_CONF}"
@@ -146,10 +148,20 @@ EOF
     echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${BARE_CONF}"
     echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
   fi
+
   echo -e "  }\n}" >> "${BARE_CONF}"
   info "published ${container_name}:${PORT} :${PUBLISH_PORT}"
 else
   rm -f "${BARE_CONF}"
+fi
+
+#redirect a DNS entry to the lxc url
+if [[ "${REDIRECT}" != '' && "${REDIRECT}" != '-' && "${REDIRECTTO}" != '' ]]; then
+  info "redirect set for ${REDIRECT}"
+  echo "if (\$http_host = ${REDIRECT}) {" > "${REDIRECT_CONF}"
+  echo " rewrite ^ ${REDIRECTTO}$request_uri permanent;" >> "${REDIRECT_CONF}"
+  echo " break;" >> "${REDIRECT_CONF}"
+  echo "}" >> "${REDIRECT_CONF}"
 fi
 
 #reload to get the newly generated settings
