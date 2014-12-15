@@ -56,7 +56,7 @@ else
     CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
   fi
 
-if [ dev_mode ]; then
+if dev_mode ; then
   info Local Dev mode appending mount to ${CONTAINER_CONF}
   STARPHLEET_DEV_DIR=/hosthome/starphleet_dev
   #create dir to hold app source and container mount point
