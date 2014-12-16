@@ -1,16 +1,13 @@
-#!/usr/bin/env bash
+#!/usr/bin/env starphleet-launcher
 ### Usage:
 ###    starphleet-status [<service_name>]
 ### --help
 ###
 ### Dump out handy statistics about your ship
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-help=$(grep "^### " "$0" | cut -c 5-)
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 ##ssl stats
 SSL_EXPIRATION=$(openssl x509 -noout -in ${STARPHLEET_ROOT:-/var/starphleet}/nginx/crt -dates | head -1 | awk 'BEGIN { FS = "=" } ; { print $2 }')
+STARPHLEET_DEV_DIR=/hosthome/starphleet_dev
 
 cat << EOF
 hostname: $(hostname)
@@ -52,7 +49,11 @@ EOF
   fi
   for status in $(find "${CURRENT_ORDERS}" | grep 'starphleetstatus$' | grep ${FILTER})
   do
-    ORDER_LOCAL=$(dirname "${status}")/git
+    if dev_mode; then
+      ORDER_LOCAL="${STARPHLEET_DEV_DIR}/${ORDER}"
+    else
+      ORDER_LOCAL=$(dirname "${status}")/git
+    fi
     if [ -f $(dirname "${status}")/.container ]; then
       CONTAINER=$(cat $(dirname "${status}")/.container)
     else
@@ -61,7 +62,7 @@ EOF
     ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
     LOCAL_IP=$([ -f "${status}.ip" ] && cat "${status}.ip")
     get_CURRENT_SHA "${ORDER_LOCAL}"
-    cd "$(dirname "${status}")/git"
+    cd "${ORDER_LOCAL}"
     AUTHOR=$(git log -1 --format='%ae')
     TEXT=$(git log -1 --format='%s')
 cat << EOF
