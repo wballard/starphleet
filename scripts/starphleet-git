@@ -17,7 +17,7 @@ else
   #completely regenerate each time there is a change. headquarters won't take
   #any lip from its admirals!
   export SSH_CONFIG="/tmp/ssh.config.$$"
-  starphleet-git-config > "${SSH_CONFIG}"
+  starphleet-git-config | tee "${SSH_CONFIG}"
 
   # script that patches SSH to use our admiral config
   export GIT_SSH="/tmp/.git_ssh.$$"

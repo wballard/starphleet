@@ -33,7 +33,6 @@ CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 #starphleet-base is a create, all orders are a clones to delta0
 cat << EOF > ${CONTAINER_CONF}
 lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT} none bind,rw 0 0
-lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
 EOF
 
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
@@ -65,7 +64,10 @@ if dev_mode ; then
   [ -d "${CONTAINER_OVERLAY}/var/git" ] || mkdir -p "${CONTAINER_OVERLAY}/var/git"
   chmod 777 "${CONTAINER_OVERLAY}/var/git"
   # add one additional mount point to the lxc container config.  Wil expose the container git dir to the host
+  echo "lxc.mount.entry = ${STARPHLEET_DEV_DIR} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0" >> ${CONTAINER_CONF}
   echo "lxc.mount.entry = ${STARPHLEET_DEV_DIR} ${CONTAINER_ROOT}/rootfs/var/git none bind,rw 0 0" >> ${CONTAINER_CONF}
+else
+  echo "lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0" >> ${CONTAINER_CONF}
 fi
 
 
