@@ -8,7 +8,7 @@ source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-while lxc-ls --running | grep "^${container_name}"; do
+while lxc-ls --running | grep "^${container_name}$"; do
   info stopping ${container_name}
   lxc-stop --name ${container_name} 2>&1
   sleep 1

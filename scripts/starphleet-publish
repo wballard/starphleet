@@ -31,7 +31,7 @@ BETA_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").beta"
 #redirect your urls to lxc
 REDIRECT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").redirect"
 
-IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
+IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}[[:space:]]" | awk '{ print $3; }')
 
 info publishing to ${IP_ADDRESS}
 
