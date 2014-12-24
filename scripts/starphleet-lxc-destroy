@@ -13,7 +13,7 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 starphleet-lxc-stop "${container_name}"
 
-while lxc-ls | grep "^${container_name}"; do
+while lxc-ls | grep "^${container_name}$"; do
   info destroying ${container_name}
   lxc-destroy --name "${container_name}" 2>&1
   sleep 1

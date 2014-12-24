@@ -12,7 +12,7 @@ trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 
 PORT=${container_port:-${PORT}}
 URL=${url:-/}
-IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}" | awk '{ print $3; }')
+IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}[[:space:]]" | awk '{ print $3; }')
 
 TEST_PASSED=false
 for c in {1..180}; do
