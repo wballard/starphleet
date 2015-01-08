@@ -63,6 +63,7 @@ if [ -d /var/git ]; then
   trace Local Dev mode
   if [ "${git_url}" != "-" ]; then
     sudo starphleet-git-synch "${git_url}" "/var/git/${container_name}" || true
+    sudo chmod -R +w "/var/git/${container_name}" || true
     sudo ln -s "/var/git/${container_name}" \${APP_IN}
   fi
 else
