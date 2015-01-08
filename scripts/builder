@@ -9,6 +9,8 @@ buildpack_root="${HOME}/build/buildpacks"
 buildpacks=($buildpack_root/*)
 selected_buildpack=
 
+source /usr/bin/tools
+
 # start: heroku buildpack hack (some buildpacks create "temp" /app dir)
 sudo bash -c "mkdir -p /app && chown ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} /app"
 # end: heroku buildpack hack
@@ -45,6 +47,11 @@ fi
 # generate a random request id used by buildpack instrumentation
 export REQUEST_ID=$(openssl rand -base64 32)
 
+# the build pack writes to our buildpack dir, and the build pack runs NOT AS ROOT
+sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} ${buildpack_root}
+if [ dev_mode ]; then
+  rm -rf ${app_root}/.heroku
+fi
 $selected_buildpack/bin/compile "$app_root" "$cache_root"
 
 # start: heroku buildpack hack (some buildpacks create "temp" /app dir)

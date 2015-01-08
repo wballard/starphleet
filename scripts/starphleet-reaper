@@ -16,5 +16,6 @@ do
   info "reaping ${name}"
   stop starphleet_serve_order name="${name}" || true
   starphleet-lxc-destroy "${name}"
+  info "reaper has reaped ${name}"
 done
-info "reaper complete"
+

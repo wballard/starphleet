@@ -4,32 +4,32 @@ ulimit -n ${MAX_OPEN_FILES} > /dev/null
 
 #Library of colorized logging functions, just source this
 function error() {
-  echo -e  '\E[31m'"\033[1m$*\033[0m"
+  echo -e  '\E[31m'"$(date +"%x %X - ")\033[1m$*\033[0m"
 }
 
 function announce() {
-  echo -e  '\E[34m'"\033[1m$*\033[0m"
+  echo -e  '\E[34m'"$(date +"%x %X - ")\033[1m$*\033[0m"
 }
 
 function fatal() {
-  echo -e  '\E[31m'"\033[1m$*\033[0m"
+  echo -e  '\E[31m'"$(date +"%x %X - ")\033[1m$*\033[0m"
   exit 1
 }
 
 function trace() {
-  >&2 echo -e  '\E[35m'"\033[1m$*\033[0m"
+  >&2 echo -e  '\E[35m'"$(date +"%x %X - ")\033[1m$*\033[0m"
 }
 
 function info() {
-  echo -e  '\E[32m'"\033[1m$*\033[0m"
+  echo -e  '\E[32m'"$(date +"%x %X - ")\033[1m$*\033[0m"
 }
 
 function warn() {
-  echo -e  '\E[33m'"\033[1m$*\033[0m"
+  echo -e  '\E[33m'"$(date +"%x %X - ")\033[1m$*\033[0m"
 }
 
 function log() {
-  echo -e "$*"
+  echo -e "$(date +"%x %X - ")$*"
 }
 
 function code() {
