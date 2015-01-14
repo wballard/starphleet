@@ -56,8 +56,6 @@ cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 
 trace Fetching service to \${APP_IN}
 
-ls /var
-
 #dev_mode detection here in containerworld
 if [ -d /var/git ]; then
   trace Local Dev mode
