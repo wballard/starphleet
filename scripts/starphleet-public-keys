@@ -36,14 +36,11 @@ chown ${ADMIRAL}:${ADMIRAL} ${AUTHFILE}
 
 #look for SSL keys
 [ -d "${NGINX_CONF}/published" ] || mkdir -p "${NGINX_CONF}/published"
-if [ -f "${HEADQUARTERS_LOCAL}/ssl/crt" ] && [ -f "${HEADQUARTERS_LOCAL}/ssl/key" ]; then
-  if diff "${HEADQUARTERS_LOCAL}/ssl/crt" "${NGINX_CONF}/published/crt" > /dev/null; then
-    #keys are the same
-    :
-  else
-    info updating SSL keys
-    cp "${HEADQUARTERS_LOCAL}/ssl/crt" "${NGINX_CONF}/published/crt"
-    cp "${HEADQUARTERS_LOCAL}/ssl/key" "${NGINX_CONF}/published/key"
-    restart starphleet_nginx
-  fi
+if for name in ${HEADQUARTERS_LOCAL}/ssl/*; do file_name=$(basename $name); diff ${HEADQUARTERS_LOCAL}/ssl/${file_name} ${NGINX_CONF}/published/${file_name} > /dev/null ; done ; then
+  #keys are the same
+  :
+else
+  info updating SSL keys
+  cp ${HEADQUARTERS_LOCAL}/ssl/* ${NGINX_CONF}/published/
+  restart starphleet_nginx
 fi
