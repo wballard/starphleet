@@ -113,7 +113,10 @@ function run_orders()
     STOP_BEFORE_AUTODEPLOY=1
   }
 
+  # If the order is unpublished - push an 'empty' link to ${AUTODEPLOY} so the previous
+  # git repo doesn't accidently get re-copied into the wrong order file
   unpublished () {
+    [ -n "${AUTODEPLOY}" ] && echo "" > "${AUTODEPLOY}";
     UNPUBLISHED=1
   }
 
