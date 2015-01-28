@@ -90,7 +90,7 @@ EOF
 #now hand off to buildstep builder
 cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 trace Running buildpack
-if [ "\${BUILDPACK_CACHE_DIR}" ]
+if [ -n "\${BUILDPACK_CACHE_DIR}" ]
   trace Buildpack caching is enabled
 then
   if [ -d "\${BUILDPACK_CACHE_DIR}" ]
