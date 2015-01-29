@@ -91,13 +91,9 @@ EOF
 cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 trace Running buildpack
 if [ -n "\${BUILDPACK_CACHE_DIR}" ]
-  trace Buildpack caching is enabled
 then
-  if [ -d "\${BUILDPACK_CACHE_DIR}" ]
-  then
-    sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
-    sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
-  fi
+  trace Buildpack caching is enabled
+  sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
 fi
 
 trace Calling Builder
