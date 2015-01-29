@@ -4,7 +4,7 @@
 ### --help
 ###
 ###   "Runs ssh to connect to the given container"
-###   
+###
 ###   "Arguments:"
 ###   "NAME    : name of the original starphleet order.  Replaced with the IP address of the container."
 ###   "COMMAND : optional command to pass to ssh"
@@ -17,7 +17,7 @@ trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 set -e
 
 get_ip(){
-  for name in $(sudo lxc-ls --running | grep --extended-regexp "service-${ENCODED_ORDER}-([a-f0-9]){7}-([a-f0-9]){7}")
+  for name in $(sudo lxc-ls --running | grep --extended-regexp "${ENCODED_ORDER}-")
     do
       ip=$(sudo lxc-ls --fancy -F ipv4 $name | tail -1)
       if [ -n  ${ip} ]; then
@@ -28,7 +28,7 @@ get_ip(){
 }
 
 do_ssh(){
-    
+
     # Use get_ip to wait for container's network to be up
     # and to obtain the ip address, then we can ssh to the lxc.
     TRIES=60
