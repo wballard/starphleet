@@ -16,8 +16,7 @@ ec2_mounts
 #put in the system overlay, gets all the files in place
 #for the starphleet jobs
 rm -f /etc/init/starphleet*
-cp -R ${DIR}/../overlay/* /
-cp -R ${DIR}/../nginx/* ${STARPHLEET_ROOT:-/var/starphleet}/nginx/
+${SCRIPT_DIR}/perform-overlay
 
 #source again, yep -- now the environment is in place
 source ${DIR}/tools
@@ -40,13 +39,10 @@ hostname "${SHIP}"
 echo "${SHIP}" > /etc/hostname
 echo "127.0.0.1 ${SHIP} localhost" > /etc/hosts
 
-
 #packages
 debconf-set-selections <<< "postfix postfix/mailname string '${SHIP}'"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
 apt-get -y install --force-yes software-properties-common
-add-apt-repository -y ppa:chris-lea/node.js
-apt-get -y update
 
 # Run Upgrade before before installing packages - which fixes this error
 # https://github.com/lxc/lxc/issues/247
@@ -64,23 +60,12 @@ popd
 rm /bin/sh
 ln /bin/bash /bin/sh
 
-
 #starphleet lives here
 [ -d ${STARPHLEET_ROOT} ] || mkdir -p ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_TMP} ] || mkdir -p ${STARPHLEET_TMP}
 chmod 755 ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_ROOT}/diagnostic ] || mkdir -p ${STARPHLEET_ROOT}/diagnostic
 chmod 755 ${STARPHLEET_ROOT}/diagnostic
-
-#starphleet and all of its scripts
-pushd "${DIR}/.."
-# npm is a jerk, and if a file exists that it tries to write it dies
-# this should all be removeed ( the npm install )and replaced with overlay
-# but since the whole thing is currently busted I want to get it working 
-# at all first
-rm /usr/bin/starphleet-launcher || true
-npm ${NPM_FLAGS} install -g
-popd
 
 #make a place for keys
 test -d ${PRIVATE_KEYS} || mkdir -p ${PRIVATE_KEYS}
@@ -94,7 +79,6 @@ fi
 if find /starphleet/public_keys/* > /dev/null ; then
   [ -d "${PUBLIC_KEYS}" ] && cp /starphleet/public_keys/* "${PUBLIC_KEYS}"
 fi
-
 
 #allow passwordless sudoers
 cat > ${ROOT}/etc/sudoers <<'EOF'

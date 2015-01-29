@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 stop starphleet
 rm /var/log/upstart/*
-/starphleet/scripts/perform-overlay
+/starphleet/scripts/starphleet-install
 start starphleet

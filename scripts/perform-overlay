@@ -11,4 +11,5 @@ run_as_root_or_die
 # run from a sibling directory of the overlay
 
 cp -R ${SCRIPT_DIR}/../overlay/* /
+cp -R ${DIR}/../nginx/* ${STARPHLEET_ROOT:-/var/starphleet}/nginx/
 cp ${SCRIPT_DIR}/* /usr/bin
