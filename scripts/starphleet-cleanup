@@ -17,6 +17,7 @@ test -d "${ADMIRAL_HOME}/.npm" && rm -rf "${ADMIRAL_HOME}/.npm"
 #deleting the headquarters makes sure we can get a version difference on start
 #in order to kick off containers
 test -d "${HEADQUARTERS_LOCAL}" && rm -rf "${HEADQUARTERS_LOCAL}"
+test -d "${CURRENT_ORDERS}" && rm -rf "${CURRENT_ORDERS}"
 
 #unpublish services from nginx
 test -d "${NGINX_CONF}/published" && rm -rf "${NGINX_CONF}/published"
