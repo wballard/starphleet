@@ -159,9 +159,12 @@ function ec2_mounts() {
 function dev_mode() {
   if [ -d /hosthome ]; then
     true
+  elif [ -d /var/git ]; then
+    true
   else
     false
   fi
+  false
 }
 
 function run_as_root_or_die(){

@@ -56,8 +56,7 @@ cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 
 trace Fetching service to \${APP_IN}
 
-#dev_mode detection here in containerworld
-if [ -d /var/git ]; then
+if dev_mode; then
   trace Local Dev mode
   if [ "${git_url}" != "-" ]; then
     sudo starphleet-git-synch "${git_url}" "/var/git/${container_name}" || true
@@ -92,8 +91,13 @@ cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 trace Running buildpack
 if [ -n "\${BUILDPACK_CACHE_DIR}" ]
 then
-  trace Buildpack caching is enabled
-  sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
+  if dev_mode; then
+    trace Buildpack caching is not needed in dev mode
+  else
+    trace Buildpack caching is enabled
+    sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
+    sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
+  fi
 fi
 
 trace Calling Builder

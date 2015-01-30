@@ -52,7 +52,7 @@ EOF
     if dev_mode; then
       ORDER_LOCAL="${STARPHLEET_DEV_DIR}/${ORDER}"
     else
-      ORDER_LOCAL=$(dirname "${status}")/git
+      ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
     fi
     if [ -f $(dirname "${status}")/.container ]; then
       CONTAINER=$(cat $(dirname "${status}")/.container)
@@ -61,10 +61,16 @@ EOF
     fi
     ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
     LOCAL_IP=$([ -f "${status}.ip" ] && cat "${status}.ip")
-    get_CURRENT_SHA "${ORDER_LOCAL}"
-    cd "${ORDER_LOCAL}"
-    AUTHOR=$(git log -1 --format='%ae')
-    TEXT=$(git log -1 --format='%s')
+    if [ -d "${ORDER_LOCAL}" ]; then
+      get_CURRENT_SHA "${ORDER_LOCAL}"
+      cd "${ORDER_LOCAL}"
+      AUTHOR=$(git log -1 --format='%ae')
+      TEXT=$(git log -1 --format='%s')
+    else
+      CURRENT_SHA=""
+      AUTHOR=""
+      TEXT=""
+    fi
 cat << EOF
   -
     order: ${ORDER}
