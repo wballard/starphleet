@@ -10,8 +10,8 @@ help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 if [ -n "${service_name}" ]; then
-  cat /var/log/upstart/starphleet_serve_order-${service_name}.log
-  tail -F --lines 0 /var/log/upstart/starphleet_serve_order-${service_name}.log
+  cat /var/log/upstart/starphleet_serve_order-${service_name}-*.log
+  tail -F --lines 0 /var/log/upstart/starphleet_serve_order-${service_name}-*.log
 else
   tail -F /var/log/upstart/*starphleet*.log
 fi
