@@ -5,15 +5,17 @@ PATH_ONLINE=${PATH_ONLINE-\\\/starphleet\\\/nginx\\\/status}
 PATH_OFFLINE=${PATH_OFFLINE-\\\/starphleet\\\/nginx\\\/offline}
 NGINX_CONFIG=${NGINX_CONFIG-/var/starphleet/nginx/nginx.conf}
 
+# Backup the original config
+[ -f ${NGINX_CONFIG} ] && cp ${NGINX_CONFIG} ${NGINX_CONFIG}.$$.bak
 # Make a new NGINX config
 cat ${NGINX_CONFIG} | sed -e "s/${PATH_ONLINE}/${PATH_OFFLINE}/" > ${NGINX_CONFIG}.tmp
 # If the last command created the tmp file - copy over the original
-[ -f ${NGINX_CONFIG}.tmp ] && cp ${NGINX_CONFIG}.tmp ${NGINX_CONFIG}
+[ -f ${NGINX_CONFIG}.tmp ] && mv ${NGINX_CONFIG}.tmp ${NGINX_CONFIG}
 
 ## Stop NGINX
-stop starphleet_nginx
+sudo stop starphleet_nginx
 ## Start NGINX
-start starphleet_nginx
+sudo start starphleet_nginx
 ## Give some status
 echo "The hostcheck endpoint for this host has been disabled"
 
