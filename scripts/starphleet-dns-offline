@@ -15,5 +15,5 @@ stop starphleet_nginx
 ## Start NGINX
 start starphleet_nginx
 ## Give some status
-echo "The hostcheck endpoint for this host has been enabled"
+echo "The hostcheck endpoint for this host has been disabled"
 
