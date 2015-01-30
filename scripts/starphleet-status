@@ -49,6 +49,8 @@ EOF
   fi
   for status in $(find "${CURRENT_ORDERS}" | grep 'starphleetstatus$' | grep ${FILTER})
   do
+    ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
+    LOCAL_IP=$([ -f "${status}.ip" ] && cat "${status}.ip")
     if dev_mode; then
       ORDER_LOCAL="${STARPHLEET_DEV_DIR}/${ORDER}"
     else
@@ -59,8 +61,6 @@ EOF
     else
       CONTAINER="<none>"
     fi
-    ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
-    LOCAL_IP=$([ -f "${status}.ip" ] && cat "${status}.ip")
     if [ -d "${ORDER_LOCAL}" ]; then
       get_CURRENT_SHA "${ORDER_LOCAL}"
       cd "${ORDER_LOCAL}"
