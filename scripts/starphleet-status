@@ -102,7 +102,7 @@ cat << EOF
     author: ${AUTHOR}
     text: >
       ${TEXT}
-    status: ${STATUS} ${OUTPUT}
+    status: ${STATUS}
 EOF
 fi
 
