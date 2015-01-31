@@ -87,7 +87,7 @@ EOF
     fi
 ##stats are all computed at this point
     OUTPUT=true
-    if [ ${trouble} = true ] && [ ${STATUS} = 'online' ]
+    if [ "${trouble}" = true ] && [ "${STATUS}" = 'online' ]
     then
       OUTPUT=false
     fi
