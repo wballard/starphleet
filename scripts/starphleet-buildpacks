@@ -13,6 +13,12 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 mkdir -p "${BUILDPACKS}"
 cd "${BUILDPACKS}"
 for buildpack in $(cat "${DIR}/buildpacks"); do
+  REMOTE=$(echo "${buildpack//$'\r'/}" | awk -F '#' '{print $1;}')
+  BRANCH=$(echo "${buildpack//$'\r'/}" | awk -F '#' '{print $2;}')
   info installing $buildpack ...
-  git clone --depth=1 "${buildpack}" || true
+  if [ -n "${BRANCH}" ]; then
+    git clone --depth=1 -b "${BRANCH}" "${REMOTE}" || true
+  else
+    git clone --depth=1 "${REMOTE}" || true
+  fi
 done
