@@ -34,5 +34,5 @@ export USER_IDENTITY_COOKIE="starphleet_user"
 # Remove the status endpoint from nginx
 export NGINX_STATUS_URL="/starphleet/nginx/status"
 export NGINX_STATUS_CONFIG_PATH="/var/starphleet/nginx/published"
-export NGINX_STATUS_CONFIG_FILE="${NGINX_STATUS_CONFIG_PATH}/starphleet_nginx_status"
+export NGINX_STATUS_CONFIG_FILE="${NGINX_STATUS_CONFIG_PATH}/starphleet_nginx_status.status"
 export NGINX_PID_FILE="/var/run/starphleet_nginx.pid"
