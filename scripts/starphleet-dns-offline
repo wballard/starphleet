@@ -1,21 +1,26 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-dns-offline
+###
+### Call this to bring the status check endpoint offline for Route 53
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-# Must escape chars for regex
-PATH_ONLINE=${PATH_ONLINE-\\\/starphleet\\\/nginx\\\/status}
-PATH_OFFLINE=${PATH_OFFLINE-\\\/starphleet\\\/nginx\\\/offline}
-NGINX_CONFIG=${NGINX_CONFIG-/var/starphleet/nginx/nginx.conf}
+# Making the feedback for this command less confusing to the user
+[ -f ${NGINX_STATUS_CONFIG_FILE} ] || echo "Endpoint config file already does not exist"
+# Remove the endpoint from nginx
+[ -f ${NGINX_STATUS_CONFIG_FILE} ] && rm ${NGINX_STATUS_CONFIG_FILE}
 
-# Backup the original config
-[ -f ${NGINX_CONFIG} ] && cp ${NGINX_CONFIG} ${NGINX_CONFIG}.$$.bak
-# Make a new NGINX config
-cat ${NGINX_CONFIG} | sed -e "s/${PATH_ONLINE}/${PATH_OFFLINE}/" > ${NGINX_CONFIG}.tmp
-# If the last command created the tmp file - copy over the original
-[ -f ${NGINX_CONFIG}.tmp ] && mv ${NGINX_CONFIG}.tmp ${NGINX_CONFIG}
+## Will B wants HUP
+NGINX_PID_FILE="/var/run/starphleet_nginx.pid"
+NGINX_PID=$(cat ${NGINX_PID_FILE})
 
-## Stop NGINX
-sudo stop starphleet_nginx
-## Start NGINX
-sudo start starphleet_nginx
-## Give some status
+## HUP NGinx
+if [ -n ${NGINX_PID} ]; then
+  kill -HUP ${NGINX_PID}
+fi
+
+# Output something to the user
 echo "The hostcheck endpoint for this host has been disabled"
-
