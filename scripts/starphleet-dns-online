@@ -16,7 +16,6 @@ echo '   return 200 "Ok";                ' >> ${NGINX_STATUS_CONFIG_FILE}
 echo '}                                  ' >> ${NGINX_STATUS_CONFIG_FILE}
 
 ## Will B wants HUP
-NGINX_PID_FILE="/var/run/starphleet_nginx.pid"
 NGINX_PID=$(cat ${NGINX_PID_FILE})
 
 ## HUP NGinx
