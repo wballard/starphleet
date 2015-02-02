@@ -1,26 +1,14 @@
-#!/usr/bin/env bash
+#!/usr/bin/env starphleet-launcher
 ### Usage:
 ###    starphleet-dns-offline
 ###
 ### Call this to bring the status check endpoint offline for Route 53
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-help=$(grep "^### " "$0" | cut -c 5-)
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-# Making the feedback for this command less confusing to the user
-[ -f ${NGINX_STATUS_CONFIG_FILE} ] || echo "Endpoint config file already does not exist"
 # Remove the endpoint from nginx
-[ -f ${NGINX_STATUS_CONFIG_FILE} ] && rm ${NGINX_STATUS_CONFIG_FILE}
-
-## Will B wants HUP
-
-NGINX_PID=$(cat ${NGINX_PID_FILE})
+[ -h ${NGINX_STATUS_CONFIG_FILE} ] && rm ${NGINX_STATUS_CONFIG_FILE}
 
 ## HUP NGinx
-if [ -n ${NGINX_PID} ]; then
-  kill -HUP ${NGINX_PID}
-fi
+reload starphleet_nginx
 
 # Output something to the user
 echo "The hostcheck endpoint for this host has been disabled"
