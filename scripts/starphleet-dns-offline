@@ -5,7 +5,7 @@
 ### Call this to bring the status check endpoint offline for Route 53
 
 # Remove the endpoint from nginx
-[ -h ${NGINX_STATUS_CONFIG_FILE} ] && rm ${NGINX_STATUS_CONFIG_FILE}
+[ -h ${NGINX_STATUS_CONFIG_SYMLINK} ] && rm ${NGINX_STATUS_CONFIG_SYMLINK}
 
 ## HUP NGinx
 reload starphleet_nginx

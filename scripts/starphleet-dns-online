@@ -5,10 +5,10 @@
 ### Call this to bring the status check endpoint online for Route 53
 
 # If the symlink already exists - punt
-[ -h ${NGINX_STATUS_CONFIG_FILE} ] && exit 0
+[ -h ${NGINX_STATUS_CONFIG_SYMLINK} ] && exit 0
 
 # Create the symlink
-ln -s ${NGINX_STATUS_ENDPOINT_CONFIG} ${NGINX_STATUS_CONFIG_FILE}
+ln -s ${NGINX_STATUS_ENDPOINT_CONFIG} ${NGINX_STATUS_CONFIG_SYMLINK}
 
 ## HUP NGinx
 sudo reload starphleet_nginx
