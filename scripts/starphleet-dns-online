@@ -11,6 +11,9 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 # Make sure the published folder exists
 [ -f ${NGINX_STATUS_CONFIG_PATH} ] || mkdir -p ${NGINX_STATUS_CONFIG_PATH}
 
+# Avoid potential config issues by checking if the url is blank
+[ -z ${NGINX_STATUS_URL} ] && echo "NGINX_STATUS_URL not set" && exit 1
+
 # Generate the endpoint
 echo "location ${NGINX_STATUS_URL} {     " > ${NGINX_STATUS_CONFIG_FILE}
 echo '   return 200 "Ok";                ' >> ${NGINX_STATUS_CONFIG_FILE}
