@@ -31,7 +31,7 @@ export SHIP=ship-$(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub | awk '{ print $
 export STARPHLEET_APP_USER="ubuntu"
 export USER_IDENTITY_HEADER="x-identity"
 export USER_IDENTITY_COOKIE="starphleet_user"
-# Remove the status endpoint from nginx
+# Configuration for starphleet-dns-*
 export NGINX_STATUS_URL="/starphleet/nginx/status"
 export NGINX_STATUS_CONFIG_PATH="/var/starphleet/nginx/published"
 export NGINX_STATUS_CONFIG_FILE="${NGINX_STATUS_CONFIG_PATH}/starphleet_nginx_status.status"
