@@ -8,7 +8,8 @@ source ${DIR}/tools
 help=$(grep "^### " "$0" | cut -c 5-)
 eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
-
+# Make sure the published folder exists
+[ -f ${NGINX_STATUS_CONFIG_PATH} ] || mkdir -p ${NGINX_STATUS_CONFIG_PATH}
 
 # Generate the endpoint
 echo "location ${NGINX_STATUS_URL} {     " > ${NGINX_STATUS_CONFIG_FILE}
