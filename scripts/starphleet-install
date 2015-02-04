@@ -39,6 +39,9 @@ hostname "${SHIP}"
 echo "${SHIP}" > /etc/hostname
 echo "127.0.0.1 ${SHIP} localhost" > /etc/hosts
 
+# restart rsyslog for it to pick up new hostname
+service rsyslog restart
+
 #packages
 debconf-set-selections <<< "postfix postfix/mailname string '${SHIP}'"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
