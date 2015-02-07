@@ -1,4 +1,4 @@
-https://github.com/heroku/heroku-buildpack-ruby.git
-https://github.com/heroku/heroku-buildpack-python.git
-https://github.com/glg/heroku-buildpack-nodejs.git
+https://github.com/igroff/heroku-buildpack-ruby.git#starphleet
+https://github.com/igroff/heroku-buildpack-python.git#starphleet
+https://github.com/igroff/heroku-buildpack-nodejs.git#starphleet
 https://github.com/wballard/nginx-buildpack.git

@@ -1,20 +1,32 @@
 #!/usr/bin/env starphleet-launcher
 ### Usage:
-###    starphleet-status [<service_name>]
+###    starphleet-status [--trouble] [<service_name>]
 ### --help
 ###
-### Dump out handy statistics about your ship
+### Dump out handy statistics about your ship.
+### Options:
+###    --trouble    filters down to just services that are not online
 
 ##ssl stats
 SSL_EXPIRATION=$(openssl x509 -noout -in ${STARPHLEET_ROOT:-/var/starphleet}/nginx/crt -dates | head -1 | awk 'BEGIN { FS = "=" } ; { print $2 }')
 STARPHLEET_DEV_DIR=/hosthome/starphleet_dev
 
+
+metadata=true
+if [ ${metadata} = true ]
+then
+  metadata=false
+fi
+
+if [ ${metadata} = true ]
+then
+#about the host
 cat << EOF
 hostname: $(hostname)
 ssl_expiration: ${SSL_EXPIRATION}
 EOF
 
-
+#headquarters
 cat << EOF
 headquarters: ${HEADQUARTERS_REMOTE:-no headquarters}
 EOF
@@ -36,6 +48,7 @@ cat << EOF
 EOF
 done
 unset IFS
+fi
 
 ### ORDERS status starts here
 if [ -d "${CURRENT_ORDERS}" ]; then
@@ -49,6 +62,7 @@ EOF
   fi
   for status in $(find "${CURRENT_ORDERS}" | grep 'starphleetstatus$' | grep ${FILTER})
   do
+    STATUS=$(cat "${status}")
     ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
     LOCAL_IP=$([ -f "${status}.ip" ] && cat "${status}.ip")
     if dev_mode; then
@@ -71,6 +85,14 @@ EOF
       AUTHOR=""
       TEXT=""
     fi
+##stats are all computed at this point
+    OUTPUT=true
+    if [ "${trouble}" = true ] && [ "${STATUS}" = 'online' ]
+    then
+      OUTPUT=false
+    fi
+if [ ${OUTPUT} = true ]
+then
 cat << EOF
   -
     order: ${ORDER}
@@ -80,8 +102,9 @@ cat << EOF
     author: ${AUTHOR}
     text: >
       ${TEXT}
-    status: $(cat "${status}")
+    status: ${STATUS}
 EOF
+fi
 
   done
   ### ORDERS status ends here
