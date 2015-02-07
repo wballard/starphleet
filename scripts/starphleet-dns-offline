@@ -1,0 +1,16 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-dns-offline
+###
+### Call this to bring the status check endpoint offline for Route 53
+die_on_error
+run_as_root_or_die
+
+# Remove the endpoint from nginx
+[ -h ${NGINX_STATUS_CONFIG_SYMLINK} ] && rm ${NGINX_STATUS_CONFIG_SYMLINK}
+
+## HUP NGinx
+reload starphleet_nginx
+
+# Output something to the user
+echo "The hostcheck endpoint for this host has been disabled"

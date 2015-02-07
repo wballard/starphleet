@@ -1,0 +1,19 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-dns-online
+###
+### Call this to bring the status check endpoint online for Route 53
+die_on_error
+run_as_root_or_die
+
+# If the symlink already exists - punt
+[ -h ${NGINX_STATUS_CONFIG_SYMLINK} ] && exit 0
+
+# Create the symlink
+ln -s ${NGINX_STATUS_ENDPOINT_CONFIG} ${NGINX_STATUS_CONFIG_SYMLINK}
+
+## HUP NGinx
+reload starphleet_nginx
+
+# Output something to the user
+echo "The hostcheck endpoint for this host has been enabled"
