@@ -106,10 +106,10 @@ echo "" > "${BETA_CONF}"
 for beta in "${!BETAS[@]}"
 do
   echo "  if (\$starphleet_beta_${beta}) {" >> "${BETA_CONF}"
-  echo "    rewrite ${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
+  echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
   echo "  }" >> "${BETA_CONF}"
   echo "  if (\$starphleet_beta_${beta}_cookie) {" >> "${BETA_CONF}"
-  echo "    rewrite ${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
+  echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
   echo "  }" >> "${BETA_CONF}"
 done
 
