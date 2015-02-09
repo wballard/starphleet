@@ -18,5 +18,3 @@ do
   starphleet-lxc-destroy "${name}"
   info "reaper has reaped ${name}"
 done
-info reaper removing logs
-rm /var/log/upstart/starphleet_serve_order-${ENCODED_ORDER}-*
