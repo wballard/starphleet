@@ -36,7 +36,7 @@ chown ${ADMIRAL}:${ADMIRAL} ${AUTHFILE}
 
 #look for SSL keys
 [ -d "${NGINX_CONF}/published" ] || mkdir -p "${NGINX_CONF}/published"
-if for name in ${HEADQUARTERS_LOCAL}/ssl/*; do file_name=$(basename $name); diff ${HEADQUARTERS_LOCAL}/ssl/${file_name} ${NGINX_CONF}/published/${file_name} > /dev/null ; done ; then
+if [ "$(diff -r ${HEADQUARTERS_LOCAL}/ssl/ ${NGINX_CONF}/published/ | grep -v 'Only in ${NGINX_CONF}/published/')" == "" ] ; then
   #keys are the same
   :
 else
