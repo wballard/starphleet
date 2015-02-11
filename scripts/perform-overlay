@@ -9,7 +9,7 @@ run_as_root_or_die
 
 # copy the contents of the overly on top of the root, this expects
 # run from a sibling directory of the overlay
-SOURCE_ROOT=${STARPHLEET_ROOT?Argh, starphleet root is not set. This is terminal. Dying.}/github
-cp --remove-destination -R ${SOURCE_ROOT}/overlay/* /
-cp --remove-destination -R ${SOURCE_ROOT}/nginx/* ${STARPHLEET_ROOT}/nginx/
-cp --remove-destination ${SOURCE_ROOT}/scripts/* /usr/bin/
+
+cp -R ${SCRIPT_DIR}/../overlay/* /
+cp -R ${DIR}/../nginx/* ${STARPHLEET_ROOT:-/var/starphleet}/nginx/
+cp ${SCRIPT_DIR}/* /usr/bin
