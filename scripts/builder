@@ -50,7 +50,9 @@ export REQUEST_ID=$(openssl rand -base64 32)
 # the build pack writes to our buildpack dir, and the build pack runs NOT AS ROOT
 sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} ${buildpack_root}
 if dev_mode; then
-  rm -rf ${app_root}/.heroku
+  if [ "Python" == "$buildpack_name" ]; then
+    rm -rf ${app_root}/.heroku
+  fi
 fi
 $selected_buildpack/bin/compile "$app_root" "$cache_root"
 
