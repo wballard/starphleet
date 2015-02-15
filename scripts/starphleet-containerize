@@ -61,8 +61,10 @@ if dev_mode; then
   if [ "${git_url}" != "-" ]; then
     #Cloning this into /var/git was breaking, it is an lxc.mount.entry
     #Not sure what the actual issue is with cloning on that particular mount
-    starphleet-git-synch "${git_url}" \${APP_IN}
-    sudo ln -s \${APP_IN} "/var/git/${container_name}"
+    starphleet-git-synch "${git_url}" "/tmp/${container_name}"
+    sudo chmod -R +w "/tmp/${container_name}"
+    sudo cp -R "/tmp/${container_name}" "/var/git/"
+    sudo ln -s "/var/git/${container_name}" \${APP_IN}
   fi
 else
   if [ "${git_url}" != "-" ]; then
