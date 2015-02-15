@@ -16,6 +16,10 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     raise 'vagrant-triggers plugin needs to be installed: vagrant plugin install vagrant-triggers'
   end
 
+  unless Vagrant.has_plugin?("vagrant-hostmanager")
+    raise 'vagrant-hostmanager plugin needs to be installed: vagrant plugin install vagrant-manager'
+  end
+
   config.trigger.before :up, :stdout => true, :force => true do
     if not (ENV['STARPHLEET_HEADQUARTERS'] or ENV['STARPHLEET_PUBLIC_KEY'] or ENV['STARPHLEET_PRIVATE_KEY'])
       raise 'Please export STARPHLEET_HEADQUARTERS, STARPHLEET_PUBLIC_KEY, STARPHLEET_PRIVATE_KEY before continuing'
@@ -50,6 +54,10 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     $([ -n \"#{ENV['STARPHLEET_HEADQUARTERS']}\" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true
   """
 
+  config.hostmanager.enabled = true
+  config.hostmanager.manage_host = true
+  config.hostmanager.aliases = [ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME, 'ship.local']
+
   config.vm.hostname = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
   config.vm.synced_folder ".", "/starphleet"
   config.vm.synced_folder "~", "/hosthome"
@@ -61,12 +69,12 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
       # if the private_key exists it ignores private_key_path
       # there is a trigger above that kills those files after a succesful provision
       override.ssh.username = 'admiral'
-      config.ssh.insert_key = false
-      config.ssh.private_key_path = ENV['STARPHLEET_PRIVATE_KEY']
-      config.ssh.forward_agent = true
+      override.ssh.insert_key = false
+      override.ssh.private_key_path = ENV['STARPHLEET_PRIVATE_KEY']
+      override.ssh.forward_agent = true
     end
 
-    override.vm.network "public_network"
+    # override.vm.network "public_network"
     override.vm.box = ENV['BOX_NAME'] || 'trusty-vmware'
     override.vm.box_url = "https://s3.amazonaws.com/glg_starphleet/trusty-14.04-amd64-vmwarefusion.box"
     f.vmx["displayName"] = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
