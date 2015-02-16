@@ -67,6 +67,8 @@ else
   cd "${local}"
   if [ -n "${BRANCH}" ]; then
     git checkout "${BRANCH}" || fatal checkout error
+    #clean up files that might have diverged between default and current branch
+    git clean -df
   fi
   exit 0
 fi
