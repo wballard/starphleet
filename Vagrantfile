@@ -17,7 +17,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   end
 
   unless Vagrant.has_plugin?("vagrant-hostmanager")
-    raise 'vagrant-hostmanager plugin needs to be installed: vagrant plugin install vagrant-manager'
+    raise 'vagrant-hostmanager plugin needs to be installed: vagrant plugin install vagrant-hostmanager'
   end
 
   config.trigger.before :up, :stdout => true, :force => true do

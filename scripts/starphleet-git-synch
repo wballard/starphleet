@@ -45,6 +45,7 @@ if [ -d "${local}/.git" ]; then
   HAS_CHANGES=$(git diff HEAD...origin/${CURRENT_BRANCH} --raw)
   if [ "${HAS_CHANGES}x" != "x" ]; then
     warn new code detected, pulling
+    starphleet-git reset --hard origin/${CURRENT_BRANCH}
     starphleet-git pull || fatal pull error
     exit 0
   fi
