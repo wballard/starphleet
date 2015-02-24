@@ -47,6 +47,8 @@ if lxc-ls | grep "^${container_name}$"; then
   exit 0
 else
   info making a new container ${CONTAINER_NAME}
+  # load the ship name as configured in /etc/starphleet-name or, just use the sucky hostname
+  SHIP_NAME=$([ -r /etc/starphleet-name ] && $(echo cat /etc/starphleet-name) || echo $(hostname))
 
   starphleet-lxc-destroy ${CONTAINER_NAME}
   if [ -z "${base_container_name}" ]; then
@@ -99,6 +101,7 @@ fi
   #host file updates
   bridge_ip
   lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n${BRIDGE_IP}  localship' >> /etc/hosts"
+  lxc-attach --name ${CONTAINER_NAME} -- bash -c "printf '\nexport SHIP_NAME=%s\n' ${SHIP_NAME} >> /usr/bin/tools"
   lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n127.0.0.1  $(< /etc/hostname)' >> /etc/hosts"
   lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n127.0.0.1  ${CONTAINER_NAME}' >> /etc/hosts"
 
