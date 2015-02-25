@@ -46,8 +46,8 @@ apt-get -y install --force-yes software-properties-common
 
 # Run Upgrade before before installing packages - which fixes this error
 # https://github.com/lxc/lxc/issues/247
+apt-get -y update
 export DEBIAN_FRONTEND=noninteractive; apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes
-
 apt-get -y install --force-yes $(< "${DIR}/packages")
 
 pushd ${STARPHLEET_ROOT:-/var/starphleet}/nginx

@@ -6,10 +6,6 @@ require 'fileutils'
 VAGRANT_MEMSIZE = ENV['STARPHLEET_VAGRANT_MEMSIZE'] || '8192'
 SHIP_NAME = 'ship'
 
-def provisioned? provider
-  File.exists? ".vagrant/machines/default/#{provider}/action_provision"
-end
-
 Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
 
   unless Vagrant.has_plugin?("vagrant-triggers")
@@ -35,11 +31,6 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     end
   end
 
-  config.trigger.after :up, :stdout => true, :force => true do
-    #if you fail to login as admiral after a clean provision, nuke .vagrant/machines/default/*/private_key
-    Dir.glob('.vagrant/machines/default/*/private_key') { |f| File.delete(f) }
-  end
-
   config.trigger.after :destroy, :stdout => true, :force => true do
     FileUtils.rm_rf 'private_keys'
     FileUtils.rm_rf 'public_keys'
@@ -63,17 +54,6 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   config.vm.synced_folder "~", "/hosthome"
 
   config.vm.provider :vmware_fusion do |f, override|
-    if provisioned? 'vmware_fusion'
-      # > 1.7.0 using private_key_path is terribly broken
-      # you must delete any vagrant generated keys for the vagrant user
-      # if the private_key exists it ignores private_key_path
-      # there is a trigger above that kills those files after a succesful provision
-      override.ssh.username = 'admiral'
-      override.ssh.insert_key = false
-      override.ssh.private_key_path = ENV['STARPHLEET_PRIVATE_KEY']
-      override.ssh.forward_agent = true
-    end
-
     # override.vm.network "public_network"
     override.vm.box = ENV['BOX_NAME'] || 'trusty-vmware'
     override.vm.box_url = "https://s3.amazonaws.com/glg_starphleet/trusty-14.04-amd64-vmwarefusion.box"
@@ -82,10 +62,8 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   end
 
   config.vm.provider :virtualbox do |f, override|
-    override.vm.network "public_network"
     override.vm.box = ENV['BOX_NAME'] || 'trusty-virtualbox'
     #this box_url is totally hosed
-    override.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
     f.customize ["modifyvm", :id, "--memory", VAGRANT_MEMSIZE]
   end
 
