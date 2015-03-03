@@ -1,0 +1,56 @@
+#! /usr/bin/env starphleet-launcher
+### Usage: starphleet-verify-overlay
+###
+###
+### Compares starphleet files at their installation location to
+### those checked out at /var/starphleet/github
+
+run_as_root_or_die
+set -u # blow up if we reference an undeclared(set) variable
+
+[ -d ${STARPHLEET_ROOT}/github ] || die "no github dir, fix it" 1
+
+# first we go ahead and diff everything from the overlay
+
+echo '********************************************************************'
+echo   Validating Overlay
+echo '********************************************************************'
+
+for file in $(find ${STARPHLEET_ROOT}/github/overlay)
+do
+  [ -d ${file} ] && continue
+  FILE_ROOT=${file##${STARPHLEET_ROOT}\/github\/overlay}
+  SOURCE=${STARPHLEET_ROOT}/github/overlay/${FILE_ROOT}
+  DESTINATION=${FILE_ROOT}
+  if ! diff ${SOURCE} ${DESTINATION}; then
+    echo "mismatched ${FILE_ROOT}"
+  fi
+done
+
+echo '********************************************************************'
+echo  Now for the scripts dir
+echo '********************************************************************'
+echo
+# then we diff out the executable scripts from the scripts
+# dir, which are installed in /usr/bin
+for file in $(find ${STARPHLEET_ROOT}/github/scripts/)
+do
+  # don't want to compare bare directories only
+  # the files the contain
+  [ -d ${file} ] && continue
+  FILE_ROOT=${file##${STARPHLEET_ROOT}\/github\/scripts}
+  SOURCE=${STARPHLEET_ROOT}/github/scripts${FILE_ROOT}
+  DESTINATION=/usr/bin${FILE_ROOT}
+
+  if ! diff ${SOURCE} ${DESTINATION}; then
+    echo "mismatched ${FILE_ROOT}"
+  fi
+
+  if test -L ${DESTINATION}; then
+    echo "${DESTINATION} is still a symlink, this is an artifact fix it"
+  fi
+
+done
+#cp -R ${SCRIPT_DIR}/../overlay/* /
+#cp -R ${DIR}/../nginx/* ${STARPHLEET_ROOT:-/var/starphleet}/nginx/
+#cp ${SCRIPT_DIR}/* /usr/bin
