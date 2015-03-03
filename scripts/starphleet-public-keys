@@ -43,5 +43,5 @@ if [ "$(diff -r ${HEADQUARTERS_LOCAL}/ssl/ ${NGINX_CONF}/published/ | grep -v 'O
 else
   info updating SSL keys
   cp ${HEADQUARTERS_LOCAL}/ssl/* ${NGINX_CONF}/published/
-  restart starphleet_nginx
+  restart starphleet_nginx || true
 fi
