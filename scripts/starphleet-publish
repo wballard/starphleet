@@ -105,6 +105,10 @@ fi
 echo "" > "${BETA_CONF}"
 for beta in "${!BETAS[@]}"
 do
+  # If there isn't a corresponding file associated with the beta
+  # group specified in the orders file we do not want to create
+  # a configuration/variable reference to something that doesn't
+  # exist so skip it
   [ ! -f "${STARPHLEET_HEADQUARTERS}/beta_groups/${beta}" ] && continue
   echo "  if (\$starphleet_beta_${beta}) {" >> "${BETA_CONF}"
   echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
