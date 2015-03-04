@@ -105,6 +105,7 @@ fi
 echo "" > "${BETA_CONF}"
 for beta in "${!BETAS[@]}"
 do
+  [ ! -f "${STARPHLEET_HEADQUARTERS}/beta_groups/${beta}" ] && continue
   echo "  if (\$starphleet_beta_${beta}) {" >> "${BETA_CONF}"
   echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
   echo "  }" >> "${BETA_CONF}"
