@@ -9,5 +9,7 @@ run_as_root_or_die
 
 rm -rf ${HEADQUARTERS_LOCAL}/${order}/git
 rm -rf ${CURRENT_ORDERS}/${order}/git
+# Force a redeploy of unpublished orders which don't include GIT repos
+rm "${CURRENT_ORDERS}/${order}/.orders_sha"
 echo 'building' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
 starphleet-reaper zzzzzzzzz "${order}"
