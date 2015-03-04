@@ -19,3 +19,4 @@ libluajit-5.1-dev
 libldap2-dev
 mailutils
 ntp
+postfix
