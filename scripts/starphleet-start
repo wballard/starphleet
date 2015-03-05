@@ -11,7 +11,7 @@ run_as_root_or_die
 
 # Check and make sure there's at least one running container
 CONTAINERS=$(lxc-ls -f | grep STOPPED | grep ${service} | awk '{print $1}')
-[ -z "${CONTAINERS}" ] && echo No Running Containers && exit 1
+[ -z "${CONTAINERS}" ] && echo No Stopped Containers && exit 1
 
 # Now figure out which container they want and attach
 echo "Start which instance:"
