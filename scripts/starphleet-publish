@@ -110,7 +110,7 @@ do
   # will create variable references that don't exist.  We
   # check to see if the corresponding file is there before we
   # create the config and skip otherwise
-  [ ! -f "${STARPHLEET_HEADQUARTERS}/beta_groups/${beta}" ] && continue
+  [ ! -f "${HEADQUARTERS_LOCAL}/beta_groups/${beta}" ] && continue
   echo "  if (\$starphleet_beta_${beta}) {" >> "${BETA_CONF}"
   echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
   echo "  }" >> "${BETA_CONF}"
