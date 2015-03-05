@@ -15,8 +15,6 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 set -e
 
-STARPHLEET_HEADQUARTERS=${STARPHLEET_HEADQUARTERS:-/var/starphleet/headquarters}
-
 declare -A BETAS
 run_orders "${orders}"
 
