@@ -31,7 +31,7 @@ do
   #cookie style
   echo "  map \$cookie_${USER_IDENTITY_COOKIE} \$starphleet_beta_$(basename ${BETA_GROUP})_cookie  {" >> "${BETA_GROUP_CONF}"
   echo "   default 0;" >> "${BETA_GROUP_CONF}"
-  for BETA_USER in $(cat "${BETA_GROUP}")
+  for BETA_USER in $(cat "${BETA_GROUP}" | sort | uniq)
   do
     echo "   ${BETA_USER} 1;" >> "${BETA_GROUP_CONF}"
   done

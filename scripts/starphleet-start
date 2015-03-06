@@ -1,0 +1,21 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-start <service>
+###
+### Fuzzy match and make attaching to instances easier
+die_on_error
+run_as_root_or_die
+
+# Make sure they pass 'something' to search for
+[ -z "${service}" ] && echo Please pass the name of a container && exit 1
+
+# Check and make sure there's at least one running container
+CONTAINERS=$(lxc-ls -f | grep STOPPED | grep ${service} | awk '{print $1}')
+[ -z "${CONTAINERS}" ] && echo No Stopped Containers && exit 1
+
+# Now figure out which container they want and attach
+echo "Start which instance:"
+select container in $(lxc-ls -f | grep STOPPED | grep ${service} | awk '{print $1}'); do
+  [ ! -z ${container} ] && sudo lxc-start -d -n "${container}"
+  break;
+done
