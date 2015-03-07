@@ -101,11 +101,8 @@ if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
   echo "  satisfy any;" >> "${MOUNT_CONF}"
   echo "  allow 10.0.3.0/8;" >> "${MOUNT_CONF}"
   # Future proof
-  echo "  allow 172.28.0.0/16;" >> "${MOUNT_CONF}"
-  echo "  allow 172.29.0.0/16;" >> "${MOUNT_CONF}"
+  echo "  allow 172.16.0.0/12;" >> "${MOUNT_CONF}"
   # Allow no auth
-  echo "  allow 172.30.0.0/16;" >> "${MOUNT_CONF}"
-  echo "  allow 172.31.0.0/16;" >> "${MOUNT_CONF}"
   echo "  allow 172.32.0.0/16;" >> "${MOUNT_CONF}"
   echo "  allow 172.33.0.0/16;" >> "${MOUNT_CONF}"
 fi
