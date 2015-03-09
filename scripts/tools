@@ -39,11 +39,6 @@ function code() {
   exit $*
 }
 
-fn_exists()
-{
-    type -t $1 | grep -q 'function'
-}
-
 silent_pushd(){ pushd $1 > /dev/null 2>&1; }
 
 silent_popd(){ popd $1 > /dev/null 2>&1 ; }
@@ -108,6 +103,11 @@ function latest_AUTHOR()
   export AUTHOR=$(git --git-dir "${1}/.git" --work-tree "${1}" log -1 --format='%ae')
 }
 
+#placeholder
+function expose() {
+  true
+}
+
 function run_orders()
 {
   autodeploy () {
@@ -126,9 +126,6 @@ function run_orders()
     [ -n "${AUTODEPLOY}" ] && echo "" > "${AUTODEPLOY}"
     UNPUBLISHED=1
   }
-
-  # Placeholder, will be defined for real in starphleet-expose
-  fn_exists expose || expose() {}
 
   redirect () {
     info redirect "${1} ${2}"
