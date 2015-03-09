@@ -122,6 +122,12 @@ function run_orders()
     UNPUBLISHED=1
   }
 
+  # Placeholder, will be defined for real in starphleet-expose
+  if [ ! type -f expose ]; then
+    function expose () {
+    }
+  fi
+
   redirect () {
     info redirect "${1} ${2}"
     REDIRECT=${1}
@@ -159,7 +165,9 @@ function ec2_mounts() {
 }
 
 function dev_mode() {
-  if [ -d /hosthome ]; then
+  if [ -f /var/starphleet/live ]; then
+    false
+  elif [ -d /hosthome ]; then
     true
   elif [ -d /var/git ]; then
     true

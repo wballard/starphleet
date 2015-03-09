@@ -16,7 +16,8 @@ Vagrant::Config.run do |config|
     export PATH=$PATH:/starphleet/scripts;
     sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
     sudo /starphleet/scripts/starphleet-install;
-    $([ -n \"#{ENV['STARPHLEET_HEADQUARTERS']}\" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true"
+    $([ -n \"#{ENV['STARPHLEET_HEADQUARTERS']}\" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true
+    $([ -n \"#{ENV['STARPHLEET_LIVE']}\" ] && touch /var/starphleet/live || true"
 end
 
 Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|

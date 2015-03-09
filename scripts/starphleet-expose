@@ -1,0 +1,27 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-expose <container_name> <orders>
+### --help
+###
+### Expose raw ports as defined in the orders with:
+### expose [port]
+###
+### You are allowed to expose multiple ports, but never 80 or 22. Last one wins
+### as this will un-NAT then NAT.
+run_as_root_or_die
+
+IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}[[:space:]]" | awk '{ print $3; }')
+
+function expose() {
+  if [ $1 == '22']; then
+    error "Sorry, I won't let you mess up SSH"
+  elif [ $1 == '80' ]
+    error "Sorry, I won't let you mess up NGINX"
+  else
+    info "expose ${container_name} on ${1}"
+    iptables -t nat -D PREROUTING ${1} || true
+    iptables -t nat -I PREROUTING -p tcp -i eth0 --dport ${1} -j DNAT --to ${IP_ADDRESS}:${1}
+  fi
+}
+
+run_orders "${orders}"

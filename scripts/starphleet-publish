@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env starphleet-launcher
 ### Usage:
 ###    starphleet-publish <container_name> <public_url> <orders> <htpasswd> <ldap>
 ### --help
@@ -8,12 +8,7 @@
 ### web services under one host and avoid CORS and cross domain muck.
 ###
 ### Optionally, you can 'deep publish' or alias further into the container.
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-help=$(grep "^### " "$0" | cut -c 5-)
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
-trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
-set -e
+run_as_root_or_die
 
 declare -A BETAS
 run_orders "${orders}"
