@@ -32,8 +32,7 @@ CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 
 #starphleet-base is a create, all orders are a clones to delta0
 cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs/${STARPHLEET_ROOT:-var/starphleet} none bind,rw 0 0
-lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs/${STARPHLEET_ROOT:-var/starphleet} none bind,r 0 0
 lxc.mount.entry = ${ADMIRAL_HOME} ${CONTAINER_ROOT}/rootfs/${ADMIRAL_HOME} none defaults,bind,create=dir 0 0
 EOF
 
@@ -71,7 +70,7 @@ if dev_mode ; then
   echo "lxc.mount.entry = ${STARPHLEET_DEV_DIR} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0" >> ${CONTAINER_CONF}
   echo "lxc.mount.entry = ${STARPHLEET_DEV_DIR} ${CONTAINER_ROOT}/rootfs/var/git none bind,rw 0 0" >> ${CONTAINER_CONF}
 else
-  echo "lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0" >> ${CONTAINER_CONF}
+  echo "lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none rbind,rw 0 0" >> ${CONTAINER_CONF}
 fi
 
 
