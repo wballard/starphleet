@@ -39,6 +39,11 @@ function code() {
   exit $*
 }
 
+fn_exists()
+{
+    type -t $1 | grep -q 'function'
+}
+
 silent_pushd(){ pushd $1 > /dev/null 2>&1; }
 
 silent_popd(){ popd $1 > /dev/null 2>&1 ; }
@@ -107,7 +112,7 @@ function run_orders()
 {
   autodeploy () {
     info autodeploy from "${1}"
-    [ -n "${AUTODEPLOY}" ] && echo "${1}" > "${AUTODEPLOY}";
+    [ -n "${AUTODEPLOY}" ] && echo "${1}" > "${AUTODEPLOY}"
     SERVICE_GIT_URL="${1}"
   }
 
@@ -118,15 +123,12 @@ function run_orders()
   # If the order is unpublished - push an 'empty' link to ${AUTODEPLOY} so the previous
   # git repo doesn't accidently get re-copied into the wrong order folder
   unpublished () {
-    [ -n "${AUTODEPLOY}" ] && echo "" > "${AUTODEPLOY}";
+    [ -n "${AUTODEPLOY}" ] && echo "" > "${AUTODEPLOY}"
     UNPUBLISHED=1
   }
 
   # Placeholder, will be defined for real in starphleet-expose
-  if [ ! type -f expose ]; then
-    function expose () {
-    }
-  fi
+  fn_exists expose || expose() {}
 
   redirect () {
     info redirect "${1} ${2}"
