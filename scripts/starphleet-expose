@@ -24,7 +24,7 @@ function expose() {
     error "Sorry, I won't let you mess up NGINX"
   else
     info "expose ${container_name} on ${1}"
-    for i in $( iptables -t nat --line-numbers -L | grep ^[0-9] | grep ${1} | awk '{ print $1 }' | tac ); do iptables -t nat -D PREROUTING $i; done
+    for i in $( iptables -t nat --line-numbers -L | grep ^[0-9] | grep DNAT | grep ${1} | awk '{ print $1 }' | tac ); do iptables -t nat -D PREROUTING $i; done
     iptables -t nat -I PREROUTING -p tcp -i eth0 --dport ${1} -j DNAT --to ${IP_ADDRESS}:${1}
   fi
 }
