@@ -2,6 +2,8 @@
 app_root="${1}"
 orders="${2}"
 script="${3}"
+export HOME=${app_root}
+export ORDERS_IN=${app_root}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${DIR}/tools
 
