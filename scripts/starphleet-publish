@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env starphleet-launcher
 ### Usage:
 ###    starphleet-publish <container_name> <public_url> <orders> <htpasswd> <ldap>
 ### --help
@@ -8,12 +8,7 @@
 ### web services under one host and avoid CORS and cross domain muck.
 ###
 ### Optionally, you can 'deep publish' or alias further into the container.
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-help=$(grep "^### " "$0" | cut -c 5-)
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
-trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
-set -e
+run_as_root_or_die
 
 declare -A BETAS
 run_orders "${orders}"
@@ -100,6 +95,11 @@ if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
   # note: this needs an auth_basic that alway fails and has the same name as auth_ldap
   echo "  satisfy any;" >> "${MOUNT_CONF}"
   echo "  allow 10.0.3.0/8;" >> "${MOUNT_CONF}"
+  # Future proof
+  echo "  allow 172.16.0.0/12;" >> "${MOUNT_CONF}"
+  # Allow no auth
+  echo "  allow 172.32.0.0/16;" >> "${MOUNT_CONF}"
+  echo "  allow 172.33.0.0/16;" >> "${MOUNT_CONF}"
 fi
 
 echo "" > "${BETA_CONF}"
@@ -110,7 +110,7 @@ do
   # will create variable references that don't exist.  We
   # check to see if the corresponding file is there before we
   # create the config and skip otherwise
-  [ ! -f "${STARPHLEET_HEADQUARTERS}/beta_groups/${beta}" ] && continue
+  [ ! -f "${HEADQUARTERS_LOCAL}/beta_groups/${beta}" ] && continue
   echo "  if (\$starphleet_beta_${beta}) {" >> "${BETA_CONF}"
   echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
   echo "  }" >> "${BETA_CONF}"

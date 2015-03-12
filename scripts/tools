@@ -103,11 +103,16 @@ function latest_AUTHOR()
   export AUTHOR=$(git --git-dir "${1}/.git" --work-tree "${1}" log -1 --format='%ae')
 }
 
+#placeholder
+function expose() {
+  true
+}
+
 function run_orders()
 {
   autodeploy () {
     info autodeploy from "${1}"
-    [ -n "${AUTODEPLOY}" ] && echo "${1}" > "${AUTODEPLOY}";
+    [ -n "${AUTODEPLOY}" ] && echo "${1}" > "${AUTODEPLOY}"
     SERVICE_GIT_URL="${1}"
   }
 
@@ -118,7 +123,7 @@ function run_orders()
   # If the order is unpublished - push an 'empty' link to ${AUTODEPLOY} so the previous
   # git repo doesn't accidently get re-copied into the wrong order folder
   unpublished () {
-    [ -n "${AUTODEPLOY}" ] && echo "" > "${AUTODEPLOY}";
+    [ -n "${AUTODEPLOY}" ] && echo "" > "${AUTODEPLOY}"
     UNPUBLISHED=1
   }
 
@@ -159,7 +164,9 @@ function ec2_mounts() {
 }
 
 function dev_mode() {
-  if [ -d /hosthome ]; then
+  if [ -f /var/starphleet/live ]; then
+    false
+  elif [ -d /hosthome ]; then
     true
   elif [ -d /var/git ]; then
     true
