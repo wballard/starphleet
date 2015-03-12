@@ -1,4 +1,6 @@
-#!/usr/bin/env starphleet-launcher
+#!/usr/bin/env bash
+source `which tools`
+
 starphleet-lxc-stop "${name}"
 if [ "${PROCESS}" == "respawn" ]; then
   # remove the last known good indicator so we don't re-use anything

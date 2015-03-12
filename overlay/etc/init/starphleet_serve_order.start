@@ -1,4 +1,6 @@
-#!/usr/bin/env starphleet-launcher
+#!/usr/bin/env bash
+source `which tools`
+
 info "starting ${name}"
 ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"

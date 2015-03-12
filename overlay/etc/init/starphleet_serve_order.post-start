@@ -1,4 +1,5 @@
-#!/usr/bin/env starphleet-launcher
+#!/usr/bin/env bash
+source `which tools`
 set +e
 info "checking ${name}"
 ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
