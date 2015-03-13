@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+source `which tools`
+set +e
+info "checking ${name}"
+ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
+run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
+if [ "${UNPUBLISHED}" == "1" ]; then
+  echo 'online' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+  starphleet-reaper "${name}" "${order}"
+  starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
+else
+  #status logging, here indicating the healthcheck is about to go
+  echo 'checking' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+  #the container and service is started, so healthcheck it before we publish it
+  #in order to have a real drainstop / transparent upgrade feature
+  #if there is a specified healthcheck url
+  if [ -z "${HEALTHCHECK}" ] || starphleet-ready "${name}" "${PORT}" "${HEALTHCHECK}"; then
+    #at this point we have a running container, and it answers HTTP, so we
+    #are on the air and can expose it via nginx
+    #new versions replace old versions in nginx for the HUP update
+    #http basic password authentication access
+    if [ -f "${HEADQUARTERS_LOCAL}/${order}/.htpasswd" ]; then
+      HTPASSWD="${HEADQUARTERS_LOCAL}/${order}/.htpasswd"
+    else
+      HTPASSWD='-'
+    fi
+    #and LDAP access, almost the same kind of thing -- but LDAPy
+    if [ -f "${HEADQUARTERS_LOCAL}/${order}/.ldap" ]; then
+      LDAP="${HEADQUARTERS_LOCAL}/${order}/.ldap"
+    else
+      LDAP='-'
+    fi
+    trace "${name}" "${PORT}" "${PUBLISH_PORT}" "/${order}" "${HTPASSWD}" "${LDAP}"
+    if ! starphleet-publish "${name}" "/${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
+      echo 'publish failed' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+      exit 1
+    fi
+    #record online, with the IP address of the container
+    echo 'online' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+    echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
+    lxc-ls --fancy "${name}" | tail -1 | awk '{ print $3; }' > "${CURRENT_ORDERS}/${order}/.starphleetstatus.ip"
+    echo "${PORT}" > "${CURRENT_ORDERS}/${order}/.starphleetstatus.port"
+    #any prior version of this order should now be reaped after
+    #we wait a small time for prior requests to flush out
+    sleep ${STARPHLEET_DRAINSTOP_WAIT}
+    starphleet-reaper "${name}" "${order}"
+    starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
+    exit 0
+  else
+    #at this point the service has failed to properly start
+    warn service failed to publish "/${order}"
+    echo 'failed' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+    mail_log
+    exit 1
+  fi
+fi

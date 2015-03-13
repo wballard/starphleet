@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+source `which tools`
+
+info "building ${name}"
+ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
+run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
+
+#pre stop if the service demands it
+if [ "${STOP_BEFORE_AUTODEPLOY}" == "1" ]; then
+  info stopping before autodeploy
+  starphleet-reaper "${name}" "${order}"
+fi
+
+LAST_KNOWN_GOOD_CONTAINER=$(cat "${CURRENT_ORDERS}/${order}/.last_known_good_container" || true)
+# this will give us the container name of the LKG ONLY IF the system has the
+# container
+DO_WE_HAVE_THE_LKG=$(lxc-ls | grep "^${LAST_KNOWN_GOOD_CONTAINER}$" || true)
+
+# this 'use existing container' step is simply for optimizing restart of the
+# LAST container we used, so we check to see if we're being asked to use the
+# LKG and that we do indeed HAVE the LKG
+if [ "${name}" == "${LAST_KNOWN_GOOD_CONTAINER}" -a "${name}" == "${DO_WE_HAVE_THE_LKG}" ]; then
+  warn "using existing container ${name}"
+  lxc-start --name ${name} -d
+  starphleet-lxc-wait ${name} RUNNING
+  lxc-attach --name ${name} -- bash starphleet-wait-network
+else
+  warn "creating a new container"
+  #starting up the build
+  echo 'building' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+  starphleet-lxc-destroy "${name}"
+  #build a container, this will recycle any existing container, only building
+  #when things are 'new', with a default for said URL to be nothing
+  starphleet-containerize "${SERVICE_GIT_URL:--}" "${name}" "${HEADQUARTERS_LOCAL}/${order}" \
+  || (echo 'building failed' > "${CURRENT_ORDERS}/${order}/.starphleetstatus" && exit 1)
+fi
+#this file is just a name pointer to the current container
+echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"

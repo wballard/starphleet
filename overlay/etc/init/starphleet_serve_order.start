@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+source `which tools`
+
+info "starting ${name}"
+ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
+run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
+if [ "${UNPUBLISHED}" == "1" ]; then
+  lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "2>&1 sleep 1000000" | logger -t "${order}" || mail_log
+else
+  lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "2>&1 setsid ~/start web" | logger -t "${order}" || mail_log
+fi
+echo 'stopped' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"

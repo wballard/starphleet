@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+source `which tools`
+
+starphleet-lxc-stop "${name}"
+if [ "${PROCESS}" == "respawn" ]; then
+  # remove the last known good indicator so we don't re-use anything
+  # if we've encountered a problems starting the container (hit the
+  # respawn limit )
+  rm "${CURRENT_ORDERS}/${order}/.last_known_good_container"
+fi
