@@ -6,6 +6,26 @@ require 'fileutils'
 VAGRANT_MEMSIZE = ENV['STARPHLEET_VAGRANT_MEMSIZE'] || '8192'
 SHIP_NAME = 'ship'
 
+$base_provision_script = <<SCRIPT
+test -d /hosthome/starphleet_dev/ && rm -rf /hosthome/starphleet_dev/;
+export PATH=$PATH:/starphleet/scripts;
+sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
+sudo /starphleet/scripts/starphleet-install;
+$([ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true
+$([ -n "#{ENV['STARPHLEET_LIVE']}" ] && touch /var/starphleet/live) || true
+sed -i.bak 's/answer AUTO_KMODS_ENABLED_ANSWER no/answer AUTO_KMODS_ENABLED_ANSWER yes/g' /etc/vmware-tools/locations
+sed -i.bak 's/answer AUTO_KMODS_ENABLED no/answer AUTO_KMODS_ENABLED yes/g' /etc/vmware-tools/locations
+/starphleet/scripts/vmware_hgfs_fix.sh
+SCRIPT
+
+$fix_vmware_tools_script = <<SCRIPT
+
+sed -i.bak 's/answer AUTO_KMODS_ENABLED_ANSWER no/answer AUTO_KMODS_ENABLED_ANSWER yes/g' /etc/vmware-tools/locations
+sed -i.bak 's/answer AUTO_KMODS_ENABLED no/answer AUTO_KMODS_ENABLED yes/g' /etc/vmware-tools/locations
+SCRIPT
+
+
+
 Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
 
   unless Vagrant.has_plugin?("vagrant-triggers")
@@ -37,15 +57,6 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     FileUtils.rm_rf 'headquarters'
   end
 
-  config.vm.provision :shell, :inline => """
-    test -d /hosthome/starphleet_dev/ && rm -rf /hosthome/starphleet_dev/;
-    export PATH=$PATH:/starphleet/scripts;
-    sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
-    sudo /starphleet/scripts/starphleet-install;
-    $([ -n \"#{ENV['STARPHLEET_HEADQUARTERS']}\" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true
-    $([ -n \"#{ENV['STARPHLEET_LIVE']}\" ] && touch /var/starphleet/live) || true
-  """
-
   config.hostmanager.enabled = true
   config.hostmanager.manage_host = true
   config.hostmanager.aliases = [ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME, 'ship.local']
@@ -60,18 +71,21 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     override.vm.box_url = "https://s3.amazonaws.com/glg_starphleet/trusty-14.04-amd64-vmwarefusion.box"
     f.vmx["displayName"] = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
     f.vmx["memsize"] = VAGRANT_MEMSIZE
+    config.vm.provision :shell, :inline => $base_provision_script + $fix_vmware_tools_script
   end
 
   config.vm.provider :virtualbox do |f, override|
     override.vm.box = ENV['BOX_NAME'] || 'trusty-virtualbox'
     #this box_url is totally hosed
     f.customize ["modifyvm", :id, "--memory", VAGRANT_MEMSIZE]
+      config.vm.provision :shell, :inline => $base_provision_script
   end
 
   config.vm.provider :parallels do |f, override|
     override.vm.box = ENV['BOX_NAME'] || 'parallels/ubuntu-14.04'
     f.name = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
     f.customize ["set", :id, "--memsize", VAGRANT_MEMSIZE]
+    config.vm.provision :shell, :inline => $base_provision_script
     # This fixes an issue on OSX with parallels, when vagrant.pkg is still mounted
     config.vm.synced_folder "./", "/vagrant", id: "some_id"
   end
