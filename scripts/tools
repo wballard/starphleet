@@ -188,12 +188,13 @@ function ec2_mounts() {
 
   # If we have a mount for syslog we move our syslog to the new mount
   # and symlink back to the old
-  if [ -d /var/log/biglogs ]; then
+  if [ -d /var/log/biglogs ] && [ ! -L /var/log/syslog ]; then
     stop rsyslog
     mv /var/log/syslog /var/log/biglogs/syslog
     ln -s /var/log/biglogs/syslog /var/log/syslog
     start rsyslog
   fi
+
 }
 
 function dev_mode() {
