@@ -160,7 +160,7 @@ function ec2_mounts() {
   # Priority to who gets the space goes something like
   #    /dev/xvdb -> /var/lib/lxc
   #    /dev/xvdc -> /var/starphleet
-  #    /dev/xvdd -> /var/log
+  #    /dev/xvdd -> /var/log/biglogs
   #
   # Default configuration is in overlay/etc/starphleet
 
@@ -185,6 +185,15 @@ function ec2_mounts() {
       fi
     fi
   done
+
+  # If we have a mount for syslog we move our syslog to the new mount
+  # and symlink back to the old
+  if [ -d /var/log/biglogs ]; then
+    stop rsyslog
+    mv /var/log/syslog /var/log/biglogs/syslog
+    ln -s /var/log/biglogs/syslog /var/log/syslog
+    start rsyslog
+  fi
 }
 
 function dev_mode() {

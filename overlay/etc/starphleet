@@ -39,4 +39,4 @@ export NGINX_STATUS_ENDPOINT_CONFIG="/var/starphleet/nginx/status.conf"
 declare -A EC2_DRIVES
 EC2_DRIVES["/dev/xvdb"]="/var/lib/lxc"
 EC2_DRIVES["/dev/xvdc"]="/var/starphleet"
-EC2_DRIVES["/dev/xvdd"]="/var/log"
+EC2_DRIVES["/dev/xvdd"]="/var/log/biglogs"

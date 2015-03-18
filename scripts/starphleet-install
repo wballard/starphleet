@@ -112,10 +112,6 @@ ${DIR}/starphleet-build-base-container
 
 starphleet-cleanup
 
-# In case we mounted a new file system at /var/log during install we
-# restart syslog
-# TODO: Might be safer to reboot
-restart rsyslog
 # Start starphleet
 start starphleet
 announce *Welcome to Starphleet*
