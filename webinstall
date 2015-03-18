@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+REPO="https://github.com/benjamin7062/starphleet.git"
+apt-get install -y git
+# TODO: branch should be removed
+git clone -b install_modifications https://github.com/benjamin7062/starphleet.git
+cd starphleet/scripts
