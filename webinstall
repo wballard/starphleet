@@ -2,7 +2,7 @@
 # TODO: All the paths need to change on final
 ## TO USE THIS SCRIPT PASTE THE FOLLOWING INTO THE TERMINAL:
 
-# bash -c "$(curl -s https://raw.githubusercontent.com/benjamin7062/starphleet/install_modifications/webinstall)"
+# bash -c "$(curl -s https://raw.githubusercontent.com/wballard/starphleet/master/webinstall)"
 
 ##############################################################################
 ## Author:          Benjamin Hudgens
@@ -18,7 +18,7 @@ STARPHLEET_REPO="https://github.com/benjamin7062/starphleet.git"
 ## Main Foo
 ##############################################################################
 
-read -p "Please paste the SSH git URL to your headquarters:" HEADQUARTERS_URL
+read -p "Please paste the SSH git URL to your headquarters:  " HEADQUARTERS_URL
 
 # We're gonna need git
 apt-get install -y git
@@ -43,8 +43,6 @@ Installation is not finished.
 
 You need to copy your GitHub ssh private key to:
 
-${PRIVATE_KEYS}
-
-Once complete the magic should begin
+   ${PRIVATE_KEYS}
 
 EOF
