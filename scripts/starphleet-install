@@ -11,6 +11,12 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 set -e
 
+# ******************
+# TODO: Figure out how they want to handle this on a fresh install
+# ******************
+export DIR=${DIR}
+export SCRIPT_DIR=${DIR}
+
 run_as_root_or_die
 
 #flush out caches, I know, I know -- but really if you don't do this
