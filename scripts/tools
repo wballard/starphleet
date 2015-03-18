@@ -166,7 +166,7 @@ function ec2_mounts() {
   # One place for typos
   # TODO: This should be a function / copying code for testing
 
-  for DRIVE in "${EC2_DRIVES[@]}"
+  for DRIVE in "${!EC2_DRIVES[@]}"
   do
     echo D: ${DRIVE} - ${EC2_DRIVES[$DRIVE]}
   done
