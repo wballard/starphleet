@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
+# TODO: All the paths need to change on final
+## TO USE THIS SCRIPT PASTE THE FOLLOWING INTO THE TERMINAL:
+
+# bash -c "$(curl -s https://raw.githubusercontent.com/benjamin7062/starphleet/install_modifications/webinstall)"
+
 ##############################################################################
 ## Author:          Benjamin Hudgens
 ## Date:            March 18, 2015
 ##
 ## Description:     Fully Deploy starphleet from the command line
 ##
-## Usage:
-##    bash -c $(curl <url to this script>)
-##    bash -c $(curl https://raw.githubusercontent.com/benjamin7062/starphleet/install_modifications/webinstall)
 ##############################################################################
 ## Locations to this repo
 STARPHLEET_REPO="https://github.com/benjamin7062/starphleet.git"
