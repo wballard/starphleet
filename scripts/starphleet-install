@@ -1,9 +1,15 @@
-#!/usr/bin/env starphleet-launcher
+#!/usr/bin/env bash
 ### Usage:
 ###    starphleet-install
 ### --help
 ###
 ### This will get starphleet on a base machine
+
+# On a fresh install starphleet-launcher doesn't exist for /usr/bin/env
+# so hopefully they are running this in the scripts dir
+[ -f ./starphleet-launcher ] && cp ./starphleet-launcher /usr/bin
+[ -f /usr/bin/starphleet-launcher ] && source /usr/bin/starphleet-launcher
+
 run_as_root_or_die
 
 
