@@ -4,11 +4,12 @@
 ### --help
 ###
 ### This will get starphleet on a base machine
-
-# On a fresh install starphleet-launcher doesn't exist for /usr/bin/env
-# so hopefully they are running this in the scripts dir
-[ -f ./starphleet-launcher ] && cp ./starphleet-launcher /usr/bin
-[ -f /usr/bin/starphleet-launcher ] && source /usr/bin/starphleet-launcher
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/tools
+help=$(grep "^### " "$0" | cut -c 5-)
+eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
+set -e
 
 run_as_root_or_die
 
@@ -114,5 +115,6 @@ starphleet-cleanup
 # restart syslog
 # TODO: Might be safer to reboot
 restart rsyslog
+# Start starphleet
 start starphleet
 announce *Welcome to Starphleet*
