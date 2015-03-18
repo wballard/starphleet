@@ -17,7 +17,6 @@ function abspath {
 
 
 # traditionallly this would be dynamic, but it's really just starphleet here
-COMMAND_NAME=starphleet
 COMMAND_PATH=$(abspath $1)
 COMMAND_DIR=$(dirname ${COMMAND_PATH})
 export DIR="${COMMAND_DIR}"
