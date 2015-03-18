@@ -15,7 +15,7 @@ STARPHLEET_REPO="https://github.com/benjamin7062/starphleet.git"
 ## Main Foo
 ##############################################################################
 
-read "Please paste the SSH git URL to your headquarters" HEADQUARTERS_URL
+read -p "Please paste the SSH git URL to your headquarters:\n" HEADQUARTERS_URL
 
 # We're gonna need git
 apt-get install -y git
