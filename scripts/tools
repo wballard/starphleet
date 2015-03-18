@@ -169,6 +169,7 @@ function ec2_mounts() {
   if [ -b "${DRIVE}" ]; then
     # If the drive doesn't have ext4 we presume it isn't setup yet
     if [[ ! $(file -s "${DRIVE}" | grep ext4) ]]; then
+      info Setting up ["${DRIVE}"] for [/var/starphleet]
       mkfs.ext4 "${DRIVE}"
       mount ${DRIVE} /var/lib/lxc
       # Strip any mounts using this device
