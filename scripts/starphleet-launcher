@@ -13,8 +13,8 @@ function abspath {
 
 
 # traditionallly this would be dynamic, but it's really just starphleet here
-COMMAND_PATH=$(abspath $1)
-COMMAND_DIR=$(dirname ${COMMAND_PATH})
+COMMAND_DIR=$(abspath $1)
+COMMAND_PATH="${COMMAND_DIR}/${1}"
 export DIR="${COMMAND_DIR}"
 export SCRIPT_DIR="${COMMAND_DIR}"
 # throw away our self reference
