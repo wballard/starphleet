@@ -168,7 +168,7 @@ function ec2_mounts() {
 
   for DRIVE in "${EC2_DRIVES[@]}"
   do
-    echo 'D: ${DRIVE} - ${EC2_DRIVES["$DRIVE"]}'
+    echo D: ${DRIVE} - ${EC2_DRIVES[$DRIVE]}
   done
   return
   DRIVE="/dev/xvdb"
