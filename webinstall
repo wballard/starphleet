@@ -12,7 +12,7 @@
 ##
 ##############################################################################
 ## Locations to this repo
-STARPHLEET_REPO="https://github.com/benjamin7062/starphleet.git"
+STARPHLEET_REPO="https://github.com/wballard/starphleet.git"
 
 ##############################################################################
 ## Main Foo
