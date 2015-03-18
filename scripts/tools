@@ -171,8 +171,12 @@ function ec2_mounts() {
     if [[ ! $(file -s "${DRIVE}" | grep ext4) ]]; then
       mkfs.ext4 "${DRIVE}"
       mount ${DRIVE} /var/lib/lxc
+      # Strip any mounts using this device
+      cat /etc/fstab | grep -v "${DRIVE}" > /tmp/fstab.tmp
       # There are tabs on purpose in here - be careful
-      echo "${DRIVE}	/var/lib/lxc	auto	defaults,nobootwait,comment=cloudconfig	0	2" >> /etc/fstab
+      echo "${DRIVE}	/var/lib/lxc	auto	defaults,nobootwait,comment=cloudconfig	0	2" >> /tmp/fstab.tmp
+      # Move the tmp file into place
+      mv /tmp/fstab.tmp /etc/fstab
     fi
   fi
 
@@ -184,8 +188,12 @@ function ec2_mounts() {
     if [[ ! $(file -s "${DRIVE}" | grep ext4) ]]; then
       mkfs.ext4 "${DRIVE}"
       mount ${DRIVE} /var/starphleet
+      # Strip any mounts using this device
+      cat /etc/fstab | grep -v "${DRIVE}" > /tmp/fstab.tmp
       # There are tabs on purpose in here - be careful
-      echo "${DRIVE}	/var/starphleet	auto	defaults,nobootwait,comment=cloudconfig	0	2" >> /etc/fstab
+      echo "${DRIVE}	/var/starphleet	auto	defaults,nobootwait,comment=cloudconfig	0	2" >> /tmp/fstab.tmp
+      # Move the tmp file into place
+      mv /tmp/fstab.tmp /etc/fstab
     fi
   fi
 
@@ -197,8 +205,12 @@ function ec2_mounts() {
     if [[ ! $(file -s "${DRIVE}" | grep ext4) ]]; then
       mkfs.ext4 "${DRIVE}"
       mount ${DRIVE} /var/log
+      # Strip any mounts using this device
+      cat /etc/fstab | grep -v "${DRIVE}" > /tmp/fstab.tmp
       # There are tabs on purpose in here - be careful
-      echo "${DRIVE}	/var/log	auto	defaults,nobootwait,comment=cloudconfig	0	2" >> /etc/fstab
+      echo "${DRIVE}	/var/log	auto	defaults,nobootwait,comment=cloudconfig	0	2" >> /tmp/fstab.tmp
+      # Move the tmp file into place
+      mv /tmp/fstab.tmp /etc/fstab
     fi
   fi
 
