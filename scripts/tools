@@ -155,12 +155,53 @@ function container_environment() {
 }
 
 function ec2_mounts() {
-  if mount | grep '/var/lib/lxc'; then
-    :
-  else
-    #may have another device on ec2
-    [ -b /dev/xvdb ] && (mount | grep /mnt) &&  mount --bind /mnt /var/lib/lxc || true
+  # Dynamically build storage devices on EC2.
+  #
+  # Priority to who gets the space goes something like
+  #    /dev/xvdb -> /var/lib/lxc
+  #    /dev/xvdc -> /var/starphleet
+  #    /dev/xvdd -> /var/log
+
+  # Drive /dev/xvdb
+  # One place for typos
+  # TODO: This should be a function / copying code for testing
+  DRIVE="/dev/xvdb"
+  if [ -b "${DRIVE}" ]; then
+    # If the drive doesn't have ext4 we presume it isn't setup yet
+    if [[ ! $(file -s "${DRIVE}" | grep ext4) ]]; then
+      mkfs.ext4 "${DRIVE}"
+      mount ${DRIVE} /var/lib/lxc
+      # There are tabs on purpose in here - be careful
+      echo "${DRIVE}	/var/lib/lxc	auto	defaults,nobootwait,comment=cloudconfig	0	2" >> /etc/fstab
+    fi
   fi
+
+  # Drive /dev/xvdc
+  # One place for typos
+  DRIVE="/dev/xvdc"
+  if [ -b "${DRIVE}" ]; then
+    # If the drive doesn't have ext4 we presume it isn't setup yet
+    if [[ ! $(file -s "${DRIVE}" | grep ext4) ]]; then
+      mkfs.ext4 "${DRIVE}"
+      mount ${DRIVE} /var/starphleet
+      # There are tabs on purpose in here - be careful
+      echo "${DRIVE}	/var/starphleet	auto	defaults,nobootwait,comment=cloudconfig	0	2" >> /etc/fstab
+    fi
+  fi
+
+  # Drive /dev/xvdd
+  # One place for typos
+  DRIVE="/dev/xvdd"
+  if [ -b "${DRIVE}" ]; then
+    # If the drive doesn't have ext4 we presume it isn't setup yet
+    if [[ ! $(file -s "${DRIVE}" | grep ext4) ]]; then
+      mkfs.ext4 "${DRIVE}"
+      mount ${DRIVE} /var/log
+      # There are tabs on purpose in here - be careful
+      echo "${DRIVE}	/var/log	auto	defaults,nobootwait,comment=cloudconfig	0	2" >> /etc/fstab
+    fi
+  fi
+
 }
 
 function dev_mode() {
