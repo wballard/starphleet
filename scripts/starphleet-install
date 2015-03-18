@@ -12,14 +12,15 @@ run_as_root_or_die
 sync && echo 3 > /proc/sys/vm/drop_caches
 
 # To support a fresh installation but keep the config in the overlay
-# we need access to the default starphleet config.  Any overrides
-# will happen after perform-overlay and re-slurpage of tools
+# we need access to the default starphleet config. We are going
+# to attempt to slurp it in
 #
-# We declare it in case overlay fails
+# We declare EC2_DRIVES in case we can't find the overlay config
 declare -A EC2_DRIVES
 # Then try to get the defaults from the starphleet config
 [ -f ../overlay/etc/starphleet ] && source ../overlay/etc/starphleet
 
+# Auto handle formatting/mounting of EC2 Drives
 ec2_mounts
 
 #put in the system overlay, gets all the files in place
