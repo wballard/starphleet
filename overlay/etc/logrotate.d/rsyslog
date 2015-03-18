@@ -11,7 +11,7 @@
         endscript
 }
 
-/var/log/biglogs/*
+/var/log/biglogs/syslog
 {
         rotate 1
         missingok
