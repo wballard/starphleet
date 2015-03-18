@@ -1,7 +1,45 @@
 #!/usr/bin/env bash
+##############################################################################
+## Author:          Benjamin Hudgens
+## Date:            March 18, 2015
+##
+## Description:     Fully Deploy starphleet from the command line
+##
+## Usage:
+##    curl <url to this script> | bash
+##############################################################################
+## Locations to this repo
+STARPHLEET_REPO="https://github.com/benjamin7062/starphleet.git"
 
-REPO="https://github.com/benjamin7062/starphleet.git"
+##############################################################################
+## Main Foo
+##############################################################################
+
+read "Please paste the SSH git URL to your headquarters" HEADQUARTERS_URL
+
+# We're gonna need git
 apt-get install -y git
-# TODO: branch should be removed
-git clone -b install_modifications https://github.com/benjamin7062/starphleet.git
+# Now grab this repo
+git clone -b install_modifications ${STARPHLEET_REPO}
+# Head into scripts
 cd starphleet/scripts
+# Move launcher into place
+cp ./starphleet-launcher /usr/bin
+# Let the magic begin
+./starphleet-install
+# Set the headquarters
+starphleet-headquarters ${HEADQUARTERS_URL}
+
+cat << EOF
+
+NOTICE:
+
+Installation is not finished.
+
+You need to copy your GitHub ssh private key to:
+
+${PRIVATE_KEYS}
+
+Once complete the magic should begin
+
+EOF
