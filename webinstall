@@ -17,29 +17,29 @@ STARPHLEET_REPO="https://github.com/benjamin7062/starphleet.git"
 
 read -p "Please paste the SSH git URL to your headquarters:\n" HEADQUARTERS_URL
 
-# We're gonna need git
-apt-get install -y git
-# Now grab this repo
-git clone -b install_modifications ${STARPHLEET_REPO}
-# Head into scripts
-cd starphleet/scripts
-# Move launcher into place
-cp ./starphleet-launcher /usr/bin
-# Let the magic begin
-./starphleet-install
-# Set the headquarters
-starphleet-headquarters ${HEADQUARTERS_URL}
-
-cat << EOF
-
-NOTICE:
-
-Installation is not finished.
-
-You need to copy your GitHub ssh private key to:
-
-${PRIVATE_KEYS}
-
-Once complete the magic should begin
-
-EOF
+# # We're gonna need git
+# apt-get install -y git
+# # Now grab this repo
+# git clone -b install_modifications ${STARPHLEET_REPO}
+# # Head into scripts
+# cd starphleet/scripts
+# # Move launcher into place
+# cp ./starphleet-launcher /usr/bin
+# # Let the magic begin
+# ./starphleet-install
+# # Set the headquarters
+# starphleet-headquarters ${HEADQUARTERS_URL}
+#
+# cat << EOF
+#
+# NOTICE:
+#
+# Installation is not finished.
+#
+# You need to copy your GitHub ssh private key to:
+#
+# ${PRIVATE_KEYS}
+#
+# Once complete the magic should begin
+#
+# EOF
