@@ -4,21 +4,6 @@
 ### --help
 ###
 ### This will get starphleet on a base machine
-# ******************
-# TODO: Fresh install doesn't have starphleet-launcher yet
-# ******************
-# DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-# source ${DIR}/tools
-# help=$(grep "^### " "$0" | cut -c 5-)
-# eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
-# trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
-# set -e
-
-# ******************
-# TODO: Figure out how they want to handle this
-# ******************
-# export DIR=${DIR}
-# export SCRIPT_DIR=${DIR}
 
 run_as_root_or_die
 
