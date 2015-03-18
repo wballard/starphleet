@@ -23,7 +23,7 @@ read -p "Please paste the SSH git URL to your headquarters:  " HEADQUARTERS_URL
 # We're gonna need git
 apt-get install -y git
 # Now grab this repo
-git clone -b install_modifications ${STARPHLEET_REPO}
+git clone ${STARPHLEET_REPO}
 # Head into scripts
 cd starphleet/scripts
 # Move launcher into place
