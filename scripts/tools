@@ -170,11 +170,15 @@ function ec2_mounts() {
       # If the drive doesn't have ext4 we presume it isn't setup yet
       if [[ ! $(file -s "${drive}" | grep ext4) ]]; then
         info Setting up ["${drive}"] for [${EC2_DRIVES[$drive]}]
+        # Format the drive
         mkfs.ext4 "${drive}"
+        # Mount it where it goes
+        mkdir -p "${EC2_DRIVES[$drive]}"
         mount "${drive}" "${EC2_DRIVES[$drive]}"
-        # Strip any mounts using this device
+        # Strip any mounts using this device from fstab
         cat /etc/fstab | grep -v "${drive}" > /tmp/fstab.tmp
-        # There are tabs on purpose in here - be careful
+        # Re-add our config to fstab
+        #   Note: There are tabs on purpose in here - be careful
         echo "${drive}	${EC2_DRIVES[$drive]}	auto	defaults,nobootwait,comment=cloudconfig	0	2" >> /tmp/fstab.tmp
         # Move the tmp file into place
         mv /tmp/fstab.tmp /etc/fstab
