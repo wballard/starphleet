@@ -4,7 +4,7 @@ function abspath {
     if [ -d "${1}" ]; then
         echo "${1}"
     elif [ -e "${1}" ]; then
-        readlink -e "${1}" | xargs dirname
+        echo $(readlink -e "${1}" | xargs dirname)
     else
         echo "$1" does not exist! >&2
         return 127
