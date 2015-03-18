@@ -11,6 +11,19 @@
         endscript
 }
 
+/var/log/biglogs/syslog
+{
+        rotate 1
+        missingok
+        notifempty
+        delaycompress
+        compress
+        size 100M
+        postrotate
+                reload rsyslog >/dev/null 2>&1 || true
+        endscript
+}
+
 /var/log/mail.info
 /var/log/mail.warn
 /var/log/mail.err
