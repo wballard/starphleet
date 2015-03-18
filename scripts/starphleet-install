@@ -59,8 +59,8 @@ echo "127.0.0.1 ${SHIP} localhost" > /etc/hosts
 #packages
 debconf-set-selections <<< "postfix postfix/mailname string '${SHIP}'"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
-apt-get update
-apt-get upgrade
+apt-get update -y
+apt-get upgrade -y
 apt-get -y install --force-yes software-properties-common
 
 # Run Upgrade before before installing packages - which fixes this error
