@@ -33,6 +33,8 @@ cp ./starphleet-launcher /usr/bin
 # Set the headquarters
 starphleet-headquarters ${HEADQUARTERS_URL}
 
+source `which tools`
+
 cat << EOF
 
 NOTICE:
