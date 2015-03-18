@@ -165,6 +165,12 @@ function ec2_mounts() {
   # Drive /dev/xvdb
   # One place for typos
   # TODO: This should be a function / copying code for testing
+
+  for DRIVE in "${EC2_DRIVES[@]}"
+  do
+    echo "D: ${DRIVE} - ${EC2_DRIVES[$DRIVE]}"
+  done
+  return
   DRIVE="/dev/xvdb"
   if [ -b "${DRIVE}" ]; then
     # If the drive doesn't have ext4 we presume it isn't setup yet
