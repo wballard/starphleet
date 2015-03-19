@@ -39,4 +39,5 @@ eval "$(${DIR}/docopts -h "$help" : "$@")"
 set +a
 
 # execute our command!
+trace "${COMMAND_PATH}" "$@"
 bash "${COMMAND_PATH}" "$@"

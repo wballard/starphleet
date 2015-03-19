@@ -1,17 +1,12 @@
-#!/usr/bin/env bash
+#!/usr/bin/env starphleet-launcher
 ### Usage:
 ###    starphleet-reaper <current_service_name> <order>
 ### --help
 ###
 ### Kill off every running service for an order except the current service
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-help=$(grep "^### " "$0" | cut -c 5-)
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
-trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 
 ENCODED_ORDER=$(urlencode "${order}")
-for name in $(lxc-ls | grep --extended-regexp -e "${ENCODED_ORDER}-([a-f0-9]){7}-([a-f0-9]){7}" | grep --invert-match "${current_service_name}")
+for name in $(lxc-ls | grep --extended-regexp -e "^${ENCODED_ORDER}-([a-f0-9]){7}-([a-f0-9]){7}" | grep --invert-match "${current_service_name}")
 do
   info "reaping ${name}"
   stop starphleet_serve_order name="${name}" || true
