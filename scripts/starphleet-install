@@ -52,7 +52,7 @@ apt-get -y update
 export DEBIAN_FRONTEND=noninteractive; apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes
 apt-get -y install --force-yes $(< "${DIR}/packages")
 
-if [ !-x "${STARPHLEET_ROOT}/nginx/nginx" ] ; then
+if [ ! -x "${STARPHLEET_ROOT}/nginx/nginx" ] ; then
 pushd ${STARPHLEET_ROOT:-/var/starphleet}/nginx
 set -e
 make
