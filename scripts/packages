@@ -20,3 +20,4 @@ libldap2-dev
 mailutils
 ntp
 postfix
+rsync
