@@ -19,6 +19,9 @@ test -d "${ADMIRAL_HOME}/.npm" && rm -rf "${ADMIRAL_HOME}/.npm"
 test -d "${HEADQUARTERS_LOCAL}" && rm -rf "${HEADQUARTERS_LOCAL}"
 test -d "${CURRENT_ORDERS}" && rm -rf "${CURRENT_ORDERS}"
 
+# Remove any dev mode run files
+rm /tmp/.*starphleet_last_run 2> /dev/null
+
 #unpublish services from nginx
 test -d "${NGINX_CONF}/published" && rm -rf "${NGINX_CONF}/published"
 test -d "${NGINX_CONF}/published_bare" && rm -rf "${NGINX_CONF}/published_bare"

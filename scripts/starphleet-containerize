@@ -59,9 +59,9 @@ trace Fetching service to \${APP_IN}
 if dev_mode; then
   trace Local Dev mode
   if [ "${git_url}" != "-" ]; then
-    sudo starphleet-git-synch "${git_url}" "/var/git/${container_name}" || true
-    sudo chmod -R +w "/var/git/${container_name}" || true
-    sudo rsync -ra "/var/git/${container_name}/" \${APP_IN}/
+    sudo starphleet-git-synch "${git_url}" "/var/git/${order}" || true
+    sudo chmod -R +w "/var/git/${order}" || true
+    sudo rsync -ra "/var/git/${order}/" \${APP_IN}/
   fi
 else
   if [ "${git_url}" != "-" ]; then
