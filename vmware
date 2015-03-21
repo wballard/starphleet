@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
-if [ -f ~/.starphleet ] ; then
-  source ~/.starphleet && vagrant up --provider vmware_fusion
-else
-  echo "~/.starphleet not found"
+
+# Check if the user has a .starphleet file
+[ -f ${HOME}/.starphleet ] && source ${HOME}/.starphleet
+
+# Still don't have a STARPHLEET_HEADQUARTERS - punt
+[ ! -n ${STARPHLEET_HEADQUARTERS} ] && echo "Please set STARPHLEET_HEADQUARTERS" && exit 1
+
+# If we don't have a private key set - be nice and test if github will use their
+# default ssh key
+if [ ! -n ${STARPHLEET_PRIVATE_KEY} ]; then
+  # If github lets us in
+  if [ "$(ssh -i ${HOME}/.ssh/id_rsa git@github.com 2>&1 | grep "successfully authenticated")" ]; then
+    # ...use this key as a fallback
+    export STARTPHLEET_PRIVATE_KEY="${HOME}/.ssh/id_rsa"
+    export STARTPHLEET_PUBLIC_KEY="${HOME}/.ssh/id_rsa.pub"
+  fi
 fi
+
+# If we still don't have a private and public key - punt
+[ ! -n ${STARPHLEET_PRIVATE_KEY} ] && echo "Please set STARPHLEET_PRIVATE_KEY" && exit 1
+[ ! -n ${STARPHLEET_PUBLIC_KEY} ] && echo "Please set STARPHLEET_PUBLIC_KEY" && exit 1
+
+vagrant up --provider vmware_fusion
