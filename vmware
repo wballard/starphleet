@@ -8,7 +8,7 @@
 
 # If we don't have a private key set - be nice and test if github will use their
 # default ssh key
-if [ ! -n ${STARPHLEET_PRIVATE_KEY} ]; then
+if [ -z ${STARPHLEET_PRIVATE_KEY} ]; then
   # If github lets us in
   if [ "$(ssh -i ${HOME}/.ssh/id_rsa git@github.com 2>&1 | grep "successfully authenticated")" ]; then
     # ...use this key as a fallback
@@ -18,7 +18,11 @@ if [ ! -n ${STARPHLEET_PRIVATE_KEY} ]; then
 fi
 
 # If we still don't have a private and public key - punt
-[ ! -n ${STARPHLEET_PRIVATE_KEY} ] && echo "Please set STARPHLEET_PRIVATE_KEY" && exit 1
-[ ! -n ${STARPHLEET_PUBLIC_KEY} ] && echo "Please set STARPHLEET_PUBLIC_KEY" && exit 1
+[ -z ${STARPHLEET_PRIVATE_KEY} ] && echo "Please set STARPHLEET_PRIVATE_KEY" && exit 1
+[ -z ${STARPHLEET_PUBLIC_KEY} ] && echo "Please set STARPHLEET_PUBLIC_KEY" && exit 1
+
+echo Starphleet HQ:     ${STARPHLEET_HEADQUARTERS}
+echo SSH Public Key:    ${STARPHLEET_PUBLIC_KEY}
+echo SSH Private Key:   ${STARPHLEET_PRIVATE_KEY}
 
 vagrant up --provider vmware_fusion
