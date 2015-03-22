@@ -64,10 +64,10 @@ if dev_mode; then
       # sudo mkdir -p "/var/git/${order}"
       # Work around HGFS bug in vmware which pukes on large
       # git checkouts to a sync'd folder between vmware -> host
-      sudo starphleet-git-synch "${git_url}" "/tmp/${order}"
+      sudo starphleet-git-synch "${git_url}" "/home/admiral/tmp/${order}"
       # This should be okay because we only do it once in dev_mode
-      sudo rsync -ravP "/tmp/${order}/" "/var/git/${order}/"
-      rm -rf "/tmp/${order}"
+      sudo rsync -ravP "/home/admiral/tmp/${order}/" "/var/git/${order}/"
+      rm -rf "/home/admiral/tmp/${order}"
       sudo chmod -R +w "/var/git/${order}" || true
     fi
     sudo rsync -ra "/var/git/${order}/" \${APP_IN}/
