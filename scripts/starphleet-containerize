@@ -87,7 +87,7 @@ if dev_mode; then
       sudo rm -rf "/home/admiral/tmp/${order}"
       # We intentionally exit here
     fi
-    sudo rsync -ra "/var/git/${order}/" \${APP_IN}/
+    sudo rsync -rlptD "/var/git/${order}/" \${APP_IN}/
   fi
 else
   if [ "${git_url}" != "-" ]; then
