@@ -22,6 +22,7 @@ test -d "${CURRENT_ORDERS}" && rm -rf "${CURRENT_ORDERS}"
 # Remove any dev mode run files
 rm /tmp/.*starphleet_last_run 2> /dev/null
 rm /var/log/upstart/starphleet* 2> /dev/null
+rm -rf /home/admiral/tmp/* 2> /dev/null
 
 #unpublish services from nginx
 test -d "${NGINX_CONF}/published" && rm -rf "${NGINX_CONF}/published"
