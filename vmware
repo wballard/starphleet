@@ -12,8 +12,8 @@ if [ -z ${STARPHLEET_PRIVATE_KEY} ]; then
   # If github lets us in
   if [ "$(ssh -i ${HOME}/.ssh/id_rsa git@github.com 2>&1 | grep "successfully authenticated")" ]; then
     # ...use this key as a fallback
-    export STARTPHLEET_PRIVATE_KEY="${HOME}/.ssh/id_rsa"
-    export STARTPHLEET_PUBLIC_KEY="${HOME}/.ssh/id_rsa.pub"
+    export STARPHLEET_PRIVATE_KEY="${HOME}/.ssh/id_rsa"
+    export STARPHLEET_PUBLIC_KEY="${HOME}/.ssh/id_rsa.pub"
   fi
 fi
 
