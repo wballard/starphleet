@@ -77,6 +77,7 @@ if dev_mode; then
       #     into starphleet_dev.  The way we do this (for now) is
       #     use a tmp directory that is exposed in both the container
       #     and the host OS
+      [ -f /home/admiral/tmp/${order} ] && rm -rf /home/admiral/tmp/${order}
       sudo starphleet-git-synch "${git_url}" "/home/admiral/tmp/${order}"
       # Now move the files (once) to the starphleet_dev dir - which, in
       # the container context where this is running is mapped to /var/git
