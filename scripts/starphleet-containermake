@@ -122,4 +122,4 @@ fi
   fi
   info made container ${CONTAINER_NAME}
 fi
-) 200>/var/lock/${CONTAINER_NAME}
+) 200>/var/lock/${order}
