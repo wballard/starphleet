@@ -80,7 +80,7 @@ if dev_mode; then
       sudo starphleet-git-synch "${git_url}" "/home/admiral/tmp/${order}"
       # Now move the files (once) to the starphleet_dev dir - which, in
       # the container context where this is running is mapped to /var/git
-      sudo rsync -rlptDPv "/home/admiral/tmp/${order}/" "/var/git/${order}/" || true
+      sudo rsync -rlptD "/home/admiral/tmp/${order}/" "/var/git/${order}/" || true
       # Once we remove the temporary directory.. starphleet will try to rebuild
       # this container because it will detect there was a change in /var/git/<order>
       sudo chmod -R +w "/var/git/${order}" || true
