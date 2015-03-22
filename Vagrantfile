@@ -17,20 +17,35 @@ Vagrant::Config.run do |config|
     sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
     sudo /starphleet/scripts/starphleet-install;
     $([ -n \"#{ENV['STARPHLEET_HEADQUARTERS']}\" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true
-    $([ -n \"#{ENV['STARPHLEET_LIVE']}\" ] && touch /var/starphleet/live) || true"
+    $([ -n \"#{ENV['STARPHLEET_LIVE']}\" ] && touch /var/starphleet/live) || true
+    "
 end
 
 Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
+
+  unless Vagrant.has_plugin?("vagrant-triggers")
+    raise 'vagrant-triggers plugin needs to be installed: vagrant plugin install vagrant-triggers'
+  end
+
+  unless Vagrant.has_plugin?("vagrant-hostmanager")
+    raise 'vagrant-hostmanager plugin needs to be installed: vagrant plugin install vagrant-hostmanager'
+  end
+
   config.vm.hostname = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
   config.vm.synced_folder ".", "/starphleet"
   config.vm.synced_folder "~", "/hosthome"
 
   config.vm.provider :vmware_fusion do |f, override|
-    override.vm.network "public_network"
+    # override.vm.network "public_network"
     override.vm.box = ENV['BOX_NAME'] || 'trusty-vmware'
     override.vm.box_url = "https://s3.amazonaws.com/glg_starphleet/trusty-14.04-amd64-vmwarefusion.box"
     f.vmx["displayName"] = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
     f.vmx["memsize"] = VAGRANT_MEMSIZE
+    config.vm.provision :shell, :inline => "
+    /starphleet/scripts/vmware_hgfs_fix.sh
+    sed -i.bak 's/answer AUTO_KMODS_ENABLED_ANSWER no/answer AUTO_KMODS_ENABLED_ANSWER yes/g' /etc/vmware-tools/locations
+    sed -i.bak 's/answer AUTO_KMODS_ENABLED no/answer AUTO_KMODS_ENABLED yes/g' /etc/vmware-tools/locations
+    "
   end
 
   config.vm.provider :virtualbox do |f, override|
