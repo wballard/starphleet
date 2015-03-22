@@ -69,6 +69,15 @@ if dev_mode; then
       sudo rsync -ravP "/home/admiral/tmp/${order}/" "/var/git/${order}/" || true
       sudo rm -rf "/home/admiral/tmp/${order}"
       sudo chmod -R +w "/var/git/${order}" || true
+      # We intentionally exit here to get around a syncing race condition in dev_mode
+      #
+      # Basically, the first container of a service that doesn't detect the git
+      # repo was checked out gets the repo in place (above).  We want that container
+      # to die.  Starphleet will detect changes occured in the final destination of
+      # the above work and start a new container.  This new container should build smoothly
+      # and this container (the one putting the git repo in place) should get reaped
+      # reaped
+      exit 1
     fi
     sudo rsync -ra "/var/git/${order}/" \${APP_IN}/
   fi
