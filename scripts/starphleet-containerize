@@ -86,13 +86,6 @@ if dev_mode; then
       sudo chmod -R +w "/var/git/${order}" || true
       sudo rm -rf "/home/admiral/tmp/${order}"
       # We intentionally exit here
-      #
-      # Basically, the first container of a service that doesn't detect the git
-      # repo was checked out gets the repo in place (above).  We want that container
-      # to die.  Starphleet will detect changes occured in the final destination of
-      # the above work and start a new container.  This new container should build smoothly
-      # and this container (the one putting the git repo in place) should get reaped
-      exit 1
     fi
     sudo rsync -ra "/var/git/${order}/" \${APP_IN}/
   fi
