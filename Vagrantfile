@@ -42,7 +42,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     f.vmx["displayName"] = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
     f.vmx["memsize"] = VAGRANT_MEMSIZE
     config.vm.provision :shell, :inline => "
-    /starphleet/scripts/vmware_hgfs_fix.sh
+    /starphleet/vmware_hgfs_fix.sh
     sed -i.bak 's/answer AUTO_KMODS_ENABLED_ANSWER no/answer AUTO_KMODS_ENABLED_ANSWER yes/g' /etc/vmware-tools/locations
     sed -i.bak 's/answer AUTO_KMODS_ENABLED no/answer AUTO_KMODS_ENABLED yes/g' /etc/vmware-tools/locations
     "
