@@ -67,8 +67,7 @@ if dev_mode; then
       # git checkouts to a sync'd folder between vmware -> host
       sudo starphleet-git-synch "${git_url}" "/tmp/${order}"
       # This should be okay because we only do it once in dev_mode
-      sudo rsync -ra "/tmp/${orders}/" "/var/git/${orders}/"
-      # TODO: Should cleanup the tmp directory
+      sudo mv "/tmp/${orders}" "/var/git/${orders}"
     fi
     sudo rsync -ra "/var/git/${order}/" \${APP_IN}/
   fi
