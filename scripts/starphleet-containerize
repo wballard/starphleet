@@ -88,6 +88,7 @@ if dev_mode; then
       # We intentionally exit here
     fi
     sudo rsync -rlptD "/var/git/${order}/" \${APP_IN}/
+    sudo chown -R ubuntu:ubuntu \${APP_IN}
   fi
 else
   if [ "${git_url}" != "-" ]; then
