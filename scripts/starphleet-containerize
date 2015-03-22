@@ -63,7 +63,11 @@ if dev_mode; then
     if [ ! -d "/var/git/${order}" ]; then
       sudo mkdir -p "/var/git/${order}"
       sudo chmod -R +w "/var/git/${order}" || true
-      sudo starphleet-git-synch "${git_url}" "/var/git/${order}"
+      # Work around HGFS bug in vmware which pukes on large
+      # git checkouts to a sync'd folder between vmware -> host
+      sudo starphleet-git-synch "${git_url}" "/tmp/${order}"
+      # This should be okay because we only do it once in dev_mode
+      sudo rsync -ra "/tmp/${orders}/" "/var/git/${orders}/"
     fi
     sudo rsync -ra "/var/git/${order}/" \${APP_IN}/
   fi
