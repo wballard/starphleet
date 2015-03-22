@@ -68,6 +68,7 @@ if dev_mode; then
       sudo starphleet-git-synch "${git_url}" "/tmp/${order}"
       # This should be okay because we only do it once in dev_mode
       sudo rsync -ra "/tmp/${orders}/" "/var/git/${orders}/"
+      # TODO: Should cleanup the tmp directory
     fi
     sudo rsync -ra "/var/git/${order}/" \${APP_IN}/
   fi
