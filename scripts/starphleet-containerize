@@ -67,7 +67,7 @@ if dev_mode; then
       sudo starphleet-git-synch "${git_url}" "/home/admiral/tmp/${order}"
       # This should be okay because we only do it once in dev_mode
       sudo rsync -ravP "/home/admiral/tmp/${order}/" "/var/git/${order}/" || true
-      rm -rf "/home/admiral/tmp/${order}"
+      sudo rm -rf "/home/admiral/tmp/${order}"
       sudo chmod -R +w "/var/git/${order}" || true
     fi
     sudo rsync -ra "/var/git/${order}/" \${APP_IN}/
