@@ -19,9 +19,10 @@ rm -f /etc/init/starphleet*
 ${SCRIPT_DIR}/perform-overlay
 
 
-# Set an EC2 region name if one exists
+# If starphleet is deployed in a EC2 environment we append the region configuration
+# to the global starphleet config
 STARPHLEET_REGION=$(curl --connect-timeout 1 -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
-[ ! -z ${STARPHLEET_REGION} ] && echo STARPHLEET_REGION=${STARPHLEET_REGION} >> /etc/starphleet
+[ ! -z "${STARPHLEET_REGION}" ] && echo "export STARPHLEET_REGION=\"${STARPHLEET_REGION}\"" >> /etc/starphleet
 
 #source again, yep -- now the environment is in place
 source ${DIR}/tools

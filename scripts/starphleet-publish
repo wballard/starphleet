@@ -77,9 +77,9 @@ location ${public_url}/ {
   more_set_headers 'X-Starphleet-Service: ${public_url}';
   more_set_headers 'X-Starphleet-Container: ${container_name}';
 EOF
-# If the starphleet region varaible is set
-if [ ! -z ${STARPHLEET_REGION} ]; then
-  echo "  more_set_headers 'X-Starphleet-Ship: ${STARPHLEET_REGION}'" >> "${MOUNT_CONF}"
+# If the Starphleet EC2 Region is set - also output this header
+if [ ! -z "${STARPHLEET_REGION}" ]; then
+  echo "  more_set_headers 'X-Starphleet-Ship: ${STARPHLEET_REGION}';" >> "${MOUNT_CONF}"
 fi
 if [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
   info password file enabled
