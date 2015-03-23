@@ -59,8 +59,14 @@ trace Fetching service to \${APP_IN}
 if dev_mode; then
   trace Local Dev mode
   if [ "${git_url}" != "-" ]; then
-    sudo starphleet-git-synch "${git_url}" "/var/git/${container_name}" || true
-    sudo chmod -R +w "/var/git/${container_name}" || true
+    #Cloning this into /var/git was breaking, it is an lxc.mount.entry
+    #Not sure what the actual issue is with cloning on that particular mount
+    sudo mkdir -p "/var/containers"
+    sudo chown -R ubuntu "/var/containers"
+
+    starphleet-git-synch "${git_url}" "/var/containers/${container_name}"
+    sudo chmod -R +w "/var/containers/${container_name}"
+    sudo cp -R "/var/containers/${container_name}" "/var/git/"
     sudo ln -s "/var/git/${container_name}" \${APP_IN}
   fi
 else
