@@ -4,13 +4,23 @@
 ### --help
 ###
 ### This will get starphleet on a base machine
-run_as_root_or_die
 
+run_as_root_or_die
 
 #flush out caches, I know, I know -- but really if you don't do this
 #Linux would rather swap than let go
 sync && echo 3 > /proc/sys/vm/drop_caches
 
+# To support a fresh installation but keep the config in the overlay
+# we need access to the default starphleet config. We are going
+# to attempt to slurp it in
+#
+# We declare EC2_DRIVES in case we can't find the overlay config
+declare -A EC2_DRIVES
+# Then try to get the defaults from the starphleet config
+[ -f ../overlay/etc/starphleet ] && source ../overlay/etc/starphleet
+
+# Auto handle formatting/mounting of EC2 Drives
 ec2_mounts
 
 #put in the system overlay, gets all the files in place
@@ -42,36 +52,35 @@ echo "127.0.0.1 ${SHIP} localhost" > /etc/hosts
 #packages
 debconf-set-selections <<< "postfix postfix/mailname string '${SHIP}'"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
-apt-get update
-apt-get upgrade
-apt-get -y install --force-yes software-properties-common
 
 # Run Upgrade before before installing packages - which fixes this error
 # https://github.com/lxc/lxc/issues/247
-apt-get -y update
-export DEBIAN_FRONTEND=noninteractive; apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes
+apt-get update -y
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes
+
+apt-get -y install --force-yes software-properties-common
 apt-get -y install --force-yes $(< "${DIR}/packages")
 
-if [ ! -x "${STARPHLEET_ROOT}/nginx/nginx" ] ; then
 pushd ${STARPHLEET_ROOT:-/var/starphleet}/nginx
 set -e
 make
 set +e
 popd
-fi
 
-#we will be using bash. period
+# We will be using bash. period
 rm /bin/sh
 ln /bin/bash /bin/sh
 
-#starphleet lives here
+# starphleet lives here
 [ -d ${STARPHLEET_ROOT} ] || mkdir -p ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_TMP} ] || mkdir -p ${STARPHLEET_TMP}
 chmod 755 ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_ROOT}/diagnostic ] || mkdir -p ${STARPHLEET_ROOT}/diagnostic
 chmod 755 ${STARPHLEET_ROOT}/diagnostic
 
-#make a place for keys
+# make a place for keys
 test -d ${PRIVATE_KEYS} || mkdir -p ${PRIVATE_KEYS}
 chmod 755 ${PRIVATE_KEYS}
 test -d ${PUBLIC_KEYS} || mkdir -p ${PUBLIC_KEYS}
@@ -93,7 +102,7 @@ root	ALL=(ALL:ALL) ALL
 %admin ALL=(ALL) ALL
 %sudo	ALL=(ALL:ALL) NOPASSWD:ALL
 vagrant ALL=NOPASSWD: ALL
-Defaults env_keep="sSH_AUTH_SOCK"
+Defaults env_keep="SSH_AUTH_SOCK"
 Defaults !requiretty
 EOF
 
@@ -105,5 +114,7 @@ starphleet-buildpacks
 ${DIR}/starphleet-build-base-container
 
 starphleet-cleanup
+
+# Start starphleet
 start starphleet
 announce *Welcome to Starphleet*

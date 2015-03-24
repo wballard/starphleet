@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# TODO: All the paths need to change on final
+## TO USE THIS SCRIPT PASTE THE FOLLOWING INTO THE TERMINAL:
+
+# bash -c "$(curl -s https://raw.githubusercontent.com/wballard/starphleet/master/webinstall)"
+
+##############################################################################
+## Author:          Benjamin Hudgens
+## Date:            March 18, 2015
+##
+## Description:     Fully Deploy starphleet from the command line
+##
+##############################################################################
+## Locations to this repo
+STARPHLEET_REPO="https://github.com/wballard/starphleet.git"
+
+##############################################################################
+## Main Foo
+##############################################################################
+
+read -p "Please paste the SSH git URL to your headquarters:  " HEADQUARTERS_URL
+
+# We're gonna need git
+apt-get install -y git
+# Now grab this repo
+git clone ${STARPHLEET_REPO}
+# Head into scripts
+cd starphleet/scripts
+# Move launcher into place
+cp ./starphleet-launcher /usr/bin
+# Let the magic begin
+./starphleet-install
+# Set the headquarters
+starphleet-headquarters ${HEADQUARTERS_URL}
+
+source `which tools`
+
+cat << EOF
+
+NOTICE:
+
+Installation is not finished.
+
+You need to copy your GitHub ssh private key to:
+
+   ${PRIVATE_KEYS}
+
+EOF
