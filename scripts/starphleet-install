@@ -52,12 +52,15 @@ echo "127.0.0.1 ${SHIP} localhost" > /etc/hosts
 #packages
 debconf-set-selections <<< "postfix postfix/mailname string '${SHIP}'"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
-apt-get update -y
+
 # Run Upgrade before before installing packages - which fixes this error
 # https://github.com/lxc/lxc/issues/247
-export DEBIAN_FRONTEND=noninteractive; apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes
-apt-get -y install --force-yes software-properties-common
+apt-get update -y
 
+export DEBIAN_FRONTEND=noninteractive
+apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes
+
+apt-get -y install --force-yes software-properties-common
 apt-get -y install --force-yes $(< "${DIR}/packages")
 
 pushd ${STARPHLEET_ROOT:-/var/starphleet}/nginx
@@ -66,18 +69,18 @@ make
 set +e
 popd
 
-#we will be using bash. period
+# We will be using bash. period
 rm /bin/sh
 ln /bin/bash /bin/sh
 
-#starphleet lives here
+# starphleet lives here
 [ -d ${STARPHLEET_ROOT} ] || mkdir -p ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_TMP} ] || mkdir -p ${STARPHLEET_TMP}
 chmod 755 ${STARPHLEET_ROOT}
 [ -d ${STARPHLEET_ROOT}/diagnostic ] || mkdir -p ${STARPHLEET_ROOT}/diagnostic
 chmod 755 ${STARPHLEET_ROOT}/diagnostic
 
-#make a place for keys
+# make a place for keys
 test -d ${PRIVATE_KEYS} || mkdir -p ${PRIVATE_KEYS}
 chmod 755 ${PRIVATE_KEYS}
 test -d ${PUBLIC_KEYS} || mkdir -p ${PUBLIC_KEYS}

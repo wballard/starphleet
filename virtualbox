@@ -1,3 +1,20 @@
 #!/usr/bin/env bash
-[ -f "~/.starphleet" ] && source "~/.starphleet"
-vagrant up
+if vagrant plugin list | grep -s vagrant-triggers; then
+  echo "vagrant-triggers already installed"
+else
+  echo "installing prerequisite vagrant-triggers"
+  vagrant plugin install vagrant-triggers
+fi
+
+if vagrant plugin list | grep -s vagrant-hostmanager; then
+  echo "vagrant-hostmanager already installed"
+else
+  echo "installing prerequisite vagrant-hostmanager"
+  vagrant plugin install vagrant-hostmanager
+fi
+
+if [ -f ~/.starphleet ] ; then
+  source ~/.starphleet && vagrant up --provider virtualbox
+else
+  echo "~/.starphleet not found"
+fi

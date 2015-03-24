@@ -45,7 +45,8 @@ if [ -d "${local}/.git" ]; then
   HAS_CHANGES=$(git diff HEAD...origin/${CURRENT_BRANCH} --raw)
   if [ "${HAS_CHANGES}x" != "x" ]; then
     warn new code detected, pulling
-    starphleet-git pull || fatal pull error
+    starphleet-git fetch || fatal pull error
+    starphleet-git reset --hard origin/${CURRENT_BRANCH} || fatal pull error
     exit 0
   fi
   GIT_STATUS=$(git status)
@@ -67,6 +68,8 @@ else
   cd "${local}"
   if [ -n "${BRANCH}" ]; then
     git checkout "${BRANCH}" || fatal checkout error
+    #clean up files that might have diverged between default and current branch
+    git clean -df
   fi
   exit 0
 fi
