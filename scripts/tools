@@ -155,12 +155,46 @@ function container_environment() {
 }
 
 function ec2_mounts() {
-  if mount | grep '/var/lib/lxc'; then
-    :
-  else
-    #may have another device on ec2
-    [ -b /dev/xvdb ] && (mount | grep /mnt) &&  mount --bind /mnt /var/lib/lxc || true
+  # Dynamically build storage devices on EC2.
+  #
+  # Priority to who gets the space goes something like
+  #    /dev/xvdb -> /var/lib/lxc
+  #    /dev/xvdc -> /var/starphleet
+  #    /dev/xvdd -> /var/log/biglogs
+  #
+  # Default configuration is in overlay/etc/starphleet
+
+  for drive in "${!EC2_DRIVES[@]}"
+  do
+    if [ -b "${drive}" ]; then
+      # If the drive doesn't have ext4 we presume it isn't setup yet
+      if [[ ! $(file -s "${drive}" | grep ext4) ]]; then
+        info Setting up ["${drive}"] for [${EC2_DRIVES[$drive]}]
+        # Format the drive
+        mkfs.ext4 "${drive}"
+        # Mount it where it goes
+        mkdir -p "${EC2_DRIVES[$drive]}"
+        mount "${drive}" "${EC2_DRIVES[$drive]}"
+        # Strip any mounts using this device from fstab
+        cat /etc/fstab | grep -v "${drive}" > /tmp/fstab.tmp
+        # Re-add our config to fstab
+        #   Note: There are tabs on purpose in here - be careful
+        echo "${drive}	${EC2_DRIVES[$drive]}	auto	defaults,nobootwait,comment=cloudconfig	0	2" >> /tmp/fstab.tmp
+        # Move the tmp file into place
+        mv /tmp/fstab.tmp /etc/fstab
+      fi
+    fi
+  done
+
+  # If we have a mount for syslog we move our syslog to the new mount
+  # and symlink back to the old
+  if [ -d /var/log/biglogs ] && [ ! -L /var/log/syslog ]; then
+    stop rsyslog
+    mv /var/log/syslog /var/log/biglogs/syslog
+    ln -s /var/log/biglogs/syslog /var/log/syslog
+    start rsyslog
   fi
+
 }
 
 function dev_mode() {
