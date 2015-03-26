@@ -53,7 +53,7 @@ EOF
 
 # Make sure a headquarters is set
 if [ -z ${STARPHLEET_HEADQUARTERS} ]; then
-  read -p "Please past a starphleet headquarters: " STARPHLEET_HEADQUARTERS
+  read -p "Please paste a starphleet headquarters: " STARPHLEET_HEADQUARTERS
   export STARPHLEET_HEADQUARTERS="${STARPHLEET_HEADQUARTERS}"
 fi
 
