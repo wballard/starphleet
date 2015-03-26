@@ -10,6 +10,7 @@
 # *********************
 # Config
 # *********************
+
 ENVIRONMENT_FILE="${HOME}/.starphleet"
 STARPHLEET_PRIVATE_KEY_FILE="${HOME}/.ssh/starphleet"
 STARPHLEET_PUBLIC_KEY_FILE="${HOME}/.ssh/starphleet.pub"
@@ -46,6 +47,7 @@ EOF
 # *********************
 # Environment Setup
 # *********************
+
 # Check if the user has an environment file
 [ -f "${ENVIRONMENT_FILE}" ] && source "${ENVIRONMENT_FILE}"
 
@@ -83,11 +85,8 @@ fi
 # Main
 # *********************
 
-
 echo Starphleet HQ:     ${STARPHLEET_HEADQUARTERS}
 echo SSH Public Key:    ${STARPHLEET_PUBLIC_KEY}
 echo SSH Private Key:   ${STARPHLEET_PRIVATE_KEY}
-
-exit 0
 
 vagrant up --provider vmware_fusion
