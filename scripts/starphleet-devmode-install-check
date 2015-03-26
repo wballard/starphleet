@@ -102,4 +102,12 @@ done
 # All done!
 # ************************
 
-announce Starphleet is done deploying
+announce Starphleet is done deploying devmode
+
+cat <<EOF
+
+Starphleet has just finished setting up dev mode.  The containers
+are building for the first time.  This will take approximately
+the same time as a deploy to production starphleet.
+
+EOF
