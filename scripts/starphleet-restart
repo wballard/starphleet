@@ -14,4 +14,3 @@ do
   kill $pid
 done
 unset IFS
-
