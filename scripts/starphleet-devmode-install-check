@@ -64,6 +64,26 @@ while [ 1 ]; do
       echo ${STILL_SYNCING}
       CONTINUE=true
     fi
+    # Make sure there is a corresponding starphleet_dev dir for all autodeploy
+    # orders
+    if [ -d "${HEADQUARTERS_LOCAL}" ]; then
+      cd "${HEADQUARTERS_LOCAL}"
+      # Go through each dir
+      for dir in $(ls ls -p | grep "/"); do
+        pushd "${dir}"
+        # Check the orders file for 'anything' that says autodeploy
+        if [ -f "./orders" ]; then
+          # TODO: Ignore comments
+          CHECK=$(cat ./orders | grep autodeploy)
+          if [ ! -z "${CHECK}" ]; then
+            # If we still don't have a working starphleet_dev dir
+            # this container is not done
+            [ ! -d "/hosthome/starphleet_dev/${dir}" ] && CONTINUE=true
+          fi
+        fi
+        popd
+      done
+    fi
     # Enter the HOST OS synced directory and make sure things
     # are not still trying to sync to it
     # cd /hosthome/starphleet_dev
@@ -75,7 +95,7 @@ while [ 1 ]; do
     # done
   fi
   # Looks like we should continue
-  [ -z "${CONTINUE}" ] && break || sleep 3
+  [ -z "${CONTINUE}" ] && break || sleep 10
 done
 
 # ************************

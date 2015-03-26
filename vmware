@@ -91,4 +91,9 @@ echo SSH Private Key:   ${STARPHLEET_PRIVATE_KEY}
 
 vagrant up --provider vmware_fusion
 
+# Give starphleet a few seconds to warm up before we go test things
+echo "One moment while devmode initalizes.  This may take a while..."
+sleep 10
+
+# Now test how things are going
 vagrant ssh -c "sudo starphleet-devmode-install-check"
