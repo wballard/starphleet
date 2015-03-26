@@ -56,7 +56,6 @@ apt-get update -y
 # Run Upgrade before before installing packages - which fixes this error
 # https://github.com/lxc/lxc/issues/247
 export DEBIAN_FRONTEND=noninteractive; apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes
-apt-get -y install --force-yes software-properties-common
 
 apt-get -y install --force-yes $(< "${DIR}/packages")
 
