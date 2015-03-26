@@ -58,7 +58,7 @@ while [ 1 ]; do
     CONTINUE=true
   else
     # Directory should be empty - Git repos are still not synced
-    STILL_SYNCING=$(find /home/admiral/tmp -type d | grep -v -e "^/home/admiral/tmp$")
+    STILL_SYNCING=$(find /home/admiral/tmp -maxdepth 1 -type d | grep -v -e "^/home/admiral/tmp$")
     if [ ! -z "${STILL_SYNCING}" ]; then
       info Orders still syncing to "starphleet_dev":
       echo ${STILL_SYNCING}
