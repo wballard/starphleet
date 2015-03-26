@@ -7,7 +7,7 @@
 ### feedback to the user whether they are deployed successfully
 
 # This does nothing more than check the various aspects of dev mode and makes
-# sure everything has finished installation.  Additionally provides feedback
+# sure everything has finished installing.  Additionally provides feedback
 # to the user so they know where things are in the process.  Specifically:
 #
 #     - Make sure starphleet is running
@@ -69,8 +69,8 @@ while [ 1 ]; do
     if [ -d "${HEADQUARTERS_LOCAL}" ]; then
       cd "${HEADQUARTERS_LOCAL}"
       # Go through each dir
-      for dir in $(ls ls -p | grep "/"); do
-        pushd "${dir}"
+      for dir in $(ls -p | grep "/"); do
+        pushd "${dir}" > /dev/null
         # Check the orders file for 'anything' that says autodeploy
         if [ -f "./orders" ]; then
           # TODO: Ignore comments
@@ -81,7 +81,7 @@ while [ 1 ]; do
             [ ! -d "/hosthome/starphleet_dev/${dir}" ] && CONTINUE=true
           fi
         fi
-        popd
+        popd > /dev/null
       done
     fi
     # Enter the HOST OS synced directory and make sure things
