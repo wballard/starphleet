@@ -28,7 +28,7 @@ info Starphleet Running
 # Test Private Keys
 # ************************
 
-for keyFile in $(find /var/starphleet/private_keys); do
+for keyFile in $(find /var/starphleet/private_keys -f); do
   TEST=$(ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${keyFile} git@github.com 2>&1 | grep "successfully authenticated")
   [ -z "${TEST}" ] && error Key File doesnt login to github:  ${keyFile}
 done
