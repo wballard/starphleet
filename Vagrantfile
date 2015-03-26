@@ -78,7 +78,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     override.vm.box_url = "https://s3.amazonaws.com/glg_starphleet/trusty-14.04-amd64-vmwarefusion.box"
     f.vmx["displayName"] = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
     f.vmx["memsize"] = VAGRANT_MEMSIZE
-    override.vm.provision :shell, :inline => $base_provision_script + $fix_vmware_tools_script
+    override.vm.provision :shell, :inline => $fix_vmware_tools_script
   end
 
   config.vm.provider :virtualbox do |f, override|
