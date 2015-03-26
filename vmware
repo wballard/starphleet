@@ -23,7 +23,7 @@ function test_git() {
 }
 
 function key_help() {
-  cat <<  EOF
+cat <<EOF
 
   You must put a non-password protected key file here:
 
@@ -40,7 +40,7 @@ function key_help() {
 
     https://help.github.com/articles/generating-ssh-keys/
 
-  EOF
+EOF
 }
 
 # *********************
@@ -83,8 +83,11 @@ fi
 # Main
 # *********************
 
+
 echo Starphleet HQ:     ${STARPHLEET_HEADQUARTERS}
 echo SSH Public Key:    ${STARPHLEET_PUBLIC_KEY}
 echo SSH Private Key:   ${STARPHLEET_PRIVATE_KEY}
+
+exit 0
 
 vagrant up --provider vmware_fusion
