@@ -1,25 +1,87 @@
 #!/usr/bin/env bash
+#######################################################################
+## Author:          Benjamin Hudgens
+## Date:            March 28, 2015
+##
+## Description:     Setup the necessary environment to install
+##                  starphleet via vagrant
+#######################################################################
 
-# Check if the user has a .starphleet file
-[ -f ${HOME}/.starphleet ] && source ${HOME}/.starphleet
+# *********************
+# Config
+# *********************
+ENVIRONMENT_FILE="${HOME}/.starphleet"
+STARPHLEET_PRIVATE_KEY_FILE="${HOME}/.ssh/starphleet"
+STARPHLEET_PUBLIC_KEY_FILE="${HOME}/.ssh/starphleet.pub"
 
-# Still don't have a STARPHLEET_HEADQUARTERS - punt
-[ ! -n ${STARPHLEET_HEADQUARTERS} ] && echo "Please set STARPHLEET_HEADQUARTERS" && exit 1
+# *********************
+# Helpers
+# *********************
 
-# If we don't have a private key set - be nice and test if github will use their
-# default ssh key
-if [ -z ${STARPHLEET_PRIVATE_KEY} ]; then
-  # If github lets us in
-  if [ "$(ssh -i ${HOME}/.ssh/id_rsa git@github.com 2>&1 | grep "successfully authenticated")" ]; then
-    # ...use this key as a fallback
-    export STARPHLEET_PRIVATE_KEY="${HOME}/.ssh/id_rsa"
-    export STARPHLEET_PUBLIC_KEY="${HOME}/.ssh/id_rsa.pub"
+function test_git() {
+  SUCCESS=$(ssh -i ${1} git@github.com 2>&1 | grep "successfully authenticated")
+}
+
+function key_help() {
+  cat <<  EOF
+
+  You must put a non-password protected key file here:
+
+     ${STARPHLEET_PRIVATE_KEY_FILE}
+     ${STARPHLEET_PUBLIC_KEY_FILE}
+
+
+  To generate a new key you can try (do not enter a password - hit <enter>):
+
+    ssh-keygen -b 1024 -t rsa -f ${HOME}/.ssh/starphleet
+
+
+  Make sure your key is setup with GitHub.  Read here:
+
+    https://help.github.com/articles/generating-ssh-keys/
+
+  EOF
+}
+
+# *********************
+# Environment Setup
+# *********************
+# Check if the user has an environment file
+[ -f "${ENVIRONMENT_FILE}" ] && source "${ENVIRONMENT_FILE}"
+
+# Make sure a headquarters is set
+if [ -z ${STARPHLEET_HEADQUARTERS} ]; then
+  read -p "Please past a starphleet headquarters: " STARPHLEET_HEADQUARTERS
+  export STARPHLEET_HEADQUARTERS="${STARPHLEET_HEADQUARTERS}"
+fi
+
+# Graceful fallback if the user didn't setup the keys in their environment
+if [ -z "${STARPHLEET_PRIVATE_KEY}" ] || [ -z "${STARPHLEET_PUBLIC_KEY}" ]; then
+  # Test to make sure their key connects to github without issue
+  [ -f "${STARPHLEET_PRIVATE_KEY_FILE}" ] && \
+  [ -f "${STARPHLEET_PUBLIC_KEY_FILE}" ] && \
+  test_git "${STARPHLEET_PRIVATE_KEY_FILE}"
+  # If success - export the starphleet key
+  if [ ! -z "${SUCCESS}" ]; then
+    export STARPHLEET_PRIVATE_KEY="${STARPHLEET_PRIVATE_KEY_FILE}"
+    export STARPHLEET_PUBLIC_KEY="${STARPHLEET_PUBLIC_KEY_FILE}"
+  else
+    # Starphleet key didn't work out - be a pal and try their default key
+    test_git "${HOME}/.ssh/id_rsa"
+    if [ ! -z "${SUCCESS}" ]; then
+      export STARPHLEET_PRIVATE_KEY="${HOME}/.ssh/id_rsa"
+      export STARPHLEET_PUBLIC_KEY="${HOME}/.ssh/id_rsa.pub"
+    else
+      # Sheesh - nothing is working
+      key_help
+      exit 1
+    fi
   fi
 fi
 
-# If we still don't have a private and public key - punt
-[ -z ${STARPHLEET_PRIVATE_KEY} ] && echo "Please set STARPHLEET_PRIVATE_KEY" && exit 1
-[ -z ${STARPHLEET_PUBLIC_KEY} ] && echo "Please set STARPHLEET_PUBLIC_KEY" && exit 1
+# *********************
+# Main
+# *********************
 
 echo Starphleet HQ:     ${STARPHLEET_HEADQUARTERS}
 echo SSH Public Key:    ${STARPHLEET_PUBLIC_KEY}
