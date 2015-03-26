@@ -90,3 +90,5 @@ echo SSH Public Key:    ${STARPHLEET_PUBLIC_KEY}
 echo SSH Private Key:   ${STARPHLEET_PRIVATE_KEY}
 
 vagrant up --provider vmware_fusion
+
+vagrant ssh -c "sudo starphleet-devmode-install-check"

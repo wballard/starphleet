@@ -13,7 +13,6 @@
 #     - Make sure starphleet is running
 #     - Test the keys in /var/starphleet/private_keys against github
 #     - Make sure /var/starphleet/headquarters is checked out
-#     - Make sure containers are building
 #     - Report status on the initial sync of starphleet
 #     - Notify the user that all components are complete
 
@@ -30,7 +29,7 @@ info Starphleet Running
 # ************************
 
 for keyFile in $(find /var/starphleet/private_keys); do
-  TEST=$(ssh -i ${keyFile} git@github.com 2>&1 | grep "successfully authenticated")
+  TEST=$(ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${keyFile} git@github.com 2>&1 | grep "successfully authenticated")
   [ -z "${TEST}" ] && error Key File doesnt login to github:  ${keyFile}
 done
 info SSH Private Keys tested
@@ -76,7 +75,7 @@ while [ 1 ]; do
     # done
   fi
   # Looks like we should continue
-  [ -z "${CONTINUE}" ] && break
+  [ -z "${CONTINUE}" ] && break || sleep 3
 done
 
 # ************************
