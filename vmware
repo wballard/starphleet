@@ -23,6 +23,22 @@ function test_git() {
   SUCCESS=$(ssh -i ${1} git@github.com 2>&1 | grep "successfully authenticated")
 }
 
+function get_starphleet_branch() {
+  read -p "Which branch for your Headquarters: " STARPHLEET_HEADQUARTERS_BRANCH
+}
+
+function headquarters_branch_help() {
+cat <<EOF
+
+  In development mode it is strongly recommended that you create a branch for
+  yourself in the development headquarters git repo.
+
+  The concensus is that it is rude to make changes to the main branch unless
+  they are global and are intended for everyone to consume.
+
+EOF
+}
+
 function key_help() {
 cat <<EOF
 
@@ -55,6 +71,18 @@ EOF
 if [ -z ${STARPHLEET_HEADQUARTERS} ]; then
   read -p "Please paste a starphleet headquarters: " STARPHLEET_HEADQUARTERS
   export STARPHLEET_HEADQUARTERS="${STARPHLEET_HEADQUARTERS}"
+fi
+
+# Require users to specify a branch explicitly so they remember not to trample
+# on everyone else.  If their headquarters doesn't contain a branch .. prompt
+if [ -z "$(echo ${STARPHLEET_HEADQUARTERS} | grep '#')" ]; then
+  headquarters_branch_help
+  get_starphleet_branch
+fi
+if [ ! -z "${STARPHLEET_HEADQUARTERS_BRANCH}" ]; then
+  export STARPHLEET_HEADQUARTERS="${STARPHLEET_HEADQUARTERS}#${STARPHLEET_HEADQUARTERS_BRANCH}"
+else
+  exit 1
 fi
 
 # Graceful fallback if the user didn't setup the keys in their environment
