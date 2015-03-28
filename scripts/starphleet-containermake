@@ -61,13 +61,22 @@ else
 
 if dev_mode ; then
   info Local Dev mode appending mount to ${CONTAINER_CONF}
+  # Edit:  This needs to take into account that these directories are properly
+  #        mounted as an HGFS file system or we need to punt completely
+  #
+  #        This helps survive a reboot where HGFS has not come up yet but
+  #        starphleet has started
+  TEST="mount | grep /hosthome | grep vmhgfs"
+  [ -z "${TEST}" ] && exit 1
+  # Proceed with original authors code
   STARPHLEET_DEV_DIR=/hosthome/starphleet_dev
-  #create dir to hold app source and container mount point
-  [ -d "${STARPHLEET_DEV_DIR}" ] || mkdir -p "${STARPHLEET_DEV_DIR}"
+  # Make the dirs
+  mkdir -p "${STARPHLEET_DEV_DIR}"
+  mkdir -p "${STARPHLEET_DEV_DIR}/data"
+  mkdir -p "${CONTAINER_OVERLAY}/var/git"
+  # Fix the perms on the dirs
   chmod 777 "${STARPHLEET_DEV_DIR}"
-  [ -d "${STARPHLEET_DEV_DIR}/data" ] || mkdir -p "${STARPHLEET_DEV_DIR}/data"
   chmod 777 "${STARPHLEET_DEV_DIR}"
-  [ -d "${CONTAINER_OVERLAY}/var/git" ] || mkdir -p "${CONTAINER_OVERLAY}/var/git"
   chmod 777 "${CONTAINER_OVERLAY}/var/git"
   # add one additional mount point to the lxc container config.  Wil expose the container git dir to the host
   echo "lxc.mount.entry = ${STARPHLEET_DEV_DIR}/data ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0" >> ${CONTAINER_CONF}
