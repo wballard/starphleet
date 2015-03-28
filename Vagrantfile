@@ -8,7 +8,6 @@ SHIP_NAME = 'ship'
 
 $base_provision_script = <<SCRIPT
 test -d /hosthome/starphleet_dev/ && rm -rf /hosthome/starphleet_dev/;
-export PATH=$PATH:/starphleet/scripts;
 sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
 sudo /starphleet/scripts/starphleet-install;
 $([ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true
@@ -17,18 +16,10 @@ sed -i.bak 's/answer AUTO_KMODS_ENABLED no/answer AUTO_KMODS_ENABLED yes/g' /etc
 SCRIPT
 
 $fix_vmware_tools_script = <<SCRIPT
-/starphleet/scripts/vmware_hgfs_fix.sh
-sed -i.bak 's/answer AUTO_KMODS_ENABLED_ANSWER no/answer AUTO_KMODS_ENABLED_ANSWER yes/g' /etc/vmware-tools/locations
-sed -i.bak 's/answer AUTO_KMODS_ENABLED no/answer AUTO_KMODS_ENABLED yes/g' /etc/vmware-tools/locations
+/starphleet/vmware_hgfs_fix.sh
 SCRIPT
 
 Vagrant::Config.run do |config|
-# Setup virtual machine box. This VM configuration code is always executed.
-  system "test -d private_keys || mkdir private_keys"
-  system "test -n \"${STARPHLEET_PRIVATE_KEY}\" && cp \"${STARPHLEET_PRIVATE_KEY}\" \"private_keys/\""
-  system "test -d public_keys || mkdir public_keys"
-  system "test -n \"${STARPHLEET_PUBLIC_KEY}\" && cp \"${STARPHLEET_PUBLIC_KEY}\" \"public_keys/\""
-  system "test -n \"${STARPHLEET_HEADQUARTERS}\" && echo \"${STARPHLEET_HEADQUARTERS}\" > headquarters"
   config.vm.provision :shell, :inline => $base_provision_script
 end
 
@@ -44,6 +35,11 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   end
 
   config.trigger.before :up, :stdout => true, :force => true do
+    # If the machine is already provisioned - Don't do it again
+    if Dir.exists? 'private_keys' and Dir.exists? 'public_keys' and File.exists? 'headquarters'
+      return
+    end
+
     if not (ENV['STARPHLEET_HEADQUARTERS'] or ENV['STARPHLEET_PUBLIC_KEY'] or ENV['STARPHLEET_PRIVATE_KEY'])
       raise 'Please export STARPHLEET_HEADQUARTERS, STARPHLEET_PUBLIC_KEY, STARPHLEET_PRIVATE_KEY before continuing'
     end
