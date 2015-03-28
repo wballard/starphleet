@@ -17,6 +17,13 @@ SCRIPT
 # at the end of the starphleet-install - these settings are only applicable
 # to
 $fix_vmware_tools_script = <<SCRIPT
+echo $(dpkg -l "*$(uname -r)*" | grep image | awk '{print $2}') hold | dpkg --set-selections
+debconf-set-selections <<< "postfix postfix/mailname string 'ship'";
+debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'";
+apt-get update -y;
+export DEBIAN_FRONTEND=noninteractive;
+apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes;
+
 [ ! -f /tmp/patched ] && touch /tmp/patched || exit 0
 /starphleet/vmware_hgfs_fix.sh;
 sed -i.bak 's/answer AUTO_KMODS_ENABLED_ANSWER no/answer AUTO_KMODS_ENABLED_ANSWER yes/g' /etc/vmware-tools/locations;
