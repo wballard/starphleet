@@ -37,7 +37,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   config.trigger.before :up, :stdout => true, :force => true do
     # If the machine is already provisioned - Don't do it again
     if Dir.exists? 'private_keys' and Dir.exists? 'public_keys' and File.exists? 'headquarters'
-      return
+      next
     end
 
     if not (ENV['STARPHLEET_HEADQUARTERS'] or ENV['STARPHLEET_PUBLIC_KEY'] or ENV['STARPHLEET_PRIVATE_KEY'])
