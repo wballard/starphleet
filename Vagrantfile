@@ -9,7 +9,7 @@ SHIP_NAME = 'ship'
 $base_provision_script = <<SCRIPT
 test -d /hosthome/starphleet_dev/ && rm -rf /hosthome/starphleet_dev/;
 sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
-#sudo /starphleet/scripts/starphleet-install;
+sudo /starphleet/scripts/starphleet-install;
 $([ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true;
 SCRIPT
 
