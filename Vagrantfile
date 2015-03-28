@@ -10,16 +10,16 @@ $base_provision_script = <<SCRIPT
 test -d /hosthome/starphleet_dev/ && rm -rf /hosthome/starphleet_dev/;
 sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
 #sudo /starphleet/scripts/starphleet-install;
-$([ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true
+$([ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true;
 SCRIPT
 
 # This install of starphleet updates the kernel.  These patches must be run
 # at the end of the starphleet-install - these settings are only applicable
 # to
 $fix_vmware_tools_script = <<SCRIPT
-/starphleet/vmware_hgfs_fix.sh
-sed -i.bak 's/answer AUTO_KMODS_ENABLED_ANSWER no/answer AUTO_KMODS_ENABLED_ANSWER yes/g' /etc/vmware-tools/locations
-sed -i.bak 's/answer AUTO_KMODS_ENABLED no/answer AUTO_KMODS_ENABLED yes/g' /etc/vmware-tools/locations
+/starphleet/vmware_hgfs_fix.sh;
+sed -i.bak 's/answer AUTO_KMODS_ENABLED_ANSWER no/answer AUTO_KMODS_ENABLED_ANSWER yes/g' /etc/vmware-tools/locations;
+sed -i.bak 's/answer AUTO_KMODS_ENABLED no/answer AUTO_KMODS_ENABLED yes/g' /etc/vmware-tools/locations;
 SCRIPT
 
 Vagrant::Config.run do |config|
