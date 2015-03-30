@@ -88,7 +88,7 @@ if dev_mode; then
       sudo rm -rf "/home/admiral/tmp/${order}"
       # We intentionally exit here
     fi
-    sudo rsync -rut "/var/git/${order}/" \${APP_IN}/
+    sudo rsync -rulKt "/var/git/${order}/" \${APP_IN}/ || true
     sudo chown -R ubuntu:ubuntu \${APP_IN}
   fi
 else
@@ -119,13 +119,9 @@ cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 trace Running buildpack
 if [ -n "\${BUILDPACK_CACHE_DIR}" ]
 then
-  if dev_mode; then
-    trace Buildpack caching is not needed in dev mode
-  else
-    trace Buildpack caching is enabled
-    sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
-    sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
-  fi
+  trace Buildpack caching is enabled
+  sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
+  sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"
 fi
 
 trace Calling Builder
