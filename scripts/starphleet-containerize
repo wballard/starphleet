@@ -88,7 +88,7 @@ if dev_mode; then
       sudo rm -rf "/home/admiral/tmp/${order}"
       # We intentionally exit here
     fi
-    sudo rsync -rulKt "/var/git/${order}/" \${APP_IN}/ || true
+    sudo rsync -rlKt "/var/git/${order}/" \${APP_IN}/ || true
     sudo chown -R ubuntu:ubuntu \${APP_IN}
   fi
 else
