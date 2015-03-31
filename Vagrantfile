@@ -7,6 +7,7 @@ VAGRANT_MEMSIZE = ENV['STARPHLEET_VAGRANT_MEMSIZE'] || '8192'
 SHIP_NAME = 'ship'
 
 $base_provision_script = <<SCRIPT
+# XXX: RFC - Should starphleet delete the working directory of a developer?
 # I do not think starphleet should be destructive inherantly and should
 # error on caution.  The upstream scripts can ask the user if they want
 # to remove the dev dir.
