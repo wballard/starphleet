@@ -89,7 +89,7 @@ if [ -d "${STARPHLEET_DEV_DIR}" ]; then
   read -p "Do you want to proceed [y/N]: " ANSWER
   # Exit unless they said yes
   [ "${ANSWER}" != "y" ] && [ "${ANSWER}" != "Y" ] && exit 1
-  echo rm -rf "${STARPHLEET_DEV_DIR}"
+  rm -rf "${STARPHLEET_DEV_DIR}"
 fi
 
 # Make sure a headquarters is set
