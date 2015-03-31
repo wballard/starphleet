@@ -82,20 +82,20 @@ EOF
 # Check if the user has an environment file
 [ -f "${ENVIRONMENT_FILE}" ] && source "${ENVIRONMENT_FILE}"
 
+# If the dev dir exists - maybe they have some previous work in that directory..
+# we should ask if they want to proceed.
+if [ -d "${STARPHLEET_DEV_DIR}" ]; then
+  starphleet_dev_help
+  read -p "Do you want to proceed [y/N]: " ANSWER
+  # Exit unless they said yes
+  [ "${ANSWER}" != "y" ] && [ "${ANSWER}" != "Y" ] && exit 1
+  echo rm -rf "${STARPHLEET_DEV_DIR}"
+fi
+
 # Make sure a headquarters is set
 if [ -z ${STARPHLEET_HEADQUARTERS} ]; then
   read -p "Please paste a starphleet headquarters: " STARPHLEET_HEADQUARTERS
   export STARPHLEET_HEADQUARTERS="${STARPHLEET_HEADQUARTERS}"
-fi
-
-# If the dev dir exists - maybe they have some previous work in that directory..
-# we should ask if they want to proceed.
-if [ -d "${STARTPHLEET_DEV_DIR}" ]; then
-  starphleet_dev_help
-  read -p "Do you want to proceed [y/N]: " ANSWER
-  # Exit unless they said yes
-  ( [ "${ANSWER}" != "y" ] || [ "${ANSWER}" != "Y" ] ) && exit 1
-  rm -rf "${STARPHLEET_DEV_DIR}"
 fi
 
 # Require users to specify a branch explicitly so they remember not to trample
