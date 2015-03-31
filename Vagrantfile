@@ -7,7 +7,11 @@ VAGRANT_MEMSIZE = ENV['STARPHLEET_VAGRANT_MEMSIZE'] || '8192'
 SHIP_NAME = 'ship'
 
 $base_provision_script = <<SCRIPT
-test -d /hosthome/starphleet_dev/ && rm -rf /hosthome/starphleet_dev/;
+# I do not think starphleet should be destructive inherantly and should
+# error on caution.  The upstream scripts can ask the user if they want
+# to remove the dev dir.
+# test -d /hosthome/starphleet_dev/ && rm -rf /hosthome/starphleet_dev/;
+
 sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
 sudo /starphleet/scripts/starphleet-install;
 $([ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true;

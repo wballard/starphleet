@@ -12,6 +12,7 @@
 # *********************
 
 ENVIRONMENT_FILE="${HOME}/.starphleet"
+STARPHLEET_DEV_DIR="${HOME}/starphleet_dev"
 STARPHLEET_PRIVATE_KEY_FILE="${HOME}/.ssh/starphleet"
 STARPHLEET_PUBLIC_KEY_FILE="${HOME}/.ssh/starphleet.pub"
 
@@ -38,6 +39,20 @@ cat <<EOF
 
 EOF
 }
+
+function starphleet_dev_help() {
+cat <<EOF
+
+  The starphleet dev directory already exists on your machine.  This implies
+  you may have previous work still in this directory:
+
+    ${STARPHLEET_DEV_DIR}
+
+  If you proceed this directory will be !!DELETED!!.
+
+EOF
+}
+
 
 function key_help() {
 cat <<EOF
@@ -71,6 +86,16 @@ EOF
 if [ -z ${STARPHLEET_HEADQUARTERS} ]; then
   read -p "Please paste a starphleet headquarters: " STARPHLEET_HEADQUARTERS
   export STARPHLEET_HEADQUARTERS="${STARPHLEET_HEADQUARTERS}"
+fi
+
+# If the dev dir exists - maybe they have some previous work in that directory..
+# we should ask if they want to proceed.
+if [ -d "${STARTPHLEET_DEV_DIR}" ]; then
+  starphleet_dev_help
+  read -p "Do you want to proceed [y/N]: " ANSWER
+  # Exit unless they said yes
+  ( [ "${ANSWER}" != "y" ] || [ "${ANSWER}" != "Y" ] ) && exit 1
+  rm -rf "${STARPHLEET_DEV_DIR}"
 fi
 
 # Require users to specify a branch explicitly so they remember not to trample
