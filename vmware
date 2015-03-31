@@ -37,6 +37,8 @@ cat <<EOF
   The concensus is that it is rude to make changes to the main branch unless
   they are global and are intended for everyone to consume.
 
+  Current Headquarters:  ${STARPHLEET_HEADQUARTERS}
+
 EOF
 }
 
