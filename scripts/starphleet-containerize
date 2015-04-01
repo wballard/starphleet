@@ -88,7 +88,14 @@ if dev_mode; then
       sudo rm -rf "/home/admiral/tmp/${order}"
       # We intentionally exit here
     fi
-    sudo rsync -rlKt "/var/git/${order}/" \${APP_IN}/ || true
+    # Some developers may wish to unbind the GIT directory to the actual app
+    # deployment directory so that packages do not mangle their working git
+    # directory.  Supporting both behaviors.
+    if [ ! -z "${DEVMODE_UNBIND_GIT_DIR}" ]; then
+      sudo rsync -rlKt "/var/git/${order}/" \${APP_IN}/ || true
+    else
+      ln -s /var/git/${order} \${APP_IN}
+    fi
     sudo chown -R ubuntu:ubuntu \${APP_IN}
   fi
 else
