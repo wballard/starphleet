@@ -94,7 +94,7 @@ if dev_mode; then
     if [ ! -z "${DEVMODE_UNBIND_GIT_DIR}" ]; then
       sudo rsync -rlKt "/var/git/${order}/" \${APP_IN}/ || true
     else
-      ln -s /var/git/${order} \${APP_IN}/ || true
+      ln -s /var/git/${order} \${APP_IN} || true
     fi
     sudo chown -R ubuntu:ubuntu \${APP_IN}
   fi
