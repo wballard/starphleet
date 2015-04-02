@@ -21,7 +21,8 @@ chmod 777 /var/lib/lxc/data
 
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
-[ -z ${order} ] && LOCK_FILE=${CONTAINER_NAME} || LOCK_FILE=${order}
+# [ -z ${order} ] && LOCK_FILE=${CONTAINER_NAME} || LOCK_FILE=${order}
+LOCK_FILE=${CONTAINER_NAME}
 
 #configuration, this is the place to mount directories on the host computer
 #into the container
