@@ -82,11 +82,10 @@ if dev_mode; then
       # Now move the files (once) to the starphleet_dev dir - which, in
       # the container context where this is running is mapped to /var/git
       sudo rsync -rlptD "/home/admiral/tmp/${order}/" "/var/git/${order}/" || true
+      sudo chmod -R +w "/var/git/${order}" || true
       # Once we remove the temporary directory.. starphleet will try to rebuild
       # this container because it will detect there was a change in /var/git/<order>
-      sudo chmod -R +w "/var/git/${order}" || true
       sudo rm -rf "/home/admiral/tmp/${order}"
-      # We intentionally exit here
     fi
     # Some developers may wish to unbind the GIT directory to the actual app
     # deployment directory so that packages do not mangle their working git
