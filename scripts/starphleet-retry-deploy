@@ -13,3 +13,16 @@ DATE_TIME=$(date +d%y%m%d-d%H%M%S)
 SERVICE_NAME="${order}-${DATE_TIME}"
 
 start --no-wait starphleet_serve_order name="${SERVICE_NAME}" order="${order}"
+
+# Add warning about the sha situation
+info This tool will attempt to deploy your service but will only publish
+info if things succeed.
+info
+warn This deploy used the following SHA:
+warn
+warn    ${DATE_TIME}
+warn
+info Your code will attempt to deploy normally but the shas will differ
+info
+info If things proceed as expected - touching your orders file will get
+info your shas back in place
