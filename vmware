@@ -108,8 +108,6 @@ if [ -z "$(echo ${STARPHLEET_HEADQUARTERS} | grep '#')" ]; then
 fi
 if [ ! -z "${STARPHLEET_HEADQUARTERS_BRANCH}" ]; then
   export STARPHLEET_HEADQUARTERS="${STARPHLEET_HEADQUARTERS}#${STARPHLEET_HEADQUARTERS_BRANCH}"
-else
-  exit 1
 fi
 
 # Graceful fallback if the user didn't setup the keys in their environment
