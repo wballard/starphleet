@@ -25,6 +25,8 @@ BARE_CONF="${NGINX_CONF}/published_bare/$(urlencode \"${public_url}\").conf"
 BETA_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").beta"
 #redirect your urls to lxc
 REDIRECT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").redirect"
+#mount this service over a path
+PROXY_FOR_CONF="${NGINX_CONF}/proxy_for/$(urlencode \"${public_url}\").conf"
 
 IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}[[:space:]]" | awk '{ print $3; }')
 
@@ -39,6 +41,7 @@ fi
 
 test ! -d "${NGINX_CONF}/published" && mkdir -p "${NGINX_CONF}/published"
 test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_bare"
+mkdir -p "${NGINX_CONF}/proxy_for"
 
 [ -f "${NGINX_CONF}/published/crt" ] || cp "${NGINX_CONF}/crt" "${NGINX_CONF}/published/crt"
 [ -f "${NGINX_CONF}/published/key" ] || cp "${NGINX_CONF}/key" "${NGINX_CONF}/published/key"
@@ -128,6 +131,16 @@ done
 echo '}' >> "${MOUNT_CONF}"
 
 info "published ${container_name}:${PORT} to ${public_url}"
+
+if [ -n "${PROXY_FOR_NAMES}" ]; then
+  info "publishing container ${container_name} using proxy_for: ${PROXY_FOR_NAMES}"
+  #so, what we do here is wrap our newly created MOUNT_CONF with a server block and save it into PROXY_FOR_CONF
+  #on the way we change the location block to be '/' which is match all so our new server block proxies all traffic
+  #the newly created server block maps our PROXY_FOR_NAMES into the server_name for the block this all ends us with
+  #host header mapped server for these orders to the given hostnames given via 'proxy_for' in the orders
+  #(e.g. in the orders find 'proxy_for some.dns.name.com')
+  cat "${MOUNT_CONF}" | sed -e "s[location ${public_url}[location [" | cat "${NGINX_CONF}/proxy_for_template.conf.head" - "${NGINX_CONF}/proxy_for_template.conf.tail" | sed --regexp-extended -e "s[\{\{\{proxy_for_names\}\}\}[${PROXY_FOR_NAMES//./\.}[" > "${PROXY_FOR_CONF}"
+fi
 
 #port publication, this is optional if a port is set - this code gets removed once everything is redirected
 if [ "${PUBLISH_PORT}" != "0" ]
