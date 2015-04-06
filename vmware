@@ -105,10 +105,16 @@ fi
 if [ -z "$(echo ${STARPHLEET_HEADQUARTERS} | grep '#')" ]; then
   headquarters_branch_help
   get_starphleet_branch
+  # They should now have a branch set - so if the variable isn't empty
+  # that's good and we set the branch on their headquarters.  Otherwise,
+  # at this point we should not proceed
+  if [ ! -z "${STARPHLEET_HEADQUARTERS_BRANCH}" ]; then
+    export STARPHLEET_HEADQUARTERS="${STARPHLEET_HEADQUARTERS}#${STARPHLEET_HEADQUARTERS_BRANCH}"
+  else
+    exit 1
+  fi
 fi
-if [ ! -z "${STARPHLEET_HEADQUARTERS_BRANCH}" ]; then
-  export STARPHLEET_HEADQUARTERS="${STARPHLEET_HEADQUARTERS}#${STARPHLEET_HEADQUARTERS_BRANCH}"
-fi
+
 
 # Graceful fallback if the user didn't setup the keys in their environment
 if [ -z "${STARPHLEET_PRIVATE_KEY}" ] || [ -z "${STARPHLEET_PUBLIC_KEY}" ]; then
