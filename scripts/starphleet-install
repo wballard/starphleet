@@ -11,6 +11,9 @@ run_as_root_or_die
 #Linux would rather swap than let go
 sync && echo 3 > /proc/sys/vm/drop_caches
 
+# MOAR PORTS
+echo "10240 65535" > /proc/sys/net/ipv4/ip_local_port_range
+
 # To support a fresh installation but keep the config in the overlay
 # we need access to the default starphleet config. We are going
 # to attempt to slurp it in
