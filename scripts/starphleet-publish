@@ -194,7 +194,7 @@ if [ -n "${PROXY_FOR_NAMES}" ]; then
   #(e.g. in the orders find 'proxy_for some.dns.name.com')
   if [  -r "${NGINX_CONF}/proxy_for_template.conf.head" -a -r "${NGINX_CONF}/proxy_for_template.conf.tail" -a -r "${MOUNT_CONF}" ]
   then
-    cat "${MOUNT_CONF}" | sed -e "s[location ${public_url}[location [" | cat "${NGINX_CONF}/proxy_for_template.conf.head" - "${NGINX_CONF}/proxy_for_template.conf.tail" | sed --regexp-extended -e "s[\{\{\{proxy_for_names\}\}\}[${PROXY_FOR_NAMES//./\.}[" > "${PROXY_FOR_CONF}"
+    cat "${MOUNT_CONF}" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}[location [" | cat "${NGINX_CONF}/proxy_for_template.conf.head" - "${NGINX_CONF}/proxy_for_template.conf.tail" | sed --regexp-extended -e "s[\{\{\{proxy_for_names\}\}\}[${PROXY_FOR_NAMES//./\.}[" > "${PROXY_FOR_CONF}"
   else
     error 'unable to find proxy_for_template.conf.* files. cannot set up proxying for provided names'
   fi
