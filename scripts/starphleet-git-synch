@@ -40,6 +40,7 @@ if [ -d "${local}/.git" ]; then
   if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
     warn specified branch changed, checking out ${BRANCH}
     git checkout "${BRANCH}" || fatal checkout error
+    exit 0
   fi
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
   HAS_CHANGES=$(git diff HEAD...origin/${CURRENT_BRANCH} --raw)
