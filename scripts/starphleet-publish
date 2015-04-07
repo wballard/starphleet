@@ -132,15 +132,6 @@ echo '}' >> "${MOUNT_CONF}"
 
 info "published ${container_name}:${PORT} to ${public_url}"
 
-if [ -n "${PROXY_FOR_NAMES}" ]; then
-  info "publishing container ${container_name} using proxy_for: ${PROXY_FOR_NAMES}"
-  #so, what we do here is wrap our newly created MOUNT_CONF with a server block and save it into PROXY_FOR_CONF
-  #on the way we change the location block to be '/' which is match all so our new server block proxies all traffic
-  #the newly created server block maps our PROXY_FOR_NAMES into the server_name for the block this all ends us with
-  #host header mapped server for these orders to the given hostnames given via 'proxy_for' in the orders
-  #(e.g. in the orders find 'proxy_for some.dns.name.com')
-  cat "${MOUNT_CONF}" | sed -e "s[location ${public_url}[location [" | cat "${NGINX_CONF}/proxy_for_template.conf.head" - "${NGINX_CONF}/proxy_for_template.conf.tail" | sed --regexp-extended -e "s[\{\{\{proxy_for_names\}\}\}[${PROXY_FOR_NAMES//./\.}[" > "${PROXY_FOR_CONF}"
-fi
 
 #port publication, this is optional if a port is set - this code gets removed once everything is redirected
 if [ "${PUBLISH_PORT}" != "0" ]
@@ -192,6 +183,21 @@ if [[ "${REDIRECT}" != '' && "${REDIRECT}" != '-' && "${REDIRECTTO}" != '' ]]; t
   echo " rewrite ^ ${REDIRECTTO}$request_uri permanent;" >> "${REDIRECT_CONF}"
   echo " break;" >> "${REDIRECT_CONF}"
   echo "}" >> "${REDIRECT_CONF}"
+fi
+
+if [ -n "${PROXY_FOR_NAMES}" ]; then
+  info "publishing container ${container_name} using proxy_for: ${PROXY_FOR_NAMES}"
+  #so, what we do here is wrap our newly created MOUNT_CONF with a server block and save it into PROXY_FOR_CONF
+  #on the way we change the location block to be '/' which is match all so our new server block proxies all traffic
+  #the newly created server block maps our PROXY_FOR_NAMES into the server_name for the block this all ends us with
+  #host header mapped server for these orders to the given hostnames given via 'proxy_for' in the orders
+  #(e.g. in the orders find 'proxy_for some.dns.name.com')
+  if [  -r "${NGINX_CONF}/proxy_for_template.conf.head" -a -r "${NGINX_CONF}/proxy_for_template.conf.tail" -a -r "${MOUNT_CONF}" ]
+  then
+    cat "${MOUNT_CONF}" | sed -e "s[location ${public_url}[location [" | cat "${NGINX_CONF}/proxy_for_template.conf.head" - "${NGINX_CONF}/proxy_for_template.conf.tail" | sed --regexp-extended -e "s[\{\{\{proxy_for_names\}\}\}[${PROXY_FOR_NAMES//./\.}[" > "${PROXY_FOR_CONF}"
+  else
+    error 'unable to find proxy_for_template.conf.* files. cannot set up proxying for provided names'
+  fi
 fi
 
 #reload to get the newly generated settings
