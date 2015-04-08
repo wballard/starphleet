@@ -20,7 +20,7 @@ trap 'cd "${STARTING_DIRECTORY}"' EXIT
 reclone () {
   cd ..
   rm -rf "${local}"
-  starphleet-git clone "${REMOTE}" "${local}" || fatal clone error
+  starphleet-git clone -b ${BRANCH} "${REMOTE}" "${local}" || fatal clone error
 }
 
 if [ -d "${local}/.git" ]; then
@@ -64,13 +64,7 @@ if [ -d "${local}/.git" ]; then
   fi
 else
   warn ${local} not found, initial clone needed from "${REMOTE}" to "${local}"
-  starphleet-git clone "${REMOTE}" "${local}" || fatal clone error
-  cd "${local}"
-  if [ -n "${BRANCH}" ]; then
-    git checkout "${BRANCH}" || fatal checkout error
-    #clean up files that might have diverged between default and current branch
-    git clean -df
-  fi
+  starphleet-git clone -b ${BRANCH} "${REMOTE}" "${local}" || fatal clone error
   exit 0
 fi
 
