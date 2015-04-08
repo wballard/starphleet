@@ -90,9 +90,7 @@ if [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
 fi
 if [ ! -z "${DEVMODE_FORCE_AUTH}" ]; then
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} ${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
-  echo "  proxy_set_header x-glgauthuser ${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
-  echo "  add_header Set-Cookie x-glgauthuser=${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
 fi
 if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
   info LDAP enabled
