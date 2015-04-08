@@ -21,8 +21,14 @@ chmod 777 /var/lib/lxc/data
 
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
-# [ -z ${order} ] && LOCK_FILE=${CONTAINER_NAME} || LOCK_FILE=${order}
 LOCK_FILE=${CONTAINER_NAME}
+# A race condition occurs when locking based on containername
+# where multiple containers for the same order will trample
+# on each other continuiously.  We are using the 'order' to
+# lock so we only build once per order
+if dev_mode ;then
+  [ -z ${order} ] && LOCK_FILE=${CONTAINER_NAME} || LOCK_FILE=${order}
+fi
 
 #configuration, this is the place to mount directories on the host computer
 #into the container
