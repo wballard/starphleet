@@ -17,5 +17,9 @@ for container in $(lxc-ls); do
   # Yank the sha(s) off the container
   SERVICE=$(echo ${container:0:${#container}-16})
   # If no orders correspond with the service - reap it
-  [ ! -d "${HEADQUARTERS_LOCAL}/${SERVICE}" ] && starphleet-reaper zzzzzzzzz "${SERVICE}"
+  if [ ! -f "${HEADQUARTERS_LOCAL}/${SERVICE}/orders" ]; then
+    starphleet-reaper zzzzzzzzz "${SERVICE}"
+    [ -d "${HEADQUARTERS_LOCAL}/${SERVICE}" ] && rm -rf "${HEADQUARTERS_LOCAL}/${SERVICE}"
+    [ -d "${CURRENT_ORDERS}/${SERVICE}" ] && rm -rf "${CURRENT_ORDERS}/${SERVICE}"
+  fi
 done
