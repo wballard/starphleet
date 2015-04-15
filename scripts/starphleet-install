@@ -31,6 +31,12 @@ ec2_mounts
 rm -f /etc/init/starphleet*
 ${SCRIPT_DIR}/perform-overlay
 
+# our overlay contains sysctl settings, we'll want to load them now
+sysctl --system 
+# the parameters we've just loaded will allow a bunch more
+# connections for netfilter to track, adjust the hashsize
+# to help with performance
+echo 24576 > /sys/module/nf_conntrack/parameters/hashsize
 
 # If starphleet is deployed in a EC2 environment we append the region configuration
 # to the global starphleet config
