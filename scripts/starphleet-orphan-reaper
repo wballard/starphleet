@@ -1,0 +1,25 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-orphan-reaper
+### --help
+###
+### Look through all containers stopped or running and run reaper
+### against any missing a current set of orders
+die_on_error
+run_as_root_or_die
+
+# Go through all containers and reap any orphans
+for container in $(lxc-ls); do
+  # Ignore starphleet-base
+  if [ $container == "starphleet-base" ]; then
+    continue
+  fi
+  # Yank the sha(s) off the container
+  SERVICE=$(echo ${container:0:${#container}-16})
+  # If no orders correspond with the service - reap it
+  if [ ! -f "${HEADQUARTERS_LOCAL}/${SERVICE}/orders" ]; then
+    starphleet-reaper zzzzzzzzz "${SERVICE}"
+    [ -d "${HEADQUARTERS_LOCAL}/${SERVICE}" ] && rm -rf "${HEADQUARTERS_LOCAL}/${SERVICE}"
+    [ -d "${CURRENT_ORDERS}/${SERVICE}" ] && rm -rf "${CURRENT_ORDERS}/${SERVICE}"
+  fi
+done
