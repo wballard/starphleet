@@ -50,7 +50,8 @@ cat <<EOF
 
     ${STARPHLEET_DEV_DIR}
 
-  If you proceed this directory will be !!DELETED!!.
+  If you are doing a clean install of a new headquarters you may want to remove
+  this directory and start fresh.
 
 EOF
 }
@@ -88,10 +89,11 @@ EOF
 # we should ask if they want to proceed.
 if [ -d "${STARPHLEET_DEV_DIR}" ]; then
   starphleet_dev_help
-  read -p "Do you want to proceed [y/N]: " ANSWER
-  # Exit unless they said yes
-  [ "${ANSWER}" != "y" ] && [ "${ANSWER}" != "Y" ] && exit 1
-  rm -rf "${STARPHLEET_DEV_DIR}"
+  read -p "Do you want to delete the ~/starphleet_dev directory? [y/N]: " ANSWER
+  # Remove the dev dor upon request
+  if [ "${ANSWER}" == "y" ] || [ "${ANSWER}" == "Y" ]; then
+    rm -rf "${STARPHLEET_DEV_DIR}"
+  fi
 fi
 
 # Make sure a headquarters is set
