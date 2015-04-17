@@ -48,7 +48,19 @@ trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
 (
 #flocked, parallel container build is a race condition on start
-flock 200
+if dev_mode; then
+  # In dev mode you should only need to build once even on many saves
+  # .. so dying gracefully is more ideal
+  flock -n 200
+  if [ $? -ne 0 ]; then
+    echo "unable to aquire lock to run ${script}"
+    # no error code so cron won't try to email
+    exit 0
+  fi
+else
+  flock 200
+fi
+
 if lxc-ls | grep "^${container_name}$"; then
   info container exists
   exit 0
@@ -139,6 +151,5 @@ else
   starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
 fi
 info made container ${CONTAINER_NAME}
-rm "/var/lock/${LOCK_FILE}"
 
 ) 200>/var/lock/${LOCK_FILE}
