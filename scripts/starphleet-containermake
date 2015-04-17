@@ -73,6 +73,7 @@ if dev_mode ; then
   #
   #        This helps survive a reboot where HGFS has not come up yet but
   #        starphleet has started
+  # TODO: But what about parallels or virtualbox?
   TEST=$(mount | grep /hosthome | grep vmhgfs)
   [ -z "${TEST}" ] && exit 1
   # Proceed with original authors code
@@ -93,50 +94,51 @@ else
 fi
 
 
-  #make a directory where we can mount back to the ship and a config file to mount
-  test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}" || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}"
-  test -d "${CONTAINER_OVERLAY}/var/data" || mkdir -p "${CONTAINER_OVERLAY}/var/data"
-  cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/config
-  #copy on the starphleet commands
-  mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
-  [ -f "/hosthome/.starphleet" ] && cp /hosthome/.starphleet "${CONTAINER_OVERLAY}/.starphleet"
-  cp /etc/starphleet "${CONTAINER_OVERLAY}/etc/"
-  cp /usr/bin/starphleet* "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/builder "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/cronner "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/runner "${CONTAINER_OVERLAY}/usr/bin/"
-  cp -R ${STARPHLEET_ROOT}/containers/overlay/* ${CONTAINER_OVERLAY}/
-  #this is the build script for the container itself
-  cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
-  chmod +x "${CONTAINER_OVERLAY}/build_script"
+#make a directory where we can mount back to the ship and a config file to mount
+test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}" || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}"
+test -d "${CONTAINER_OVERLAY}/var/data" || mkdir -p "${CONTAINER_OVERLAY}/var/data"
+cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/config
+#copy on the starphleet commands
+mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
+[ -f "/hosthome/.starphleet" ] && cp /hosthome/.starphleet "${CONTAINER_OVERLAY}/.starphleet"
+cp /etc/starphleet "${CONTAINER_OVERLAY}/etc/"
+cp /usr/bin/starphleet* "${CONTAINER_OVERLAY}/usr/bin/"
+cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
+cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
+cp /usr/bin/builder "${CONTAINER_OVERLAY}/usr/bin/"
+cp /usr/bin/cronner "${CONTAINER_OVERLAY}/usr/bin/"
+cp /usr/bin/runner "${CONTAINER_OVERLAY}/usr/bin/"
+cp -R ${STARPHLEET_ROOT}/containers/overlay/* ${CONTAINER_OVERLAY}/
+#this is the build script for the container itself
+cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
+chmod +x "${CONTAINER_OVERLAY}/build_script"
 
-  #start up the container, waiting for the network, and then run the container build script
-  lxc-start --name ${CONTAINER_NAME} -d
-  starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
-  lxc-attach --name ${CONTAINER_NAME} -- bash starphleet-wait-network
-  #host file updates
-  bridge_ip
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n${BRIDGE_IP}  localship' >> /etc/hosts"
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c "printf '\nexport SHIP_NAME=%s\n' ${SHIP_NAME} >> /usr/bin/tools"
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n127.0.0.1  $(< /etc/hostname)' >> /etc/hosts"
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n127.0.0.1  ${CONTAINER_NAME}' >> /etc/hosts"
+#start up the container, waiting for the network, and then run the container build script
+lxc-start --name ${CONTAINER_NAME} -d
+starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
+lxc-attach --name ${CONTAINER_NAME} -- bash starphleet-wait-network
+#host file updates
+bridge_ip
+lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n${BRIDGE_IP}  localship' >> /etc/hosts"
+lxc-attach --name ${CONTAINER_NAME} -- bash -c "printf '\nexport SHIP_NAME=%s\n' ${SHIP_NAME} >> /usr/bin/tools"
+lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n127.0.0.1  $(< /etc/hostname)' >> /etc/hosts"
+lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n127.0.0.1  ${CONTAINER_NAME}' >> /etc/hosts"
 
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'chmod 777 /var/log/'
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'useradd -s /bin/bash ${ADMIRAL} || true'
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'adduser ${ADMIRAL} sudo'
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}/.ssh'
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${ADMIRAL} ALL=NOPASSWD:ALL" >> /etc/sudoers'
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'
-  lxc-attach --name ${CONTAINER_NAME} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "source /usr/bin/tools; /build_script"
+lxc-attach --name ${CONTAINER_NAME} -- bash -c 'chmod 777 /var/log/'
+lxc-attach --name ${CONTAINER_NAME} -- bash -c 'useradd -s /bin/bash ${ADMIRAL} || true'
+lxc-attach --name ${CONTAINER_NAME} -- bash -c 'adduser ${ADMIRAL} sudo'
+lxc-attach --name ${CONTAINER_NAME} -- bash -c 'chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}/.ssh'
+lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${ADMIRAL} ALL=NOPASSWD:ALL" >> /etc/sudoers'
+lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'
+lxc-attach --name ${CONTAINER_NAME} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "source /usr/bin/tools; /build_script"
 
-  if [ "${run}" == "true" ]; then
-    info leaving ${CONTAINER_NAME} running
-  else
-    lxc-stop --name ${CONTAINER_NAME}
-    starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
-  fi
-  info made container ${CONTAINER_NAME}
+if [ "${run}" == "true" ]; then
+  info leaving ${CONTAINER_NAME} running
+else
+  lxc-stop --name ${CONTAINER_NAME}
+  starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
 fi
+info made container ${CONTAINER_NAME}
+rm "/var/lock/${LOCK_FILE}"
+
 ) 200>/var/lock/${LOCK_FILE}
