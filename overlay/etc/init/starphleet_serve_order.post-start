@@ -46,7 +46,6 @@ else
     #we wait a small time for prior requests to flush out
     sleep ${STARPHLEET_DRAINSTOP_WAIT}
     starphleet-reaper "${name}" "${order}"
-    starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
     exit 0
   else
     #at this point the service has failed to properly start
