@@ -13,7 +13,7 @@ run_as_root_or_die
 ln -s ${NGINX_STATUS_ENDPOINT_CONFIG} ${NGINX_STATUS_CONFIG_SYMLINK}
 
 ## HUP NGinx
-reload starphleet_nginx
+starphleet-hup-nginx
 
 # Output something to the user
 echo "The hostcheck endpoint for this host has been enabled"

@@ -201,4 +201,4 @@ if [ -n "${PROXY_FOR_NAMES}" ]; then
 fi
 
 #reload to get the newly generated settings
-reload starphleet_nginx || start starphleet_nginx
+starphleet-hup-nginx

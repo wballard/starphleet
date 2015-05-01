@@ -6,7 +6,6 @@
 ### otherwise
 
 run_as_root_or_die
-
 # copy the contents of the overly on top of the root, this expects
 # run from a sibling directory of the overlay
 
