@@ -75,39 +75,21 @@ After completing the above configuration steps, you can choose to deploy Starphl
   ```bash
   $ vagrant ssh -c "ifconfig eth0 | grep 'inet addr'"
   ```
-1.  Navigate in your web browser to `http://{ship_ip}/echo/hello_world`.  There will be an availability delay while Starphleet runs bootstrap code, however subsequent service deployments and updates will completely quickly.
+1.  Navigate in your web browser to `http://{ship_ip}/echo/hello_world`.  There will be an availability delay while Starphleet runs bootstrap code, however subsequent service deployments and updates will complete quickly.
 
 ## In the Cloud (AWS)
+
 Starphleet includes [Amazon Web Services (AWS)](http://aws.amazon.com) support out of the box.  To initialize your phleet, you need to have an AWS account.
 
-1.  Set additional environment variables required for AWS use.
+1.  Provision an Ubuntu EC2 Instance (Currently 14.04)
+
+1.  Login to your provisioned instance
+
+1.  Run the following command:
 
   ```bash
-  $ export AWS_ACCESS_KEY_ID={your_aws_key_id}
-  $ export AWS_SECRET_ACCESS_KEY={your_aws_access_key}
+  $ sudo bash -c "$(curl -s https://raw.githubusercontent.com/wballard/starphleet/master/webinstall)"
   ```
-
-1.  Install the Starphleet command line interface (CLI) tool.
-
-  ```bash
-  $ npm install -g starphleet-cli
-  ```
-
-1.  Use the Starphleet CLI's `init` and `add` commands to launch a new ship (virtual machine instance).
-
-  ```bash
-  $ starphleet init ec2
-  $ starphleet add ship ec2 us-west-1
-  ```
-
-1.  Get the IP address, `{ship_ip}`, of your new ship.
-
-  ```bash
-  $ starphleet info ec2
-  ```
-
-1.  Navigate in your web browser to `http://{ship_ip}/echo/hello_world`.  There will be an availability delay while Starphleet runs bootstrap code, however subsequent service deployments and updates will completely quickly.
-
 
 ## All Running?
 Once you are up and running, look in your `${STARPHLEET_HEADQUARTERS}` repository at `echo/orders`. The contents of the orders directory are all that is required to get a web service automatically deploying on a ship (virtualized machine instance).
@@ -606,3 +588,88 @@ Don't cheap out and go small. The default instance size in Starphleet is `m2.xla
 
 ### Phleets
 Don't feel limited to just one phleet. Part of making your own PaaS is to give you the freedom to mix and match services across phleets as you see fit.
+
+# Development Mode
+
+### What is Development Mode
+
+When Starphleet is installed on your local machine through vagrant the behavior of starphleet changes in a way that facilitates local development.  Starphleet becomes your automated build-and-test environment.  Starphleet will manage the following tasks for you:
+
+* Checking out all GIT repos and remote files associated with your headquarters
+* Mapping the above mentioned repos to your machine
+* Automated Container Deployment on file changes (saves) (optional)
+
+Utilizing Starphleet as your build-and-test environment has the benefit of simplifying your workflow.  This also allows you to test your code changes against a real Starphleet environment that mimics your production systems.
+
+### Configuring your environment
+
+There are several ways you can configure the environment for a local Starphleet deployment:
+
+* Export your variables manually
+* Create an environment file and export your variables:  `${HOME}/.starphleet`
+* Utilize web installation scripts (Examples can be found [here](https://github.com/glg/starphleet-dev-webinstalls))
+* Run the appropriate deployment script (ex `vmware`) and answer the prompts
+
+At a minimum you will need an un-password protected SSH key associated with your Git account for any private repositories associated with your Headquarters.  You will need the following environment variables:
+
+```bash
+STARPHLEET_HEADQUARTERS
+STARPHLEET_PRIVATE_KEY
+STARPHLEET_PUBLIC_KEY
+```
+
+You can read more about these variables [here](https://github.com/wballard/starphleet/blob/gh-pages/index.md#get-started)
+
+### What is different between dev mode and production?
+
+* Git repos associated with your orders are checked out to a different location
+* Git repos are monitored for file changes rather than git commit changes for triggering deployments (optional)
+* Starphleet 'always' tries to start a dead container.
+* Starphleet uses date stamps instead of git hashes for container names
+* Your working git directory is linked directly to containers
+
+### Development Mode Special Directories
+
+When you install Starphleet locally the ship will automatically grab git repositories associated with your orders and map them to a local directory for development.  This directory can be found here:
+
+```bash
+$ cd ${HOME}/starphleet_dev
+```
+
+Additionally, containers may use a special directory to persistently store data between deployments.  This directory inside your container is usually located in `/var/data`.  For your convenience you can find this directory locally on your machine here:
+
+```bash
+$ cd ${HOME}/starphleet_dev/data
+```
+
+### Unbinding your development directory from the container
+
+The default behavior of Development mode links your working development directory all the way into the virtual containers.  This is ideal if your build system typically uses something like `gulp watch`.  You can run `gulp watch` and your changes will be realized immediately all the way inside the service container.  
+
+In some instances this behavior may be unfavorable.  A few examples may be:
+
+* Your service doesn't use a build system
+* The build-pack for your service runs a 'rebuild' against your development directory and changes many files
+* You experience stability issues with HGFS in vmware
+
+In these instances you may wish to unbind your development directory from the container.  By adding a setting to your orders file you can change the behavior of Starphleet to instead detect changes as you save them in your development directory and run a full re-deploy of your containers automatically.  To trigger this behavior you can add the following to your 'orders' inside your [headquarters](https://github.com/wballard/starphleet/blob/gh-pages/index.md#headquarters).
+
+```bash
+DEVMODE_UNBIND_GIT_DIR=true
+```
+
+### Authentication
+
+Some services depend on authentication.  Starphleet automatically supports LDAP and HTACCESS [authentication](https://github.com/wballard/starphleet/blob/gh-pages/index.md#service_name).  Services are written in such a way that they depend on HTTP headers that are provided by the authentication method.  If you need to simulate authenticated services in development mode you can add the following variable to your orders file:
+
+```bash
+DEVMODE_FORCE_AUTH=[username]
+```
+
+### Disabling Development Mode
+
+There may be instances where you want to force starphleet to behave like a production environment locally on your machine.  In those instances you can simply touch a file to disable Development Mode:
+
+```bash
+$ touch /var/starphleet/live
+```
