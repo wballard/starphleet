@@ -591,7 +591,7 @@ Don't feel limited to just one phleet. Part of making your own PaaS is to give y
 
 # Development Mode
 
-## What is Development Mode
+### What is Development Mode
 
 When Starphleet is installed on your local machine through vagrant the behavior of starphleet changes in a way that facilitates local development.  Starphleet becomes your automated build-and-test environment.  Starphleet will manage the following tasks for you:
 
@@ -601,7 +601,7 @@ When Starphleet is installed on your local machine through vagrant the behavior 
 
 Utilizing Starphleet as your build-and-test environment has the benefit of simplifying your workflow.  This also allows you to test your code changes against a real Starphleet environment that mimics your production systems.
 
-## Configuring your environment
+### Configuring your environment
 
 There are several ways you can configure the environment for a local Starphleet deployment:
 
@@ -620,7 +620,7 @@ STARPHLEET_PUBLIC_KEY
 
 You can read more about these variables [here](https://github.com/wballard/starphleet/blob/gh-pages/index.md#get-started)
 
-## What is different between dev mode and production?
+### What is different between dev mode and production?
 
 * Git repos associated with your orders are checked out to a different location
 * Git repos are monitored for file changes rather than git commit changes for triggering deployments (optional)
@@ -628,7 +628,7 @@ You can read more about these variables [here](https://github.com/wballard/starp
 * Starphleet uses date stamps instead of git hashes for container names
 * Your working git directory is linked directly to containers
 
-## Development Mode Special Directories
+### Development Mode Special Directories
 
 When you install Starphleet locally the ship will automatically grab git repositories associated with your orders and map them to a local directory for development.  This directory can be found here:
 
@@ -642,7 +642,7 @@ Additionally, containers may use a special directory to persistently store data 
 $ cd ${HOME}/starphleet_dev/data
 ```
 
-## Unbinding your development directory from the container
+### Unbinding your development directory from the container
 
 The default behavior of Development mode links your working development directory all the way into the virtual containers.  This is ideal if your build system typically uses something like `gulp watch`.  You can run `gulp watch` and your changes will be realized immediately all the way inside the service container.  
 
@@ -658,7 +658,7 @@ In these instances you may wish to unbind your development directory from the co
 DEVMODE_UNBIND_GIT_DIR=true
 ```
 
-## Authentication
+### Authentication
 
 Some services depend on authentication.  Starphleet automatically supports LDAP and HTACCESS [authentication](https://github.com/wballard/starphleet/blob/gh-pages/index.md#service_name).  Services are written in such a way that they depend on HTTP headers that are provided by the authentication method.  If you need to simulate authenticated services in development mode you can add the following variable to your orders file:
 
@@ -666,7 +666,7 @@ Some services depend on authentication.  Starphleet automatically supports LDAP 
 DEVMODE_FORCE_AUTH=[username]
 ```
 
-## Disabling Development Mode
+### Disabling Development Mode
 
 There may be instances where you want to force starphleet to behave like a production environment locally on your machine.  In those instances you can simply touch a file to disable Development Mode:
 
