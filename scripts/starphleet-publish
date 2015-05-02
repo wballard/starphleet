@@ -110,22 +110,7 @@ if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
   echo "  allow 172.33.0.0/16;" >> "${MOUNT_CONF}"
 fi
 
-echo "" > "${BETA_CONF}"
-for beta in "${!BETAS[@]}"
-do
-  # Beta groups need a corresponding file with a list of users
-  # for the beta.  If that file doesn't exist the following
-  # will create variable references that don't exist.  We
-  # check to see if the corresponding file is there before we
-  # create the config and skip otherwise
-  [ ! -f "${HEADQUARTERS_LOCAL}/beta_groups/${beta}" ] && continue
-  echo "  if (\$starphleet_beta_${beta}) {" >> "${BETA_CONF}"
-  echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
-  echo "  }" >> "${BETA_CONF}"
-  echo "  if (\$starphleet_beta_${beta}_cookie) {" >> "${BETA_CONF}"
-  echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
-  echo "  }" >> "${BETA_CONF}"
-done
+
 
 #closing off the location
 echo '}' >> "${MOUNT_CONF}"
