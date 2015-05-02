@@ -21,5 +21,8 @@ for container in $(lxc-ls); do
     starphleet-reaper zzzzzzzzz "${SERVICE}"
     [ -d "${HEADQUARTERS_LOCAL}/${SERVICE}" ] && rm -rf "${HEADQUARTERS_LOCAL}/${SERVICE}"
     [ -d "${CURRENT_ORDERS}/${SERVICE}" ] && rm -rf "${CURRENT_ORDERS}/${SERVICE}"
+    [ -f "${NGINX_CONF}/published/$(urlencode \"/${SERVICE}/\").conf" ] && rm "${NGINX_CONF}/published/$(urlencode \"/${SERVICE}/\").conf"
+    [ -f "${NGINX_CONF}/published/$(urlencode \"/${SERVICE}/\").beta" ] && rm "${NGINX_CONF}/published/$(urlencode \"/${SERVICE}/\").beta"
+    [ -f "${NGINX_CONF}/published_bare/$(urlencode \"/${SERVICE}/\").conf" ] && rm "${NGINX_CONF}/published_bare/$(urlencode \"/${SERVICE}/\").conf"
   fi
 done
