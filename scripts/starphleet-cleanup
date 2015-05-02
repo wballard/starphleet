@@ -22,4 +22,4 @@ test -d "${CURRENT_ORDERS}" && rm -rf "${CURRENT_ORDERS}"
 #unpublish services from nginx
 test -d "${NGINX_CONF}/published" && rm -rf "${NGINX_CONF}/published"
 test -d "${NGINX_CONF}/published_bare" && rm -rf "${NGINX_CONF}/published_bare"
-test -d "${NGINX_CONF}/published_bare" && rm -rf "${NGINX_CONF}/beta_groups"
+test -d "${NGINX_CONF}/beta_groups" && rm -rf "${NGINX_CONF}/beta_groups"
