@@ -1,18 +1,20 @@
-#!/usr/bin/env bash
+#!/usr/bin/env starphleet-launcher
 ### Usage:
 ###    starphleet-beta-groups
 ### --help
 ###
 ### Configure named beta group maps.
 ###
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-help=$(grep "^### " "$0" | cut -c 5-)
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
-trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
-set -e
 
+die_on_error
+run_as_root_or_die
+
+# Purge all beta groups and beta configs
 [ -d "${NGINX_CONF}/beta_groups" ]  && rm -rf "${NGINX_CONF}/beta_groups"
+# Try to remove beta files or.. exit happy if none exist
+rm "${HEADQUARTERS_LOCAL}/published/*.beta" || true
+
+# Make the beta_group again
 mkdir -p "${NGINX_CONF}/beta_groups"
 
 #set a beta group if the remote user is in the list of beta users
@@ -37,3 +39,38 @@ do
   done
   echo "  }" >> "${BETA_GROUP_CONF}"
 done
+
+# Go through all the orders and generate all the beta configs
+for ORDERS_FILE in $(find "${HEADQUARTERS_LOCAL}" | grep '/orders$')
+do
+  # Orders will contain BETAS as an array.. so we clear and declare
+  # the BETAS variable as an associative array
+  unset BETAS
+  declare -A BETAS
+  # Slurp in the beta configs for this orders file by running it
+  run_orders "${ORDERS_FILE}"
+
+  # Get only the 'name' of these orders
+  ORDER_NAME=$(echo "${ORDERS_FILE}" | sed -e 's[/orders$[[' | sed -e "s[${HEADQUARTERS_LOCAL}/\?[[")
+  # Beta config name
+  BETA_CONF="${NGINX_CONF}/published/$(urlencode \"${ORDER_NAME}\").beta"
+
+  echo "" > "${BETA_CONF}"
+  for beta in "${!BETAS[@]}"
+  do
+    # Beta groups need a corresponding file with a list of users
+    # for the beta.  If that file doesn't exist the following
+    # will create variable references that don't exist.  We
+    # check to see if the corresponding file is there before we
+    # create the config and skip otherwise
+    [ ! -f "${HEADQUARTERS_LOCAL}/beta_groups/${beta}" ] && continue
+    echo "  if (\$starphleet_beta_${beta}) {" >> "${BETA_CONF}"
+    echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
+    echo "  }" >> "${BETA_CONF}"
+    echo "  if (\$starphleet_beta_${beta}_cookie) {" >> "${BETA_CONF}"
+    echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
+    echo "  }" >> "${BETA_CONF}"
+  done
+done
+
+starphleet-hup-nginx
