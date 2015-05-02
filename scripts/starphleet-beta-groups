@@ -50,7 +50,7 @@ do
 
   # Get only the 'name' of these orders
   ORDER_NAME=$(echo "${ORDERS_FILE}" | sed -e 's[/orders$[[' | sed -e "s[${HEADQUARTERS_LOCAL}/\?[[")
-  # Get the beta configuration
+  # Beta config name
   BETA_CONF="${NGINX_CONF}/published/$(urlencode \"${ORDER_NAME}\").beta"
 
   echo "" > "${BETA_CONF}"
