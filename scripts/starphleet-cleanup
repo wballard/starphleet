@@ -1,13 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env starphleet-launcher
 ### Usage:
 ###    starphleet-cleanup
 ### --help
 ###
 ### Call this to toss all starphleet state on shutdown
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-help=$(grep "^### " "$0" | cut -c 5-)
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 
 test -d "${STARPHLEET_ROOT}/node_modules" && rm -rf "${STARPHLEET_ROOT}/node_modules"
 test -d ${STARPHLEET_TMP} && rm -rf ${STARPHLEET_TMP}/*
