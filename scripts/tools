@@ -137,6 +137,10 @@ function run_orders()
     BETAS[$1]=$2
   }
 
+  proxy_for () {
+    PROXY_FOR_NAMES="$@"
+  }
+
   source "${1}" || true
 }
 

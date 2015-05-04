@@ -10,6 +10,8 @@
 ### Optionally, you can 'deep publish' or alias further into the container.
 run_as_root_or_die
 
+# Even though we won't use this variable here we still
+# want to declare it in case the orders don't
 declare -A BETAS
 run_orders "${orders}"
 
@@ -21,10 +23,10 @@ fi
 MOUNT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
 #mount this service over a port
 BARE_CONF="${NGINX_CONF}/published_bare/$(urlencode \"${public_url}\").conf"
-#rewrites for beta support
-BETA_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").beta"
 #redirect your urls to lxc
 REDIRECT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").redirect"
+#mount this service over a path
+PROXY_FOR_CONF="${NGINX_CONF}/proxy_for/$(urlencode \"${public_url}\").conf"
 
 IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}[[:space:]]" | awk '{ print $3; }')
 
@@ -39,6 +41,7 @@ fi
 
 test ! -d "${NGINX_CONF}/published" && mkdir -p "${NGINX_CONF}/published"
 test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_bare"
+mkdir -p "${NGINX_CONF}/proxy_for"
 
 [ -f "${NGINX_CONF}/published/crt" ] || cp "${NGINX_CONF}/crt" "${NGINX_CONF}/published/crt"
 [ -f "${NGINX_CONF}/published/key" ] || cp "${NGINX_CONF}/key" "${NGINX_CONF}/published/key"
@@ -111,27 +114,13 @@ if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
   echo "  allow 172.33.0.0/16;" >> "${MOUNT_CONF}"
 fi
 
-echo "" > "${BETA_CONF}"
-for beta in "${!BETAS[@]}"
-do
-  # Beta groups need a corresponding file with a list of users
-  # for the beta.  If that file doesn't exist the following
-  # will create variable references that don't exist.  We
-  # check to see if the corresponding file is there before we
-  # create the config and skip otherwise
-  [ ! -f "${HEADQUARTERS_LOCAL}/beta_groups/${beta}" ] && continue
-  echo "  if (\$starphleet_beta_${beta}) {" >> "${BETA_CONF}"
-  echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
-  echo "  }" >> "${BETA_CONF}"
-  echo "  if (\$starphleet_beta_${beta}_cookie) {" >> "${BETA_CONF}"
-  echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
-  echo "  }" >> "${BETA_CONF}"
-done
+
 
 #closing off the location
 echo '}' >> "${MOUNT_CONF}"
 
 info "published ${container_name}:${PORT} to ${public_url}"
+
 
 #port publication, this is optional if a port is set - this code gets removed once everything is redirected
 if [ "${PUBLISH_PORT}" != "0" ]
@@ -185,5 +174,20 @@ if [[ "${REDIRECT}" != '' && "${REDIRECT}" != '-' && "${REDIRECTTO}" != '' ]]; t
   echo "}" >> "${REDIRECT_CONF}"
 fi
 
+if [ -n "${PROXY_FOR_NAMES}" ]; then
+  info "publishing container ${container_name} using proxy_for: ${PROXY_FOR_NAMES}"
+  #so, what we do here is wrap our newly created MOUNT_CONF with a server block and save it into PROXY_FOR_CONF
+  #on the way we change the location block to be '/' which is match all so our new server block proxies all traffic
+  #the newly created server block maps our PROXY_FOR_NAMES into the server_name for the block this all ends us with
+  #host header mapped server for these orders to the given hostnames given via 'proxy_for' in the orders
+  #(e.g. in the orders find 'proxy_for some.dns.name.com')
+  if [  -r "${NGINX_CONF}/proxy_for_template.conf.head" -a -r "${NGINX_CONF}/proxy_for_template.conf.tail" -a -r "${MOUNT_CONF}" ]
+  then
+    cat "${MOUNT_CONF}" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}[location [" | cat "${NGINX_CONF}/proxy_for_template.conf.head" - "${NGINX_CONF}/proxy_for_template.conf.tail" | sed --regexp-extended -e "s[\{\{\{proxy_for_names\}\}\}[${PROXY_FOR_NAMES//./\.}[" > "${PROXY_FOR_CONF}"
+  else
+    error 'unable to find proxy_for_template.conf.* files. cannot set up proxying for provided names'
+  fi
+fi
+
 #reload to get the newly generated settings
-reload starphleet_nginx || start starphleet_nginx
+starphleet-hup-nginx

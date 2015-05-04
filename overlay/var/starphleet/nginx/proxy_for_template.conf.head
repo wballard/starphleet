@@ -1,0 +1,5 @@
+  server {
+        listen 80;
+        listen 443 ssl spdy;
+        large_client_header_buffers 4 32k;
+        server_name {{{proxy_for_names}}};

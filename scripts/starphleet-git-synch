@@ -40,12 +40,13 @@ if [ -d "${local}/.git" ]; then
   if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
     warn specified branch changed, checking out ${BRANCH}
     git checkout "${BRANCH}" || fatal checkout error
+    exit 0
   fi
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
   HAS_CHANGES=$(git diff HEAD...origin/${CURRENT_BRANCH} --raw)
   if [ "${HAS_CHANGES}x" != "x" ]; then
     warn new code detected, pulling
-    starphleet-git fetch || fatal pull error
+    starphleet-git fetch || fatal error during fetch of latest code
     starphleet-git reset --hard origin/${CURRENT_BRANCH} || fatal pull error
     exit 0
   fi

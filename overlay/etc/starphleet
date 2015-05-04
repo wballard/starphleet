@@ -23,6 +23,7 @@ export NGINX_CONF="${STARPHLEET_ROOT}/nginx"
 export BUILDPACKS="${STARPHLEET_ROOT}/buildpacks"
 export ADMIRAL="admiral"
 export ADMIRAL_HOME="/home/admiral"
+export STARPHLEET_NGINX_HUP_TURD="/var/run/starphleet_hup_turd"
 export MAX_OPEN_FILES="4096"
 if [ "${TERM}" == "unknown" ]; then
   export TERM="xterm-256color"

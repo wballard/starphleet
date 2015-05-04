@@ -11,6 +11,9 @@ run_as_root_or_die
 #Linux would rather swap than let go
 sync && echo 3 > /proc/sys/vm/drop_caches
 
+# MOAR PORTS
+echo "10240 65535" > /proc/sys/net/ipv4/ip_local_port_range
+
 # To support a fresh installation but keep the config in the overlay
 # we need access to the default starphleet config. We are going
 # to attempt to slurp it in
@@ -28,6 +31,12 @@ ec2_mounts
 rm -f /etc/init/starphleet*
 ${SCRIPT_DIR}/perform-overlay
 
+# our overlay contains sysctl settings, we'll want to load them now
+sysctl --system 
+# the parameters we've just loaded will allow a bunch more
+# connections for netfilter to track, adjust the hashsize
+# to help with performance
+echo 24576 > /sys/module/nf_conntrack/parameters/hashsize
 
 # If starphleet is deployed in a EC2 environment we append the region configuration
 # to the global starphleet config
