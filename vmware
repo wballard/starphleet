@@ -56,6 +56,30 @@ cat <<EOF
 EOF
 }
 
+function stale_vagrant_help() {
+cat <<EOF
+
+
+  ---------------------
+  !!WARNING!!
+
+  It is possible you did not cleanly destroy a previous vagrant installation.
+  This may have left stale data in your local machines "/etc/hosts" file.
+  You may be unable to reach your ship after a successful deployment.
+
+  You most likely want to remove this stale data before installing.  You can
+  cleanup this data by editing the following file:
+
+      /etc/hosts
+
+  You should remove any lines that are similar to this:
+
+      ## vagrant-hostmanager-start id: f2ae1ca9-1ddf-419e-a3e8-37fd4f23143a
+      172.16.114.129	ship ship ship.local ship.glgresearch.com
+      ## vagrant-hostmanager-end
+
+EOF
+}
 
 function key_help() {
 cat <<EOF
@@ -85,10 +109,24 @@ EOF
 # Check if the user has an environment file
 [ -f "${ENVIRONMENT_FILE}" ] && source "${ENVIRONMENT_FILE}"
 
+# If the user doesn't cleanly shutdown vagrant it can leave
+# stale host records in /etc/hosts
+# Let's warn them and possibly punt
+if [ "$(cat /etc/hosts | grep 'vagrant-hostmanager')" != "" ]; then
+  stale_vagrant_help
+  unset ANSWER
+  read -p "Do you want to exit and fix this? [y/N]: " ANSWER
+
+  if [ "${ANSWER}" == "y" ] || [ "${ANSWER}" == "Y" ]; then
+    exit 1
+  fi
+fi
+
 # If the dev dir exists - maybe they have some previous work in that directory..
-# we should ask if they want to proceed.
+# we should ask if they want to delete it first
 if [ -d "${STARPHLEET_DEV_DIR}" ]; then
   starphleet_dev_help
+  unset ANSWER
   read -p "Do you want to delete the ~/starphleet_dev directory? [y/N]: " ANSWER
   # Remove the dev dor upon request
   if [ "${ANSWER}" == "y" ] || [ "${ANSWER}" == "Y" ]; then
