@@ -167,7 +167,7 @@ fi
 if [[ "${REDIRECT}" != '' && "${REDIRECT}" != '-' && "${REDIRECTTO}" != '' ]]; then
   info "redirect set for ${REDIRECT}"
   echo "if (\$http_host = ${REDIRECT}) {" > "${REDIRECT_CONF}"
-  echo " rewrite ^ ${REDIRECTTO}$request_uri permanent;" >> "${REDIRECT_CONF}"
+  echo " rewrite ^ ${REDIRECTTO}\$uri permanent;" >> "${REDIRECT_CONF}"
   echo " break;" >> "${REDIRECT_CONF}"
   echo "}" >> "${REDIRECT_CONF}"
 fi
