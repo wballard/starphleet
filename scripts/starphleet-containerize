@@ -76,6 +76,7 @@ else
 fi
 
 trace Running orders
+export ORDERS_NAME=$(basename $(dirname $ORDERS))
 run_orders ${ORDERS}
 
 trace Prepping container

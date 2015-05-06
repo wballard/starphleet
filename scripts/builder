@@ -79,6 +79,7 @@ export HOME=${app_root}
 export ORDERS_IN=${app_root}
 
 source /usr/bin/tools
+export ORDERS_NAME=$(basename $(dirname $orders))
 container_environment ${app_root} ${orders}
 if [[ -f Procfile ]]; then
     ruby -e "require 'yaml';puts YAML.load_file('Procfile')['\$1']" | bash
