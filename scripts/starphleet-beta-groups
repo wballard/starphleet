@@ -65,10 +65,10 @@ do
     # create the config and skip otherwise
     [ ! -f "${HEADQUARTERS_LOCAL}/beta_groups/${beta}" ] && continue
     echo "  if (\$starphleet_beta_${beta}) {" >> "${BETA_CONF}"
-    echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
+    echo "    rewrite ^/${ORDER_NAME}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
     echo "  }" >> "${BETA_CONF}"
     echo "  if (\$starphleet_beta_${beta}_cookie) {" >> "${BETA_CONF}"
-    echo "    rewrite ^${public_url}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
+    echo "    rewrite ^/${ORDER_NAME}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
     echo "  }" >> "${BETA_CONF}"
   done
 done
