@@ -141,6 +141,12 @@ function run_orders()
     PROXY_FOR_NAMES="$@"
   }
 
+  server_names () {
+    SERVER_NAMES_CONF_NAME=$1
+    shift
+    SERVER_NAMES="$@"
+  }
+
   source "${1}" || true
 }
 

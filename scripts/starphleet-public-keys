@@ -37,11 +37,10 @@ chown ${ADMIRAL}:${ADMIRAL} ${AUTHFILE}
 
 #look for SSL keys
 [ -d "${NGINX_CONF}/published" ] || mkdir -p "${NGINX_CONF}/published"
-if [ "$(diff -r ${HEADQUARTERS_LOCAL}/ssl/ ${NGINX_CONF}/published/ | grep -v 'Only in ${NGINX_CONF}/published/')" == "" ] ; then
-  #keys are the same
-  :
+if [ "$(diff -r ${HEADQUARTERS_LOCAL}/ssl/ ${NGINX_CONF}/published/ | grep -v "Only in ${NGINX_CONF}/published/")" == "" ] ; then
+  info "no change in ssl keys provided in HQ"
 else
   info updating SSL keys
   cp ${HEADQUARTERS_LOCAL}/ssl/* ${NGINX_CONF}/published/
-  restart starphleet_nginx || true
+  starphleet-hup-nginx
 fi
