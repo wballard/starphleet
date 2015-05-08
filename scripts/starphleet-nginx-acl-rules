@@ -52,17 +52,14 @@ for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
     for ACL_USERNAME in $(cat "${FILE_ACL_LIST}"); do
       echo "   ${ACL_USERNAME} 1;" >> "${FILE_ACL_RULES_MAP}"
     done
-
-    # Now we actually publish the rule for the map
-    # note - it's okay if this runs more than once - it will create the same
-    #        rule regardless of the number of acl files
-    echo "  if (\$starphleet_acl_${SERVICE} != 1) {" > "${FILE_ACL_RULES_CONF}"
-    echo "    rewrite ^/${SERVICE}/(.*) /autherror last;" >> "${FILE_ACL_RULES_CONF}"
-    echo "  }" >> "${FILE_ACL_RULES_CONF}"
   done
   # Now, if there were ACL files we need to close up the map file
   if [ "$(ls $(dirname ${FILE_ORDERS})/*.acl 2> /dev/null)" ]; then
     echo "  }" >> "${FILE_ACL_RULES_MAP}"
+    # Now we actually publish the rule for the map
+    echo "  if (\$starphleet_acl_${SERVICE} != 1) {" > "${FILE_ACL_RULES_CONF}"
+    echo "    rewrite ^/${SERVICE}/(.*) /autherror last;" >> "${FILE_ACL_RULES_CONF}"
+    echo "  }" >> "${FILE_ACL_RULES_CONF}"
   fi
 done
 
