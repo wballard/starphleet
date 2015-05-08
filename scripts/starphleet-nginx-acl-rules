@@ -29,28 +29,26 @@ rm "${DIR_NGINX_PUBLISHED}"/*.acl 2> /dev/null || true
 mkdir -p "${DIR_NGINX_ACL_RULES}"
 mkdir -p "${DIR_NGINX_PUBLISHED}"
 
+  set -x
 # Go through all Access Control List files (*.acl)
 for FILE_ACL_LIST in $(find ${HEADQUARTERS_LOCAL} -type f -name "*.acl"); do
   # Yoink the HQ Path off
-  SERVICE=$(echo ${FILE_ACL_LIST} | perl -ne "s|${HEADQUARTERS_LOCAL}/||;print $1")
+  SERVICE=$(echo ${FILE_ACL_LIST#${HEADQUARTERS_LOCAL}/})
   # Yoink the file name for theFILE_ACL_LIST
-  SERVICE=$(echo ${SERVICE} | perl -ne "s|/$(basename ${FILE_ACL_LIST})||;print $1")
+  SERVICE=$(echo ${SERVICE} | sed -e "s/$(basename ${FILE_ACL_LIST})//")
+  # Yoink the trailing slash
+  SERVICE=${SERVICE::-1}
   # The file with our rules for this service
   FILE_ACL_RULES_MAP="${DIR_NGINX_ACL_RULES}/${SERVICE}.conf"
   FILE_ACL_RULES_CONF="${DIR_NGINX_PUBLISHED}/${SERVICE}.acl"
-  # Only create one map file per service
-  # XXX: Is it an error if orders have more than one acl list?
-  # Only allow one ACL file? (or make this way more complicated)
-  if [ ! -f "${FILE_ACL_RULES_MAP}" ]; then
-    # Create the map file and make the default 0
-    echo "  map \$remote_user \$starphleet_acl_service_${SERVICE} {" > "${FILE_ACL_RULES_MAP}"
-    echo "   default 0;" >> "${FILE_ACL_RULES_MAP}"
-    # Add each user
-    for ACL_USERNAME in $(cat "${FILE_ACL_LIST}"); do
-      echo "   ${ACL_USERNAME} 1;" >> "${FILE_ACL_RULES_MAP}"
-    done
-    echo "  }" >> "${FILE_ACL_RULES_MAP}"
-  fi
+  # Create the map file and make the default 0
+  echo "  map \$remote_user \$starphleet_acl_service_${SERVICE} {" >> "${FILE_ACL_RULES_MAP}"
+  echo "   default 0;" >> "${FILE_ACL_RULES_MAP}"
+  # Add each user
+  for ACL_USERNAME in $(cat "${FILE_ACL_LIST}"); do
+    echo "   ${ACL_USERNAME} 1;" >> "${FILE_ACL_RULES_MAP}"
+  done
+  echo "  }" >> "${FILE_ACL_RULES_MAP}"
 
   # Now we actually publish the rule for the map
   echo "  if (\$starphleet_acl_service_${SERVICE} != 1) {" > "${FILE_ACL_RULES_CONF}"
