@@ -29,7 +29,6 @@ rm "${DIR_NGINX_PUBLISHED}"/*.acl 2> /dev/null || true
 mkdir -p "${DIR_NGINX_ACL_RULES}"
 mkdir -p "${DIR_NGINX_PUBLISHED}"
 
-  set -x
 # Go through all Access Control List files (*.acl)
 for FILE_ACL_LIST in $(find ${HEADQUARTERS_LOCAL} -type f -name "*.acl"); do
   # Yoink the HQ Path off
