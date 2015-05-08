@@ -30,12 +30,10 @@ mkdir -p "${DIR_NGINX_PUBLISHED}"
 
 # Go through all Access Control List files (*.acl)
 for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
+  # Yoink off the filename of the orders
+  SERVICE=$(dirname ${FILE_ORDERS})
   # Yoink the HQ Path off
-  SERVICE=$(echo ${FILE_ORDERS#${HEADQUARTERS_LOCAL}/})
-  # Yoink the file name for theFILE_ACL_LIST
-  SERVICE=$(echo ${SERVICE} | sed -e "s/$(basename ${FILE_ORDERS})//")
-  # Yoink the trailing slash
-  SERVICE=${SERVICE::-1}
+  SERVICE=$(echo ${SERVICE#${HEADQUARTERS_LOCAL}/})
   # The file with our rules for this service
   FILE_ACL_RULES_MAP="${DIR_NGINX_ACL_RULES}/${SERVICE}.conf"
   FILE_ACL_RULES_CONF="${DIR_NGINX_PUBLISHED}/${SERVICE}.acl"
