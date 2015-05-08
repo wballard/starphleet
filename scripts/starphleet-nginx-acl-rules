@@ -53,7 +53,7 @@ for FILE_ACL_LIST in $(find ${HEADQUARTERS_LOCAL} -type f -name "*.acl"); do
   echo "  }" >> "${FILE_ACL_RULES_MAP}"
 
   # Now we actually publish the rule for the map
-  echo "  if (\$starphleet_acl_${SERVICE}_${FILE_ACL_LIST_WITHOUT_EXTENSION} != 1) {" > "${FILE_ACL_RULES_CONF}"
+  echo "  if (\$starphleet_acl_${SERVICE}_${FILE_ACL_LIST_WITHOUT_EXTENSION} != 1) {" >> "${FILE_ACL_RULES_CONF}"
   echo "    rewrite ^/${SERVICE}/(.*) /autherror last;" >> "${FILE_ACL_RULES_CONF}"
   echo "  }" >> "${FILE_ACL_RULES_CONF}"
 done
