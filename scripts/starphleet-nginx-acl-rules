@@ -13,7 +13,6 @@ run_as_root_or_die
 # Configuration
 #******************************************************************
 
-NGINX_CONF=${NGINX_CONF:-/var/starphleet/nginx}
 DIR_NGINX_ACL_RULES="${NGINX_CONF}/acl_rules"
 DIR_NGINX_PUBLISHED="${NGINX_CONF}/published"
 
@@ -23,7 +22,7 @@ DIR_NGINX_PUBLISHED="${NGINX_CONF}/published"
 
 # We purge everything each run and start over
 [ -d "${DIR_NGINX_ACL_RULES}" ]  && rm -rf "${DIR_NGINX_ACL_RULES}"
-rm "${DIR_NGINX_PUBLISHED}"/*.acl 2> /dev/null || true
+rm "${DIR_NGINX_PUBLISHED}"/*.acl || true
 
 # Make sure our dirs work
 mkdir -p "${DIR_NGINX_ACL_RULES}"
