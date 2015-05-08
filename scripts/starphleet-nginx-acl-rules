@@ -29,32 +29,40 @@ mkdir -p "${DIR_NGINX_ACL_RULES}"
 mkdir -p "${DIR_NGINX_PUBLISHED}"
 
 # Go through all Access Control List files (*.acl)
-for FILE_ACL_LIST in $(find ${HEADQUARTERS_LOCAL} -type f -name "*.acl"); do
+for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
   # Yoink the HQ Path off
-  SERVICE=$(echo ${FILE_ACL_LIST#${HEADQUARTERS_LOCAL}/})
+  SERVICE=$(echo ${FILE_ORDERS#${HEADQUARTERS_LOCAL}/})
   # Yoink the file name for theFILE_ACL_LIST
-  SERVICE=$(echo ${SERVICE} | sed -e "s/$(basename ${FILE_ACL_LIST})//")
+  SERVICE=$(echo ${SERVICE} | sed -e "s/$(basename ${FILE_ORDERS})//")
   # Yoink the trailing slash
   SERVICE=${SERVICE::-1}
-  # Readability - pull just the ACL file name without extension
-  FILE_ACL_LIST_WITHOUT_EXTENSION=$(basename ${FILE_ACL_LIST})
-  FILE_ACL_LIST_WITHOUT_EXTENSION=${FILE_ACL_LIST_WITHOUT_EXTENSION::-4}
   # The file with our rules for this service
   FILE_ACL_RULES_MAP="${DIR_NGINX_ACL_RULES}/${SERVICE}.conf"
   FILE_ACL_RULES_CONF="${DIR_NGINX_PUBLISHED}/${SERVICE}.acl"
-  # Create the map file and make the default 0
-  echo "  map \$remote_user \$starphleet_acl_${SERVICE}_${FILE_ACL_LIST_WITHOUT_EXTENSION} {" >> "${FILE_ACL_RULES_MAP}"
-  echo "   default 0;" >> "${FILE_ACL_RULES_MAP}"
-  # Add each user
-  for ACL_USERNAME in $(cat "${FILE_ACL_LIST}"); do
-    echo "   ${ACL_USERNAME} 1;" >> "${FILE_ACL_RULES_MAP}"
-  done
-  echo "  }" >> "${FILE_ACL_RULES_MAP}"
+  # Only create files if necessary by checking if the orders dir has any ACL files
+  # piping error to dev null since it's normal for acl files to not exist
+  if [ "$(ls $(dirname ${FILE_ORDERS})/*.acl) 2> /dev/null" ]; then
+    # Create the map file and make the default 0
+    echo "  map \$remote_user \$starphleet_acl_${SERVICE} {" > "${FILE_ACL_RULES_MAP}"
+    echo "   default 0;" >> "${FILE_ACL_RULES_MAP}"
+  fi
+  # Now go through every ACL file and append the users to a map
+  for FILE_ACL_LIST in $(find $(dirname ${FILE_ORDERS}) -type f -name "*.acl"); do
+    # Add all the users from this file to the map
+    for ACL_USERNAME in $(cat "${FILE_ACL_LIST}"); do
+      echo "   ${ACL_USERNAME} 1;" >> "${FILE_ACL_RULES_MAP}"
+    done
 
-  # Now we actually publish the rule for the map
-  echo "  if (\$starphleet_acl_${SERVICE}_${FILE_ACL_LIST_WITHOUT_EXTENSION} != 1) {" >> "${FILE_ACL_RULES_CONF}"
-  echo "    rewrite ^/${SERVICE}/(.*) /autherror last;" >> "${FILE_ACL_RULES_CONF}"
-  echo "  }" >> "${FILE_ACL_RULES_CONF}"
+    # Now we actually publish the rule for the map
+    # note - it's okay if this runs more than once
+    echo "  if (\$starphleet_acl_${SERVICE} != 1) {" > "${FILE_ACL_RULES_CONF}"
+    echo "    rewrite ^/${SERVICE}/(.*) /autherror last;" >> "${FILE_ACL_RULES_CONF}"
+    echo "  }" >> "${FILE_ACL_RULES_CONF}"
+  done
+  # Now, if there were ACL files we need to close up the map file
+  if [ "$(ls $(dirname ${FILE_ORDERS})/*.acl) 2> /dev/null" ]; then
+    echo "  }" >> "${FILE_ACL_RULES_MAP}"
+  fi
 done
 
 starphleet-hup-nginx
