@@ -41,7 +41,7 @@ for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
   FILE_ACL_RULES_CONF="${DIR_NGINX_PUBLISHED}/${SERVICE}.acl"
   # Only create files if necessary by checking if the orders dir has any ACL files
   # piping error to dev null since it's normal for acl files to not exist
-  if [ "$(ls $(dirname ${FILE_ORDERS})/*.acl) 2> /dev/null" ]; then
+  if [ "$(ls $(dirname ${FILE_ORDERS})/*.acl 2> /dev/null)" ]; then
     # Create the map file and make the default 0
     echo "  map \$remote_user \$starphleet_acl_${SERVICE} {" > "${FILE_ACL_RULES_MAP}"
     echo "   default 0;" >> "${FILE_ACL_RULES_MAP}"
@@ -54,13 +54,14 @@ for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
     done
 
     # Now we actually publish the rule for the map
-    # note - it's okay if this runs more than once
+    # note - it's okay if this runs more than once - it will create the same
+    #        rule regardless of the number of acl files
     echo "  if (\$starphleet_acl_${SERVICE} != 1) {" > "${FILE_ACL_RULES_CONF}"
     echo "    rewrite ^/${SERVICE}/(.*) /autherror last;" >> "${FILE_ACL_RULES_CONF}"
     echo "  }" >> "${FILE_ACL_RULES_CONF}"
   done
   # Now, if there were ACL files we need to close up the map file
-  if [ "$(ls $(dirname ${FILE_ORDERS})/*.acl) 2> /dev/null" ]; then
+  if [ "$(ls $(dirname ${FILE_ORDERS})/*.acl 2> /dev/null)" ]; then
     echo "  }" >> "${FILE_ACL_RULES_MAP}"
   fi
 done
