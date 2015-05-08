@@ -1,0 +1,29 @@
+#!/usr/bin/env starphleet-launcher
+### Script to take log files and push them up to S3 for later reporting
+### Usage:
+###   archive_log_to_s3 <path_to_logfile> nginx
+# Setup from logrotate config 'lastaction' block. 
+## lastaction
+##  archive_log_to_s3 $1 nginx
+## endscript
+
+# Requires configuration of /home/admiral/.aws_credentials, which needs to include:
+## export AWS_ACCESS_KEY_ID=xx
+## export AWS_SECRET_ACCESS_KEY=xx
+## export AWS_DEFAULT_REGION=us-west-2
+
+# If aws credential file is not setup, or there is an AWS failure, the action fails but does not affect the log rotate action.
+
+# Spaces are not allowed in the inputs
+original_file=$(echo "$1" | sed 's/[[:space:]]//g')
+category=$(echo "$2" | sed 's/[[:space:]]//g')
+
+compressed_file="$original_file.1.gz"
+echo "Archive $compressed_file"
+
+# Create a unique file name to store up to s3 to include category+hostname+timestamp
+extension="$(hostname)_$(date -u "+%m-%d-%Y_%H:%M:%S")_$AWS_REGION.log.gz"
+cp_to_file="$category.$extension"
+
+aws s3 cp $compressed_file s3://phleet-logs/$category/$cp_to_file &>> /var/log/archive_to_s3_for_$category.log
+
