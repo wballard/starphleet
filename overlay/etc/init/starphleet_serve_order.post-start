@@ -6,8 +6,8 @@ ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
 if [ "${UNPUBLISHED}" == "1" ]; then
   echo 'online' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
-  starphleet-reaper "${name}" "${order}"
   starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
+  starphleet-reaper "${name}" "${order}"
 else
   #status logging, here indicating the healthcheck is about to go
   echo 'checking' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
@@ -40,11 +40,12 @@ else
     echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
     lxc-ls --fancy "${name}" | tail -1 | awk '{ print $3; }' > "${CURRENT_ORDERS}/${order}/.starphleetstatus.ip"
     echo "${PORT}" > "${CURRENT_ORDERS}/${order}/.starphleetstatus.port"
+    # Expose any ports requested in the orders
+    starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
     #any prior version of this order should now be reaped after
     #we wait a small time for prior requests to flush out
     sleep ${STARPHLEET_DRAINSTOP_WAIT}
     starphleet-reaper "${name}" "${order}"
-    starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
     exit 0
   else
     #at this point the service has failed to properly start

@@ -12,7 +12,7 @@ run_as_root_or_die
 # Purge all beta groups and beta configs
 [ -d "${NGINX_CONF}/beta_groups" ]  && rm -rf "${NGINX_CONF}/beta_groups"
 # Try to remove beta files or.. exit happy if none exist
-rm "${HEADQUARTERS_LOCAL}/published/*.beta" || true
+rm "${NGINX_CONF}"/published/*.beta || true
 
 # Make the beta_group again
 mkdir -p "${NGINX_CONF}/beta_groups"
@@ -55,7 +55,6 @@ do
   # Beta config name
   BETA_CONF="${NGINX_CONF}/published/$(urlencode \"${ORDER_NAME}\").beta"
 
-  echo "" > "${BETA_CONF}"
   for beta in "${!BETAS[@]}"
   do
     # Beta groups need a corresponding file with a list of users
@@ -64,6 +63,7 @@ do
     # check to see if the corresponding file is there before we
     # create the config and skip otherwise
     [ ! -f "${HEADQUARTERS_LOCAL}/beta_groups/${beta}" ] && continue
+    echo "" > "${BETA_CONF}"
     echo "  if (\$starphleet_beta_${beta}) {" >> "${BETA_CONF}"
     echo "    rewrite ^/${ORDER_NAME}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
     echo "  }" >> "${BETA_CONF}"
