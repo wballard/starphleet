@@ -41,14 +41,14 @@ for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
   if [ -n "${HAS_ACL}" ]; then
     # Create the map file and make the default 0
     echo "  map \$remote_user \$starphleet_acl_${SERVICE_NAME} {" > "${FILE_ACL_RULES_MAP}"
-    echo "   default 1;" >> "${FILE_ACL_RULES_MAP}"
+    echo "   default 0;" >> "${FILE_ACL_RULES_MAP}"
   fi
   # Go through every ACL file and append the users to a map
   for FILE_ACL_LIST in $(find ${SERVICE_DIR} -type f -name "*.acl"); do
-    info loading ACL for service ${SERVICE_NAME} from ${SERVICE_DIR}
+    info loading ACL for service ${SERVICE_NAME} from ${FILE_ACL_LIST}
     # Add all the users from this file to the map
     for ACL_USERNAME in $(cat "${FILE_ACL_LIST}"); do
-      echo "   ${ACL_USERNAME} 0;" >> "${FILE_ACL_RULES_MAP}"
+      echo "   ${ACL_USERNAME} 1;" >> "${FILE_ACL_RULES_MAP}"
     done
   done
   # If there were ACL files we need to close up the map file
@@ -56,10 +56,12 @@ for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
     echo "  }" >> "${FILE_ACL_RULES_MAP}"
     # Publish the rule for the map
     echo "  location /${SERVICE_NAME}/accessdenied {" > "${FILE_ACL_RULES_CONF}"
-    echo "      return 403;" >> "${FILE_ACL_RULES_CONF}"
+    echo "      more_set_headers 'WWW-Authenticate: Basic realm=\"Forbidden!\"';" >> "${FILE_ACL_RULES_CONF}"
+    echo "      return 401;" >> "${FILE_ACL_RULES_CONF}"
     echo "  }" >> "${FILE_ACL_RULES_CONF}"
-    echo "  if (\$starphleet_acl_${SERVICE_NAME}) {" >> "${FILE_ACL_RULES_CONF}"
-    echo "    rewrite ^/${SERVICE_NAME}/(.*) /${SERVICE_NAME}/accessdenied break;" >> "${FILE_ACL_RULES_CONF}" echo "  }" >> "${FILE_ACL_RULES_CONF}"
+    echo "  if (\$starphleet_acl_${SERVICE_NAME} != 1) {" >> "${FILE_ACL_RULES_CONF}"
+    echo "    rewrite ^/${SERVICE_NAME}/(.*) /${SERVICE_NAME}/accessdenied break;" >> "${FILE_ACL_RULES_CONF}"
+    echo "  }" >> "${FILE_ACL_RULES_CONF}"
   else
     info no ACLs specified for service: ${SERVICE_NAME}
   fi
