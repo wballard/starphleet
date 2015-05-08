@@ -30,37 +30,38 @@ mkdir -p "${DIR_NGINX_PUBLISHED}"
 
 # Go through all Access Control List files (*.acl)
 for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
-  # Yoink off the filename of the orders
-  SERVICE=$(dirname ${FILE_ORDERS})
-  # Yoink the HQ Path off
-  SERVICE=$(echo ${SERVICE#${HEADQUARTERS_LOCAL}/})
+  SERVICE_DIR=$(dirname ${FILE_ORDERS})
+  SERVICE_NAME=$(basename ${SERVICE_DIR})
+  HAS_ACL=$(ls ${SERVICE_DIR}/*.acl 2> /dev/null || true)
   # The file with our rules for this service
-  FILE_ACL_RULES_MAP="${DIR_NGINX_ACL_RULES}/${SERVICE}.conf"
-  FILE_ACL_RULES_CONF="${DIR_NGINX_PUBLISHED}/${SERVICE}.acl"
+  FILE_ACL_RULES_MAP="${DIR_NGINX_ACL_RULES}/${SERVICE_NAME}.conf"
+  FILE_ACL_RULES_CONF="${DIR_NGINX_PUBLISHED}/${SERVICE_NAME}.acl"
   # Only create files if necessary by checking if the orders dir has any ACL files
   # piping error to dev null since it's normal for acl files to not exist
-  if [ "$(ls $(dirname ${FILE_ORDERS})/*.acl 2> /dev/null)" ]; then
+  if [ -n "${HAS_ACL}" ]; then
     # Create the map file and make the default 0
-    echo "  map \$remote_user \$starphleet_acl_${SERVICE} {" > "${FILE_ACL_RULES_MAP}"
+    echo "  map \$remote_user \$starphleet_acl_${SERVICE_NAME} {" > "${FILE_ACL_RULES_MAP}"
     echo "   default 1;" >> "${FILE_ACL_RULES_MAP}"
   fi
   # Go through every ACL file and append the users to a map
-  for FILE_ACL_LIST in $(find $(dirname ${FILE_ORDERS}) -type f -name "*.acl"); do
+  for FILE_ACL_LIST in $(find ${SERVICE_DIR} -type f -name "*.acl"); do
+    info loading ACL for service ${SERVICE_NAME} from ${SERVICE_DIR}
     # Add all the users from this file to the map
     for ACL_USERNAME in $(cat "${FILE_ACL_LIST}"); do
       echo "   ${ACL_USERNAME} 0;" >> "${FILE_ACL_RULES_MAP}"
     done
   done
   # If there were ACL files we need to close up the map file
-  if [ "$(ls $(dirname ${FILE_ORDERS})/*.acl 2> /dev/null)" ]; then
+  if [ -n "${HAS_ACL}" ]; then
     echo "  }" >> "${FILE_ACL_RULES_MAP}"
     # Publish the rule for the map
-    echo "  location /${SERVICE}/autherror {" > "${FILE_ACL_RULES_CONF}"
+    echo "  location /${SERVICE_NAME}/accessdenied {" > "${FILE_ACL_RULES_CONF}"
     echo "      return 403;" >> "${FILE_ACL_RULES_CONF}"
     echo "  }" >> "${FILE_ACL_RULES_CONF}"
-    echo "  if (\$starphleet_acl_${SERVICE}) {" >> "${FILE_ACL_RULES_CONF}"
-    echo "    rewrite ^/${SERVICE}/(.*) /${SERVICE}/autherror break;" >> "${FILE_ACL_RULES_CONF}"
-    echo "  }" >> "${FILE_ACL_RULES_CONF}"
+    echo "  if (\$starphleet_acl_${SERVICE_NAME}) {" >> "${FILE_ACL_RULES_CONF}"
+    echo "    rewrite ^/${SERVICE_NAME}/(.*) /${SERVICE_NAME}/accessdenied break;" >> "${FILE_ACL_RULES_CONF}" echo "  }" >> "${FILE_ACL_RULES_CONF}"
+  else
+    info no ACLs specified for service: ${SERVICE_NAME}
   fi
 done
 
