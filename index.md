@@ -283,6 +283,18 @@ Say you have a simple service with a todo list, a mail queue, and a website. You
 
 Then when running you get your site at `http://example.co/`, and your services at `http://example.co/todo` and `http://example.co/mail`.
 
+## Access Control Lists
+
+If you enable ldap or htpasswd authentication you can also limit a service to certain users.  To enable per-user access to a service add a file to your service endpoint directory with the extension `.acl`.  The file should contain a list of users separated by newlines.
+
+Example (`example.acl`):
+
+    jdoe
+    jjdoe
+    jsmith
+
+The above service endpoint would only allow three users access - all others will be prompted to login.
+
 ## Set up Multiversion Betas
 You can run more than one version of your service, and route users along to a different version based on their logged in HTTP identity.
 
