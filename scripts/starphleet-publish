@@ -13,6 +13,9 @@ run_as_root_or_die
 # Even though we won't use this variable here we still
 # want to declare it in case the orders don't
 declare -A BETAS
+
+# declare for redirects
+declare -A REDIRECT_TO
 run_orders "${orders}"
 
 order_name=${public_url}
@@ -163,6 +166,7 @@ else
   rm -f "${BARE_CONF}"
 fi
 
+echo "" > "${REDIRECT_CONF}"
 #redirect a DNS entry to the lxc url
 if [[ "${REDIRECT}" != '' && "${REDIRECT}" != '-' && "${REDIRECTTO}" != '' ]]; then
   info "redirect set for ${REDIRECT}"
@@ -171,6 +175,18 @@ if [[ "${REDIRECT}" != '' && "${REDIRECT}" != '-' && "${REDIRECTTO}" != '' ]]; t
   echo " break;" >> "${REDIRECT_CONF}"
   echo "}" >> "${REDIRECT_CONF}"
 fi
+
+#handle the list of redirections by appending to the redirect conf variable
+for redirected in "${!REDIRECT_TO[@]}"
+do
+  info "redirect_to set for ${redirected}"
+  echo "if (\$http_host = ${redirected}) {" >> "${REDIRECT_CONF}"
+  echo " rewrite ^ ${REDIRECT_TO[$redirected]}\$uri permanent;" >> "${REDIRECT_CONF}"
+  echo " break;" >> "${REDIRECT_CONF}"
+  echo "}" >> "${REDIRECT_CONF}"
+
+done
+
 
 if [ -n "${PROXY_FOR_NAMES}" ]; then
   info "publishing container ${container_name} using proxy_for: ${PROXY_FOR_NAMES}"

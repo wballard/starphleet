@@ -133,6 +133,11 @@ function run_orders()
     REDIRECTTO=${2}
   }
 
+  redirect_to () {
+    info redirect_to_set "${1} ${2}"
+    REDIRECT_TO[$1]=$2
+  }
+
   beta () {
     BETAS[$1]=$2
   }
