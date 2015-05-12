@@ -2,6 +2,7 @@
         missingok
         rotate 4
         size 10M
+        copytruncate
         compress
         lastaction
                 archive_log_to_s3 $1 nginx
