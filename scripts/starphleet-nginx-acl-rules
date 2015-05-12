@@ -48,7 +48,6 @@ for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
     for ACL_USERNAME in $(cat "${SERVICE_DIR}"/*.acl 2> /dev/null | sort | uniq); do
       echo "   ${ACL_USERNAME} 1;" >> "${FILE_ACL_RULES_MAP}"
     done
-    # If there were ACL files we need to close up the map file
     echo "  }" >> "${FILE_ACL_RULES_MAP}"
     # Publish the rule for the map
     echo "  location /${SERVICE_NAME}/accessdenied {" > "${FILE_ACL_RULES_CONF}"
