@@ -233,6 +233,12 @@ function die_on_error(){
 
 # environment set up each time we ask for tools
 [ -f "/etc/starphleet" ] && source "/etc/starphleet"
+if [ -d /etc/starphleet.d ]; then
+  for env_file in /etc/starphleet.d/*
+  do
+    source ${env_file}
+  done
+fi
 [ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"
 [ -f "${HEADQUARTERS_ENV}" ] && source "${HEADQUARTERS_ENV}"
 :

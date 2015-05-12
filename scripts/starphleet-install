@@ -32,16 +32,19 @@ rm -f /etc/init/starphleet*
 ${SCRIPT_DIR}/perform-overlay
 
 # our overlay contains sysctl settings, we'll want to load them now
-sysctl --system 
+sysctl --system
 # the parameters we've just loaded will allow a bunch more
 # connections for netfilter to track, adjust the hashsize
 # to help with performance
 echo 24576 > /sys/module/nf_conntrack/parameters/hashsize
 
+# Machine specific configs
+mkdir -p /etc/starphleet.d
+
 # If starphleet is deployed in a EC2 environment we append the region configuration
 # to the global starphleet config
 STARPHLEET_EC2_REGION=$(curl --connect-timeout 1 -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
-[ ! -z "${STARPHLEET_EC2_REGION}" ] && echo "export STARPHLEET_EC2_REGION=\"${STARPHLEET_EC2_REGION}\"" >> /etc/starphleet
+[ ! -z "${STARPHLEET_EC2_REGION}" ] && echo "export STARPHLEET_EC2_REGION=\"${STARPHLEET_EC2_REGION}\"" > /etc/starphleet.d/starphleet_ec2_region
 
 #source again, yep -- now the environment is in place
 source ${DIR}/tools

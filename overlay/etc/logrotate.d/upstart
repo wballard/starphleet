@@ -2,7 +2,10 @@
         missingok
         rotate 4
         size 10M
-        nocompress
+        compress
+        lastaction
+                archive_log_to_s3 $1 nginx
+        endscript
         notifempty
         nocreate
 }
