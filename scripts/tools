@@ -142,7 +142,6 @@ function run_orders()
     if [ ${#REDIRECT_TO[@]} -eq 0 ]; then
       declare -A -g REDIRECT_TO
     fi
-    info redirect_to_set "${1} ${2}"
     REDIRECT_TO[$1]=$2
   }
 
