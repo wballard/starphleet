@@ -23,6 +23,7 @@ for container in $(lxc-ls); do
     [ -d "${CURRENT_ORDERS}/${SERVICE}" ] && rm -rf "${CURRENT_ORDERS}/${SERVICE}"
     [ -f "${NGINX_CONF}/published/$(urlencode \"/${SERVICE}\").conf" ] && rm "${NGINX_CONF}/published/$(urlencode \"/${SERVICE}\").conf"
     [ -f "${NGINX_CONF}/published/$(urlencode \"/${SERVICE}\").beta" ] && rm "${NGINX_CONF}/published/$(urlencode \"/${SERVICE}\").beta"
+    [ -f "${NGINX_CONF}/published/${SERVICE}.acl" ] && rm "${NGINX_CONF}/published/${SERVICE}.acl"
     [ -f "${NGINX_CONF}/published/$(urlencode \"/${SERVICE}\").redirect" ] && rm "${NGINX_CONF}/published/$(urlencode \"/${SERVICE}\").redirect"
     [ -f "${NGINX_CONF}/published_bare/$(urlencode \"/${SERVICE}\").conf" ] && rm "${NGINX_CONF}/published_bare/$(urlencode \"/${SERVICE}\").conf"
   fi
