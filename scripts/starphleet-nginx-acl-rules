@@ -1,0 +1,65 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-nginx-acl-rules
+### --help
+###
+### Generate all ACL Rules for NGINX
+###
+
+die_on_error
+run_as_root_or_die
+
+#******************************************************************
+# Configuration
+#******************************************************************
+
+DIR_NGINX_ACL_RULES="${NGINX_CONF}/acl_rules"
+DIR_NGINX_PUBLISHED="${NGINX_CONF}/published"
+
+#******************************************************************
+# Main
+#******************************************************************
+
+# We purge everything each run and start over
+[ -d "${DIR_NGINX_ACL_RULES}" ]  && rm -rf "${DIR_NGINX_ACL_RULES}"
+rm "${DIR_NGINX_PUBLISHED}"/*.acl || true
+
+# Make sure our dirs work
+mkdir -p "${DIR_NGINX_ACL_RULES}"
+mkdir -p "${DIR_NGINX_PUBLISHED}"
+
+# Go through all Access Control List files (*.acl)
+for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
+  SERVICE_DIR=$(dirname ${FILE_ORDERS})
+  SERVICE_NAME=$(basename ${SERVICE_DIR})
+  HAS_ACL=$(ls ${SERVICE_DIR}/*.acl 2> /dev/null || true)
+  # The file with our rules for this service
+  FILE_ACL_RULES_MAP="${DIR_NGINX_ACL_RULES}/${SERVICE_NAME}.conf"
+  FILE_ACL_RULES_CONF="${DIR_NGINX_PUBLISHED}/${SERVICE_NAME}.acl"
+  # Only create files if necessary by checking if the orders dir has any ACL files
+  # piping error to dev null since it's normal for acl files to not exist
+  if [ -n "${HAS_ACL}" ]; then
+    info loading ACL for service ${SERVICE_NAME}
+    # Create the map file and make the default 0
+    echo "  map \$remote_user \$starphleet_acl_${SERVICE_NAME} {" > "${FILE_ACL_RULES_MAP}"
+    echo "   default 0;" >> "${FILE_ACL_RULES_MAP}"
+    # Go through every ACL file and append the users to a map
+    # Add all the users from this file to the map
+    for ACL_USERNAME in $(cat "${SERVICE_DIR}"/*.acl 2> /dev/null | sort | uniq); do
+      echo "   ${ACL_USERNAME} 1;" >> "${FILE_ACL_RULES_MAP}"
+    done
+    echo "  }" >> "${FILE_ACL_RULES_MAP}"
+    # Publish the rule for the map
+    echo "  location /${SERVICE_NAME}/accessdenied {" > "${FILE_ACL_RULES_CONF}"
+    echo "      more_set_headers 'WWW-Authenticate: Basic realm=\"Forbidden!\"';" >> "${FILE_ACL_RULES_CONF}"
+    echo "      return 401;" >> "${FILE_ACL_RULES_CONF}"
+    echo "  }" >> "${FILE_ACL_RULES_CONF}"
+    echo "  if (\$starphleet_acl_${SERVICE_NAME} != 1) {" >> "${FILE_ACL_RULES_CONF}"
+    echo "    rewrite ^/${SERVICE_NAME}/(.*) /${SERVICE_NAME}/accessdenied break;" >> "${FILE_ACL_RULES_CONF}"
+    echo "  }" >> "${FILE_ACL_RULES_CONF}"
+  else
+    info no ACLs specified for service: ${SERVICE_NAME}
+  fi
+done
+
+starphleet-hup-nginx
