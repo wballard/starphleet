@@ -39,27 +39,16 @@ for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
   # Only create files if necessary by checking if the orders dir has any ACL files
   # piping error to dev null since it's normal for acl files to not exist
   if [ -n "${HAS_ACL}" ]; then
+    info loading ACL for service ${SERVICE_NAME}
     # Create the map file and make the default 0
     echo "  map \$remote_user \$starphleet_acl_${SERVICE_NAME} {" > "${FILE_ACL_RULES_MAP}"
     echo "   default 0;" >> "${FILE_ACL_RULES_MAP}"
-  fi
-  # Go through every ACL file and append the users to a map
-  for FILE_ACL_LIST in $(find ${SERVICE_DIR} -type f -name "*.acl"); do
-    info loading ACL for service ${SERVICE_NAME} from ${FILE_ACL_LIST}
-    # Map files must have 'uniq' entries so.. lets uniq'ify it
-    FILE_UNIQ_ACL_LIST="/tmp/${SERVICE_NAME}_acl_list.tmp"
-    # In case of errors lets cleanup
-    trap "test -f ${FILE_UNIQ_ACL_LIST} && rm ${FILE_UNIQ_ACL_LIST} 2> /dev/null" SIGTERM EXIT
-    # Uniqify
-    cat "${FILE_ACL_LIST}" | sort | uniq > "${FILE_UNIQ_ACL_LIST}"
+    # Go through every ACL file and append the users to a map
     # Add all the users from this file to the map
-    for ACL_USERNAME in $(cat "${FILE_UNIQ_ACL_LIST}"); do
+    for ACL_USERNAME in $(cat "${SERVICE_DIR}"/*.acl 2> /dev/null | sort | uniq); do
       echo "   ${ACL_USERNAME} 1;" >> "${FILE_ACL_RULES_MAP}"
     done
-    [ -f "${FILE_UNIQ_ACL_LIST}" ] && rm "${FILE_UNIQ_ACL_LIST}"
-  done
-  # If there were ACL files we need to close up the map file
-  if [ -n "${HAS_ACL}" ]; then
+    # If there were ACL files we need to close up the map file
     echo "  }" >> "${FILE_ACL_RULES_MAP}"
     # Publish the rule for the map
     echo "  location /${SERVICE_NAME}/accessdenied {" > "${FILE_ACL_RULES_CONF}"
