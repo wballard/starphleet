@@ -283,6 +283,18 @@ Say you have a simple service with a todo list, a mail queue, and a website. You
 
 Then when running you get your site at `http://example.co/`, and your services at `http://example.co/todo` and `http://example.co/mail`.
 
+## Access Control Lists
+
+If you enable [ldap](#authenticate-with-ldap) or htpasswd authentication you can also limit a service to certain users.  To enable per-user access to a service add a file to your service endpoint directory with the extension `.acl`.  The file should contain a list of users separated by newlines.
+
+Example (`example.acl`):
+
+    jdoe
+    jjdoe
+    jsmith
+
+The above service endpoint would only allow three users access - all others will be prompted to login.
+
 ## Set up Multiversion Betas
 You can run more than one version of your service, and route users along to a different version based on their logged in HTTP identity.
 
@@ -660,7 +672,7 @@ DEVMODE_UNBIND_GIT_DIR=true
 
 ### Authentication
 
-Some services depend on authentication.  Starphleet automatically supports LDAP and HTACCESS [authentication](https://github.com/wballard/starphleet/blob/gh-pages/index.md#service_name).  Services are written in such a way that they depend on HTTP headers that are provided by the authentication method.  If you need to simulate authenticated services in development mode you can add the following variable to your orders file:
+Some services depend on authentication.  Starphleet automatically supports LDAP and [htpasswd authentication](https://github.com/wballard/starphleet/blob/gh-pages/index.md#service_name).  Services are written in such a way that they depend on HTTP headers that are provided by the authentication method.  If you need to simulate authenticated services in development mode you can add the following variable to your orders file:
 
 ```bash
 DEVMODE_FORCE_AUTH=[username]
@@ -668,7 +680,7 @@ DEVMODE_FORCE_AUTH=[username]
 
 ### Disabling Development Mode
 
-There may be instances where you want to force starphleet to behave like a production environment locally on your machine.  In those instances you can simply touch a file to disable Development Mode:
+There may be instances where you want to force Starphleet to behave like a production environment locally on your machine.  In those instances you can simply touch a file to disable Development Mode:
 
 ```bash
 $ touch /var/starphleet/live
