@@ -133,6 +133,18 @@ function run_orders()
     REDIRECTTO=${2}
   }
 
+  redirect_to () {
+    # although it is perfectly ok ( it seems ) to redeclare an array when 
+    # one of the same name exists ( it doesn't seem to do anything ) the 
+    # desire is to only create one if it's needed, so to do this we use the
+    # lenght of the array as a proxy for existence as bash has no way to  check fo
+    # the existence of an empty array that I can find
+    if [ ${#REDIRECT_TO[@]} -eq 0 ]; then
+      declare -A -g REDIRECT_TO
+    fi
+    REDIRECT_TO[$1]=$2
+  }
+
   beta () {
     BETAS[$1]=$2
   }
