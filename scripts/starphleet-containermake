@@ -21,6 +21,14 @@ chmod 777 /var/lib/lxc/data
 
 CONTAINER_NAME="${container_name}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
+LOCK_FILE=${CONTAINER_NAME}
+# A race condition occurs when locking based on containername
+# where multiple containers for the same order will trample
+# on each other continuiously.  We are using the 'order' to
+# lock so we only build once per order
+if dev_mode ;then
+  [ -z ${order} ] && LOCK_FILE=${CONTAINER_NAME} || LOCK_FILE=${order}
+fi
 
 #configuration, this is the place to mount directories on the host computer
 #into the container
@@ -40,7 +48,19 @@ trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
 (
 #flocked, parallel container build is a race condition on start
-flock 200
+if dev_mode ; then
+  # In dev mode you should only need to build once even on many saves
+  # .. so dying gracefully is more ideal
+  flock -n 200
+  if [ $? -ne 0 ]; then
+    echo "unable to aquire lock to run ${script}"
+    # no error code so cron won't try to email
+    exit 0
+  fi
+else
+  flock 200
+fi
+
 if lxc-ls | grep "^${container_name}$"; then
   info container exists
   exit 0
@@ -58,20 +78,32 @@ else
     CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
   fi
 
-if dev_mode ; then
-  info Local Dev mode appending mount to ${CONTAINER_CONF}
-  STARPHLEET_DEV_DIR=/hosthome/starphleet_dev
-  #create dir to hold app source and container mount point
-  [ -d "${STARPHLEET_DEV_DIR}" ] || mkdir -p "${STARPHLEET_DEV_DIR}"
-  chmod 777 "${STARPHLEET_DEV_DIR}"
-  [ -d "${CONTAINER_OVERLAY}/var/git" ] || mkdir -p "${CONTAINER_OVERLAY}/var/git"
-  chmod 777 "${CONTAINER_OVERLAY}/var/git"
-  # add one additional mount point to the lxc container config.  Wil expose the container git dir to the host
-  echo "lxc.mount.entry = ${STARPHLEET_DEV_DIR} ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0" >> ${CONTAINER_CONF}
-  echo "lxc.mount.entry = ${STARPHLEET_DEV_DIR} ${CONTAINER_ROOT}/rootfs/var/git none bind,rw 0 0" >> ${CONTAINER_CONF}
-else
-  echo "lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none rbind,rw 0 0" >> ${CONTAINER_CONF}
-fi
+  if dev_mode ; then
+    info Local Dev mode appending mount to ${CONTAINER_CONF}
+    # Edit:  This needs to take into account that these directories are properly
+    #        mounted as an HGFS file system or we need to punt completely
+    #
+    #        This helps survive a reboot where HGFS has not come up yet but
+    #        starphleet has started
+    # TODO: But what about parallels or virtualbox?
+    TEST=$(mount | grep /hosthome | grep vmhgfs)
+    [ -z "${TEST}" ] && exit 1
+    # Proceed with original authors code
+    STARPHLEET_DEV_DIR=/hosthome/starphleet_dev
+    # Make the dirs
+    mkdir -p "${STARPHLEET_DEV_DIR}"
+    mkdir -p "${STARPHLEET_DEV_DIR}/data"
+    mkdir -p "${CONTAINER_OVERLAY}/var/git"
+    # Fix the perms on the dirs
+    chmod 777 "${STARPHLEET_DEV_DIR}"
+    chmod 777 "${STARPHLEET_DEV_DIR}"
+    chmod 777 "${CONTAINER_OVERLAY}/var/git"
+    # add one additional mount point to the lxc container config.  Wil expose the container git dir to the host
+    echo "lxc.mount.entry = ${STARPHLEET_DEV_DIR}/data ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0" >> ${CONTAINER_CONF}
+    echo "lxc.mount.entry = ${STARPHLEET_DEV_DIR} ${CONTAINER_ROOT}/rootfs/var/git none bind,rw 0 0" >> ${CONTAINER_CONF}
+  else
+    echo "lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none rbind,rw 0 0" >> ${CONTAINER_CONF}
+  fi
 
 
   #make a directory where we can mount back to the ship and a config file to mount
@@ -119,5 +151,5 @@ fi
     starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
   fi
   info made container ${CONTAINER_NAME}
-fi
-) 200>/var/lock/${CONTAINER_NAME}
+fi # End of container name exists
+) 200>/var/lock/${LOCK_FILE}

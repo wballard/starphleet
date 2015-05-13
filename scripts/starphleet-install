@@ -74,11 +74,9 @@ debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Si
 # Run Upgrade before before installing packages - which fixes this error
 # https://github.com/lxc/lxc/issues/247
 apt-get update -y
-
 export DEBIAN_FRONTEND=noninteractive
 apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes
 
-apt-get -y install --force-yes software-properties-common
 apt-get -y install --force-yes $(< "${DIR}/packages")
 
 pushd ${STARPHLEET_ROOT:-/var/starphleet}/nginx

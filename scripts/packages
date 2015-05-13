@@ -1,3 +1,4 @@
+software-properties-common
 git
 curl
 apt-transport-https
@@ -20,4 +21,5 @@ libldap2-dev
 mailutils
 ntp
 postfix
+rsync
 awscli

@@ -59,15 +59,43 @@ trace Fetching service to \${APP_IN}
 if dev_mode; then
   trace Local Dev mode
   if [ "${git_url}" != "-" ]; then
-    #Cloning this into /var/git was breaking, it is an lxc.mount.entry
-    #Not sure what the actual issue is with cloning on that particular mount
-    sudo mkdir -p "/var/containers"
-    sudo chown -R ubuntu "/var/containers"
-
-    starphleet-git-synch "${git_url}" "/var/containers/${container_name}"
-    sudo chmod -R +w "/var/containers/${container_name}"
-    sudo cp -R "/var/containers/${container_name}" "/var/git/"
-    sudo ln -s "/var/git/${container_name}" \${APP_IN}
+    # Only trample on the current git dir if it doesn't already exist
+    if [ ! -d "/var/git/${order}" ]; then
+      # Work around HGFS bug in vmware which pukes on large
+      # git checkouts to a sync'd folder between vmware -> host
+      #
+      # To work around this pesky issue we allow starphleet to setup
+      # git the first time in a different way.
+      #
+      #    - Check git out to a local dir
+      #    - Rsync that dir to starphleet_dev
+      #    - Punt and let starphleet detect the changes in starphleet_dev
+      #
+      # Here we sync to a temp directory in admiral.  Why?
+      # ... We want starphleet_monitor_orders to not try to rebuild
+      #     this service until the entire repository is synced
+      #     into starphleet_dev.  The way we do this (for now) is
+      #     use a tmp directory that is exposed in both the container
+      #     and the host OS
+      [ -f /home/admiral/tmp/${order} ] && rm -rf /home/admiral/tmp/${order}
+      sudo starphleet-git-synch "${git_url}" "/home/admiral/tmp/${order}"
+      # Now move the files (once) to the starphleet_dev dir - which, in
+      # the container context where this is running is mapped to /var/git
+      sudo rsync -rlptD "/home/admiral/tmp/${order}/" "/var/git/${order}/" || true
+      sudo chmod -R +w "/var/git/${order}" || true
+      # Once we remove the temporary directory.. starphleet will try to rebuild
+      # this container because it will detect there was a change in /var/git/<order>
+      sudo rm -rf "/home/admiral/tmp/${order}"
+    fi
+    # Some developers may wish to unbind the GIT directory to the actual app
+    # deployment directory so that packages do not mangle their working git
+    # directory.  Supporting both behaviors.
+    if [ ! -z "${DEVMODE_UNBIND_GIT_DIR}" ]; then
+      sudo rsync -rlKt "/var/git/${order}/" \${APP_IN}/ || true
+    else
+      ln -s /var/git/${order} \${APP_IN} || true
+    fi
+    sudo chown -R ubuntu:ubuntu \${APP_IN}
   fi
 else
   if [ "${git_url}" != "-" ]; then

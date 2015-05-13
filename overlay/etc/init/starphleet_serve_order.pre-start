@@ -24,6 +24,9 @@ if [ "${name}" == "${LAST_KNOWN_GOOD_CONTAINER}" -a "${name}" == "${DO_WE_HAVE_T
   lxc-start --name ${name} -d
   starphleet-lxc-wait ${name} RUNNING
   lxc-attach --name ${name} -- bash starphleet-wait-network
+  if dev_mode && [ ! -z ${DEVMODE_UNBIND_GIT_DIR} ]; then
+    lxc-attach --name ${name} -- bash -c "rsync -rlKt '/var/git/${order}/' /home/ubuntu/app/"
+  fi
 else
   warn "creating a new container"
   #starting up the build

@@ -1,5 +1,2 @@
 #!/usr/bin/env bash
-sudo apt-get -y update
-sudo apt-get install -y git
-sudo git clone https://github.com/wballard/starphleet.git /starphleet
-sudo bash /starphleet/scripts/starphleet-install
+bash -c "$(curl -s https://raw.githubusercontent.com/wballard/starphleet/master/webinstall)"
