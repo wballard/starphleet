@@ -12,7 +12,8 @@
 ##
 ##############################################################################
 ## Locations to this repo
-STARPHLEET_REPO="https://github.com/wballard/starphleet.git"
+STARPHLEET_REPO=${STARPHLEET_REPO:-"https://github.com/wballard/starphleet.git"}
+STARPHLEET_BRANCH=${STARPHLEET_BRANCH:-master}
 
 ##############################################################################
 ## Main Foo
@@ -23,7 +24,7 @@ read -p "Please paste the SSH git URL to your headquarters:  " HEADQUARTERS_URL
 # We're gonna need git
 apt-get install -y git
 # Now grab this repo
-git clone ${STARPHLEET_REPO}
+git clone -b ${STARPHLEET_BRANCH} ${STARPHLEET_REPO}
 # Head into scripts
 cd starphleet/scripts
 # Move launcher into place
