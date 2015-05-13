@@ -60,7 +60,7 @@ EOF
   else
     FILTER="starphleetstatus"
   fi
-  for status in $(find "${CURRENT_ORDERS}" | grep 'starphleetstatus$' | grep ${FILTER})
+  for status in $(find "${CURRENT_ORDERS}" -maxdepth 2 | grep 'starphleetstatus$' | grep ${FILTER})
   do
     STATUS=$(cat "${status}")
     ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
