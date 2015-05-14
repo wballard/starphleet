@@ -63,7 +63,7 @@ do
     # check to see if the corresponding file is there before we
     # create the config and skip otherwise
     [ ! -f "${HEADQUARTERS_LOCAL}/beta_groups/${beta}" ] && continue
-    echo "" > "${BETA_CONF}"
+    echo "" >> "${BETA_CONF}"
     echo "  if (\$starphleet_beta_${beta}) {" >> "${BETA_CONF}"
     echo "    rewrite ^/${ORDER_NAME}/(.*) ${BETAS[$beta]}/\$1 last;" >> "${BETA_CONF}"
     echo "  }" >> "${BETA_CONF}"
