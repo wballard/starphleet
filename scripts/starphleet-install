@@ -40,6 +40,7 @@ echo 24576 > /sys/module/nf_conntrack/parameters/hashsize
 
 # Machine specific configs
 mkdir -p /etc/starphleet.d
+touch /etc/starphleet.d/overrides
 
 # If starphleet is deployed in a EC2 environment we append the region configuration
 # to the global starphleet config
