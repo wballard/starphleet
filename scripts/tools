@@ -134,8 +134,8 @@ function run_orders()
   }
 
   redirect_to () {
-    # although it is perfectly ok ( it seems ) to redeclare an array when 
-    # one of the same name exists ( it doesn't seem to do anything ) the 
+    # although it is perfectly ok ( it seems ) to redeclare an array when
+    # one of the same name exists ( it doesn't seem to do anything ) the
     # desire is to only create one if it's needed, so to do this we use the
     # lenght of the array as a proxy for existence as bash has no way to  check fo
     # the existence of an empty array that I can find
@@ -248,7 +248,7 @@ function die_on_error(){
 if [ -d /etc/starphleet.d ]; then
   for env_file in /etc/starphleet.d/*
   do
-    source ${env_file}
+    test -f "${env_file}" && source "${env_file}"
   done
 fi
 [ -f "${HEADQUARTERS_SOURCE}" ] && source "${HEADQUARTERS_SOURCE}"
