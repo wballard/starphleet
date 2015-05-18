@@ -41,7 +41,7 @@ do
 done
 
 # Go through all the orders and generate all the beta configs
-for ORDERS_FILE in $(find "${HEADQUARTERS_LOCAL}" | grep '/orders$')
+for ORDERS_FILE in $(find "${HEADQUARTERS_LOCAL}" | grep '/orders$' | grep -v '/git')
 do
   # Orders will contain BETAS as an array.. so we clear and declare
   # the BETAS variable as an associative array
