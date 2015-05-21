@@ -45,7 +45,7 @@ for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
     echo "   default 0;" >> "${FILE_ACL_RULES_MAP}"
     # Go through every ACL file and append the users to a map
     # Add all the users from this file to the map
-    for ACL_USERNAME in $(cat "${SERVICE_DIR}"/*.acl 2> /dev/null | sort | uniq); do
+    for ACL_USERNAME in $(cat "${SERVICE_DIR}"/*.acl 2> /dev/null | tr '[:upper:]' '[:lower:]' | sort | uniq); do
       echo "   ${ACL_USERNAME} 1;" >> "${FILE_ACL_RULES_MAP}"
     done
     echo "  }" >> "${FILE_ACL_RULES_MAP}"
