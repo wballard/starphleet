@@ -114,6 +114,7 @@ else
   mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
   [ -f "/hosthome/.starphleet" ] && cp /hosthome/.starphleet "${CONTAINER_OVERLAY}/.starphleet"
   cp /etc/starphleet "${CONTAINER_OVERLAY}/etc/"
+  cp -r /etc/starphleet.d "${CONTAINER_OVERLAY}/etc/"
   cp /usr/bin/starphleet* "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
