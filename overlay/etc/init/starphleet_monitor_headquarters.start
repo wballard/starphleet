@@ -1,0 +1,31 @@
+#!/bin/bash
+
+while [ 1 ]
+do
+  source `which tools`
+  trace checking headquarters ${HEADQUARTERS_REMOTE} for updates
+  if [ -n "${HEADQUARTERS_REMOTE}" ]; then
+    #pull down the actual headquarters changes
+    if starphleet-git-synch "${HEADQUARTERS_REMOTE}" "${HEADQUARTERS_LOCAL}"; then
+      latest_AUTHOR ${HEADQUARTERS_LOCAL}
+      warn Headquarters updated by ${AUTHOR}
+      [ -d ${HEADQUARTERS_LOCAL}/overlay ] && cp -R ${HEADQUARTERS_LOCAL}/overlay/* /
+      starphleet-ldap-servers
+      starphleet-public-keys
+      starphleet-beta-groups
+      starphleet-nginx-acl-rules
+      run_ship_scripts
+      service rsyslog restart || true
+      service postfix reload || true
+      starphleet-hup-nginx
+    fi
+  else
+    warn "**"
+    warn You have no headquarters, add one with
+    warn starphleet-headquarters giturl
+    warn "**"
+  fi
+  # we'll wait a bit, and fall through allowing our respawn
+  # to start us up again
+  sleep "${STARPHLEET_PULSE}"
+done
