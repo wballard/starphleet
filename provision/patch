@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 sudo stop starphleet_monitor_orders
 sudo stop starphleet_monitor_headquarters

@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 source `which tools`
 
 while [ 1 ]

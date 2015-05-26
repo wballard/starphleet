@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 STARPHLEET_DEV_DIR=/hosthome/starphleet_dev/data
 while [ 1 ]
