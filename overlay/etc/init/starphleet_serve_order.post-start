@@ -59,11 +59,15 @@ else
       FAILED_COUNT=0
       while [ 1 ];
       do
+        sleep 10;
         TEST_GET="http://${IP_ADDRESS}:${PORT}${HEALTHCHECK}"
         TEST_COMMAND="curl -X GET -o /dev/null -s -w %{response_code} ${TEST_GET}"
         RESULT=`${TEST_COMMAND}`
+        warn Command ${TEST_COMMAND}
+        warn Result: ${RESULT}
         if [ ${RESULT} == "200" ]; then
           # Reset the failed counter
+          warn success
           FAILED_COUNT=0
           continue;
         fi
@@ -75,11 +79,14 @@ else
         # the default (180) without ever surpassing the default of 180.
         # since our caller sources the orders file, this can be added to your orders
         # for a specific service
-        if [ $FAILED_COUNT -gt 3 ]; then
+        if [ $FAILED_COUNT -gt 1 ]; then
           error "Healthcheck Failed too many times - restarting service"
-          restart starphleet_serve_order name="${name}" order="${order}"
+          warn stop starphleet_serve_order name="${name}" order="${order}"
+          warn start starphleet_serve_order name="${name}" order="${order}"
+          # TODO: Find a way to restart that upstart likes
+          # starphleet-retry-deploy "${order}"
+          exit 0
         fi
-        sleep 10;
       done
     fi
 
