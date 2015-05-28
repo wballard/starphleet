@@ -87,14 +87,26 @@ function make_admiral() {
   info admiral created
 }
 
-function mail_log()
+function mail_failure_log()
 {
   if which mail > /dev/null; then
     ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
     latest_AUTHOR "${ORDER_LOCAL}"
+    [ -n "${BUILD_NOTIFICATION_EMAIL_ADDRESSES}" ] && AUTHOR="${AUTHOR},${BUILD_NOTIFICATION_EMAIL_ADDRESSES}"
     cat /var/log/upstart/${UPSTART_JOB}-${name}.log \
     | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
     | mail -s "Starphleet Build Failure: ${name}" "${AUTHOR}"
+  fi
+}
+
+function mail_success_log()
+{
+  if which mail > /dev/null; then
+    if [ -n "${BUILD_NOTIFICATION_EMAIL_ADDRESSES}" ]; then
+      cat /var/log/upstart/${UPSTART_JOB}-${name}.log \
+      | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" \
+      | mail -s "Starphleet Build Success: ${name}" "${BUILD_NOTIFICATION_EMAIL_ADDRESSES}"
+    fi
   fi
 }
 

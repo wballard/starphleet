@@ -33,6 +33,7 @@ else
     trace "${name}" "${PORT}" "${PUBLISH_PORT}" "/${order}" "${HTPASSWD}" "${LDAP}"
     if ! starphleet-publish "${name}" "/${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
       echo 'publish failed' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+      mail_failure_log
       exit 1
     fi
     #record online, with the IP address of the container
@@ -46,12 +47,13 @@ else
     #we wait a small time for prior requests to flush out
     sleep ${STARPHLEET_DRAINSTOP_WAIT}
     starphleet-reaper "${name}" "${order}"
+    mail_success_log
     exit 0
   else
     #at this point the service has failed to properly start
     warn service failed to publish "/${order}"
     echo 'failed' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
-    mail_log
+    mail_failure_log
     exit 1
   fi
 fi
