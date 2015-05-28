@@ -87,7 +87,7 @@ function make_admiral() {
   info admiral created
 }
 
-function mail_failure_log()
+function failure_mail_log()
 {
   if which mail > /dev/null; then
     ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
@@ -99,7 +99,7 @@ function mail_failure_log()
   fi
 }
 
-function mail_success_log()
+function success_mail_log()
 {
   if which mail > /dev/null; then
     if [ -n "${BUILD_NOTIFICATION_EMAIL_ADDRESSES}" ]; then
