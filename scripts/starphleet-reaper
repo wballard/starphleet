@@ -21,10 +21,10 @@ STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
   #   - The container is online
   #   - The container is failed
   #   - The container failed to publish
-  if [ "${CURRENT_STATUS}" == ""] ||
-     [ "${CURRENT_STATUS}" == "online"] ||
-     [ "${CURRENT_STATUS}" == "failed"] ||
-     [ "${CURRENT_STATUS}" == "publish failed"]; then
+  if [ "${CURRENT_STATUS}" == "" ] ||
+     [ "${CURRENT_STATUS}" == "online" ] ||
+     [ "${CURRENT_STATUS}" == "failed" ] ||
+     [ "${CURRENT_STATUS}" == "publish failed" ]; then
 
     info "reaping ${name}"
     stop starphleet_serve_order name="${name}" || true
