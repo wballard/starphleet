@@ -3,14 +3,15 @@ source `which tools`
 set +e
 info "checking ${name}"
 ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
+STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
 if [ "${UNPUBLISHED}" == "1" ]; then
-  echo 'online' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+  echo 'online' > "${STATUS_FILE}"
   starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
   starphleet-reaper "${name}" "${order}"
 else
   #status logging, here indicating the healthcheck is about to go
-  echo 'checking' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+  echo 'checking' > "${STATUS_FILE}"
   #the container and service is started, so healthcheck it before we publish it
   #in order to have a real drainstop / transparent upgrade feature
   #if there is a specified healthcheck url
@@ -32,14 +33,14 @@ else
     fi
     trace "${name}" "${PORT}" "${PUBLISH_PORT}" "/${order}" "${HTPASSWD}" "${LDAP}"
     if ! starphleet-publish "${name}" "/${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
-      echo 'publish failed' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+      echo 'publish failed' > "${STATUS_FILE}"
       exit 1
     fi
     #record online, with the IP address of the container
-    echo 'online' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+    echo 'online' > "${STATUS_FILE}"
     echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
-    lxc-ls --fancy "${name}" | tail -1 | awk '{ print $3; }' > "${CURRENT_ORDERS}/${order}/.starphleetstatus.ip"
-    echo "${PORT}" > "${CURRENT_ORDERS}/${order}/.starphleetstatus.port"
+    lxc-ls --fancy "${name}" | tail -1 | awk '{ print $3; }' > "${STATUS_FILE}.ip"
+    echo "${PORT}" > "${STATUS_FILE}.port"
     # Expose any ports requested in the orders
     starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
     #any prior version of this order should now be reaped after
@@ -50,7 +51,7 @@ else
   else
     #at this point the service has failed to properly start
     warn service failed to publish "/${order}"
-    echo 'failed' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+    echo 'failed' > "${STATUS_FILE}"
     mail_log
     exit 1
   fi
