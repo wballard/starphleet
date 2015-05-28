@@ -19,11 +19,12 @@ STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
   # so future statuses don't trigger accidental reapz
   # We reap if:
   #   - The status file doesn't exist (orphaned container)
+  #   - The container is not the latest container
   #   - The container is online
   #   - The container is failed
   #   - The container failed to publish
-  if [ "${CURRENT_STATUS}" == "" ] ||
-     [ "${CURRENT_CONTAINER}" == "${name}" ] ||
+  if [ "${CURRENT_CONTAINER}" != "${name}" ] ||
+     [ "${CURRENT_STATUS}" == "" ] ||
      [ "${CURRENT_STATUS}" == "online" ] ||
      [ "${CURRENT_STATUS}" == "failed" ] ||
      [ "${CURRENT_STATUS}" == "publish failed" ]; then
