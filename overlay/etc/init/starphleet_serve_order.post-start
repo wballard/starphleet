@@ -47,21 +47,21 @@ else
     #we wait a small time for prior requests to flush out
     sleep ${STARPHLEET_DRAINSTOP_WAIT}
     starphleet-reaper "${name}" "${order}"
-    exit 0
 
     ###################################
     ## Persistent healchecker
     ###################################
 
     if [ -n "${HEALTHCHECK}" ]; then
+      HEALTHCHECK_TIMEOUT=${HEALTHCHECK_TIMEOUT:-30}
       IP_ADDRESS=$(lxc-ls --fancy | grep "^${name}[[:space:]]" | awk '{ print $3; }')
       TEST_PASSED=false
       FAILED_COUNT=0
       while [ 1 ];
       do
-        sleep 10;
+        sleep ${STARPHLEET_PULSE};
         TEST_GET="http://${IP_ADDRESS}:${PORT}${HEALTHCHECK}"
-        TEST_COMMAND="curl -X GET -o /dev/null -s -w %{response_code} ${TEST_GET}"
+        TEST_COMMAND="curl -X GET --connect-timeout ${HEALTHCHECK_TIMEOUT} -o /dev/null -s -w %{response_code} ${TEST_GET}"
         RESULT=`${TEST_COMMAND}`
         warn Command ${TEST_COMMAND}
         warn Result: ${RESULT}
@@ -79,13 +79,13 @@ else
         # the default (180) without ever surpassing the default of 180.
         # since our caller sources the orders file, this can be added to your orders
         # for a specific service
-        if [ $FAILED_COUNT -gt 1 ]; then
+        if [ $FAILED_COUNT -gt 3 ]; then
           error "Healthcheck Failed too many times - restarting service"
-          warn stop starphleet_serve_order name="${name}" order="${order}"
-          warn start starphleet_serve_order name="${name}" order="${order}"
           # TODO: Find a way to restart that upstart likes
           # starphleet-retry-deploy "${order}"
-          exit 0
+          warn starphleet-lxc-stop "${name}"
+          starphleet-lxc-stop "${name}"
+          exit 1
         fi
       done
     fi
