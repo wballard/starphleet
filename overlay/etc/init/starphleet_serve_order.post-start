@@ -82,6 +82,9 @@ else
           error "Healthcheck Failed too many times - restarting service"
           # TODO: Find a way to restart that upstart likes
           # starphleet-retry-deploy "${order}"
+          # Debug Emailing
+          echo "Healthcheck Restart for ${name} on ${STARPHLEET_EC2_REGION}" |
+            mail -s "Persistent Healthcheck Restart - ${name}" "devfirefighters@glgroup.com"
           warn starphleet-lxc-stop "${name}"
           starphleet-lxc-stop "${name}"
           exit 1
