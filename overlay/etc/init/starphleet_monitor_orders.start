@@ -11,7 +11,7 @@ do
   ORDERS_SHA="${CURRENT_SHA}"
 
   #Clean up Removed Orders
-  for ORDER_FILE in $(find "${CURRENT_ORDERS}" -type f -iname ".starphleetstatus")
+  for ORDER_FILE in $(find "${CURRENT_ORDERS}" -type f -iname ".starphleetstatus*")
   do
     ORDER_FILE="${ORDER_FILE%/*}"
     ORDER_FILE="${ORDER_FILE##*/}"

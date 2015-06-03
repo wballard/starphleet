@@ -8,8 +8,31 @@
 ENCODED_ORDER=$(urlencode "${order}")
 for name in $(lxc-ls | grep --extended-regexp -e "^${ENCODED_ORDER}-([a-f0-9]){7}-([a-f0-9]){7}" | grep --invert-match "${current_service_name}")
 do
-  info "reaping ${name}"
-  stop starphleet_serve_order name="${name}" || true
-  starphleet-lxc-destroy "${name}"
-  info "reaper has reaped ${name}"
+
+  STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
+
+  # If the status file exists get the status
+  [ -f "${STATUS_FILE}" ] && CURRENT_STATUS=$(cat "${STATUS_FILE}")
+  CURRENT_CONTAINER=$(cat ${CURRENT_ORDERS}/${order}/.container)
+
+  # Only reap non-building containers.  Being explicit about reap conditions
+  # so future statuses don't trigger accidental reapz
+  # We reap if:
+  #   - The status file doesn't exist (orphaned container)
+  #   - The container is not the latest container
+  #   - The container is online
+  #   - The container is failed
+  #   - The container failed to publish
+  if [ "${CURRENT_CONTAINER}" != "${name}" ] ||
+     [ "${CURRENT_STATUS}" == "" ] ||
+     [ "${CURRENT_STATUS}" == "online" ] ||
+     [ "${CURRENT_STATUS}" == "failed" ] ||
+     [ "${CURRENT_STATUS}" == "publish failed" ]; then
+
+    info "reaping ${name}"
+    stop starphleet_serve_order name="${name}" || true
+    starphleet-lxc-destroy "${name}" || true
+    rm ${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}* 2> /dev/null || true
+    info "reaper has reaped ${name}"
+  fi
 done
