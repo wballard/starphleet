@@ -59,7 +59,7 @@ else
       FAILED_COUNT=0
       while [ 1 ];
       do
-        if [ "${name}" == "$(cat ${CURRENT_ORDERS}/${order}/.container)" ]; then
+        if [ "${name}" != "$(cat ${CURRENT_ORDERS}/${order}/.container)" ]; then
           # If this isn't the current container the healthcheck timer should punt
           # without an error
           warn "Container is no longer active - healthcheck stopping"
