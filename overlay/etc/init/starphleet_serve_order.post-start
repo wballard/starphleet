@@ -59,6 +59,11 @@ else
       FAILED_COUNT=0
       while [ 1 ];
       do
+        if [ "${name}" == "$(cat ${CURRENT_ORDERS}/${order}/.container)" ]; then
+          # If this isn't the current container the healthcheck timer should punt
+          # without an error
+          exit 0
+        fi
         sleep ${STARPHLEET_PULSE};
         TEST_GET="http://${IP_ADDRESS}:${PORT}${HEALTHCHECK}"
         TEST_COMMAND="curl -X GET --connect-timeout ${HEALTHCHECK_TIMEOUT} -o /dev/null -s -w %{response_code} ${TEST_GET}"
@@ -81,10 +86,8 @@ else
         if [ $FAILED_COUNT -gt 3 ]; then
           error "Healthcheck Failed too many times - restarting service"
           # Debug Emailing
-          if [ "${name}" == "$(cat ${CURRENT_ORDERS}/${order}/.container)" ]; then
-            echo "Healthcheck Restart for ${name} on ${STARPHLEET_EC2_REGION}" |
-              mail -s "Persistent Healthcheck Restart - ${name}" "devfirefighters@glgroup.com"
-          fi
+          echo "Healthcheck Restart for ${name} on ${STARPHLEET_EC2_REGION}" |
+            mail -s "Persistent Healthcheck Restart - ${name}" "devfirefighters@glgroup.com"
           warn starphleet-lxc-stop "${name}"
           starphleet-lxc-stop "${name}"
           exit 1
