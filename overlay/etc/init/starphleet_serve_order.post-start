@@ -84,7 +84,8 @@ else
         # the default (180) without ever surpassing the default of 180.
         # since our caller sources the orders file, this can be added to your orders
         # for a specific service
-        if [ $FAILED_COUNT -gt 3 ]; then
+        HEALTHCHECK_RETRY_COUNT=${HEALTHCHECK_RETRY_COUNT:-3}
+        if [ $FAILED_COUNT -gt ${HEALTHCHECK_RETRY_COUNT} ]; then
           error "Healthcheck Failed too many times - restarting service"
           # Debug Emailing
           if [ -n "${HEALTHCHECK_NOTIFICATIONS_EMAIL_ADDRESS}" ]; then
