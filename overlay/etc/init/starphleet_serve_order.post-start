@@ -62,6 +62,7 @@ else
         if [ "${name}" == "$(cat ${CURRENT_ORDERS}/${order}/.container)" ]; then
           # If this isn't the current container the healthcheck timer should punt
           # without an error
+          warn "Container is no longer active - healthcheck stopping"
           exit 0
         fi
         sleep ${STARPHLEET_PULSE};
