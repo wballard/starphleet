@@ -87,8 +87,10 @@ else
         if [ $FAILED_COUNT -gt 3 ]; then
           error "Healthcheck Failed too many times - restarting service"
           # Debug Emailing
-          echo "Healthcheck Restart for ${name} on ${STARPHLEET_EC2_REGION}" |
-            mail -s "Persistent Healthcheck Restart - ${name}" "devfirefighters@glgroup.com"
+          if [ -n "${HEALTHCHECK_NOTIFICATIONS_EMAIL_ADDRESS}" ]; then
+            echo "Healthcheck Restart for ${name} on ${STARPHLEET_EC2_REGION}" |
+              mail -s "Persistent Healthcheck Restart - ${name}" "${HEALTHCHECK_NOTIFICATIONS_EMAIL_ADDRESS}"
+          fi
           warn starphleet-lxc-stop "${name}"
           starphleet-lxc-stop "${name}"
           exit 1
