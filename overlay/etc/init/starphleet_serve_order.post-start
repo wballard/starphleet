@@ -15,7 +15,7 @@ else
   #the container and service is started, so healthcheck it before we publish it
   #in order to have a real drainstop / transparent upgrade feature
   #if there is a specified healthcheck url
-  if [ -z "${HEALTHCHECK}" ] || starphleet-ready "${name}" "${PORT}" "${HEALTHCHECK}"; then
+  if [ -z "${HEALTHCHECK}" ] || starphleet-healthcheck "${name}" "${PORT}" "${HEALTHCHECK}"; then
     #at this point we have a running container, and it answers HTTP, so we
     #are on the air and can expose it via nginx
     #new versions replace old versions in nginx for the HUP update
