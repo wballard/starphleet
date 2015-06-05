@@ -1,0 +1,29 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-healthcheck <name> <order> <url>
+### --help
+###
+### Check if a container is ready by looking for a successful http return.
+
+STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
+
+HEALTHCHECK_TIMEOUT=${HEALTHCHECK_TIMEOUT:-30}
+
+[ -f "${STATUS_FILE}.ip" ] && CONTAINER_IP=$(cat "${STATUS_FILE}.ip")
+[ -f "${STATUS_FILE}.port" ] && CONTAINER_PORT=$(cat "${STATUS_FILE}.port")
+URL=${url:-/}
+
+if [ -z ${CONTAINER_IP} ] || [ -z ${CONTAINER_PORT} ]; then
+  error "Cannot find container ip address or port"
+  exit 1
+fi
+
+TEST_GET="http://${CONTAINER_IP}:${CONTAINER_PORT}${URL}"
+TEST_COMMAND="curl -X GET --connect-timeout ${HEALTHCHECK_TIMEOUT} -o /dev/null -s -w %{response_code} ${TEST_GET}"
+RESULT=`${TEST_COMMAND}`
+if [ ${RESULT} == "200" ]; then
+  exit 0
+fi
+
+error Failed Healthcheck - ${TEST_GET}
+exit 1

@@ -2,7 +2,10 @@
 source `which tools`
 
 info "building ${name}"
+
 ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
+STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
+
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
 
 #pre stop if the service demands it
@@ -30,12 +33,10 @@ if [ "${name}" == "${LAST_KNOWN_GOOD_CONTAINER}" -a "${name}" == "${DO_WE_HAVE_T
 else
   warn "creating a new container"
   #starting up the build
-  echo 'building' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+  echo 'building' > "${STATUS_FILE}"
   starphleet-lxc-destroy "${name}"
   #build a container, this will recycle any existing container, only building
   #when things are 'new', with a default for said URL to be nothing
   starphleet-containerize "${SERVICE_GIT_URL:--}" "${name}" "${HEADQUARTERS_LOCAL}/${order}" \
-  || (echo 'building failed' > "${CURRENT_ORDERS}/${order}/.starphleetstatus" && exit 1)
+  || (echo 'building failed' > "${STATUS_FILE}" && exit 1)
 fi
-#this file is just a name pointer to the current container
-echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"

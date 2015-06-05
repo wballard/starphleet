@@ -153,4 +153,6 @@ else
   fi
   info made container ${CONTAINER_NAME}
 fi # End of container name exists
+# Remove lock file to guarantee release
+rm "/var/lock/${LOCK_FILE}"
 ) 200>/var/lock/${LOCK_FILE}
