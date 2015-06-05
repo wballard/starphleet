@@ -14,10 +14,10 @@ USE_LXC_BRIDGE="true"
 # /etc/dnsmasq.d/lxc and restart the system wide dnsmasq daemon.
 LXC_BRIDGE="lxcbr0"
 LXC_ADDR="10.0.3.1"
-LXC_NETMASK="255.255.252.0"
-LXC_NETWORK="10.0.0.0/22"
-LXC_DHCP_RANGE="10.0.0.2,10.0.3.254"
-LXC_DHCP_MAX="1022"
+LXC_NETMASK="255.255.0.0"
+LXC_NETWORK="10.0.0.0/16"
+LXC_DHCP_RANGE="10.0.0.2,10.0.255.254"
+LXC_DHCP_MAX="65534"
 # Uncomment the next line if you'd like to use a conf-file for the lxcbr0
 # dnsmasq.  For instance, you can use 'dhcp-host=mail1,10.0.3.100' to have
 # container 'mail1' always get ip address 10.0.3.100.
