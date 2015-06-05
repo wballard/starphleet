@@ -2,8 +2,15 @@
 source `which tools`
 set +e
 info "checking ${name}"
+
+# Make sure we don't have any settings from previous orders
+unset HEALTHCHECK
+unset HEALTHCHECK_TIMEOUT
+unset HEALTHCHECK_RETRY_COUNT
+
 ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
+
 if [ "${UNPUBLISHED}" == "1" ]; then
   echo 'online' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
   starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
@@ -11,10 +18,13 @@ if [ "${UNPUBLISHED}" == "1" ]; then
 else
   #status logging, here indicating the healthcheck is about to go
   echo 'checking' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
+  # Reduce the hits to lxc-ls --fancy by  making this available sooner
+  lxc-ls --fancy "${name}" | tail -1 | awk '{ print $3; }' > "${CURRENT_ORDERS}/${order}/.starphleetstatus.ip"
+  echo "${PORT}" > "${CURRENT_ORDERS}/${order}/.starphleetstatus.port"
   #the container and service is started, so healthcheck it before we publish it
   #in order to have a real drainstop / transparent upgrade feature
   #if there is a specified healthcheck url
-  if [ -z "${HEALTHCHECK}" ] || starphleet-ready "${name}" "${PORT}" "${HEALTHCHECK}"; then
+  if [ -z "${HEALTHCHECK}" ] || starphleet-healthcheck "${name}" "${PORT}" "${HEALTHCHECK}"; then
     #at this point we have a running container, and it answers HTTP, so we
     #are on the air and can expose it via nginx
     #new versions replace old versions in nginx for the HUP update
@@ -32,24 +42,24 @@ else
     fi
     trace "${name}" "${PORT}" "${PUBLISH_PORT}" "/${order}" "${HTPASSWD}" "${LDAP}"
     if ! starphleet-publish "${name}" "/${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
+      warn "Publish Failed - Container: ${name} / Order: ${order}"
       echo 'publish failed' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
       exit 1
     fi
     #record online, with the IP address of the container
     echo 'online' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
     echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
-    lxc-ls --fancy "${name}" | tail -1 | awk '{ print $3; }' > "${CURRENT_ORDERS}/${order}/.starphleetstatus.ip"
-    echo "${PORT}" > "${CURRENT_ORDERS}/${order}/.starphleetstatus.port"
     # Expose any ports requested in the orders
     starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
     #any prior version of this order should now be reaped after
     #we wait a small time for prior requests to flush out
-    sleep ${STARPHLEET_DRAINSTOP_WAIT}
     starphleet-reaper "${name}" "${order}"
-    exit 0
+    if [ -n "${HEALTHCHECK}" ]; then
+      start --no-wait starphleet_orders_healthcheck name="${name}" order="${order}"
+    fi
   else
     #at this point the service has failed to properly start
-    warn service failed to publish "/${order}"
+    warn Service failed to publish "${order}" for container ${name}
     echo 'failed' > "${CURRENT_ORDERS}/${order}/.starphleetstatus"
     mail_log
     exit 1

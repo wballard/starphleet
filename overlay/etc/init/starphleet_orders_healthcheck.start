@@ -1,0 +1,67 @@
+#!/bin/bash
+
+source `which tools`
+set +e
+info "Healthcheck Engine Starting For ${name} for order ${order}"
+
+# Make sure we don't have any settings from previous orders
+unset HEALTHCHECK
+unset HEALTHCHECK_TIMEOUT
+unset HEALTHCHECK_RETRY_COUNT
+
+run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
+
+###################################
+## Persistent healchecker
+###################################
+
+if [ -n "${HEALTHCHECK}" ]; then
+  HEALTHCHECK_TIMEOUT=${HEALTHCHECK_TIMEOUT:-30}
+  IP_ADDRESS=$(lxc-ls --fancy | grep "^${name}[[:space:]]" | awk '{ print $3; }')
+  TEST_PASSED=false
+  FAILED_COUNT=0
+  while [ 1 ];
+  do
+    ACTIVE_CONTAINER=$(cat ${CURRENT_ORDERS}/${order}/.container)
+    if [ "${name}" != "${ACTIVE_CONTAINER}" ]; then
+      # If this isn't the current container the healthcheck timer should punt
+      # without an error
+      warn "Active Container is now [${ACTIVE_CONTAINER}] - Healthcheck ending for [${name}]"
+      exit 0
+    fi
+    sleep ${STARPHLEET_PULSE};
+    TEST_GET="http://${IP_ADDRESS}:${PORT}${HEALTHCHECK}"
+    TEST_COMMAND="curl -X GET --connect-timeout ${HEALTHCHECK_TIMEOUT} -o /dev/null -s -w %{response_code} ${TEST_GET}"
+    RESULT=`${TEST_COMMAND}`
+    # Less logging for now
+    # warn Healthcheck Result: ${RESULT}
+    if [ ${RESULT} == "200" ]; then
+      # Reset the failed counter
+      FAILED_COUNT=0
+      continue;
+    fi
+    error Failed Healthcheck ${TEST_GET}
+    ((FAILED_COUNT++))
+    # we'll read a timeout configuration from our environment, and if its not
+    # specified, we'll just default to the actual controlling loop (for loop)
+    # boundary.  So this will allow you to specify some value other other than
+    # the default (180) without ever surpassing the default of 180.
+    # since our caller sources the orders file, this can be added to your orders
+    # for a specific service
+    HEALTHCHECK_RETRY_COUNT=${HEALTHCHECK_RETRY_COUNT:-3}
+    if [ $FAILED_COUNT -gt ${HEALTHCHECK_RETRY_COUNT} ]; then
+      error "Healthcheck Failed too many times - restarting service"
+      # Debug Emailing
+      if [ -n "${HEALTHCHECK_NOTIFICATIONS_EMAIL_ADDRESS}" ]; then
+        echo "Healthcheck Restart for ${name} on ${STARPHLEET_EC2_REGION}" |
+          mail -s "Persistent Healthcheck Restart - ${name}" "${HEALTHCHECK_NOTIFICATIONS_EMAIL_ADDRESS}"
+      fi
+      warn Running starphleet-lxc-stop "${name}"
+      starphleet-lxc-stop "${name}"
+    fi
+  done
+fi
+
+###################################
+## End persistent healchecker
+###################################

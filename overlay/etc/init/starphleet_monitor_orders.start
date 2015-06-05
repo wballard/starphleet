@@ -139,57 +139,44 @@ do
           #     Here we are seeing if the rsync dir still exists which implies
           #     it hasn't finished moving to the host OS yet
           if [ ! -d "/home/admiral/tmp/${ORDER}" ]; then
-            # **************************************
-            # Not running detection
-            # **************************************
-            # In this section - in dev mode - if a container isn't running that should
-            # be we always try to start a new one.  The normal starphleet behavior
-            # will only serve up an order once per order/sha change.  We instead will
-            # restart failing containers forever
             RUNNING=$(lxc-ls -f | grep RUNNING | grep --extended-regexp -e "^${ENCODED_ORDER}-([a-f0-9]){7}-([a-f0-9]){7}"  | cut -f1 -d" ")
-            # If nothing returned - nothing is running so we should deploy again
-            if [ -z "${RUNNING}" ]; then
-              DEPLOY_REASON="NOT RUNNING"
-            else
-              # **************************************
-              # File Change Detection
-              # **************************************
-              # Define a temp file to check for changed files
-              CHANGED_FILES_FILE="/tmp/${ORDER}.starphleet.newfiles"
-              # Only check for changed files if the they specified to unbind the git dir
-              if [ ! -z ${DEVMODE_UNBIND_GIT_DIR} ]; then
-                # Exclude git and node_modules directory which heavily improves performance.  However,
-                # this requires that some other file be touched and may have unintended consequences.
-                # ...so, this is kinda beta
-                EXCLUDES='-not ( -path *node_modules* -prune ) -and -not ( -path *.git* -prune ) -type f'
-                # Look for a changed file in the directory - punt after the first one
-                find "/hosthome/starphleet_dev/${ORDER}" ${EXCLUDES} -newer "${LAST_RUN_FILE}" -print -quit > "${CHANGED_FILES_FILE}"
-                # Slurp in those files
-                FILES_CHANGED=$(cat ${CHANGED_FILES_FILE})
-                # If there were any changed files
-                if [ ! -z "${FILES_CHANGED}" ]; then
-                  # Go through any running containers (albiet, there should only be one)
-                  for container in $(echo ${RUNNING}); do
-                    # Stop the container
-                    warn Redeploying ${container} - ${FILES_CHANGED}
-                    # Redeploy the same container.  This will re-run the build script
-                    # but sync only the updated files first
-                    touch "${LAST_RUN_FILE}"
-                    # This should force the container to respawn
-                    stop starphleet_serve_order name="${container}"
-                    # ...but if it doesn't - we'll start it backup anyway
-                    start --no-wait starphleet_serve_order name="${container}" order="${ORDER}"
-                  done
-                fi
-                # Cleanup
-                rm ${CHANGED_FILES_FILE}
+            # **************************************
+            # File Change Detection
+            # **************************************
+            # Define a temp file to check for changed files
+            CHANGED_FILES_FILE="/tmp/${ORDER}.starphleet.newfiles"
+            # Only check for changed files if the they specified to unbind the git dir
+            if [ ! -z ${DEVMODE_UNBIND_GIT_DIR} ]; then
+              # Exclude git and node_modules directory which heavily improves performance.  However,
+              # this requires that some other file be touched and may have unintended consequences.
+              # ...so, this is kinda beta
+              EXCLUDES='-not ( -path *node_modules* -prune ) -and -not ( -path *.git* -prune ) -type f'
+              # Look for a changed file in the directory - punt after the first one
+              find "/hosthome/starphleet_dev/${ORDER}" ${EXCLUDES} -newer "${LAST_RUN_FILE}" -print -quit > "${CHANGED_FILES_FILE}"
+              # Slurp in those files
+              FILES_CHANGED=$(cat ${CHANGED_FILES_FILE})
+              # If there were any changed files
+              if [ ! -z "${FILES_CHANGED}" ]; then
+                # Go through any running containers (albiet, there should only be one)
+                for container in $(echo ${RUNNING}); do
+                  # Stop the container
+                  warn Redeploying ${container} - ${FILES_CHANGED}
+                  # Redeploy the same container.  This will re-run the build script
+                  # but sync only the updated files first
+                  touch "${LAST_RUN_FILE}"
+                  # This should force the container to respawn
+                  stop starphleet_serve_order name="${container}"
+                  # ...but if it doesn't - we'll start it backup anyway
+                  start --no-wait starphleet_serve_order name="${container}" order="${ORDER}"
+                done
               fi
               # Cleanup
-              unset DEVMODE_UNBIND_GIT_DIR
-              unset FILES_CHANGED
-              unset CHANGED_FILES_FILE
+              rm ${CHANGED_FILES_FILE}
             fi
-            # For good measure
+            # Cleanup
+            unset DEVMODE_UNBIND_GIT_DIR
+            unset FILES_CHANGED
+            unset CHANGED_FILES_FILE
             unset RUNNING
           fi
         fi
