@@ -1,6 +1,6 @@
 #!/usr/bin/env starphleet-launcher
 ### Usage:
-###    starphleet-ready <container_name> <container_port> <url>
+###    starphleet-healthcheck <order> <container_port> <url>
 ### --help
 ###
 ### Check if a container is ready by looking for a successful http return.
@@ -9,7 +9,7 @@ HEALTHCHECK_TIMEOUT=${HEALTHCHECK_TIMEOUT:-30}
 
 PORT=${container_port:-${PORT}}
 URL=${url:-/}
-IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}[[:space:]]" | awk '{ print $3; }')
+IP_ADDRESS=$(cat "${CURRENT_ORDERS}/${order}/.starphleetstatus.ip")
 
 TEST_GET="http://${IP_ADDRESS}:${PORT}${URL}"
 TEST_COMMAND="curl -X GET --connect-timeout ${HEALTHCHECK_TIMEOUT} -o /dev/null -s -w %{response_code} ${TEST_GET}"
