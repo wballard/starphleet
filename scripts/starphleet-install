@@ -31,6 +31,10 @@ ec2_mounts
 rm -f /etc/init/starphleet*
 ${SCRIPT_DIR}/perform-overlay
 
+# Assign larger subnet to LXC iface (config in overlay)
+# but interface requires a restart
+restart lxc-net
+
 # our overlay contains sysctl settings, we'll want to load them now
 sysctl --system
 # the parameters we've just loaded will allow a bunch more
