@@ -1,0 +1,66 @@
+#!/bin/bash
+
+source `which tools`
+set +e
+info "Healthcheck Engine Starting For ${name} for order ${order}"
+
+# Make sure we don't have any settings from previous orders
+unset HEALTHCHECK
+unset HEALTHCHECK_PULSE
+unset HEALTHCHECK_TIMEOUT
+unset HEALTHCHECK_RETRY_COUNT
+
+run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
+
+HEALTHCHECK_TIMEOUT=${HEALTHCHECK_TIMEOUT:-30}
+HEALTHCHECK_PULSE=${HEALTHCHECK_PULSE:-10}
+HEALTHCHECK_RETRY_COUNT=${HEALTHCHECK_RETRY_COUNT:-3}
+FAILED_COUNT=0
+
+###################################
+## Persistent healchecker
+###################################
+
+if [ -n "${HEALTHCHECK}" ]; then
+  while [ 1 ];
+  do
+    # Healthcheck PUlse
+    sleep ${HEALTHCHECK_PULSE}
+    ACTIVE_CONTAINER=$(cat ${CURRENT_ORDERS}/${order}/.container)
+    if [ "${name}" != "${ACTIVE_CONTAINER}" ]; then
+      # If this isn't the current container the healthcheck timer should punt
+      # without an error
+      warn "Active Container is now [${ACTIVE_CONTAINER}] - Healthcheck ending for [${name}]"
+      exit 0
+    fi
+    if starphleet-healthcheck "${name}" "${order}" "${HEALTHCHECK}" ; then
+      # Reset the failed counter
+      FAILED_COUNT=0
+      continue;
+    fi
+    ((FAILED_COUNT++))
+    # we'll read a timeout configuration from our environment, and if its not
+    # specified, we'll just default to the actual controlling loop (for loop)
+    # boundary.  So this will allow you to specify some value other other than
+    # the default (180) without ever surpassing the default of 180.
+    # since our caller sources the orders file, this can be added to your orders
+    # for a specific service
+    if [ $FAILED_COUNT -gt ${HEALTHCHECK_RETRY_COUNT} ]; then
+      error "Healthcheck Failed too many times - restarting service"
+      # Debug Emailing
+      if [ -n "${HEALTHCHECK_NOTIFICATIONS_EMAIL_ADDRESS}" ]; then
+        echo "Healthcheck Restart for ${name} on ${STARPHLEET_EC2_REGION}" |
+          mail -s "Persistent Healthcheck Restart - ${name}" "${HEALTHCHECK_NOTIFICATIONS_EMAIL_ADDRESS}"
+      fi
+      warn Running starphleet-lxc-stop "${name}"
+      starphleet-lxc-stop "${name}"
+      # We should automatically get restarted by another successful deploy
+      stop
+      exit 0
+    fi
+  done
+fi
+
+###################################
+## End persistent healchecker
+###################################
