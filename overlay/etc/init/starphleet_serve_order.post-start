@@ -11,9 +11,6 @@ STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
 
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
 
-# Give the service a chance to light up
-sleep ${STARPHLEET_DRAINSTOP_WAIT}
-
 # Deploy all the things
 if [ "${UNPUBLISHED}" == "1" ]; then
   echo 'online' > "${STATUS_FILE}"
@@ -24,6 +21,14 @@ else
   echo 'checking' > "${STATUS_FILE}"
   lxc-ls --fancy "${name}" | tail -1 | awk '{ print $3; }' > "${STATUS_FILE}.ip"
   echo "${PORT}" > "${STATUS_FILE}.port"
+
+  # Give the service a chance to light up and allow orders to configure a longer
+  # delay if a service takes a while to init
+  if [ -n "${HEALTHCHECK}" ]; then
+    HEALTHCHECK_INIT_DELAY=${HEALTHCHECK_INIT_DELAY:-10}
+    sleep ${HEALTHCHECK_INIT_DELAY}
+  fi
+
   # Reduce the hits to lxc-ls --fancy by  making this available sooner
   #the container and service is started, so healthcheck it before we publish it
   #in order to have a real drainstop / transparent upgrade feature
