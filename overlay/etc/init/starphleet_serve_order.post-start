@@ -31,8 +31,10 @@ else
     HEALTHCHECK_INIT_DELAY=${HEALTHCHECK_INIT_DELAY:-180}
     # Keep looping on the service until it responds with a success, or
     # eventually punt after some delay and give up
+    info "Testing health of container ${name}"
     for ((c=0; c<HEALTHCHECK_INIT_DELAY; c++)); do
       # If we get a successful healthcheck
+      info "Attempt $c of ${HEALTHCHECK_INIT_DELAY}"
       if starphleet-healthcheck "${name}" "${order}" "${HEALTHCHECK}" ; then
         # Logs are redunant ish but help quickly see what happened when
         # reviewing logs on the command line
