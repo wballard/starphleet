@@ -31,7 +31,7 @@ else
     HEALTHCHECK_INIT_DELAY=${HEALTHCHECK_INIT_DELAY:-180}
     # Keep looping on the service until it responds with a success, or
     # eventually punt after some delay and give up
-    for c in {1..${HEALTHCHECK_INIT_DELAY}}; do
+    for ((c=0; c<HEALTHCHECK_INIT_DELAY; c++)); do
       # If we get a successful healthcheck
       if starphleet-healthcheck "${name}" "${order}" "${HEALTHCHECK}" ; then
         # Logs are redunant ish but help quickly see what happened when
@@ -44,13 +44,14 @@ else
         # Dump out of our check loop
         break
       fi
-      if [ $c -gt ${HEALTHCHECK_INIT_DELAY} ]; then
+      if [ "$c" -gt "${HEALTHCHECK_INIT_DELAY}" ]; then
         #at this point the service has failed to properly start
         warn Service failed to publish "${order}" for container ${name}
         echo 'failed' > "${STATUS_FILE}"
         mail_log
         exit 1
       fi
+      sleep 1
     done
   fi
 
