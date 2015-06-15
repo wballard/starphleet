@@ -22,60 +22,77 @@ else
   lxc-ls --fancy "${name}" | tail -1 | awk '{ print $3; }' > "${STATUS_FILE}.ip"
   echo "${PORT}" > "${STATUS_FILE}.port"
 
-  # Give the service a chance to light up and allow orders to configure a longer
-  # delay if a service takes a while to init
+  ######################
+  # Healthchecks
+  ######################
+  # Give the service a chance to light up
   if [ -n "${HEALTHCHECK}" ]; then
-    HEALTHCHECK_INIT_DELAY=${HEALTHCHECK_INIT_DELAY:-10}
-    sleep ${HEALTHCHECK_INIT_DELAY}
+    # Allow for orders to configure the delay
+    HEALTHCHECK_INIT_DELAY=${HEALTHCHECK_INIT_DELAY:-180}
+    # Keep looping on the service until it responds with a success, or
+    # eventually punt after some delay and give up
+    for c in {1..${HEALTHCHECK_INIT_DELAY}}; do
+      # If we get a successful healthcheck
+      if starphleet-healthcheck "${name}" "${order}" "${HEALTHCHECK}" ; then
+        # Logs are redunant ish but help quickly see what happened when
+        # reviewing logs on the command line
+        info Healthcheck passed for container ${name}
+        # Here we start a upstart 'watchdog' for services that have
+        # a healthcheck
+        start --no-wait starphleet_orders_healthcheck name="${name}" order="${order}"
+        info "Started healthchecker for ${order} on container ${name}"
+        # Dump out of our check loop
+        break
+      fi
+      if [ $c -gt ${HEALTHCHECK_INIT_DELAY} ]; then
+        #at this point the service has failed to properly start
+        warn Service failed to publish "${order}" for container ${name}
+        echo 'failed' > "${STATUS_FILE}"
+        mail_log
+        exit 1
+      fi
+    done
   fi
 
-  # Reduce the hits to lxc-ls --fancy by  making this available sooner
-  #the container and service is started, so healthcheck it before we publish it
-  #in order to have a real drainstop / transparent upgrade feature
-  #if there is a specified healthcheck url
-  if [ -z "${HEALTHCHECK}" ] || starphleet-healthcheck "${name}" "${order}" "${HEALTHCHECK}" ; then
-    #at this point we have a running container, and it answers HTTP, so we
-    #are on the air and can expose it via nginx
-    #new versions replace old versions in nginx for the HUP update
-    #http basic password authentication access
-    if [ -f "${HEADQUARTERS_LOCAL}/${order}/.htpasswd" ]; then
-      HTPASSWD="${HEADQUARTERS_LOCAL}/${order}/.htpasswd"
-    else
-      HTPASSWD='-'
-    fi
-    #and LDAP access, almost the same kind of thing -- but LDAPy
-    if [ -f "${HEADQUARTERS_LOCAL}/${order}/.ldap" ]; then
-      LDAP="${HEADQUARTERS_LOCAL}/${order}/.ldap"
-    else
-      LDAP='-'
-    fi
-    trace "${name}" "${PORT}" "${PUBLISH_PORT}" "/${order}" "${HTPASSWD}" "${LDAP}"
-    if ! starphleet-publish "${name}" "/${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
-      warn "Publish Failed - Container: ${name} / Order: ${order}"
-      echo 'publish failed' > "${STATUS_FILE}"
-      exit 1
-    fi
-    # record online
-    echo 'online' > "${STATUS_FILE}"
-    # Only update the active container if we get a successful publish
-    echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
-    echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
-    # Expose any ports requested in the orders
-    starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
-    # Reap non-building other containers
-    starphleet-reaper "${name}" "${order}"
-    # If a healthcheck exists - start our healthchecker
-    if [ -n "${HEALTHCHECK}" ]; then
-      warn "Starting healthchecker for ${order} on container ${name}"
-      start --no-wait starphleet_orders_healthcheck name="${name}" order="${order}"
-    fi
-    # For good measure
-    exit 0
+
+
+  ######################
+  # Publish
+  ######################
+  # At this point we have a running container, and it answers HTTP if a healthcheck
+  # was provided, so we are on the air and can expose it via nginx
+
+  # http basic password authentication access
+  if [ -f "${HEADQUARTERS_LOCAL}/${order}/.htpasswd" ]; then
+    HTPASSWD="${HEADQUARTERS_LOCAL}/${order}/.htpasswd"
   else
-    #at this point the service has failed to properly start
-    warn Service failed to publish "${order}" for container ${name}
-    echo 'failed' > "${STATUS_FILE}"
-    mail_log
+    HTPASSWD='-'
+  fi
+
+  # and LDAP access, almost the same kind of thing -- but LDAPy
+  if [ -f "${HEADQUARTERS_LOCAL}/${order}/.ldap" ]; then
+    LDAP="${HEADQUARTERS_LOCAL}/${order}/.ldap"
+  else
+    LDAP='-'
+  fi
+  # Now attempt to write the nginx configs (starphleet-publish)
+  # starphleet-publish will handle 'hupping' nginx
+  if ! starphleet-publish "${name}" "/${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
+    warn "Publish Failed - Container: ${name} / Order: ${order}"
+    echo 'publish failed' > "${STATUS_FILE}"
     exit 1
   fi
+  # record online
+  echo 'online' > "${STATUS_FILE}"
+  # Only update the active container if we get a successful publish
+  echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
+  echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
+  # Expose any ports requested in the orders
+  starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
+  # Sleep for STARPHLEET_DRAINSTOP_WAIT time before reaping old containers
+  sleep "${STARPHLEET_DRAINSTOP_WAIT}"
+  # Reap non-building other containers
+  starphleet-reaper "${name}" "${order}"
+  # For good measure
+  exit 0
 fi
