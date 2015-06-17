@@ -4,8 +4,56 @@ source `which tools`
 while [ 1 ]
 do
   if [ -f "${STARPHLEET_NGINX_HUP_TURD}" ]; then
+
     # just to avoid getting stuck, we'll remove the hup turd first
     rm "${STARPHLEET_NGINX_HUP_TURD}" # yes we could race, but meh
+
+    ######################
+    # Publish
+    ######################
+
+    # Remove the current configs and start fresh
+    rm "${NGINX_CONF}"/published/* 2> /dev/null
+
+    # CURRENT_ORDERS dir is the 'master' of what should be published
+    for CONTAINER_FILE in $(find "${CURRENT_ORDERS}" -type f -iname ".container")
+    do
+      # Extract the container name that should be deployed
+      name=$(cat ${CONTAINER_FILE})
+      # Extract the name of the order
+      order="${CONTAINER_FILE%/*}"
+      order="${order##*/}"
+
+      STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
+
+      # http basic password authentication access
+      if [ -f "${HEADQUARTERS_LOCAL}/${order}/.htpasswd" ]; then
+        HTPASSWD="${HEADQUARTERS_LOCAL}/${order}/.htpasswd"
+      else
+        HTPASSWD='-'
+      fi
+
+      # and LDAP access, almost the same kind of thing -- but LDAPy
+      if [ -f "${HEADQUARTERS_LOCAL}/${order}/.ldap" ]; then
+        LDAP="${HEADQUARTERS_LOCAL}/${order}/.ldap"
+      else
+        LDAP='-'
+      fi
+
+      # Now attempt to write the nginx configs (starphleet-publish)
+      if ! starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
+        warn "Publish Failed - Container: ${name} / Order: ${order}"
+        echo 'publish failed' > "${STATUS_FILE}"
+      fi
+
+      # Expose any ports requested in the orders
+      starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
+    done
+
+    ######################
+    # Validate Config / HUP
+    ######################
+
     if ${STARPHLEET_ROOT}/nginx/nginx -p "${NGINX_CONF}" -c nginx.conf -t; then
       # the config is good, let's get nginx running
       reload starphleet_nginx || start starphleet_nginx
@@ -15,63 +63,12 @@ do
       ${STARPHLEET_ROOT}/nginx/nginx -p "${NGINX_CONF}" -c nginx.conf -t 2>&1 || true | mail -s "Starphleet NGINX Config Failed Validation" "root@localhost"
     fi
   fi
+
   sleep "${STARPHLEET_PULSE}"
+
 done
 
+# TODO: REAPER MUST BE MADE SMARTER'ER
 
-
-  for ORDER_FILE in $(find "${CURRENT_ORDERS}" -type f -iname ".starphleetstatus*")
-  do
-    ORDER_FILE="${ORDER_FILE%/*}"
-    ORDER_FILE="${ORDER_FILE##*/}"
-    if [ ! -f "${HEADQUARTERS_LOCAL}/${ORDER_FILE}/orders" ] && [ ! -f "${HEADQUARTERS_LOCAL}/${ORDER_FILE}/remote" ]; then
-      #Clean up published Nginx Configs
-      [ -f "${NGINX_CONF}/published/$(urlencode \"/${ORDER_FILE}\").conf" ] && rm "${NGINX_CONF}/published/$(urlencode \"/${ORDER_FILE}\").conf"
-      [ -f "${NGINX_CONF}/published/$(urlencode \"/${ORDER_FILE}\").beta" ] && rm "${NGINX_CONF}/published/$(urlencode \"/${ORDER_FILE}\").beta"
-      [ -f "${NGINX_CONF}/published/${ORDER_FILE}.acl" ] && rm "${NGINX_CONF}/published/${ORDER_FILE}.acl"
-      [ -f "${NGINX_CONF}/proxy_for/$(urlencode \"/${ORDER_FILE}\").conf" ] && rm "${NGINX_CONF}/proxy_for/$(urlencode \"/${ORDER_FILE}\").conf"
-      [ -f "${NGINX_CONF}/named_servers/$(urlencode \"/${ORDER_FILE}\").conf" ] && rm "${NGINX_CONF}/named_servers/$(urlencode \"/${ORDER_FILE}\").conf"
-      [ -f "${NGINX_CONF}/published/$(urlencode \"/${ORDER_FILE}\").redirect" ] && rm "${NGINX_CONF}/published/$(urlencode \"/${ORDER_FILE}\").redirect"
-      [ -f "${NGINX_CONF}/published_bare/$(urlencode \"/${ORDER_FILE}\").conf" ] && rm "${NGINX_CONF}/published_bare/$(urlencode \"/${ORDER_FILE}\").conf"
-
-      [ -d "${CURRENT_ORDERS}/${ORDER_FILE}" ] && rm -rf "${CURRENT_ORDERS}/${ORDER_FILE}"
-    fi
-  done
-
-  ######################
-  # Publish
-  ######################
-  # At this point we have a running container, and it answers HTTP if a healthcheck
-  # was provided, so we are on the air and can expose it via nginx
-
-  # http basic password authentication access
-  if [ -f "${HEADQUARTERS_LOCAL}/${order}/.htpasswd" ]; then
-    HTPASSWD="${HEADQUARTERS_LOCAL}/${order}/.htpasswd"
-  else
-    HTPASSWD='-'
-  fi
-
-  # and LDAP access, almost the same kind of thing -- but LDAPy
-  if [ -f "${HEADQUARTERS_LOCAL}/${order}/.ldap" ]; then
-    LDAP="${HEADQUARTERS_LOCAL}/${order}/.ldap"
-  else
-    LDAP='-'
-  fi
-  # Now attempt to write the nginx configs (starphleet-publish)
-  # starphleet-publish will handle 'hupping' nginx
-  if ! starphleet-publish "${name}" "/${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
-    warn "Publish Failed - Container: ${name} / Order: ${order}"
-    echo 'publish failed' > "${STATUS_FILE}"
-    exit 1
-  fi
-  # record online
-  echo 'online' > "${STATUS_FILE}"
-  # Only update the active container if we get a successful publish
-  echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
-  echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
-  # Expose any ports requested in the orders
-  starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
-  # Sleep for STARPHLEET_DRAINSTOP_WAIT time before reaping old containers
-  sleep "${STARPHLEET_DRAINSTOP_WAIT}"
-  # Reap non-building other containers
-  starphleet-reaper "${name}" "${order}"
+# Reap non-building other containers
+starphleet-reaper "${name}" "${order}"
