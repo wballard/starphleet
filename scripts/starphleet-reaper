@@ -1,6 +1,6 @@
 #!/usr/bin/env starphleet-launcher
 ### Usage:
-###    starphleet-reaper <current_service_name> <order>
+###    starphleet-reaper <current_service_name> <order> [--force]
 ### --help
 ###
 ### Kill off every running service for an order except the current service
@@ -42,15 +42,18 @@ do
      [ "${CURRENT_STATUS}" != "online" ] &&
      [ "${CURRENT_STATUS}" != "stopped" ] &&
      [ "${CURRENT_STATUS}" != "failed" ] &&
-     [ "${CURRENT_STATUS}" != "publish failed" ]; then
+     [ "${CURRENT_STATUS}" != "publish failed" ] &&
+     [ "${force}" != "true" ]; then
      info "Unable to reap ${name} due to status: ${CURRENT_STATUS}"
     continue;
   fi
   # We won't reap if any are true:
   #   - The current active container is being attempted
   #   - NGINX is pointing at this container
+  #   - Force is enabled
   if [ "${CURRENT_CONTAINER}" == "${name}" ] ||
-     [ "${NGINX_CONTAINER}" == "${name}" ]; then
+     [ "${NGINX_CONTAINER}" == "${name}" ] ||
+     [ "${force}" == "true "]; then
      info "Unable to reap ${name} - Active Container ${CURRENT_CONTAINER} - NGINX Pointing at ${NGINX_CONTAINER}"
     continue;
   fi
