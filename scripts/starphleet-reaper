@@ -17,29 +17,47 @@ do
   # Determine where nginx is pointing
   NGINX_CONTAINER=$(curl --connect-timeout 1 -s -XHEAD -i "http://localhost/${order}/" | grep "X-Starphleet-Container" | cut -f 2 -d " ")
 
+  # XXX: After this feature has been live a bit we can purge this...
+  #      For now, I'd like to quickly be able to resort to this Even
+  #      in production for quick debugging
+  if dev_mode ; then
+    log NM: ${name}
+    log OR: ${order}
+    log SN: ${current_service_name}
+    log CS: ${CURRENT_STATUS}
+    log SF: ${STATUS_FILE}
+    log CC: ${CURRENT_CONTAINER}
+    log NC: ${NGINX_CONTAINER}
+  fi
+
   # Only reap non-building containers.  Being explicit about reap conditions
   # so future statuses don't trigger accidental reapz
-  # We reap if:
-  #   - The status file doesn't exist (orphaned container)
-  #   - The container is not the latest container
-  #   - The container is online
-  #   - The container is failed
-  #   - The container failed to publish
-  #   - The container is not pointed at by nginx
-  if [ "${CURRENT_CONTAINER}" != "${name}" ] ||
-     [ "${NGINX_CONTAINER}" != "${name}" ] ||
-     [ "${CURRENT_STATUS}" == "" ] ||
-     [ "${CURRENT_STATUS}" == "online" ] ||
-     [ "${CURRENT_STATUS}" == "failed" ] ||
-     [ "${CURRENT_STATUS}" == "publish failed" ]; then
-
-    info "Reaping ${name}"
-    info "Stopping Upstart job ${name}"
-    stop starphleet_serve_order name="${name}" || true
-    info "Destroying container ${name}"
-    starphleet-lxc-destroy "${name}" || true
-    info "Removing status files"
-    rm ${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}* 2> /dev/null || true
-    info "reaper has reaped ${name}"
+  # We won't reap if any are true:
+  #   - The container is not online
+  #   - The container is not failed
+  #   - The container is not failed to publish
+  if [ "${CURRENT_STATUS}" != "" ] &&
+     [ "${CURRENT_STATUS}" != "online" ] &&
+     [ "${CURRENT_STATUS}" != "failed" ] &&
+     [ "${CURRENT_STATUS}" != "publish failed" ]; then
+     info "Unable to reap ${name} due to status: ${CURRENT_STATUS}"
+     continue;
   fi
+  # We won't reap if any are true:
+  #   - The current active container is being attempted
+  #   - NGINX is pointing at this container
+  if [ "${CURRENT_CONTAINER}" == "${name}" ] ||
+     [ "${NGINX_CONTAINER}" == "${name}" ]; then
+     info "Unable to reap ${name} - Active Container ${CURRENT_CONTAINER} - NGINX Pointing at ${NGINX_CONTAINER}"
+    continue;
+  fi
+
+  info "Reaping ${name}"
+  info "Stopping Upstart job ${name}"
+  stop starphleet_serve_order name="${name}" || true
+  info "Destroying container ${name}"
+  starphleet-lxc-destroy "${name}" || true
+  info "Removing status files"
+  rm ${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}* 2> /dev/null || true
+  info "reaper has reaped ${name}"
 done
