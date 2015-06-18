@@ -5,6 +5,7 @@
 ###
 ### Kill off every running service for an order except the current service
 
+# Reap any containers
 for name in $(lxc-ls | grep --extended-regexp -e "^${order}-([a-f0-9]){7}-([a-f0-9]){7}" | grep --invert-match "${current_service_name}")
 do
 
@@ -15,19 +16,19 @@ do
   # Get the latest successful container deployment
   CURRENT_CONTAINER=$(cat ${CURRENT_ORDERS}/${order}/.container)
   # Determine where nginx is pointing
-  NGINX_CONTAINER=$(curl --connect-timeout 1 -s -XHEAD -i "http://localhost/${order}/" | grep "X-Starphleet-Container" | cut -f 2 -d " ")
+  NGINX_CONTAINER=$(curl --connect-timeout 1 -s -XHEAD -i "http://localhost/${order}/" | grep "X-Starphleet-Container" | cut -f 2 -d " " | tr -dc '[[:print:]]')
 
   # XXX: After this feature has been live a bit we can purge this...
   #      For now, I'd like to quickly be able to resort to this Even
   #      in production for quick debugging
   if dev_mode ; then
-    log NM: ${name}
-    log OR: ${order}
-    log SN: ${current_service_name}
-    log CS: ${CURRENT_STATUS}
-    log SF: ${STATUS_FILE}
-    log CC: ${CURRENT_CONTAINER}
-    log NC: ${NGINX_CONTAINER}
+    log "NM: |${name}|"
+    log "OR: |${order}|"
+    log "SN: |${current_service_name}|"
+    log "CS: |${CURRENT_STATUS}|"
+    log "SF: |${STATUS_FILE}|"
+    log "CC: |${CURRENT_CONTAINER}|"
+    log "NC: |${NGINX_CONTAINER}|"
   fi
 
   # Only reap non-building containers.  Being explicit about reap conditions
@@ -41,7 +42,7 @@ do
      [ "${CURRENT_STATUS}" != "failed" ] &&
      [ "${CURRENT_STATUS}" != "publish failed" ]; then
      info "Unable to reap ${name} due to status: ${CURRENT_STATUS}"
-     continue;
+    continue;
   fi
   # We won't reap if any are true:
   #   - The current active container is being attempted
@@ -60,4 +61,28 @@ do
   info "Removing status files"
   rm ${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}* 2> /dev/null || true
   info "reaper has reaped ${name}"
+done
+
+# After we destroy all containers above, technically, all status files would
+# be purged.  However, if a user manually destroys a container and it doesn't
+# run through the proper reaper process it would leave around stale status
+# files which would trigger the reaper over-and-over.
+#
+# So, check if any status files are left over and if there isn't a container
+# running for them we clean them up
+# Clean up any stale status files
+for CONTAINER_STATUS_FILE in $(find "${CURRENT_ORDERS}/${order}/" -type f -name ".starphleetstatus*" | grep --extended-regexp -e ".*-([a-f0-9]){7}$" | grep -v "${current_service_name}")
+do
+    # Yoink just the container name off the status file
+    container_name=$(basename "${CONTAINER_STATUS_FILE}" | sed -e 's/.starphleetstatus.//')
+
+    # Check if there's a container associated with this status file
+    check=$(lxc-ls | grep "${container_name}")
+
+    info "Checking if status file stale: ${CONTAINER_STATUS_FILE}"
+
+    if [ -z "${check}" ]; then
+      warn "Stale Status File Detected: ${CONTAINER_STATUS_FILE}"
+      rm ${CONTAINER_STATUS_FILE}*
+    fi
 done

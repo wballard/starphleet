@@ -59,6 +59,7 @@ do
         # If we have any reason to believe we should reap this order there
         # is no reason to keep processing other status files
         if [ "${active_container}" != "${container_name}" ]; then
+          info "Reaping order ${order}: Container [${container_name}] is not active [${active_container}]"
           REAP="true"
           break
         fi
