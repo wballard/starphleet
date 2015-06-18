@@ -51,21 +51,6 @@ mkdir -p "${NGINX_CONF}/named_servers"
 [ -f "${NGINX_CONF}/published/crt" ] || cp "${NGINX_CONF}/crt" "${NGINX_CONF}/published/crt"
 [ -f "${NGINX_CONF}/published/key" ] || cp "${NGINX_CONF}/key" "${NGINX_CONF}/published/key"
 
-
-# XXX: RFC - Doesn't this code completely get overwritten by the following
-#      mount output since the following output pipes with a replace?  > instead of >>?
-#      commenting out for now..
-
-#redirect to forgive a lack of trailing slash
-# if [ -n "${public_url}" ]; then
-# cat << EOF >> "${MOUNT_CONF}"
-# location = ${public_url} {
-#   rewrite .* ${public_url}/ last;
-# }
-# EOF
-# fi
-
-
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
 
