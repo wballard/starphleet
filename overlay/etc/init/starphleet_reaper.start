@@ -47,9 +47,11 @@ do
         # We won't reap if all are true:
         #   - The container is not online
         #   - The container is not failed
+        #   - The container is not stopped
         #   - The container is not failed to publish
         if [ "${CURRENT_STATUS}" != "" ] &&
            [ "${CURRENT_STATUS}" != "online" ] &&
+           [ "${CURRENT_STATUS}" != "stopped" ] &&
            [ "${CURRENT_STATUS}" != "failed" ] &&
            [ "${CURRENT_STATUS}" != "publish failed" ]; then
            info "Unable to reap ${container_name} due to status: ${CURRENT_STATUS}"
