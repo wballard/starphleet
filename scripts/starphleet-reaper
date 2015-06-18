@@ -50,10 +50,10 @@ do
   # We won't reap if any are true:
   #   - The current active container is being attempted
   #   - NGINX is pointing at this container
-  #   - Force is enabled
-  if [ "${CURRENT_CONTAINER}" == "${name}" ] ||
-     [ "${NGINX_CONTAINER}" == "${name}" ] ||
-     [ "${force}" == "true "]; then
+  #   - Force is not enabled
+  if ([ "${CURRENT_CONTAINER}" == "${name}" ] ||
+     [ "${NGINX_CONTAINER}" == "${name}" ]) &&
+     [ "${force}" != "true "]; then
      info "Unable to reap ${name} - Active Container ${CURRENT_CONTAINER} - NGINX Pointing at ${NGINX_CONTAINER}"
     continue;
   fi
