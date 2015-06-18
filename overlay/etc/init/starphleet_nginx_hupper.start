@@ -5,6 +5,10 @@ while [ 1 ]
 do
   if [ -f "${STARPHLEET_NGINX_HUP_TURD}" ]; then
 
+    # Keep track of any errors on publish and do not attempt a hup
+    # if one happens
+    unset ERROR
+
     # just to avoid getting stuck, we'll remove the hup turd first
     rm "${STARPHLEET_NGINX_HUP_TURD}" # yes we could race, but meh
 
@@ -51,13 +55,25 @@ do
 
       # Now attempt to write the nginx configs (starphleet-publish)
       if ! starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
+        # Errors on publish only happen if we can't find the IP which should
+        # not be possible because the container isn't published until its
+        # successfully running
         warn "Publish Failed - Container: ${name} / Order: ${order}"
         echo 'publish failed' > "${STATUS_FILE}"
         # If we have an error then we fall back to the last known good container
         if [ -f "${CURRENT_ORDERS}/${order}/.last_known_good_container" ]; then
           name=$(cat "${CURRENT_ORDERS}/${order}/.last_known_good_container")
           warn "Falling back to container ${name}"
-          starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}"
+          if ! starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
+            # If the fallback fails too we need to purge the files that are triggering a deploy
+            # and as a final measure we attempt an additional soft deploy.  If that succeeds
+            # these files get re-created.  If it STILL fails, somethings is broken
+            # bad and we don't want to keep trying this container
+            warn Fallback failed to container "${name}" - Attempting Soft Deploy
+            rm "${CONTAINER_FILE}"
+            rm "${CURRENT_ORDERS}/${order}/.last_known_good_container"
+            starphleet-retry-deploy "${order}"
+          fi
         fi
       fi
 
@@ -72,7 +88,7 @@ do
     # Validate Config / HUP
     ######################
 
-    if ${STARPHLEET_ROOT}/nginx/nginx -p "${NGINX_CONF}" -c nginx.conf -t; then
+    if [ -z "${ERROR}" ] && ${STARPHLEET_ROOT}/nginx/nginx -p "${NGINX_CONF}" -c nginx.conf -t; then
       # the config is good, let's get nginx running
       reload starphleet_nginx || start starphleet_nginx
     else
