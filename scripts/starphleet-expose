@@ -10,9 +10,11 @@
 ### as this will un-NAT then NAT.
 run_as_root_or_die
 
-IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}[[:space:]]" | awk '{ print $3; }')
 
 function expose() {
+
+  IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}[[:space:]]" | awk '{ print $3; }')
+  
   if [ $1 == '22' ]
   then
     error "Sorry, I won't let you mess up SSH"
