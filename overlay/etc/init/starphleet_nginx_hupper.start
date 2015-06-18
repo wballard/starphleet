@@ -18,6 +18,7 @@ do
 
     # Remove the current configs and start fresh
     rm "${NGINX_CONF}"/published/* 2> /dev/null
+    rm "${NGINX_CONF}"/published_bare/* 2> /dev/null
     rm "${NGINX_CONF}"/proxy_for/* 2> /dev/null
     rm "${NGINX_CONF}"/named_servers/* 2> /dev/null
 
