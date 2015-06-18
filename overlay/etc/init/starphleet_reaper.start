@@ -1,6 +1,8 @@
 #!/bin/bash
 source `which tools`
 
+set -x
+
 while [ 1 ]
 do
   #####################
@@ -23,8 +25,7 @@ do
     active_container=$(cat ${CONTAINER_FILE})
 
     # Extract the name of the order
-    order="${CONTAINER_FILE%/*}"
-    order="${order##*/}"
+    order=$(basename $(dirname "${CONTAINER_FILE}"))
 
     # Run through all the status files inside this order directory and
     # see if any of these status files don't match up with the container
@@ -76,6 +77,6 @@ do
   # End CONTAINER_STATUS_FILE loop
   done
 
-  # We don't need to go reep crazy.  Pause for a pulse
+  # We don't need to go reap crazy.  Pause for a pulse
   sleep "${STARPHLEET_PULSE}"
 done
