@@ -61,5 +61,3 @@ for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
     info no ACLs specified for service: ${SERVICE_NAME}
   fi
 done
-
-starphleet-hup-nginx

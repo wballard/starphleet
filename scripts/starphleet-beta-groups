@@ -72,5 +72,3 @@ do
     echo "  }" >> "${BETA_CONF}"
   done
 done
-
-starphleet-hup-nginx
