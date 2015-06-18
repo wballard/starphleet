@@ -3,7 +3,9 @@
 sudo stop starphleet_monitor_orders
 sudo stop starphleet_monitor_headquarters
 sudo stop starphleet_nginx_hupper
+sudo stop starphleet_reaper
 sudo /starphleet/scripts/perform-overlay
 sudo start starphleet_monitor_orders
 sudo start starphleet_monitor_headquarters
 sudo start starphleet_nginx_hupper
+sudo start starphleet_reaper
