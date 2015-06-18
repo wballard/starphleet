@@ -11,8 +11,12 @@ run_as_root_or_die
 
 # Purge all beta groups and beta configs
 [ -d "${NGINX_CONF}/beta_groups" ]  && rm -rf "${NGINX_CONF}/beta_groups"
-# Try to remove beta files or.. exit happy if none exist
-rm "${NGINX_CONF}"/published/*.beta 2> /dev/null || true
+
+# Purge any beta files
+for file in $(find "${NGINX_CONF}/published/" -type f -regex ".*\.beta$")
+do
+  rm "${file}"
+done
 
 # Make the beta_group again
 mkdir -p "${NGINX_CONF}/beta_groups"
