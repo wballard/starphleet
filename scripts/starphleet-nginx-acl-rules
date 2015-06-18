@@ -22,7 +22,7 @@ DIR_NGINX_PUBLISHED="${NGINX_CONF}/published"
 
 # We purge everything each run and start over
 [ -d "${DIR_NGINX_ACL_RULES}" ]  && rm -rf "${DIR_NGINX_ACL_RULES}"
-rm "${DIR_NGINX_PUBLISHED}"/*.acl || true
+rm "${DIR_NGINX_PUBLISHED}"/*.acl 2> /dev/null || true
 
 # Make sure our dirs work
 mkdir -p "${DIR_NGINX_ACL_RULES}"
