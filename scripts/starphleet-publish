@@ -36,8 +36,8 @@ IP_ADDRESS=$(cat "${CURRENT_ORDERS}/${order}/.starphleetstatus.${container_name}
 
 info publishing to ${IP_ADDRESS}
 
-# we seem to be able to get either an empty string or a - as the ip address
-# when things go 'wrong'
+# If we can't get an IP, punt.  THis can happen if a person manually deletes things
+# in CURRENT_ORDERS or tries a starphleet-redeploy which indentionally wipes the world
 if [ -z "${IP_ADDRESS}" ]; then
   error "Could not find ip address for container ${container_name} cannot publish"
   exit 1
