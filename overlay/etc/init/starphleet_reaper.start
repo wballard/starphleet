@@ -5,44 +5,46 @@ while [ 1 ]
 do
   # Run through current orders for all containers
 
+  ######################
+  # Reaper Service
+  ######################
+
+  # Look through all the active containers and check for status files
+  # that do not match the 'active' container.  If any exist, this
+  # service needs a reap.  The reaper (starphleet-reaper) will make
+  # sure NGINX reports back the proper container and won't reap any
+  # containers that may currently be building
+
+  for CONTAINER_FILE in $(find "${CURRENT_ORDERS}" -type f -iname ".container")
+  do
+    unset REAP
+
+    # Extract the container name that should be deployed
+    active_container=$(cat ${CONTAINER_FILE})
+
+    # Extract the name of the order
+    order="${CONTAINER_FILE%/*}"
+    order="${order##*/}"
+
+    for CONTAINER_STATUS_FILE in $(find "${CURRENT_ORDERS}/${order}/" -type f -name ".starphleetstatus*" | grep --extended-regexp -e ".*-([a-f0-9]){7}$")
+    do
+        # Yoink just the container name off the status file
+        container_name=$(basename "${CONTAINER_STATUS_FILE}" | sed -e 's/.starphleetstatus.//')
+
+        # If we have any reason to believe we should reap this order there
+        # is no reason to keep processing other status files
+        if [ "${active_container}" != "${container_name}" ]; then
+          REAP="true"
+          break
+        fi
+    done
+
+    # If we found a reason to reap these orders.. do eet
+    if [ -n "${REAP}" ]; then
+      starphleet-reaper "${active_container}" "${order}"
+    fi
+  done
+
+  # We don't need to go reep crazy.  Pause for a pulse
   sleep "${STARPHLEET_PULSE}"
 done
-
-
-  ######################
-  # Publish
-  ######################
-  # At this point we have a running container, and it answers HTTP if a healthcheck
-  # was provided, so we are on the air and can expose it via nginx
-
-  # http basic password authentication access
-  if [ -f "${HEADQUARTERS_LOCAL}/${order}/.htpasswd" ]; then
-    HTPASSWD="${HEADQUARTERS_LOCAL}/${order}/.htpasswd"
-  else
-    HTPASSWD='-'
-  fi
-
-  # and LDAP access, almost the same kind of thing -- but LDAPy
-  if [ -f "${HEADQUARTERS_LOCAL}/${order}/.ldap" ]; then
-    LDAP="${HEADQUARTERS_LOCAL}/${order}/.ldap"
-  else
-    LDAP='-'
-  fi
-  # Now attempt to write the nginx configs (starphleet-publish)
-  # starphleet-publish will handle 'hupping' nginx
-  if ! starphleet-publish "${name}" "/${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
-    warn "Publish Failed - Container: ${name} / Order: ${order}"
-    echo 'publish failed' > "${STATUS_FILE}"
-    exit 1
-  fi
-  # record online
-  echo 'online' > "${STATUS_FILE}"
-  # Only update the active container if we get a successful publish
-  echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
-  echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
-  # Expose any ports requested in the orders
-  starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
-  # Sleep for STARPHLEET_DRAINSTOP_WAIT time before reaping old containers
-  sleep "${STARPHLEET_DRAINSTOP_WAIT}"
-  # Reap non-building other containers
-  starphleet-reaper "${name}" "${order}"
