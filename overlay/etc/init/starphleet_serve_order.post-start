@@ -59,7 +59,7 @@ else
 
   # XXX: This may be functionaly equivalent to ".container" - needs further review
   echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
-  
+
   # At this point the container is active so make it the current container
   echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
 

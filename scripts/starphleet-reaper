@@ -5,8 +5,7 @@
 ###
 ### Kill off every running service for an order except the current service
 
-ENCODED_ORDER=$(urlencode "${order}")
-for name in $(lxc-ls | grep --extended-regexp -e "^${ENCODED_ORDER}-([a-f0-9]){7}-([a-f0-9]){7}" | grep --invert-match "${current_service_name}")
+for name in $(lxc-ls | grep --extended-regexp -e "^${order}-([a-f0-9]){7}-([a-f0-9]){7}" | grep --invert-match "${current_service_name}")
 do
 
   STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"

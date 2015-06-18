@@ -17,6 +17,8 @@ do
 
   for CONTAINER_FILE in $(find "${CURRENT_ORDERS}" -type f -iname ".container")
   do
+    # We set REAP if we think we should reap this service so here we make
+    # sure it doesn't have anything stale from the last service
     unset REAP
 
     # Extract the container name that should be deployed
@@ -26,6 +28,9 @@ do
     order="${CONTAINER_FILE%/*}"
     order="${order##*/}"
 
+    # Run through all the status files inside this order directory and
+    # see if any of these status files don't match up with the container
+    # that should be running
     for CONTAINER_STATUS_FILE in $(find "${CURRENT_ORDERS}/${order}/" -type f -name ".starphleetstatus*" | grep --extended-regexp -e ".*-([a-f0-9]){7}$")
     do
         # Yoink just the container name off the status file

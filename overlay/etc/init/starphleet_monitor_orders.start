@@ -10,25 +10,6 @@ do
   latest_AUTHOR "${HEADQUARTERS_LOCAL}"
   ORDERS_SHA="${CURRENT_SHA}"
 
-  #Clean up Removed Orders
-  for ORDER_FILE in $(find "${CURRENT_ORDERS}" -type f -iname ".starphleetstatus*")
-  do
-    ORDER_FILE="${ORDER_FILE%/*}"
-    ORDER_FILE="${ORDER_FILE##*/}"
-    if [ ! -f "${HEADQUARTERS_LOCAL}/${ORDER_FILE}/orders" ] && [ ! -f "${HEADQUARTERS_LOCAL}/${ORDER_FILE}/remote" ]; then
-      #Clean up published Nginx Configs
-      [ -f "${NGINX_CONF}/published/$(urlencode \"/${ORDER_FILE}\").conf" ] && rm "${NGINX_CONF}/published/$(urlencode \"/${ORDER_FILE}\").conf"
-      [ -f "${NGINX_CONF}/published/$(urlencode \"/${ORDER_FILE}\").beta" ] && rm "${NGINX_CONF}/published/$(urlencode \"/${ORDER_FILE}\").beta"
-      [ -f "${NGINX_CONF}/published/${ORDER_FILE}.acl" ] && rm "${NGINX_CONF}/published/${ORDER_FILE}.acl"
-      [ -f "${NGINX_CONF}/proxy_for/$(urlencode \"/${ORDER_FILE}\").conf" ] && rm "${NGINX_CONF}/proxy_for/$(urlencode \"/${ORDER_FILE}\").conf"
-      [ -f "${NGINX_CONF}/named_servers/$(urlencode \"/${ORDER_FILE}\").conf" ] && rm "${NGINX_CONF}/named_servers/$(urlencode \"/${ORDER_FILE}\").conf"
-      [ -f "${NGINX_CONF}/published/$(urlencode \"/${ORDER_FILE}\").redirect" ] && rm "${NGINX_CONF}/published/$(urlencode \"/${ORDER_FILE}\").redirect"
-      [ -f "${NGINX_CONF}/published_bare/$(urlencode \"/${ORDER_FILE}\").conf" ] && rm "${NGINX_CONF}/published_bare/$(urlencode \"/${ORDER_FILE}\").conf"
-
-      [ -d "${CURRENT_ORDERS}/${ORDER_FILE}" ] && rm -rf "${CURRENT_ORDERS}/${ORDER_FILE}"
-    fi
-  done
-
 
   #track the publish ports
   unset PUBLISH_PORTS
@@ -97,8 +78,7 @@ do
       ############################################
       if dev_mode ; then
         warn Dev Mode Detected
-        ENCODED_ORDER=$(urlencode "${ORDER}")
-        SERVICE_NAME=$(echo "${ENCODED_ORDER}")
+        SERVICE_NAME=$(echo "${ORDER}")
         #
         # VMWARE Bug:  Large Git Repos puke when checking out to a shared folder
         #              (does not happen to every user or every time)
@@ -139,7 +119,7 @@ do
           #     Here we are seeing if the rsync dir still exists which implies
           #     it hasn't finished moving to the host OS yet
           if [ ! -d "/home/admiral/tmp/${ORDER}" ]; then
-            RUNNING=$(lxc-ls -f | grep RUNNING | grep --extended-regexp -e "^${ENCODED_ORDER}-([a-f0-9]){7}-([a-f0-9]){7}"  | cut -f1 -d" ")
+            RUNNING=$(lxc-ls -f | grep RUNNING | grep --extended-regexp -e "^${ORDER}-([a-f0-9]){7}-([a-f0-9]){7}"  | cut -f1 -d" ")
             # **************************************
             # File Change Detection
             # **************************************
@@ -213,15 +193,14 @@ do
         get_CURRENT_SHA "${LOCAL}"
         SERVICE_SHA="${CURRENT_SHA}"
       fi
-      ENCODED_ORDER=$(urlencode "${ORDER}")
       #sha for both the service and the orders asking for it, changing either
       #of these starts up a new container that will run in parallel with prior
       #versions
       if dev_mode ; then
-        SERVICE_NAME=$(echo "${ENCODED_ORDER}-")
+        SERVICE_NAME=$(echo "${ORDER}-")
         stop --no-wait starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
       else
-        SERVICE_NAME=$(echo "${ENCODED_ORDER}-${ORDERS_SHA}-${SERVICE_SHA}")
+        SERVICE_NAME=$(echo "${ORDER}-${ORDERS_SHA}-${SERVICE_SHA}")
       fi
       #this is done with no-wait since upstart will prevent duplicate starts
       start --no-wait starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"

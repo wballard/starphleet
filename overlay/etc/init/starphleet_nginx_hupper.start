@@ -15,11 +15,18 @@ do
     # Remove the current configs and start fresh
     rm "${NGINX_CONF}"/published/* 2> /dev/null
 
+    # Run all the accessory nginx configuration tools
+    starphleet-ldap-servers
+    starphleet-public-keys
+    starphleet-beta-groups
+    starphleet-nginx-acl-rules
+
     # CURRENT_ORDERS dir is the 'master' of what should be published
     for CONTAINER_FILE in $(find "${CURRENT_ORDERS}" -type f -iname ".container")
     do
       # Extract the container name that should be deployed
       name=$(cat ${CONTAINER_FILE})
+
       # Extract the name of the order
       order="${CONTAINER_FILE%/*}"
       order="${order##*/}"
@@ -67,8 +74,3 @@ do
   sleep "${STARPHLEET_PULSE}"
 
 done
-
-# TODO: REAPER MUST BE MADE SMARTER'ER
-
-# Reap non-building other containers
-starphleet-reaper "${name}" "${order}"
