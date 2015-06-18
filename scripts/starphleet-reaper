@@ -42,6 +42,7 @@ do
      [ "${CURRENT_STATUS}" != "online" ] &&
      [ "${CURRENT_STATUS}" != "stopped" ] &&
      [ "${CURRENT_STATUS}" != "failed" ] &&
+     [ "${CURRENT_STATUS}" != "building failed" ] &&
      [ "${CURRENT_STATUS}" != "publish failed" ] &&
      [ "${force}" != "true" ]; then
      info "Unable to reap ${name} due to status: ${CURRENT_STATUS}"
