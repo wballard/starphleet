@@ -53,7 +53,7 @@ do
   #   - Force is not enabled
   if ([ "${CURRENT_CONTAINER}" == "${name}" ] ||
      [ "${NGINX_CONTAINER}" == "${name}" ]) &&
-     [ "${force}" != "true "]; then
+     [ "${force}" != "true" ]; then
      info "Unable to reap ${name} - Active Container ${CURRENT_CONTAINER} - NGINX Pointing at ${NGINX_CONTAINER}"
     continue;
   fi
