@@ -25,7 +25,7 @@ do
     for CONTAINER_FILE in $(find "${CURRENT_ORDERS}" -type f -iname ".container")
     do
       # Extract the container name that should be deployed
-      name=$(cat ${CONTAINER_FILE})
+      name=$(cat "${CONTAINER_FILE}")
 
       # Extract the name of the order
       order="${CONTAINER_FILE%/*}"
@@ -51,7 +51,16 @@ do
       if ! starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
         warn "Publish Failed - Container: ${name} / Order: ${order}"
         echo 'publish failed' > "${STATUS_FILE}"
+        # If we have an error then we fall back to the last known good container
+        if [ -f "${CURRENT_ORDERS}/${order}/.last_known_good_container" ]; then
+          name=$(cat "${CURRENT_ORDERS}/${order}/.last_known_good_container")
+          warn "Falling back to container ${name}"
+          starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}"
+        fi
       fi
+
+      # Keep track of the last good container as a fallback
+      echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
 
       # Expose any ports requested in the orders
       starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"

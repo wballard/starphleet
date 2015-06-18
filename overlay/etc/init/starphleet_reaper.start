@@ -3,9 +3,7 @@ source `which tools`
 
 while [ 1 ]
 do
-  # Run through current orders for all containers
-
-  ######################
+  #####################
   # Reaper Service
   ######################
 
@@ -41,10 +39,12 @@ do
         # there's no reason to run the reaper which pulls containers
         # against lxc-ls which is a bit more heavy than this simple query
         # Thus, we also check the status of this container and don't consider
-        # it reapable if its still building
+        # it reapable if its still building.  There's still a small race condition
+        # where nginx hasn't finished publishing and hupping.  The reaper will refuse
+        # to reap the container if nginx is still directed at the container
         CURRENT_STATUS=$(cat "${CONTAINER_STATUS_FILE}")
 
-        # We won't reap if any are true:
+        # We won't reap if all are true:
         #   - The container is not online
         #   - The container is not failed
         #   - The container is not failed to publish
@@ -68,6 +68,8 @@ do
     if [ -n "${REAP}" ]; then
       starphleet-reaper "${active_container}" "${order}"
     fi
+
+  # End CONTAINER_STATUS_FILE loop
   done
 
   # We don't need to go reep crazy.  Pause for a pulse

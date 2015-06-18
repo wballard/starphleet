@@ -32,7 +32,7 @@ do
 
   # Only reap non-building containers.  Being explicit about reap conditions
   # so future statuses don't trigger accidental reapz
-  # We won't reap if any are true:
+  # We won't reap if all are true:
   #   - The container is not online
   #   - The container is not failed
   #   - The container is not failed to publish
