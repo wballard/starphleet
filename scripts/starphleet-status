@@ -58,10 +58,11 @@ EOF
   if [ -n "${service_name}" ]; then
     FILTER="${service_name}"
   else
-    FILTER="starphleetstatus"
+    FILTER=".container"
   fi
-  for status in $(find "${CURRENT_ORDERS}" | grep 'starphleetstatus$' | grep ${FILTER})
+  for active_container in $(find "${CURRENT_ORDERS}" -regex '.*\.container$' | grep ${FILTER})
   do
+    status=$(dirname "${active_container}")/.starphleetstatus.$(cat "${active_container}")
     STATUS=$(cat "${status}")
     ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
     LOCAL_IP=$([ -f "${status}.ip" ] && cat "${status}.ip")
