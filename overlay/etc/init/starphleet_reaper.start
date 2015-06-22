@@ -7,6 +7,12 @@ do
   # Reaper Service
   ######################
 
+  if [ ! -d "${CURRENT_ORDERS}" ]; then
+    info "Current Orders Doesn't exist: ${CURRENT_ORDERS}"
+    sleep ${STARPHLEET_PULSE}
+    continue;
+  fi
+
   # Look through all the active containers and check for status files
   # that do not match the 'active' container.  If any exist, this
   # service needs a reap.  The reaper (starphleet-reaper) will make
