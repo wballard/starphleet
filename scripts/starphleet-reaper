@@ -43,7 +43,7 @@ do
   # this we check if the .container file (updates on success) is 'newer' than
   # the status file of the container we are attempting to reap
   if [ "${CURRENT_ORDERS}/${order}/.container}" -nt "${STATUS_FILE}" ] ||
-     [ "${force}" == "true" ]; then
+     [ "${force}" != "true" ]; then
      info "Unable to reap ${name} - Latest container ${CURRENT_CONTAINER} is not newer"
     continue;
   fi
