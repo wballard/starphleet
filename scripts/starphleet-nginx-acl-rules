@@ -22,7 +22,12 @@ DIR_NGINX_PUBLISHED="${NGINX_CONF}/published"
 
 # We purge everything each run and start over
 [ -d "${DIR_NGINX_ACL_RULES}" ]  && rm -rf "${DIR_NGINX_ACL_RULES}"
-rm "${DIR_NGINX_PUBLISHED}"/*.acl || true
+
+# Purge any beta files
+for file in $(find "${NGINX_CONF}/published/" -type f -regex ".*\.acl$")
+do
+  rm "${file}"
+done
 
 # Make sure our dirs work
 mkdir -p "${DIR_NGINX_ACL_RULES}"
@@ -61,5 +66,3 @@ for FILE_ORDERS in $(find ${HEADQUARTERS_LOCAL} -type f -name "orders"); do
     info no ACLs specified for service: ${SERVICE_NAME}
   fi
 done
-
-starphleet-hup-nginx

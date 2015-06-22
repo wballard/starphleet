@@ -58,44 +58,14 @@ else
   fi
 
 
-
-  ######################
-  # Publish
-  ######################
-  # At this point we have a running container, and it answers HTTP if a healthcheck
-  # was provided, so we are on the air and can expose it via nginx
-
-  # http basic password authentication access
-  if [ -f "${HEADQUARTERS_LOCAL}/${order}/.htpasswd" ]; then
-    HTPASSWD="${HEADQUARTERS_LOCAL}/${order}/.htpasswd"
-  else
-    HTPASSWD='-'
-  fi
-
-  # and LDAP access, almost the same kind of thing -- but LDAPy
-  if [ -f "${HEADQUARTERS_LOCAL}/${order}/.ldap" ]; then
-    LDAP="${HEADQUARTERS_LOCAL}/${order}/.ldap"
-  else
-    LDAP='-'
-  fi
-  # Now attempt to write the nginx configs (starphleet-publish)
-  # starphleet-publish will handle 'hupping' nginx
-  if ! starphleet-publish "${name}" "/${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" ; then
-    warn "Publish Failed - Container: ${name} / Order: ${order}"
-    echo 'publish failed' > "${STATUS_FILE}"
-    exit 1
-  fi
-  # record online
-  echo 'online' > "${STATUS_FILE}"
-  # Only update the active container if we get a successful publish
+  # At this point the container is active so make it the current container
   echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
-  echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
-  # Expose any ports requested in the orders
-  starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
-  # Sleep for STARPHLEET_DRAINSTOP_WAIT time before reaping old containers
-  sleep "${STARPHLEET_DRAINSTOP_WAIT}"
-  # Reap non-building other containers
-  starphleet-reaper "${name}" "${order}"
+
+  # Update this containers status with 'online'
+  echo 'online' > "${STATUS_FILE}"
+
+  # Trigger new publish configs and a hup of nginx
+  starphleet-hup-nginx
   # For good measure
   exit 0
 fi

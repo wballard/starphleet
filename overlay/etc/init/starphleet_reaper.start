@@ -1,0 +1,88 @@
+#!/bin/bash
+source `which tools`
+
+while [ 1 ]
+do
+  #####################
+  # Reaper Service
+  ######################
+
+  # New installs and HQ changes create a valid condition where CURRENT_ORDERS
+  # may not yet exist.  No reason to report unhandled errors when this happens
+  if [ ! -d "${CURRENT_ORDERS}" ]; then
+    info "Current Orders Doesn't exist: ${CURRENT_ORDERS}"
+    sleep ${STARPHLEET_PULSE}
+    continue;
+  fi
+
+  # Look through all the active containers and check for status files
+  # that do not match the 'active' container.  If any exist, this
+  # service needs a reap.  The reaper (starphleet-reaper) will make
+  # sure NGINX reports back the proper container and won't reap any
+  # containers that may currently be building
+
+  for CONTAINER_FILE in $(find "${CURRENT_ORDERS}" -type f -iname ".container")
+  do
+    # We set REAP if we think we should reap this service so here we make
+    # sure it doesn't have anything stale from the last service
+    unset REAP
+
+    # Extract the container name that should be deployed
+    active_container=$(cat ${CONTAINER_FILE})
+
+    # Extract the name of the order
+    order=$(basename $(dirname "${CONTAINER_FILE}"))
+
+    # Run through all the status files inside this order directory and
+    # see if any of these status files don't match up with the container
+    # that should be running
+    for CONTAINER_STATUS_FILE in $(find "${CURRENT_ORDERS}/${order}/" -type f -name ".starphleetstatus*" | grep --extended-regexp -e ".*-([a-f0-9]){7}$")
+    do
+
+        # Yoink just the container name off the status file
+        container_name=$(basename "${CONTAINER_STATUS_FILE}" | sed -e 's/.starphleetstatus.//')
+
+        # Even though similar logic exists in starphleet-reaper
+        # there's no reason to run the reaper which pulls containers
+        # against lxc-ls which is a bit more heavy than this simple query
+        # Thus, we also check the status of this container and don't consider
+        # it reapable if its still building.  There's still a small race condition
+        # where nginx hasn't finished publishing and hupping.  The reaper will refuse
+        # to reap the container if nginx is still directed at the container
+        CURRENT_STATUS=$(cat "${CONTAINER_STATUS_FILE}")
+
+        # We won't reap if all are true:
+        #   - The container is not online
+        #   - The container is not failed
+        #   - The container is not stopped
+        #   - The container is not failed to publish
+        if [ "${CURRENT_STATUS}" != "" ] &&
+           [ "${CURRENT_STATUS}" != "online" ] &&
+           [ "${CURRENT_STATUS}" != "stopped" ] &&
+           [ "${CURRENT_STATUS}" != "failed" ] &&
+           [ "${CURRENT_STATUS}" != "building failed" ] &&
+           [ "${CURRENT_STATUS}" != "publish failed" ]; then
+           info "Unable to reap ${container_name} due to status: ${CURRENT_STATUS}"
+           continue;
+        fi
+
+        # If we have any reason to believe we should reap this order there
+        # is no reason to keep processing other status files
+        if [ "${active_container}" != "${container_name}" ]; then
+          info "Reaping order ${order}: Container [${container_name}] is not active [${active_container}]"
+          REAP="true"
+          break
+        fi
+    done
+
+    # If we found a reason to reap these orders.. do eet
+    if [ -n "${REAP}" ]; then
+      starphleet-reaper "${active_container}" "${order}"
+    fi
+
+  # End CONTAINER_STATUS_FILE loop
+  done
+
+  # We don't need to go reap crazy.  Pause for a pulse
+  sleep "${STARPHLEET_PULSE}"
+done

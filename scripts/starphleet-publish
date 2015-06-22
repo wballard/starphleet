@@ -1,6 +1,6 @@
 #!/usr/bin/env starphleet-launcher
 ### Usage:
-###    starphleet-publish <container_name> <public_url> <orders> <htpasswd> <ldap>
+###    starphleet-publish <container_name> <order> <orders_file> <htpasswd> <ldap>
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
@@ -16,30 +16,30 @@ declare -A BETAS
 
 # declare for redirects
 declare -A REDIRECT_TO
-run_orders "${orders}"
+run_orders "${orders_file}"
 
-order_name=${public_url}
+public_url="/${order}"
 if [ "${public_url}" == "/" ]; then
   public_url=""
 fi
 #mount this service over a path
-MOUNT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").conf"
+MOUNT_CONF="${NGINX_CONF}/published/${order}.conf"
 #mount this service over a port
-BARE_CONF="${NGINX_CONF}/published_bare/$(urlencode \"${public_url}\").conf"
+BARE_CONF="${NGINX_CONF}/published_bare/${order}.conf"
 #redirect your urls to lxc
-REDIRECT_CONF="${NGINX_CONF}/published/$(urlencode \"${public_url}\").redirect"
+REDIRECT_CONF="${NGINX_CONF}/published/${order}.redirect"
 #mount this service over a path
-PROXY_FOR_CONF="${NGINX_CONF}/proxy_for/$(urlencode \"${public_url}\").conf"
-SERVER_NAMES_CONF="${NGINX_CONF}/named_servers/$(urlencode \"${public_url}\").conf"
+PROXY_FOR_CONF="${NGINX_CONF}/proxy_for/${order}.conf"
+SERVER_NAMES_CONF="${NGINX_CONF}/named_servers/${order}.conf"
 
-IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}[[:space:]]" | awk '{ print $3; }')
+IP_ADDRESS=$(cat "${CURRENT_ORDERS}/${order}/.starphleetstatus.${container_name}.ip")
 
 info publishing to ${IP_ADDRESS}
 
-# we seem to be able to get either an empty string or a - as the ip address
-# when things go 'wrong'
-if [ -z "${IP_ADDRESS}" -o "${IP_ADDRESS}" == "-" ]; then
-  error "could not find ip address for container ${container_name} cannot publish"
+# If we can't get an IP, punt.  THis can happen if a person manually deletes things
+# in CURRENT_ORDERS or tries a starphleet-redeploy which indentionally wipes the world
+if [ -z "${IP_ADDRESS}" ]; then
+  error "Could not find ip address for container ${container_name} cannot publish"
   exit 1
 fi
 
@@ -50,17 +50,6 @@ mkdir -p "${NGINX_CONF}/named_servers"
 
 [ -f "${NGINX_CONF}/published/crt" ] || cp "${NGINX_CONF}/crt" "${NGINX_CONF}/published/crt"
 [ -f "${NGINX_CONF}/published/key" ] || cp "${NGINX_CONF}/key" "${NGINX_CONF}/published/key"
-
-
-#redirect to forgive a lack of trailing slash
-if [ -n "${public_url}" ]; then
-cat << EOF >> "${MOUNT_CONF}"
-location = ${public_url} {
-  rewrite .* ${public_url}/ last;
-}
-EOF
-fi
-
 
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
@@ -224,6 +213,3 @@ if [ -n "${SERVER_NAMES}" ]; then
     error 'unable to find named_server.conf.* files. cannot set up named server for provided names'
   fi
 fi
-
-#reload to get the newly generated settings
-starphleet-hup-nginx

@@ -11,8 +11,12 @@ run_as_root_or_die
 
 # Purge all beta groups and beta configs
 [ -d "${NGINX_CONF}/beta_groups" ]  && rm -rf "${NGINX_CONF}/beta_groups"
-# Try to remove beta files or.. exit happy if none exist
-rm "${NGINX_CONF}"/published/*.beta || true
+
+# Purge any beta files
+for file in $(find "${NGINX_CONF}/published/" -type f -regex ".*\.beta$")
+do
+  rm "${file}"
+done
 
 # Make the beta_group again
 mkdir -p "${NGINX_CONF}/beta_groups"
@@ -53,7 +57,7 @@ do
   # Get only the 'name' of these orders
   ORDER_NAME=$(echo "${ORDERS_FILE}" | sed -e 's[/orders$[[' | sed -e "s[${HEADQUARTERS_LOCAL}/\?[[")
   # Beta config name
-  BETA_CONF="${NGINX_CONF}/published/$(urlencode \"${ORDER_NAME}\").beta"
+  BETA_CONF="${NGINX_CONF}/published/${ORDER_NAME}.beta"
 
   for beta in "${!BETAS[@]}"
   do
@@ -72,5 +76,3 @@ do
     echo "  }" >> "${BETA_CONF}"
   done
 done
-
-starphleet-hup-nginx
