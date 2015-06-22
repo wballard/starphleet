@@ -61,7 +61,7 @@ mkdir -p "${NGINX_CONF}/named_servers"
 # we will proxy failed requests to other ships
 cat << EOF > "${UPSTREAM_CONF}"
 upstream ${order} {
-  server ${IP_ADDRESS}:${PORT};
+  server localhost;
 EOF
 for failover_server in $(echo "${PHLEET}"); do
   if [ -n "${STARPHLEET_THIS_SHIP}" ] && [ "${STARPHLEET_THIS_SHIP}" != "${failover_server}" ]; then
