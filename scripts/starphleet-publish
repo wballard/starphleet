@@ -22,8 +22,10 @@ public_url="/${order}"
 if [ "${public_url}" == "/" ]; then
   public_url=""
 fi
+#Failover confs
+FAILOVER_CONF="${NGINX_CONF}/published/${order}.conf"
 #mount this service over a path
-MOUNT_CONF="${NGINX_CONF}/published/${order}.conf"
+MOUNT_CONF="${NGINX_CONF}/published/${order}-local.conf"
 #Upstream conf
 UPSTREAM_CONF="${NGINX_CONF}/published/${order}.upstream"
 #mount this service over a port
@@ -70,9 +72,8 @@ cat << EOF >> "${UPSTREAM_CONF}"
 }
 EOF
 
-
 #basic publication at an url mount point
-cat << EOF > "${MOUNT_CONF}"
+cat << EOF > "${FAILOVER_CONF}"
 
 location ${public_url}/ {
   gzip on;
@@ -80,8 +81,34 @@ location ${public_url}/ {
   gzip_proxied any;
   gzip_comp_level 6;
   include ${NGINX_CONF}/cors.conf;
-  rewrite ${public_url}/(.*) /\$1 break;
+  rewrite ${public_url}/(.*) /${order}-local/\$1 break;
   proxy_pass http://${order};
+  proxy_next_upstream error http_502;
+  proxy_set_header X-Forwarded-Host \$host;
+  proxy_set_header X-Forwarded-Server \$host;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Starphleet-Service-Name: ${order};
+  proxy_set_header Host \$http_host;
+  # WebSocket support (nginx 1.4)
+  proxy_http_version 1.1;
+  proxy_set_header Upgrade \$http_upgrade;
+  proxy_set_header Connection "upgrade";
+EOF
+#closing off the location
+echo '}' >> "${FAILOVER_CONF}"
+
+
+#basic publication at an url mount point
+cat << EOF > "${MOUNT_CONF}"
+
+location ${public_url}-local/ {
+  gzip on;
+  gzip_types *;
+  gzip_proxied any;
+  gzip_comp_level 6;
+  include ${NGINX_CONF}/cors.conf;
+  rewrite ${public_url}-local/(.*) /\$1 break;
+  proxy_pass http://${IP_ADDRESS}:${PORT};
   proxy_next_upstream error http_502;
   proxy_set_header X-Forwarded-Host \$host;
   proxy_set_header X-Forwarded-Server \$host;
