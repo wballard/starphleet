@@ -18,6 +18,8 @@ declare -A BETAS
 declare -A REDIRECT_TO
 run_orders "${orders_file}"
 
+STARPHLEET_HOSTNAME=${STARPHLEET_HOSTNAME:-starphleet.com}
+
 public_url="/${order}"
 if [ "${public_url}" == "/" ]; then
   public_url=""
@@ -110,7 +112,7 @@ EOF
 cat << EOF > "${SERVER_CONF}"
 
 server {
-  server_name ${order}.glgresearch.com;
+  server_name ${order}.${STARPHLEET_HOSTNAME};
   ssl_certificate      published/crt;
   ssl_certificate_key  published/key;
   listen 80;
@@ -130,7 +132,7 @@ server {
     proxy_set_header X-Forwarded-Server \$host;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
     proxy_set_header X-Starphleet-Service-Name: ${order};
-    proxy_set_header Host ${order}.glgresearch.com;
+    proxy_set_header Host ${order}.${STARPHLEET_HOSTNAME};
     # WebSocket support (nginx 1.4)
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
