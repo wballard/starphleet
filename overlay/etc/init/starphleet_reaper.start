@@ -7,6 +7,8 @@ do
   # Reaper Service
   ######################
 
+  # New installs and HQ changes create a valid condition where CURRENT_ORDERS
+  # may not yet exist.  No reason to report unhandled errors when this happens
   if [ ! -d "${CURRENT_ORDERS}" ]; then
     info "Current Orders Doesn't exist: ${CURRENT_ORDERS}"
     sleep ${STARPHLEET_PULSE}
