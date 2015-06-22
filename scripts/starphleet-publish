@@ -63,7 +63,7 @@ cat << EOF > "${UPSTREAM_CONF}"
 upstream ${order} {
   server localhost;
 EOF
-for failover_server in $(echo "${PHLEET}"); do
+for failover_server in "${PHLEET}"; do
   if [ -n "${STARPHLEET_THIS_SHIP}" ] && [ "${STARPHLEET_THIS_SHIP}" != "${failover_server}" ]; then
     echo "  server ${failover_server} backup;" >> "${UPSTREAM_CONF}"
   fi
