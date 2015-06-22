@@ -30,6 +30,15 @@ do
     log "CC: |${CURRENT_CONTAINER}|"
     log "NC: |${NGINX_CONTAINER}|"
   fi
+  # Starphleet intentionally won't reap containers that fail to build
+  # until a successful container builds.  Thus, make sure the container
+  # file is newer than the status file attempting to be reaped
+  if [ "${CURRENT_STATUS}" != "building failed" ] &&
+     [ "${CURRENT_ORDERS}/${order}/.container}" -nt "${STATUS_FILE}" ] &&
+     [ "${force}" != "true" ]; then
+     info "Unable to reap ${name} - Latest container ${CURRENT_CONTAINER} is not newer"
+    continue;
+  fi
 
   # Only reap non-building containers.  Being explicit about reap conditions
   # so future statuses don't trigger accidental reapz
@@ -42,7 +51,6 @@ do
      [ "${CURRENT_STATUS}" != "online" ] &&
      [ "${CURRENT_STATUS}" != "stopped" ] &&
      [ "${CURRENT_STATUS}" != "failed" ] &&
-     [ "${CURRENT_STATUS}" != "building failed" ] &&
      [ "${CURRENT_STATUS}" != "publish failed" ] &&
      [ "${force}" != "true" ]; then
      info "Unable to reap ${name} due to status: ${CURRENT_STATUS}"
