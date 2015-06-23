@@ -42,7 +42,7 @@ do
   # intentionally leaves around failed containers for debug purposes.  To facilitate
   # this we check if the .container file (updates on success) is 'newer' than
   # the status file of the container we are attempting to reap
-  if [ "${CURRENT_ORDERS}/${order}/.container}" -nt "${STATUS_FILE}" ] ||
+  if [ "${CURRENT_ORDERS}/${order}/.container" -ot "${STATUS_FILE}" ] &&
      [ "${force}" != "true" ]; then
      info "Unable to reap ${name} - Latest container ${CURRENT_CONTAINER} is not newer"
     continue;
