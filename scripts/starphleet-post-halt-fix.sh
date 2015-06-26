@@ -1,0 +1,1 @@
+find /var/starphleet/current_orders/ -regex "^.*\.orders_sha$" | xargs sudo rm
