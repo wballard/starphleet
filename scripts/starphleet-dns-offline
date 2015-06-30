@@ -6,8 +6,7 @@
 die_on_error
 run_as_root_or_die
 
-# Remove the endpoint from nginx
-[ -h ${NGINX_STATUS_CONFIG_SYMLINK} ] && rm ${NGINX_STATUS_CONFIG_SYMLINK}
+[ -f "${STARPHLEET_DNS_ONLINE_STATUS_FILE}" ] && rm "${STARPHLEET_DNS_ONLINE_STATUS_FILE}"
 
 ## HUP NGinx
 starphleet-hup-nginx
