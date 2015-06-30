@@ -86,6 +86,13 @@ do
       starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
     done
 
+    # Support NGINX DNS online/offline operations.  
+    if [ -f "${STARPHLEET_DNS_ONLINE_STATUS_FILE}" ] && [ ! -h "${NGINX_STATUS_CONFIG_SYMLINK}" ]; then
+      # Create the symlink
+      ln -s ${NGINX_STATUS_ENDPOINT_CONFIG} ${NGINX_STATUS_CONFIG_SYMLINK}
+
+    fi
+
     ######################
     # Validate Config / HUP
     ######################
