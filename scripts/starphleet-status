@@ -43,6 +43,13 @@ done
 unset IFS
 fi
 
+# TODO: Add back --trouble after I figure out what 'trouble' should mean in
+#       a world where starphleet-status is looking at all the containers
+#       It could mean:
+#         - services with failed containers
+#         - services where nginx/active aren't the same
+#         - other things?
+#         - all the above?
 
 if [ -d "${CURRENT_ORDERS}" ]; then
 cat << EOF
@@ -123,19 +130,19 @@ EOF
     fi
 
     # Emit some info about this order
-    info "    order          : ${ORDER}"
-    info "    latest status  : ${LATEST_SUCCESSFUL_STATUS}"
+    info "    order             : ${ORDER}"
+    info "    latest status     : ${LATEST_SUCCESSFUL_STATUS}"
     if [ "${LATEST_SUCCESSFUL_CONTAINER}" != "${NGINX_POINTING_AT}" ]; then
-    error "    latest active  : ${LATEST_SUCCESSFUL_CONTAINER}"
+    error "    latest active     : ${LATEST_SUCCESSFUL_CONTAINER}"
     else
-    info "    latest active  : ${LATEST_SUCCESSFUL_CONTAINER}"
+    info "    latest active     : ${LATEST_SUCCESSFUL_CONTAINER}"
     fi
-    info "    nginx aimed at : ${NGINX_POINTING_AT}"
-    info "    git author     : ${AUTHOR}"
-    info "    git sha        : ${CURRENT_SHA}"
-    info "    latest git msg : ${GIT_TEXT}"
+    info "    nginx aimed at    : ${NGINX_POINTING_AT}"
+    info "    git author        : ${AUTHOR}"
+    info "    git sha           : ${CURRENT_SHA}"
+    info "    latest git msg    : ${GIT_TEXT}"
     info "    "
-    info "    Containers"
+    info "    Container Details : "
     info "    ------------"
 
     # Now run through all the status files for this order and spit up
