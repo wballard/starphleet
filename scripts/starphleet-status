@@ -132,12 +132,12 @@ EOF
     # Emit some info about this order
     info "    order             : ${ORDER}"
     info "    latest status     : ${LATEST_SUCCESSFUL_STATUS}"
-    if [ "${LATEST_SUCCESSFUL_CONTAINER}" != "${NGINX_POINTING_AT}" ]; then
-    error "    latest active     : ${LATEST_SUCCESSFUL_CONTAINER}"
-    else
     info "    latest active     : ${LATEST_SUCCESSFUL_CONTAINER}"
-    fi
+    if [ "${LATEST_SUCCESSFUL_CONTAINER}" != "${NGINX_POINTING_AT}" ]; then
+    error "    nginx aimed at    : ${NGINX_POINTING_AT}"
+    else
     info "    nginx aimed at    : ${NGINX_POINTING_AT}"
+    fi
     info "    git author        : ${AUTHOR}"
     info "    git sha           : ${CURRENT_SHA}"
     info "    latest git msg    : ${GIT_TEXT}"
