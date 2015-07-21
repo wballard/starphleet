@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 source `which tools`
 
-starphleet-lxc-stop "${name}"
+# Pipe output to /dev/null so it doesn't log this stop and create
+# a new stale log
+starphleet-lxc-stop "${name}" > /dev/null
 if [ "${PROCESS}" == "respawn" ]; then
   # remove the last known good indicator so we don't re-use anything
   # if we've encountered a problems starting the container (hit the
