@@ -85,9 +85,9 @@ EOF
     fi
 
     # Delimit our output so it is moar readable
-    echo "    "
-    echo "  --"
-    echo "    "
+    info "    "
+    info "  --"
+    info "    "
 
     # It's possible unsuccessful order files that have never deployed to not
     # have a .container file (which indicates the latest successfully built container)
@@ -123,16 +123,20 @@ EOF
     fi
 
     # Emit some info about this order
-    echo "    order          : ${ORDER}"
-    echo "    latest status  : ${LATEST_SUCCESSFUL_STATUS}"
-    echo "    latest active  : ${LATEST_SUCCESSFUL_CONTAINER}"
-    echo "    nginx aimed at : ${NGINX_POINTING_AT}"
-    echo "    git author     : ${AUTHOR}"
-    echo "    git sha        : ${CURRENT_SHA}"
-    echo "    latest git msg : ${GIT_TEXT}"
-    echo "    "
-    echo "    Containers"
-    echo "    ------------"
+    info "    order          : ${ORDER}"
+    info "    latest status  : ${LATEST_SUCCESSFUL_STATUS}"
+    if [ "${LATEST_SUCCESSFUL_CONTAINER}" != "${NGINX_POINTING_AT}" ]; then
+    error "    latest active  : ${LATEST_SUCCESSFUL_CONTAINER}"
+    else
+    info "    latest active  : ${LATEST_SUCCESSFUL_CONTAINER}"
+    fi
+    info "    nginx aimed at : ${NGINX_POINTING_AT}"
+    info "    git author     : ${AUTHOR}"
+    info "    git sha        : ${CURRENT_SHA}"
+    info "    latest git msg : ${GIT_TEXT}"
+    info "    "
+    info "    Containers"
+    info "    ------------"
 
     # Now run through all the status files for this order and spit up
     # some info about each container
@@ -150,7 +154,7 @@ EOF
       LOCAL_IP=$([ -f "${container_status_file}.ip" ] && cat "${container_status_file}.ip")
       LOCAL_PORT=$([ -f "${container_status_file}.port" ] && cat "${container_status_file}.port")
 
-      echo "    ${CONTAINER} - [${LOCAL_IP}:${LOCAL_PORT}] - [${STATUS}]"
+      info "    ${CONTAINER} - [${LOCAL_IP}:${LOCAL_PORT}] - [${STATUS}]"
     done # End container_status_file
   done # End container_file
 fi
