@@ -1,6 +1,6 @@
 #!/usr/bin/env starphleet-launcher
 ### Usage:
-###    starphleet-status [--metadata] [<service_name>]
+###    starphleet-status [--trouble] [--metadata] [<service_name>]
 ### --help
 ###
 ### Dump out handy statistics about your ship.
@@ -91,11 +91,6 @@ EOF
       PREVIOUS_ORDER=${ORDER}
     fi
 
-    # Delimit our output so it is moar readable
-    info "    "
-    info "  --"
-    info "    "
-
     # It's possible unsuccessful order files that have never deployed to not
     # have a .container file (which indicates the latest successfully built container)
     if [ -f "${container_file}" ]; then
@@ -104,11 +99,21 @@ EOF
       LATEST_SUCCESSFUL_CONTAINER=$(echo ${LATEST_SUCCESSFUL_CONTAINER_STATUS_FILE} | sed -e 's/.*starphleetstatus\.//')
     fi
 
-
-
     # This grabs the container NGINX is currently configured to point to which
     # is not always the same is what starphleet thinks is the latest container
     NGINX_POINTING_AT=$(curl --connect-timeout 1 -s -XHEAD -i "http://localhost/${ORDER}/" | grep "X-Starphleet-Container" | cut -f 2 -d " " | tr -dc '[[:print:]]')
+
+    # If trouble is set and everything is healthy we skip this one (eg, continue)
+    if [ "${trouble}" == "true" ] &&
+       ([ -f "${container_file}" ] &&
+        [ "${LATEST_SUCCESSFUL_CONTAINER}" == "${NGINX_POINTING_AT}" ]); then
+      continue
+    fi
+
+    # Delimit our output so it is moar readable
+    info "    "
+    info "  --"
+    info "    "
 
     # The git directories are relocated in dev_mode
     if dev_mode; then
