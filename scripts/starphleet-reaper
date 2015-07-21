@@ -83,10 +83,10 @@ do
   info "Destroying container ${name}"
   starphleet-lxc-destroy "${name}" || true
   info "Removing status files"
-  rm ${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}* 2> /dev/null || true
-  info "Removing Logs"
-  rm /var/logs/upstart/starphleet_serve_order-${name}* 2> /dev/null || true
-  rm /var/logs/upstart/starphleet_orders_healthcheck-${name}* 2> /dev/null || true
+  rm ${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}* || true
+  info "Removing Logs for ${name}"
+  rm /var/log/upstart/starphleet_serve_order-${name}* || true
+  rm /var/log/upstart/starphleet_orders_healthcheck-${name}* || true
   info "reaper has reaped ${name}"
 done
 
