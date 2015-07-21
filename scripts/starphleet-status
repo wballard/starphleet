@@ -43,14 +43,6 @@ done
 unset IFS
 fi
 
-# TODO: Add back --trouble after I figure out what 'trouble' should mean in
-#       a world where starphleet-status is looking at all the containers
-#       It could mean:
-#         - services with failed containers
-#         - services where nginx/active aren't the same
-#         - other things?
-#         - all the above?
-
 if [ -d "${CURRENT_ORDERS}" ]; then
 cat << EOF
 orders:
