@@ -82,7 +82,7 @@ do
   stop starphleet_serve_order name="${name}" || true
   info "Destroying container ${name}"
   starphleet-lxc-destroy "${name}" || true
-  info "Removing status files"
+  info "Removing status files for ${name}"
   rm ${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}* || true
   info "Removing Logs for ${name}"
   rm /var/log/upstart/starphleet_serve_order-${name}* || true
