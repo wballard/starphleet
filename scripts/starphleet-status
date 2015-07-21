@@ -77,11 +77,25 @@ EOF
     #      because it would only consider services with at least one successful build.
     #      As a quick fix this hackery is mimic'ing the previous behavior.  However,
     #      the correct solution is to refactor all this foo
-    if [ -n "${PREVIOUS_ORDER}" ] && [ "${ORDER}" == "${PREVIOUS_ORDER}" ]; then
+
+    # To support "--trouble" we override the logic below which might otherwise
+    # script passed displaying this particular order once a previous iteration occurred
+    # ..This is all very counterintuitive and needs a fixing
+    if [ ${trouble} == "true" ]; then
+      STATUS_OF_THIS_CONTAINER=$(cat "${status_file}")
+      if [ "${STATUS_OF_THIS_CONTAINER}" != "building failed" ]; then
+        TROUBLE_ORDER=${ORDER}
+      fi
+    fi
+
+    if [ -n "${PREVIOUS_ORDER}" ] && [ "${ORDER}" == "${PREVIOUS_ORDER}" ] && [ -z "${TROUBLE_ORDER}" ]; then
       continue
     else
+      unset TROUBLE_ORDER
       PREVIOUS_ORDER=${ORDER}
     fi
+
+
 
     # It's possible unsuccessful order files that have never deployed to not
     # have a .container file (which indicates the latest successfully built container)
