@@ -16,6 +16,6 @@ CONTAINERS=$(lxc-ls -f | grep RUNNING | grep ${service} | awk '{print $1}')
 # Now figure out which container they want and attach
 echo "Stop which instance:"
 select container in $(lxc-ls -f | grep RUNNING | grep ${service} | awk '{print $1}'); do
-  [ ! -z ${container} ] && sudo stop starphleet_serve_order -n "${container}"
+  [ ! -z ${container} ] && stop starphleet_serve_order name="${container}"
   break;
 done
