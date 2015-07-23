@@ -1,6 +1,6 @@
 #!/usr/bin/env starphleet-launcher
 ### Usage:
-###    starphleet-status [--trouble] [<service_name>]
+###    starphleet-status [--trouble] [--metadata] [<service_name>]
 ### --help
 ###
 ### Dump out handy statistics about your ship.
@@ -10,13 +10,6 @@
 ##ssl stats
 SSL_EXPIRATION=$(openssl x509 -noout -in ${STARPHLEET_ROOT:-/var/starphleet}/nginx/crt -dates | head -1 | awk 'BEGIN { FS = "=" } ; { print $2 }')
 STARPHLEET_DEV_DIR=/hosthome/starphleet_dev
-
-
-metadata=true
-if [ ${metadata} = true ]
-then
-  metadata=false
-fi
 
 if [ ${metadata} = true ]
 then
@@ -50,7 +43,6 @@ done
 unset IFS
 fi
 
-### ORDERS status starts here
 if [ -d "${CURRENT_ORDERS}" ]; then
 cat << EOF
 orders:
@@ -58,55 +50,129 @@ EOF
   if [ -n "${service_name}" ]; then
     FILTER="${service_name}"
   else
-    FILTER=".container"
+    FILTER="\'\'"
   fi
-  for active_container in $(find "${CURRENT_ORDERS}" -regex '.*\.container$' | grep ${FILTER})
+  # for container_file in $(find "${CURRENT_ORDERS}" -regex '.*\.container$' | grep ${FILTER})
+  for status_file in $(find "${CURRENT_ORDERS}" -type f -name ".starphleetstatus.*" | grep --extended-regexp -e ".*-([a-f0-9]){7}-([a-f0-9]){7}$" | grep ${FILTER})
   do
-    status=$(dirname "${active_container}")/.starphleetstatus.$(cat "${active_container}")
-    STATUS=$(cat "${status}")
-    ORDER="$(dirname ${status} | sed -e "s[${CURRENT_ORDERS}/\?[[")"
-    LOCAL_IP=$([ -f "${status}.ip" ] && cat "${status}.ip")
+
+    # XXX: This needs a refactor.  Initial iteration used the .container file in error
+    #      because it would only consider services with at least one successful build.
+    #      As a quick fix this hackery is mimic'ing the previous behavior.  However,
+    #      the correct solution is to refactor all this foo
+    container_file=$(echo $(dirname "${status_file}")"/.container")
+
+    # Make sure we don't output some stale data from the previous loop
+    unset LATEST_SUCCESSFUL_CONTAINER_STATUS_FILE
+    unset LATEST_SUCCESSFUL_CONTAINER
+    unset ORDER
+    unset AUTHOR
+    unset CURRENT_SHA
+    unset GIT_TEXT
+    unset NGINX_POINTING_AT
+
+    ORDER="$(basename $(dirname ${container_file}))"
+
+    # XXX: This needs a refactor.  Initial iteration used the .container file in error
+    #      because it would only consider services with at least one successful build.
+    #      As a quick fix this hackery is mimic'ing the previous behavior.  However,
+    #      the correct solution is to refactor all this foo
+
+    # To support "--trouble" we override the logic below which might otherwise
+    # script passed displaying this particular order once a previous iteration occurred
+    # ..This is all very counterintuitive and needs a fixing
+    if [ ${trouble} == "true" ]; then
+      STATUS_OF_THIS_CONTAINER=$(cat "${status_file}")
+      if [ "${STATUS_OF_THIS_CONTAINER}" != "building failed" ]; then
+        TROUBLE_ORDER=${ORDER}
+      fi
+    fi
+
+    if [ -n "${PREVIOUS_ORDER}" ] && [ "${ORDER}" == "${PREVIOUS_ORDER}" ] && [ -z "${TROUBLE_ORDER}" ]; then
+      continue
+    else
+      unset TROUBLE_ORDER
+      PREVIOUS_ORDER=${ORDER}
+    fi
+
+
+
+    # It's possible unsuccessful order files that have never deployed to not
+    # have a .container file (which indicates the latest successfully built container)
+    if [ -f "${container_file}" ]; then
+      LATEST_SUCCESSFUL_CONTAINER_STATUS_FILE=$(dirname "${container_file}")/.starphleetstatus.$(cat "${container_file}")
+      LATEST_SUCCESSFUL_STATUS=$(cat ${LATEST_SUCCESSFUL_CONTAINER_STATUS_FILE})
+      LATEST_SUCCESSFUL_CONTAINER=$(echo ${LATEST_SUCCESSFUL_CONTAINER_STATUS_FILE} | sed -e 's/.*starphleetstatus\.//')
+    fi
+
+    # This grabs the container NGINX is currently configured to point to which
+    # is not always the same is what starphleet thinks is the latest container
+    NGINX_POINTING_AT=$(curl --connect-timeout 1 -s -XHEAD -i "http://localhost/${ORDER}/" | grep "X-Starphleet-Container" | cut -f 2 -d " " | tr -dc '[[:print:]]')
+
+    # If trouble is set and everything is healthy we skip this one (eg, continue)
+    if [ "${trouble}" == "true" ] &&
+       ([ -f "${container_file}" ] &&
+        [ "${LATEST_SUCCESSFUL_CONTAINER}" == "${NGINX_POINTING_AT}" ]); then
+      continue
+    fi
+
+    # Delimit our output so it is moar readable
+    info "    "
+    info "  --"
+    info "    "
+
+    # The git directories are relocated in dev_mode
     if dev_mode; then
       ORDER_LOCAL="${STARPHLEET_DEV_DIR}/${ORDER}"
     else
       ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
     fi
-    if [ -f $(dirname "${status}")/.container ]; then
-      CONTAINER=$(cat $(dirname "${status}")/.container)
-    else
-      CONTAINER="<none>"
-    fi
+
+    # Snag GIT infoz
     if [ -d "${ORDER_LOCAL}" ]; then
       get_CURRENT_SHA "${ORDER_LOCAL}"
       cd "${ORDER_LOCAL}"
       AUTHOR=$(git log -1 --format='%ae')
-      TEXT=$(git log -1 --format='%s')
+      GIT_TEXT=$(git log -1 --format='%s')
     else
       CURRENT_SHA=""
       AUTHOR=""
-      TEXT=""
+      GIT_TEXT=""
     fi
-##stats are all computed at this point
-    OUTPUT=true
-    if [ "${trouble}" = true ] && [ "${STATUS}" = 'online' ]
-    then
-      OUTPUT=false
-    fi
-if [ ${OUTPUT} = true ]
-then
-cat << EOF
-  -
-    order: ${ORDER}
-    container: ${CONTAINER}
-    local_ip: ${LOCAL_IP}
-    sha: ${CURRENT_SHA}
-    author: ${AUTHOR}
-    text: >
-      ${TEXT}
-    status: ${STATUS}
-EOF
-fi
 
-  done
-  ### ORDERS status ends here
+    # Emit some info about this order
+    info "    order             : ${ORDER}"
+    info "    latest status     : ${LATEST_SUCCESSFUL_STATUS}"
+    info "    latest active     : ${LATEST_SUCCESSFUL_CONTAINER}"
+    if [ "${LATEST_SUCCESSFUL_CONTAINER}" != "${NGINX_POINTING_AT}" ]; then
+    error "    nginx aimed at    : ${NGINX_POINTING_AT}"
+    else
+    info "    nginx aimed at    : ${NGINX_POINTING_AT}"
+    fi
+    info "    git author        : ${AUTHOR}"
+    info "    git sha           : ${CURRENT_SHA}"
+    info "    latest git msg    : ${GIT_TEXT}"
+    info "    "
+    info "    Container Details : "
+    info "    ------------"
+
+    # Now run through all the status files for this order and spit up
+    # some info about each container
+    for container_status_file in $(find "${CURRENT_ORDERS}/${ORDER}" -type f -name ".starphleetstatus.*" | grep --extended-regexp -e ".*${ORDER}-([a-f0-9]){7}-([a-f0-9]){7}$")
+    do
+      # Make sure we aren't using stale data
+      unset CONTAINER
+      unset STATUS
+      unset LOCAL_IP
+      unset LOCAL_PORT
+
+      # Snag all the infoz about this specific container
+      CONTAINER=$(echo ${container_status_file} | sed -e 's/.*starphleetstatus\.//')
+      STATUS=$(cat "${container_status_file}")
+      LOCAL_IP=$([ -f "${container_status_file}.ip" ] && cat "${container_status_file}.ip")
+      LOCAL_PORT=$([ -f "${container_status_file}.port" ] && cat "${container_status_file}.port")
+
+      info "    ${CONTAINER} - [${LOCAL_IP}:${LOCAL_PORT}] - [${STATUS}]"
+    done # End container_status_file
+  done # End container_file
 fi
