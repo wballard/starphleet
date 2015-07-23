@@ -1,209 +1,206 @@
 #!/bin/bash
 
-while [ 1 ]
+set +e
+source `which tools`
+sleep "${STARPHLEET_PULSE}"
+
+get_CURRENT_SHA "${HEADQUARTERS_LOCAL}"
+latest_AUTHOR "${HEADQUARTERS_LOCAL}"
+ORDERS_SHA="${CURRENT_SHA}"
+
+
+#track the publish ports
+unset PUBLISH_PORTS
+declare -a PUBLISH_PORTS
+
+#auto deploy each ordered service, really need to use grep here
+#find doesn't work out on that / pattern
+for order in $(find "${HEADQUARTERS_LOCAL}" | grep '/orders$' | grep -v '/git' )
 do
-  set +e
-  source `which tools`
-  sleep "${STARPHLEET_PULSE}"
-
-  get_CURRENT_SHA "${HEADQUARTERS_LOCAL}"
-  latest_AUTHOR "${HEADQUARTERS_LOCAL}"
-  ORDERS_SHA="${CURRENT_SHA}"
-
-
-  #track the publish ports
-  unset PUBLISH_PORTS
-  declare -a PUBLISH_PORTS
-
-  #auto deploy each ordered service, really need to use grep here
-  #find doesn't work out on that / pattern
-  for order in $(find "${HEADQUARTERS_LOCAL}" | grep '/orders$' | grep -v '/git' )
-  do
-    trace -----------------------
-    info checking ${order}
-    #reset variables
-    source /etc/starphleet
-    ORDER=$(echo "${order}" | sed -e 's[/orders$[[' | sed -e "s[${HEADQUARTERS_LOCAL}/\?[[")
-    #make a place for the orders to be managed while running, this is separate
-    #from the order files in the headquarters
-    CURRENT_ORDER="${CURRENT_ORDERS}/${ORDER}"
-    mkdir -p "${CURRENT_ORDER}"
-    #use git to determing if the orders have changed since the last publish
-    if [ -f "${CURRENT_ORDER}/.orders_sha" ]; then
-      DEPLOYED_ORDERS_SHA=$(cat "${CURRENT_ORDER}/.orders_sha")
-      get_VERSION_DIFF ${HEADQUARTERS_LOCAL} ${ORDERS_SHA} ${DEPLOYED_ORDERS_SHA} $(dirname "${order}")
-      if [ -n "${VERSION_DIFF}" ]; then
-        ORDERS_DIFF="Updated orders"
-      else
-        ORDERS_DIFF="NONE"
-      fi
+  trace -----------------------
+  info checking ${order}
+  #reset variables
+  source /etc/starphleet
+  ORDER=$(echo "${order}" | sed -e 's[/orders$[[' | sed -e "s[${HEADQUARTERS_LOCAL}/\?[[")
+  #make a place for the orders to be managed while running, this is separate
+  #from the order files in the headquarters
+  CURRENT_ORDER="${CURRENT_ORDERS}/${ORDER}"
+  mkdir -p "${CURRENT_ORDER}"
+  #use git to determing if the orders have changed since the last publish
+  if [ -f "${CURRENT_ORDER}/.orders_sha" ]; then
+    DEPLOYED_ORDERS_SHA=$(cat "${CURRENT_ORDER}/.orders_sha")
+    get_VERSION_DIFF ${HEADQUARTERS_LOCAL} ${ORDERS_SHA} ${DEPLOYED_ORDERS_SHA} $(dirname "${order}")
+    if [ -n "${VERSION_DIFF}" ]; then
+      ORDERS_DIFF="Updated orders"
     else
-      ORDERS_DIFF="New orders"
+      ORDERS_DIFF="NONE"
     fi
-    # k, so.  in this scope we don't actually care about the betas BUT
-    # we do want it to be an associative array... if we DO NOT explicitly
-    # make it associative it will implicitly be created as indexed, if you
-    # try to index an indexed (non associative array) with an index like
-    # pants-3322 bash will try to perform the arithmetic operation that
-    # statement seems to indicate (since indexed arrays expect numeric indicies)
-    # pants - 3322 will result in an invalid index and blow chunks.
-    # thus we explicitly declare BETAS
-    declare -A BETAS
-    declare -A REDIRECT_TO
-    #run the order as a whole script with the autodeploy function defined above
-    #this lets folks get creative in orders files as needed
-    unset SERVICE_GIT_URL
-    run_orders "${order}"
-    unset DEPLOY_REASON
-    [ "${ORDERS_DIFF}" != "NONE" ] && DEPLOY_REASON="${ORDERS_DIFF}"
-    #check if this publish port is a duplicate, halting the install of this
-    #order if so, first one wins
-    if [ "${PUBLISH_PORT}" != "0" ]; then
-      warn "${ORDER}" is requesting a host port "${PUBLISH_PORT}"
-      if [ -n "${PUBLISH_PORTS["${PUBLISH_PORT}"]}" ]; then
-        error ${ORDER} attempted to duplicate port ${PUBLISH_PORT}
-        echo ${ORDER} attempted to duplicate port ${PUBLISH_PORT} | mail -s 'Headquarters Error' "${AUTHOR}"
-        #clear this guard to prevent a deploy
-        SERVICE_GIT_URL=""
-      fi
-      PUBLISH_PORTS["${PUBLISH_PORT}"]="1"
+  else
+    ORDERS_DIFF="New orders"
+  fi
+  # k, so.  in this scope we don't actually care about the betas BUT
+  # we do want it to be an associative array... if we DO NOT explicitly
+  # make it associative it will implicitly be created as indexed, if you
+  # try to index an indexed (non associative array) with an index like
+  # pants-3322 bash will try to perform the arithmetic operation that
+  # statement seems to indicate (since indexed arrays expect numeric indicies)
+  # pants - 3322 will result in an invalid index and blow chunks.
+  # thus we explicitly declare BETAS
+  declare -A BETAS
+  declare -A REDIRECT_TO
+  #run the order as a whole script with the autodeploy function defined above
+  #this lets folks get creative in orders files as needed
+  unset SERVICE_GIT_URL
+  run_orders "${order}"
+  unset DEPLOY_REASON
+  [ "${ORDERS_DIFF}" != "NONE" ] && DEPLOY_REASON="${ORDERS_DIFF}"
+  #check if this publish port is a duplicate, halting the install of this
+  #order if so, first one wins
+  if [ "${PUBLISH_PORT}" != "0" ]; then
+    warn "${ORDER}" is requesting a host port "${PUBLISH_PORT}"
+    if [ -n "${PUBLISH_PORTS["${PUBLISH_PORT}"]}" ]; then
+      error ${ORDER} attempted to duplicate port ${PUBLISH_PORT}
+      echo ${ORDER} attempted to duplicate port ${PUBLISH_PORT} | mail -s 'Headquarters Error' "${AUTHOR}"
+      #clear this guard to prevent a deploy
+      SERVICE_GIT_URL=""
     fi
-    #if there is a service repo, pull and synch it
-    if [ -n "${SERVICE_GIT_URL}" ]; then
-      LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
-      #if there is new code in the remote for a service -- or if the orders have
-      #changed, it is time to start
-      ############################################
-      # Modified Dev Mode
-      ############################################
-      if dev_mode ; then
-        warn Dev Mode Detected
-        SERVICE_NAME=$(echo "${ORDER}")
-        #
-        # VMWARE Bug:  Large Git Repos puke when checking out to a shared folder
-        #              (does not happen to every user or every time)
-        #
-        # We've adjusted and made the first (and only the first) pass at building
-        # a container set all the things up that are necessary for the starphleet-dev
-        # directory on the HOST OS.
-        #
-        # The first container build
-        #   - Grabs the git repo to a tmp dir (/home/admiral/tmp/<order>)
-        #   - Rsyncs the repo to /var/git (which maps to /hosthome)
-        #   - Punts
-        #
-        # After the above process completes we takeover in here and deploy new
-        # containers from the master directory [/hosthome]
-        #
-        # In starphleet_monitor_orders - we listen for changes in the git repo
-        # located in /hosthome and deploy new containers upon changes
+    PUBLISH_PORTS["${PUBLISH_PORT}"]="1"
+  fi
+  #if there is a service repo, pull and synch it
+  if [ -n "${SERVICE_GIT_URL}" ]; then
+    LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
+    #if there is new code in the remote for a service -- or if the orders have
+    #changed, it is time to start
+    ############################################
+    # Modified Dev Mode
+    ############################################
+    if dev_mode ; then
+      warn Dev Mode Detected
+      SERVICE_NAME=$(echo "${ORDER}")
+      #
+      # VMWARE Bug:  Large Git Repos puke when checking out to a shared folder
+      #              (does not happen to every user or every time)
+      #
+      # We've adjusted and made the first (and only the first) pass at building
+      # a container set all the things up that are necessary for the starphleet-dev
+      # directory on the HOST OS.
+      #
+      # The first container build
+      #   - Grabs the git repo to a tmp dir (/home/admiral/tmp/<order>)
+      #   - Rsyncs the repo to /var/git (which maps to /hosthome)
+      #   - Punts
+      #
+      # After the above process completes we takeover in here and deploy new
+      # containers from the master directory [/hosthome]
+      #
+      # In starphleet_monitor_orders - we listen for changes in the git repo
+      # located in /hosthome and deploy new containers upon changes
 
-        # Use date stamps for containers (that are formatted like shas)
-        #    - Allows normal starphleet commands to operate
-        #    - Gives the user an indication of time of deployment
-        DATE_TIME=$(date +d%y%m%d-d%H%M%S)
+      # Use date stamps for containers (that are formatted like shas)
+      #    - Allows normal starphleet commands to operate
+      #    - Gives the user an indication of time of deployment
+      DATE_TIME=$(date +d%y%m%d-d%H%M%S)
 
-        # The 'LAST_RUN_FILE' is created each run for a container.  We use this files
-        # modified time to determine if anything 'new' has been created/changed
-        # since our last deployment of a container
-        LAST_RUN_FILE="/tmp/.${SERVICE_NAME}-starphleet_last_run"
+      # The 'LAST_RUN_FILE' is created each run for a container.  We use this files
+      # modified time to determine if anything 'new' has been created/changed
+      # since our last deployment of a container
+      LAST_RUN_FILE="/tmp/.${SERVICE_NAME}-starphleet_last_run"
 
-        # TODO: Find out if we have a DEV DIR variable available here somewhere
-        if [ -d "/hosthome/starphleet_dev/${ORDER}" ] && [ -f "${LAST_RUN_FILE}" ]; then
-          # Work around vmware hgfs sync issues on the host OS
-          #   - Basically for now we need to git sync to a local directory
-          #     in the container and then move that directory into the git
-          #     repo of the host ship.. which then gets sync'd upstream
-          #     to the host OS.
-          #
-          #     Here we are seeing if the rsync dir still exists which implies
-          #     it hasn't finished moving to the host OS yet
-          if [ ! -d "/home/admiral/tmp/${ORDER}" ]; then
-            RUNNING=$(lxc-ls -f | grep RUNNING | grep --extended-regexp -e "^${ORDER}-([a-f0-9]){7}-([a-f0-9]){7}"  | cut -f1 -d" ")
-            # **************************************
-            # File Change Detection
-            # **************************************
-            # Define a temp file to check for changed files
-            CHANGED_FILES_FILE="/tmp/${ORDER}.starphleet.newfiles"
-            # Only check for changed files if the they specified to unbind the git dir
-            if [ ! -z ${DEVMODE_UNBIND_GIT_DIR} ]; then
-              # Exclude git and node_modules directory which heavily improves performance.  However,
-              # this requires that some other file be touched and may have unintended consequences.
-              # ...so, this is kinda beta
-              EXCLUDES='-not ( -path *node_modules* -prune ) -and -not ( -path *.git* -prune ) -type f'
-              # Look for a changed file in the directory - punt after the first one
-              find "/hosthome/starphleet_dev/${ORDER}" ${EXCLUDES} -newer "${LAST_RUN_FILE}" -print -quit > "${CHANGED_FILES_FILE}"
-              # Slurp in those files
-              FILES_CHANGED=$(cat ${CHANGED_FILES_FILE})
-              # If there were any changed files
-              if [ ! -z "${FILES_CHANGED}" ]; then
-                # Go through any running containers (albiet, there should only be one)
-                for container in $(echo ${RUNNING}); do
-                  # Stop the container
-                  warn Redeploying ${container} - ${FILES_CHANGED}
-                  # Redeploy the same container.  This will re-run the build script
-                  # but sync only the updated files first
-                  touch "${LAST_RUN_FILE}"
-                  # This should force the container to respawn
-                  stop starphleet_serve_order name="${container}"
-                  # ...but if it doesn't - we'll start it backup anyway
-                  start --no-wait starphleet_serve_order name="${container}" order="${ORDER}"
-                done
-              fi
-              # Cleanup
-              rm ${CHANGED_FILES_FILE}
+      # TODO: Find out if we have a DEV DIR variable available here somewhere
+      if [ -d "/hosthome/starphleet_dev/${ORDER}" ] && [ -f "${LAST_RUN_FILE}" ]; then
+        # Work around vmware hgfs sync issues on the host OS
+        #   - Basically for now we need to git sync to a local directory
+        #     in the container and then move that directory into the git
+        #     repo of the host ship.. which then gets sync'd upstream
+        #     to the host OS.
+        #
+        #     Here we are seeing if the rsync dir still exists which implies
+        #     it hasn't finished moving to the host OS yet
+        if [ ! -d "/home/admiral/tmp/${ORDER}" ]; then
+          RUNNING=$(lxc-ls -f | grep RUNNING | grep --extended-regexp -e "^${ORDER}-([a-f0-9]){7}-([a-f0-9]){7}"  | cut -f1 -d" ")
+          # **************************************
+          # File Change Detection
+          # **************************************
+          # Define a temp file to check for changed files
+          CHANGED_FILES_FILE="/tmp/${ORDER}.starphleet.newfiles"
+          # Only check for changed files if the they specified to unbind the git dir
+          if [ ! -z ${DEVMODE_UNBIND_GIT_DIR} ]; then
+            # Exclude git and node_modules directory which heavily improves performance.  However,
+            # this requires that some other file be touched and may have unintended consequences.
+            # ...so, this is kinda beta
+            EXCLUDES='-not ( -path *node_modules* -prune ) -and -not ( -path *.git* -prune ) -type f'
+            # Look for a changed file in the directory - punt after the first one
+            find "/hosthome/starphleet_dev/${ORDER}" ${EXCLUDES} -newer "${LAST_RUN_FILE}" -print -quit > "${CHANGED_FILES_FILE}"
+            # Slurp in those files
+            FILES_CHANGED=$(cat ${CHANGED_FILES_FILE})
+            # If there were any changed files
+            if [ ! -z "${FILES_CHANGED}" ]; then
+              # Go through any running containers (albiet, there should only be one)
+              for container in $(echo ${RUNNING}); do
+                # Stop the container
+                warn Redeploying ${container} - ${FILES_CHANGED}
+                # Redeploy the same container.  This will re-run the build script
+                # but sync only the updated files first
+                touch "${LAST_RUN_FILE}"
+                # This should force the container to respawn
+                stop starphleet_serve_order name="${container}"
+                # ...but if it doesn't - we'll start it backup anyway
+                start --no-wait starphleet_serve_order name="${container}" order="${ORDER}"
+              done
             fi
             # Cleanup
-            unset DEVMODE_UNBIND_GIT_DIR
-            unset FILES_CHANGED
-            unset CHANGED_FILES_FILE
-            unset RUNNING
+            rm ${CHANGED_FILES_FILE}
           fi
+          # Cleanup
+          unset DEVMODE_UNBIND_GIT_DIR
+          unset FILES_CHANGED
+          unset CHANGED_FILES_FILE
+          unset RUNNING
         fi
-        # If no run file exists this container has never been deployed so
-        # starphleet must have just started
-        if [ ! -f "${LAST_RUN_FILE}" ]  || [ -n "${DEPLOY_REASON}" ]; then
-          # Flag that this has been deployed
-          touch "${LAST_RUN_FILE}"
-          # Be nice and list why we are deploying
-          warn Dev Mode Deployment: "${DEPLOY_REASON}"
-          # Just like in production - we respect order changes
-          echo ${ORDERS_SHA} > "${CURRENT_ORDER}/.orders_sha"
-          # Deploy with Date Stamps in Dev Mode
-          start --no-wait starphleet_serve_order name="${SERVICE_NAME}-${DATE_TIME}" order="${ORDER}"
-          # Now that we are deploying - make sure we unset our reason
-          unset DEPLOY_REASON
-        fi
-      else
-        #resynchronize to autodeploy repo, this is the primary case
-        starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}" && DEPLOY_REASON="Updated service"
       fi
+      # If no run file exists this container has never been deployed so
+      # starphleet must have just started
+      if [ ! -f "${LAST_RUN_FILE}" ]  || [ -n "${DEPLOY_REASON}" ]; then
+        # Flag that this has been deployed
+        touch "${LAST_RUN_FILE}"
+        # Be nice and list why we are deploying
+        warn Dev Mode Deployment: "${DEPLOY_REASON}"
+        # Just like in production - we respect order changes
+        echo ${ORDERS_SHA} > "${CURRENT_ORDER}/.orders_sha"
+        # Deploy with Date Stamps in Dev Mode
+        start --no-wait starphleet_serve_order name="${SERVICE_NAME}-${DATE_TIME}" order="${ORDER}"
+        # Now that we are deploying - make sure we unset our reason
+        unset DEPLOY_REASON
+      fi
+    else
+      #resynchronize to autodeploy repo, this is the primary case
+      starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}" && DEPLOY_REASON="Updated service"
     fi
-    # If we are in dev mode then there is never a good enough reason in
-    # ${DEPLOY_REASON} that we'd want a container with a sha so we
-    # force the rest of the code to be skipped
+  fi
+  # If we are in dev mode then there is never a good enough reason in
+  # ${DEPLOY_REASON} that we'd want a container with a sha so we
+  # force the rest of the code to be skipped
+  if dev_mode ; then
+    continue
+  fi
+  #if there is any reason to start a container -- well, go to it
+  if [ -n "${DEPLOY_REASON}" ]; then
+    warn "${DEPLOY_REASON}"
+    echo ${ORDERS_SHA} > "${CURRENT_ORDER}/.orders_sha"
+    if [ -d "${LOCAL}" ]; then
+      get_CURRENT_SHA "${LOCAL}"
+      SERVICE_SHA="${CURRENT_SHA}"
+    fi
+    #sha for both the service and the orders asking for it, changing either
+    #of these starts up a new container that will run in parallel with prior
+    #versions
     if dev_mode ; then
-      continue
+      SERVICE_NAME=$(echo "${ORDER}-")
+      stop --no-wait starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
+    else
+      SERVICE_NAME=$(echo "${ORDER}-${ORDERS_SHA}-${SERVICE_SHA}")
     fi
-    #if there is any reason to start a container -- well, go to it
-    if [ -n "${DEPLOY_REASON}" ]; then
-      warn "${DEPLOY_REASON}"
-      echo ${ORDERS_SHA} > "${CURRENT_ORDER}/.orders_sha"
-      if [ -d "${LOCAL}" ]; then
-        get_CURRENT_SHA "${LOCAL}"
-        SERVICE_SHA="${CURRENT_SHA}"
-      fi
-      #sha for both the service and the orders asking for it, changing either
-      #of these starts up a new container that will run in parallel with prior
-      #versions
-      if dev_mode ; then
-        SERVICE_NAME=$(echo "${ORDER}-")
-        stop --no-wait starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
-      else
-        SERVICE_NAME=$(echo "${ORDER}-${ORDERS_SHA}-${SERVICE_SHA}")
-      fi
-      #this is done with no-wait since upstart will prevent duplicate starts
-      start --no-wait starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
-    fi
-  done
+    #this is done with no-wait since upstart will prevent duplicate starts
+    start --no-wait starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
+  fi
 done
