@@ -12,3 +12,4 @@ run_as_root_or_die
 cp -R ${SCRIPT_DIR}/../overlay/* /
 cp -R ${DIR}/../nginx/* ${STARPHLEET_ROOT:-/var/starphleet}/nginx/
 cp ${SCRIPT_DIR}/* /usr/bin
+[ -d "${HEADQUARTERS_LOCAL}/overlay" ] && cp -R ${HEADQUARTERS_LOCAL}/overlay/* /
