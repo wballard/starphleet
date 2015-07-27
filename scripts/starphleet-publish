@@ -33,6 +33,7 @@ PROXY_FOR_CONF="${NGINX_CONF}/proxy_for/${order}.conf"
 SERVER_NAMES_CONF="${NGINX_CONF}/named_servers/${order}.conf"
 
 IP_ADDRESS=$(cat "${CURRENT_ORDERS}/${order}/.starphleetstatus.${container_name}.ip")
+PORT=$(cat "${CURRENT_ORDERS}/${order}/.starphleetstatus.${container_name}.port")
 
 info publishing to ${IP_ADDRESS}
 
