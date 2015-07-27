@@ -15,7 +15,7 @@ run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
 if [ "${UNPUBLISHED}" == "1" ]; then
   echo 'online' > "${STATUS_FILE}"
   starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
-  starphleet-reaper "${name}" "${order}"
+  starphleet-reaper "${name}" "${order}" --force
 else
   #status logging, here indicating the healthcheck is about to go
   echo 'checking' > "${STATUS_FILE}"

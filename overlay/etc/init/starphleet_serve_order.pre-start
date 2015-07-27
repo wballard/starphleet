@@ -11,7 +11,7 @@ run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
 #pre stop if the service demands it
 if [ "${STOP_BEFORE_AUTODEPLOY}" == "1" ]; then
   info stopping before autodeploy
-  starphleet-reaper "${name}" "${order}"
+  starphleet-reaper "${name}" "${order}" --force
 fi
 
 LAST_KNOWN_GOOD_CONTAINER=$(cat "${CURRENT_ORDERS}/${order}/.last_known_good_container" || true)
