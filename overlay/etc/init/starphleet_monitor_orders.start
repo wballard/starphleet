@@ -51,6 +51,7 @@ do
   #run the order as a whole script with the autodeploy function defined above
   #this lets folks get creative in orders files as needed
   unset SERVICE_GIT_URL
+  unset UNPUBLISHED
   run_orders "${order}"
   unset DEPLOY_REASON
   [ "${ORDERS_DIFF}" != "NONE" ] && DEPLOY_REASON="${ORDERS_DIFF}"
@@ -66,6 +67,7 @@ do
     fi
     PUBLISH_PORTS["${PUBLISH_PORT}"]="1"
   fi
+
   #if there is a service repo, pull and synch it
   if [ -n "${SERVICE_GIT_URL}" ]; then
     LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
@@ -181,6 +183,12 @@ do
   # ${DEPLOY_REASON} that we'd want a container with a sha so we
   # force the rest of the code to be skipped
   if dev_mode ; then
+    if [ -n "${UNPUBLISHED}" ] && [ -n "${DEPLOY_REASON}" ]; then
+      echo ${ORDERS_SHA} > "${CURRENT_ORDER}/.orders_sha"
+      SERVICE_NAME=$(echo "${ORDER}")
+      DATE_TIME=$(date +d%y%m%d-d%H%M%S)
+      start --no-wait starphleet_serve_order name="${SERVICE_NAME}-${DATE_TIME}" order="${ORDER}"
+    fi
     continue
   fi
   #if there is any reason to start a container -- well, go to it
