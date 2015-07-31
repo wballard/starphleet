@@ -202,11 +202,11 @@ do
     #sha for both the service and the orders asking for it, changing either
     #of these starts up a new container that will run in parallel with prior
     #versions
-    if dev_mode ; then
-      SERVICE_NAME=$(echo "${ORDER}-")
-      stop --no-wait starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
-    else
+    if [ -n "${ORDER}" ] && [ -n "${ORDERS_SHA}" ] && [ -n "${SERVICE_SHA}" ]; then
       SERVICE_NAME=$(echo "${ORDER}-${ORDERS_SHA}-${SERVICE_SHA}")
+    else
+      warn "Critical Info Missing - Not Deploying Container:  O: ${ORDER} OS: ${ORDERS_SHA} SS:${SERVICE_SHA}"
+      continue
     fi
     #this is done with no-wait since upstart will prevent duplicate starts
     start --no-wait starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
