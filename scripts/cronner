@@ -14,7 +14,7 @@ for file in $(find ${orders_dir} -maxdepth 1 -type f)
 do
   get_sh_at "${file}"
   if [ -n "${SH_AT}" ]; then
-    echo "${SH_AT}" runner "${app_root}" "${orders}" "${file}" >> "${HOME}/sh_at"
+    echo "${SH_AT}" stdbuf -oL runner "${app_root}" "${orders}" "${file}" >> "${HOME}/sh_at"
   fi
 done
 if [ -f "${HOME}/sh_at" ]; then
