@@ -18,6 +18,7 @@ else
   # Keep track of all the ports we are using
   echo "${PORT}" > "${STATUS_FILE}.port"
   # Run a worker for each port
-  parallel --ungroup "lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} PORT={} bash -c '2>&1 setsid ~/start web'" ::: ${PORT} | logger -t "${order}" || mail_log
+  RUN_CMD="lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} PORT={} bash -c '2>&1 setsid ~/start web'"
+  parallel --ungroup "while [ 1 ]; do ${RUN_CMD}; done" ::: ${PORT} | logger -t "${order}" || mail_log
 fi
 echo 'stopped' > "${STATUS_FILE}"
