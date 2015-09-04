@@ -8,9 +8,16 @@ STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
 if [ "${UNPUBLISHED}" == "1" ]; then
   lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "2>&1 sleep 1000000" | logger -t "${order}" || mail_log
 else
+  # Take whatever port is set and make a list from there of worker ports
+  # Example:
+  #   WORKERS=3
+  #   PORT=3000
+  # Result:
+  #   PORT=3000 3001 3002
   PORT=$(seq -s " " ${PORT} $((${PORT}+(${WORKERS}-1))))
+  # Keep track of all the ports we are using
   echo "${PORT}" > "${STATUS_FILE}.port"
+  # Run a worker for each port
   parallel --ungroup "lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} PORT={} bash -c '2>&1 setsid ~/start web'" ::: ${PORT} | logger -t "${order}" || mail_log
-  echo "Stopped running"
 fi
 echo 'stopped' > "${STATUS_FILE}"
