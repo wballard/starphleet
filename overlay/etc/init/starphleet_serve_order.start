@@ -11,7 +11,7 @@ else
   WORKERS=${WORKERS:-1}
   PORT=${PORT:-3000}
   PORT=$(seq -s " " ${PORT} $((${PORT}+(${WORKERS}-1))))
-  parallel --ungroup "echo lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} -u PORT={} bash -c '2>&1 setsid ~/start web'" ::: ${PORT} | logger -t "${order}" || mail_log
+  parallel --ungroup "lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} -u PORT={} bash -c '2>&1 setsid ~/start web'" ::: ${PORT} | logger -t "${order}" || mail_log
   echo "${PORT}" > "${STATUS_FILE}.port"
 fi
 echo 'stopped' > "${STATUS_FILE}"
