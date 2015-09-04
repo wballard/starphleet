@@ -62,7 +62,7 @@ echo "upstream ${order} {" > "${UPSTREAM_CONF}"
 for WORKER_PORT in ${PORT}; do
   echo "  server ${IP_ADDRESS}:${WORKER_PORT};" >> "${UPSTREAM_CONF}"
 done
-echo "}" > "${UPSTREAM_CONF}"
+echo "}" >> "${UPSTREAM_CONF}"
 
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
