@@ -54,10 +54,7 @@ mkdir -p "${NGINX_CONF}/named_servers"
 [ -f "${NGINX_CONF}/published/crt" ] || cp "${NGINX_CONF}/crt" "${NGINX_CONF}/published/crt"
 [ -f "${NGINX_CONF}/published/key" ] || cp "${NGINX_CONF}/key" "${NGINX_CONF}/published/key"
 
-# Build the upstream list for this service
-# The default behavior sends traffic only to this container.  If a 'PHLEET'
-# variable is set in conjunction with a per-machine setting of STARPHLEET_THIS_SHIP
-# we will proxy failed requests to other ships
+# Build an upstream config for each worker port exposed
 echo "upstream ${order} {" > "${UPSTREAM_CONF}"
 for WORKER_PORT in ${PORT}; do
   echo "  server ${IP_ADDRESS}:${WORKER_PORT};" >> "${UPSTREAM_CONF}"
