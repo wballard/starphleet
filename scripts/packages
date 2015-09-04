@@ -23,4 +23,3 @@ ntp
 postfix
 rsync
 awscli
-parallel

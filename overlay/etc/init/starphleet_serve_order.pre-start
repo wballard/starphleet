@@ -40,3 +40,26 @@ else
   starphleet-containerize "${SERVICE_GIT_URL:--}" "${name}" "${HEADQUARTERS_LOCAL}/${order}" \
   || (echo 'building failed' > "${STATUS_FILE}" && exit 1)
 fi
+
+info "starting ${name}"
+ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
+run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
+info "using orders ${order}"
+STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
+if [ "${UNPUBLISHED}" == "1" ]; then
+  # this needs to be switched to a worker process
+  # starphleet_unpublished_worker
+  lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "2>&1 sleep 1000000" | logger -t "${order}" || mail_log
+else
+  # default to 1 worker if not otherwise specified
+  info web worker count ${WEB_WORKERS=1}
+  # we ant to start our worker number at 0 just to make the port arithmetic and assignment
+  # straight-forward PORT + 0 always equals PORT.
+  for worker_number in $(seq 0 $((${WEB_WORKERS} - 1)))
+  do
+    WORKER_PORT=$((${PORT:=3000} + ${worker_number}))
+    info worker port ${WORKER_PORT}
+    start starphleet_web_worker name=${name} order=${order} port=${WORKER_PORT}
+  done
+fi
+echo 'stopped' > "${STATUS_FILE}"
