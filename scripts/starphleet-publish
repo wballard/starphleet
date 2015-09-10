@@ -61,6 +61,9 @@ location ${public_url}/ {
   gzip_proxied any;
   gzip_comp_level 6;
   include ${NGINX_CONF}/cors.conf;
+  if (\$cookie_beta_${order}) {
+    rewrite ${public_url}/(.*) /\$cookie_beta_${order}/\$1 last;
+  }
   rewrite ${public_url}/(.*) /\$1 break;
   proxy_pass http://${IP_ADDRESS}:${PORT};
   proxy_set_header X-Forwarded-Host \$host;
