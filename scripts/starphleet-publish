@@ -61,8 +61,9 @@ location ${public_url}/ {
   gzip_proxied any;
   gzip_comp_level 6;
   include ${NGINX_CONF}/cors.conf;
-  if (\$cookie_beta_${order}) {
-    rewrite ${public_url}/(.*) /\$cookie_beta_${order}/\$1 last;
+  if (\$http_cookie ~ "beta_${order}=(.*?)(;|$)") {
+    set \$sendto \$1;
+    rewrite ${public_url}/(.*) /\$sendto/\$1 last;
   }
   rewrite ${public_url}/(.*) /\$1 break;
   proxy_pass http://${IP_ADDRESS}:${PORT};
@@ -180,7 +181,6 @@ do
   echo " rewrite ^ ${REDIRECT_TO[$redirected]}\$uri permanent;" >> "${REDIRECT_CONF}"
   echo " break;" >> "${REDIRECT_CONF}"
   echo "}" >> "${REDIRECT_CONF}"
-
 done
 
 
