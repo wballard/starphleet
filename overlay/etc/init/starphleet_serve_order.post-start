@@ -32,7 +32,7 @@ else
     # Keep looping on the service until it responds with a success, or
     # eventually punt after some delay and give up
     info "Testing health of container ${name}"
-    for ((c=0; c<HEALTHCHECK_INIT_DELAY; c++)); do
+    for ((c=0; c<=HEALTHCHECK_INIT_DELAY; c++)); do
       # If we get a successful healthcheck
       info "Attempt $c of ${HEALTHCHECK_INIT_DELAY}"
       if starphleet-healthcheck "${name}" "${order}" "${HEALTHCHECK}" ; then
@@ -46,7 +46,7 @@ else
         # Dump out of our check loop
         break
       fi
-      if [ "$c" -gt "${HEALTHCHECK_INIT_DELAY}" ]; then
+      if [ "$c" -eq "${HEALTHCHECK_INIT_DELAY}" ]; then
         #at this point the service has failed to properly start
         warn Service failed to publish "${order}" for container ${name}
         echo 'failed' > "${STATUS_FILE}"
