@@ -20,7 +20,6 @@ else
   #status logging, here indicating the healthcheck is about to go
   echo 'checking' > "${STATUS_FILE}"
   lxc-ls --fancy "${name}" | tail -1 | awk '{ print $3; }' > "${STATUS_FILE}.ip"
-  echo "${PORT}" > "${STATUS_FILE}.port"
 
   ######################
   # Healthchecks

@@ -31,6 +31,8 @@ REDIRECT_CONF="${NGINX_CONF}/published/${order}.redirect"
 #mount this service over a path
 PROXY_FOR_CONF="${NGINX_CONF}/proxy_for/${order}.conf"
 SERVER_NAMES_CONF="${NGINX_CONF}/named_servers/${order}.conf"
+# Upstream configs
+UPSTREAM_CONF="${NGINX_CONF}/published/${order}.upstream"
 
 IP_ADDRESS=$(cat "${CURRENT_ORDERS}/${order}/.starphleetstatus.${container_name}.ip")
 PORT=$(cat "${CURRENT_ORDERS}/${order}/.starphleetstatus.${container_name}.port")
@@ -52,6 +54,13 @@ mkdir -p "${NGINX_CONF}/named_servers"
 [ -f "${NGINX_CONF}/published/crt" ] || cp "${NGINX_CONF}/crt" "${NGINX_CONF}/published/crt"
 [ -f "${NGINX_CONF}/published/key" ] || cp "${NGINX_CONF}/key" "${NGINX_CONF}/published/key"
 
+# Build an upstream config for each worker port exposed
+echo "upstream ${order} {" > "${UPSTREAM_CONF}"
+for WORKER_PORT in ${PORT}; do
+  echo "  server ${IP_ADDRESS}:${WORKER_PORT};" >> "${UPSTREAM_CONF}"
+done
+echo "}" >> "${UPSTREAM_CONF}"
+
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
 
@@ -66,7 +75,7 @@ location ${public_url}/ {
     rewrite ${public_url}/(.*) /\$sendto/\$1 last;
   }
   rewrite ${public_url}/(.*) /\$1 break;
-  proxy_pass http://${IP_ADDRESS}:${PORT};
+  proxy_pass http://${order};
   proxy_set_header X-Forwarded-Host \$host;
   proxy_set_header X-Forwarded-Server \$host;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
