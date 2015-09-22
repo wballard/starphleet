@@ -217,4 +217,6 @@ if [ -n "${SERVER_NAMES}" ]; then
 fi
 
 # generate a cached configuration
-cat "${MOUNT_CONF}" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}/[location ${public_url}_cached/ [" | sed -e "s[# cache goes here[add_header X-Cache-Status \$upstream_cache_status;\n  proxy_cache aggressive_zone;\n  proxy_cache_lock on;\n  proxy_cache_methods GET HEAD POST;\n  proxy_ignore_headers Expires Cache-Control;\n  proxy_cache_lock_timeout 1d;\n  proxy_cache_use_stale updating error timeout;\n  proxy_cache_valid any 2h;\n  proxy_buffering on;\n  proxy_cache_key \$scheme\$proxy_host\$uri\$is_args\$args\$http_method;[" > "${MOUNT_CACHED_CONF}"
+if [ -n "${ADD_CACHED_LOCATION}" ]; then
+	cat "${MOUNT_CONF}" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}/[location ${public_url}_cached/ [" | sed -e "s[# cache goes here[add_header X-Cache-Status \$upstream_cache_status;\n  proxy_cache aggressive_zone;\n  proxy_cache_lock on;\n  proxy_cache_methods GET HEAD POST;\n  proxy_ignore_headers Expires Cache-Control;\n  proxy_cache_lock_timeout 1d;\n  proxy_cache_use_stale updating error timeout;\n  proxy_cache_valid any 2h;\n  proxy_buffering on;\n  proxy_cache_key \$scheme\$proxy_host\$uri\$is_args\$args\$http_method;[" > "${MOUNT_CACHED_CONF}"
+fi
