@@ -163,6 +163,10 @@ function run_orders()
     SERVER_NAMES="$@"
   }
 
+  log_to_stderr () {
+    LOG_TO_STDERR=1
+  }
+
   source "${1}" || true
 }
 
