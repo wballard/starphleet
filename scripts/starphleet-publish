@@ -24,6 +24,7 @@ if [ "${public_url}" == "/" ]; then
 fi
 #mount this service over a path
 MOUNT_CONF="${NGINX_CONF}/published/${order}.conf"
+MOUNT_CACHED_CONF="${NGINX_CONF}/published/${order}_cached.conf"
 #mount this service over a port
 BARE_CONF="${NGINX_CONF}/published_bare/${order}.conf"
 #redirect your urls to lxc
@@ -63,6 +64,7 @@ location ${public_url}/ {
   include ${NGINX_CONF}/cors.conf;
   rewrite ${public_url}/(.*) /\$1 break;
   proxy_pass http://${IP_ADDRESS}:${PORT};
+  # cache goes here
   proxy_set_header X-Forwarded-Host \$host;
   proxy_set_header X-Forwarded-Server \$host;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -70,7 +72,7 @@ location ${public_url}/ {
   proxy_set_header Host \$http_host;
   # WebSocket support (nginx 1.4)
   proxy_http_version 1.1;
-  proxy_set_header Upgrade \$http_upgrade;
+  #proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "upgrade";
   more_set_headers 'X-Starphleet-Service: ${public_url}';
   more_set_headers 'X-Starphleet-Container: ${container_name}';
@@ -213,3 +215,6 @@ if [ -n "${SERVER_NAMES}" ]; then
     error 'unable to find named_server.conf.* files. cannot set up named server for provided names'
   fi
 fi
+
+# generate a cached configuration
+cat "${MOUNT_CONF}" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}/[location ${public_url}_cached/ [" | sed -e "s[# cache goes here[add_header X-Cache-Status \$upstream_cache_status;\n  proxy_cache aggressive_zone;\n  proxy_cache_lock on;\n  proxy_cache_methods GET HEAD POST;\n  proxy_ignore_headers Expires Cache-Control;\n  proxy_cache_lock_timeout 1d;\n  proxy_cache_use_stale updating error timeout;\n  proxy_cache_valid any 2h;\n  proxy_cache_key \$scheme\$proxy_host\$uri\$is_args\$args\$http_method;[" > "${MOUNT_CACHED_CONF}"
