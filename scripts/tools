@@ -153,10 +153,18 @@ function run_orders()
     PROXY_FOR_NAMES="$@"
   }
 
+  enable_cache_endpoint () {
+    ADD_CACHED_LOCATION="yes"
+  }
+
   server_names () {
     SERVER_NAMES_CONF_NAME=$1
     shift
     SERVER_NAMES="$@"
+  }
+
+  log_to_stderr () {
+    LOG_TO_STDERR=1
   }
 
   source "${1}" || true
