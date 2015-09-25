@@ -14,6 +14,7 @@ export AWS_DEFAULT_REGION=${PHLEET_LOGS_ARCHIVE_AWS_DEFAULT_REGION:-us-west-2}
 # this serves as an optional server (ship) level setting that can be used to further split the
 # logs up into groups like, staging, production, prodiction-ship1, etc.
 export LOG_ARCHIVE_PREFIX=${PHLEET_LOGS_ARCHIVE_PREFIX}
+export LOG_ARCHIVE_BUCKET=${PHLEET_LOGS_ARCHIVE_BUCKET?This really doesnt work without a bucket name}
 
 # If aws credential are not setup, or there is an AWS failure, the action fails but does not affect the log rotate action.
 
@@ -29,8 +30,8 @@ extension="$(hostname)_$(date -u "+%m-%d-%Y_%H:%M:%S")_$AWS_REGION.log.gz"
 cp_to_file="$category.$extension"
 
 if [ -n "${LOG_ARCHIVE_PREFIX}" ]; then
-  aws s3 cp $compressed_file s3://phleet-logs/${LOG_ARCHIVE_PREFIX}/$category/$cp_to_file &>> /var/log/archive_to_s3_for_$category.log
+  aws s3 cp $compressed_file s3://${LOG_ARCHIVE_BUCKET}/${LOG_ARCHIVE_PREFIX}/$category/$cp_to_file &>> /var/log/archive_to_s3_for_$category.log
 else
-  aws s3 cp $compressed_file s3://phleet-logs/$category/$cp_to_file &>> /var/log/archive_to_s3_for_$category.log
+  aws s3 cp $compressed_file s3://${LOG_ARCHIVE_BUCKET}/$category/$cp_to_file &>> /var/log/archive_to_s3_for_$category.log
 fi
 
