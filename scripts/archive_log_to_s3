@@ -1,12 +1,12 @@
 #!/usr/bin/env starphleet-launcher
 ### Script to take log files and push them up to S3 for later reporting
 ### Usage:
-###   archive_log_to_s3 <path_to_logfile> nginx
+###   archive_log_to_s3 <path_to_logfile> <category>
 # Setup from logrotate config 'lastaction' block. 
 ## lastaction
 ##  archive_log_to_s3 $1 nginx
 ## endscript
-
+#
 # Requires configuration of AWS creds which needs to include:
 export AWS_ACCESS_KEY_ID=${PHLEET_LOGS_ARCHIVE_AWS_ACCESS_KEY_ID}
 export AWS_SECRET_ACCESS_KEY=${PHLEET_LOGS_ARCHIVE_AWS_SECRET_ACCESS_KEY}
@@ -19,8 +19,8 @@ export LOG_ARCHIVE_BUCKET=${PHLEET_LOGS_ARCHIVE_BUCKET?This really doesnt work w
 # If aws credential are not setup, or there is an AWS failure, the action fails but does not affect the log rotate action.
 
 # Spaces are not allowed in the inputs
-original_file=$(echo "$1" | sed 's/[[:space:]]//g')
-category=$(echo "$2" | sed 's/[[:space:]]//g')
+original_file=$(echo "${path_to_logfile}" | sed 's/[[:space:]]//g')
+category=$(echo "${category}" | sed 's/[[:space:]]//g')
 
 compressed_file="$original_file.1.gz"
 echo "Archive $compressed_file"
