@@ -76,7 +76,7 @@ location ${public_url}/ {
   proxy_set_header Host \$http_host;
   # WebSocket support (nginx 1.4)
   proxy_http_version 1.1;
-  #proxy_set_header Upgrade \$http_upgrade;
+  proxy_set_header Upgrade \$http_upgrade;
   proxy_set_header Connection "upgrade";
   more_set_headers 'X-Starphleet-Service: ${public_url}';
   more_set_headers 'X-Starphleet-Container: ${container_name}';
