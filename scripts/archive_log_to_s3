@@ -21,15 +21,12 @@ export LOG_ARCHIVE_BUCKET=${PHLEET_LOGS_ARCHIVE_BUCKET?This really doesnt work w
 # Spaces are not allowed in category 
 category=$(echo "${category}" | sed 's/[[:space:]]//g')
 
-echo "Archive $path_to_logfile"
-
 # Create a unique file name to store up to s3 to include category+hostname+timestamp
 extension="$(hostname)_$(date -u "+%m-%d-%Y_%H:%M:%S")_$AWS_REGION.log.gz"
-cp_to_file="$category.$extension"
+cp_to_file="$(basename -s '.log.1.gz' $path_to_logfile).$extension"
 
-set -x
 if [ -n "${LOG_ARCHIVE_PREFIX}" ]; then
-  aws s3 cp "$path_to_logfile" "s3://${LOG_ARCHIVE_BUCKET}/${LOG_ARCHIVE_PREFIX}/$cp_to_file" &>> /var/log/archive_to_s3_for_$category.log
+  aws s3 cp "$path_to_logfile" "s3://${LOG_ARCHIVE_BUCKET}/${LOG_ARCHIVE_PREFIX}/${category}/$cp_to_file" &>> /var/log/archive_to_s3_for_$category.log
 else
-  aws s3 cp "$path_to_logfile" "s3://${LOG_ARCHIVE_BUCKET}/$cp_to_file" &>> /var/log/archive_to_s3_for_$category.log
+  aws s3 cp "$path_to_logfile" "s3://${LOG_ARCHIVE_BUCKET}/${category}/$cp_to_file" &>> /var/log/archive_to_s3_for_$category.log
 fi
