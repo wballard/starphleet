@@ -1,20 +1,23 @@
 /var/log/upstart/starphleet_nginx.log {
         missingok
-        rotate 4
-        size 10M
+        rotate 1
+        size 0K
         copytruncate
         compress
-        lastaction
-                archive_log_to_s3 $1 nginx
+        preremove
+                archive_log_to_s3 ${1}.gz nginx
         endscript
         notifempty
         nocreate
 }
-/var/log/upstart/*.log {
+/var/log/upstart/starphleet_serve_order*.log {
         missingok
         rotate 1
-        size 10M
+        size 0k
         compress
+        preremove 
+          archive_log_to_s3 ${1}.gz serve_order
+        endscript
         notifempty
         nocreate
 }

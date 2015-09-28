@@ -18,20 +18,18 @@ export LOG_ARCHIVE_BUCKET=${PHLEET_LOGS_ARCHIVE_BUCKET?This really doesnt work w
 
 # If aws credential are not setup, or there is an AWS failure, the action fails but does not affect the log rotate action.
 
-# Spaces are not allowed in the inputs
-original_file=$(echo "${path_to_logfile}" | sed 's/[[:space:]]//g')
+# Spaces are not allowed in category 
 category=$(echo "${category}" | sed 's/[[:space:]]//g')
 
-compressed_file="$original_file.1.gz"
-echo "Archive $compressed_file"
+echo "Archive $path_to_logfile"
 
 # Create a unique file name to store up to s3 to include category+hostname+timestamp
 extension="$(hostname)_$(date -u "+%m-%d-%Y_%H:%M:%S")_$AWS_REGION.log.gz"
 cp_to_file="$category.$extension"
 
+set -x
 if [ -n "${LOG_ARCHIVE_PREFIX}" ]; then
-  aws s3 cp $compressed_file s3://${LOG_ARCHIVE_BUCKET}/${LOG_ARCHIVE_PREFIX}/$category/$cp_to_file &>> /var/log/archive_to_s3_for_$category.log
+  aws s3 cp "$path_to_logfile" "s3://${LOG_ARCHIVE_BUCKET}/${LOG_ARCHIVE_PREFIX}/$cp_to_file" &>> /var/log/archive_to_s3_for_$category.log
 else
-  aws s3 cp $compressed_file s3://${LOG_ARCHIVE_BUCKET}/$category/$cp_to_file &>> /var/log/archive_to_s3_for_$category.log
+  aws s3 cp "$path_to_logfile" "s3://${LOG_ARCHIVE_BUCKET}/$cp_to_file" &>> /var/log/archive_to_s3_for_$category.log
 fi
-
