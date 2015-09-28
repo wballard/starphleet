@@ -1,5 +1,5 @@
 #! /usr/bin/env starphleet-launcher
-### Usage: starphleet-verify-overlay
+### Usage: starphleet-verify-overlay [nodetail]
 ###
 ###
 ### Compares starphleet files at their installation location to
@@ -22,8 +22,14 @@ do
   FILE_ROOT=${file##${STARPHLEET_ROOT}\/github\/overlay}
   SOURCE=${STARPHLEET_ROOT}/github/overlay/${FILE_ROOT}
   DESTINATION=${FILE_ROOT}
-  if ! diff ${SOURCE} ${DESTINATION}; then
-    echo "mismatched ${FILE_ROOT}"
+  if [ "${nodetail}" = "true" ]; then
+    if ! diff -q ${SOURCE} ${DESTINATION}; then
+      echo "mismatched ${FILE_ROOT}"
+    fi
+  else
+    if ! diff  ${SOURCE} ${DESTINATION}; then
+      echo "mismatched ${FILE_ROOT}"
+    fi
   fi
 done
 
@@ -42,8 +48,14 @@ do
   SOURCE=${STARPHLEET_ROOT}/github/scripts${FILE_ROOT}
   DESTINATION=/usr/bin${FILE_ROOT}
 
-  if ! diff ${SOURCE} ${DESTINATION}; then
-    echo "mismatched ${FILE_ROOT}"
+  if [ "${nodetail}" = "true" ]; then
+    if ! diff -q ${SOURCE} ${DESTINATION}; then
+      echo "mismatched ${FILE_ROOT}"
+    fi
+  else
+    if ! diff  ${SOURCE} ${DESTINATION}; then
+      echo "mismatched ${FILE_ROOT}"
+    fi
   fi
 
   if test -L ${DESTINATION}; then
