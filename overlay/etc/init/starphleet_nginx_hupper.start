@@ -100,6 +100,7 @@ do
       # the config is good, let's get nginx running
       if [ -f "${STARPHLEET_RESTART_NGINX_HUP_TURD}" ]; then
         restart starphleet_nginx || start starphleet_nginx
+        rm "${STARPHLEET_RESTART_NGINX_HUP_TURD}"
       else
         reload starphleet_nginx || start starphleet_nginx
       fi
