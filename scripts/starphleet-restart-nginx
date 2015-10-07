@@ -2,7 +2,7 @@
 ### Usage:
 ###    starphleet-restart-nginx
 ###
-### Requests that the hupper hup or start nginx as appropriate
+### Requests that the hupper restart or start nginx as appropriate
 die_on_error
 run_as_root_or_die
 
