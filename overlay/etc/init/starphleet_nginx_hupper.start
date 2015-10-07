@@ -86,11 +86,10 @@ do
       starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
     done
 
-    # Support NGINX DNS online/offline operations.  
+    # Support NGINX DNS online/offline operations.
     if [ -f "${STARPHLEET_DNS_ONLINE_STATUS_FILE}" ] && [ ! -h "${NGINX_STATUS_CONFIG_SYMLINK}" ]; then
       # Create the symlink
       ln -s ${NGINX_STATUS_ENDPOINT_CONFIG} ${NGINX_STATUS_CONFIG_SYMLINK}
-
     fi
 
     ######################
@@ -99,7 +98,12 @@ do
 
     if [ -z "${ERROR}" ] && ${STARPHLEET_ROOT}/nginx/nginx -p "${NGINX_CONF}" -c nginx.conf -t; then
       # the config is good, let's get nginx running
-      reload starphleet_nginx || start starphleet_nginx
+      if [ -f "${STARPHLEET_RESTART_NGINX_HUP_TURD}" ]; then
+        restart starphleet_nginx || start starphleet_nginx
+        rm "${STARPHLEET_RESTART_NGINX_HUP_TURD}"
+      else
+        reload starphleet_nginx || start starphleet_nginx
+      fi
     else
       #we have a bad configuration, we'll need to do something about that
       warn "nginx configuration fails validity test, will not restart or apply configuration changes"
