@@ -79,6 +79,21 @@ do
         fi
       fi
 
+      # If the above publish worked it should be safe to respect publish commands
+      for publish_file in $(find "${CURRENT_ORDERS}/${order}/".publish_* 2> /dev/null); do
+        NAME_ONLY=$(basename "${publish_file}" | sed -e 's|.publish_||')
+        # We need to make sure this publish isn't stale so we double check that
+        # the command is still valid in the orders file
+        if [ -f "${HEADQUARTERS_LOCAL}/${NAME_ONLY}/orders" ] &&
+           [ -n $(cat ${HEADQUARTERS_LOCAL}/${NAME_ONLY}/orders | grep publish | grep "${NAME_ONLY}") ]; then
+          warn "Publishing ${order} to ${NAME_ONLY}"
+          starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${NAME_ONLY}"
+        else
+          warn "Stale Publish Command: ${publish_file}"
+          rm "${publish_file}"
+        fi
+      done
+
       # Keep track of the last good container as a fallback
       echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
 
