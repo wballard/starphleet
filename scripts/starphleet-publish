@@ -1,6 +1,6 @@
 #!/usr/bin/env starphleet-launcher
 ### Usage:
-###    starphleet-publish <container_name> <order> <orders_file> <htpasswd> <ldap>
+###    starphleet-publish <container_name> <order> <orders_file> <htpasswd> <ldap> [<publish_path>]
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
@@ -18,10 +18,17 @@ declare -A BETAS
 declare -A REDIRECT_TO
 run_orders "${orders_file}"
 
+ORIGINAL_ORDER_NAME="${order}"
+
+if [ -n "${publish_path}" ]; then
+  order="${publish_path}"
+fi
+
 public_url="/${order}"
 if [ "${public_url}" == "/" ]; then
   public_url=""
 fi
+
 #mount this service over a path
 MOUNT_CONF="${NGINX_CONF}/published/${order}.conf"
 MOUNT_CACHED_CONF="${NGINX_CONF}/published/${order}_cached.conf"
@@ -33,8 +40,8 @@ REDIRECT_CONF="${NGINX_CONF}/published/${order}.redirect"
 PROXY_FOR_CONF="${NGINX_CONF}/proxy_for/${order}.conf"
 SERVER_NAMES_CONF="${NGINX_CONF}/named_servers/${order}.conf"
 
-IP_ADDRESS=$(cat "${CURRENT_ORDERS}/${order}/.starphleetstatus.${container_name}.ip")
-PORT=$(cat "${CURRENT_ORDERS}/${order}/.starphleetstatus.${container_name}.port")
+IP_ADDRESS=$(cat "${CURRENT_ORDERS}/${ORIGINAL_ORDER_NAME}/.starphleetstatus.${container_name}.ip")
+PORT=$(cat "${CURRENT_ORDERS}/${ORIGINAL_ORDER_NAME}/.starphleetstatus.${container_name}.port")
 
 info publishing to ${IP_ADDRESS}
 
@@ -166,7 +173,6 @@ else
   rm -f "${BARE_CONF}"
 fi
 
-echo "" > "${REDIRECT_CONF}"
 #redirect a DNS entry to the lxc url
 if [[ "${REDIRECT}" != '' && "${REDIRECT}" != '-' && "${REDIRECTTO}" != '' ]]; then
   info "redirect set for ${REDIRECT}"
