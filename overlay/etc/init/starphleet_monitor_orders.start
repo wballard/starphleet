@@ -26,7 +26,7 @@ do
   #from the order files in the headquarters
   CURRENT_ORDER="${CURRENT_ORDERS}/${ORDER}"
   mkdir -p "${CURRENT_ORDER}"
-  #use git to determing if the orders have changed since the last publish
+  #use git to determine if the orders have changed since the last publish
   if [ -f "${CURRENT_ORDER}/.orders_sha" ]; then
     DEPLOYED_ORDERS_SHA=$(cat "${CURRENT_ORDER}/.orders_sha")
     get_VERSION_DIFF ${HEADQUARTERS_LOCAL} ${ORDERS_SHA} ${DEPLOYED_ORDERS_SHA} $(dirname "${order}")
@@ -52,8 +52,19 @@ do
   #this lets folks get creative in orders files as needed
   unset SERVICE_GIT_URL
   unset UNPUBLISHED
-  run_orders "${order}"
   unset DEPLOY_REASON
+  unset PUBLISH_FROM
+  run_orders "${order}"
+  ##############################
+  # Support for 'publish' command
+  ##############################
+  # Touch a status file in current orders to tell the hupper to create a config
+  # for this endpoint also
+  if [ -n "${PUBLISH_FROM}" ] && [ -d "${CURRENT_ORDERS}${PUBLISH_FROM}" ]; then
+    warn "Publish Detected: ${CURRENT_ORDERS}${PUBLISH_FROM}/.publish_${ORDER}"
+    touch "${CURRENT_ORDERS}${PUBLISH_FROM}/.publish_${ORDER}"
+    continue
+  fi
   [ "${ORDERS_DIFF}" != "NONE" ] && DEPLOY_REASON="${ORDERS_DIFF}"
   #check if this publish port is a duplicate, halting the install of this
   #order if so, first one wins
