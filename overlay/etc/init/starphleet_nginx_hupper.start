@@ -79,20 +79,25 @@ do
         fi
       fi
 
-      # If the above publish worked it should be safe to respect publish commands
+      ###################################
+      # Support for 'publish' command
+      ###################################
+      # If the above starphleet-publish worked and if we have any 'publish' files
+      # we need to also publish the nginx configs for our publish files.  This
+      # should be safe at this point since the above completed its health checks.
       for publish_file in $(find "${CURRENT_ORDERS}/${order}/".publish_* 2> /dev/null); do
         # Purge last run
         unset CHECK
-        unset NAME_ONLY
+        unset PUBLISH_DESTINATION
 
-        NAME_ONLY=$(basename "${publish_file}" | sed -e 's|.publish_||')
-        CHECK=$(cat ${HEADQUARTERS_LOCAL}/${NAME_ONLY}/orders | grep publish | grep "${order}")
-        # We need to make sure this publish isn't stale so we double check that
-        # the command is still valid in the orders file
-        if [ -f "${HEADQUARTERS_LOCAL}/${NAME_ONLY}/orders" ] &&
-           [ -n "${CHECK}" ]; then
-          warn "Publishing ${order} to ${NAME_ONLY}"
-          starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${NAME_ONLY}"
+        # Extract the publish destination off the file name
+        PUBLISH_DESTINATION=$(basename "${publish_file}" | sed -e 's|.publish_||')
+        # Double check that the publish file isn't stale by checking the original
+        # orders for the command
+        [ -f "${HEADQUARTERS_LOCAL}/${PUBLISH_DESTINATION}/orders" ] && CHECK=$(cat ${HEADQUARTERS_LOCAL}/${PUBLISH_DESTINATION}/orders | grep publish | grep "${order}")
+        if [ -n "${CHECK}" ]; then
+          warn "Publishing ${order} to ${PUBLISH_DESTINATION}"
+          starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${PUBLISH_DESTINATION}"
         else
           warn "Stale Publish Command: ${publish_file}"
           rm "${publish_file}"
