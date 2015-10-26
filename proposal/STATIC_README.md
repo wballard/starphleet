@@ -1,7 +1,9 @@
 ### Overview
 
 Adding the ability, within starphleet, to publish static assets in such a way as to 
-optimize their delivery using a CDN.
+optimize their delivery using a CDN. This proposes an additional configuration to the
+existing service orders structure that can be used to trigger static asset deployment
+after the successful build of a service.
 
 ### Required Configuration
 
