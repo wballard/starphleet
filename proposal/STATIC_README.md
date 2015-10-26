@@ -70,4 +70,4 @@ The following will be valid urls post publising the service having HEAD sha of
   service will have it's assets deployed and accessible in perpetuity.
 * each deployment will update the existing 'service name' directory meaning that
   as the CDN returns to the s3 bucket to refresh expired assets it will get updated
-  assets.
+  assets for any assets served directly by service name e.g. `http(s)://static.mydomain.com/my_static_app/img/my_asset.gif`
