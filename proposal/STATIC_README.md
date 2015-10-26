@@ -63,4 +63,11 @@ The following will be valid urls post publising the service having HEAD sha of
 
       http(s)://static.mydomain.com/my_static_app-9dce20983bde406ed10d9ba01b2b94312e0e82b4/img/my_asset.gif
 
+#### Notes
 
+* each deployment will result in the creation of a new 'directory' named using the
+  sha of the repo HEAD at deployment, this means each distinct version of the
+  service will have it's assets deployed and accessible in perpetuity.
+* each deployment will update the existing 'service name' directory meaning that
+  as the CDN returns to the s3 bucket to refresh expired assets it will get updated
+  assets.
