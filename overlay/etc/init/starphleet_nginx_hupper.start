@@ -79,6 +79,31 @@ do
         fi
       fi
 
+      ###################################
+      # Support for 'publish' command
+      ###################################
+      # If the above starphleet-publish worked and if we have any 'publish' files
+      # we need to also publish the nginx configs for our publish files.  This
+      # should be safe at this point since the above completed its health checks.
+      for publish_file in $(find "${CURRENT_ORDERS}/${order}/".publish_* 2> /dev/null); do
+        # Purge last run
+        unset CHECK
+        unset PUBLISH_DESTINATION
+
+        # Extract the publish destination off the file name
+        PUBLISH_DESTINATION=$(basename "${publish_file}" | sed -e 's|.publish_||')
+        # Double check that the publish file isn't stale by checking the original
+        # orders for the command
+        [ -f "${HEADQUARTERS_LOCAL}/${PUBLISH_DESTINATION}/orders" ] && CHECK=$(cat ${HEADQUARTERS_LOCAL}/${PUBLISH_DESTINATION}/orders | grep publish | grep "${order}")
+        if [ -n "${CHECK}" ]; then
+          warn "Publishing ${order} to ${PUBLISH_DESTINATION}"
+          starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${PUBLISH_DESTINATION}"
+        else
+          warn "Stale Publish Command: ${publish_file}"
+          rm "${publish_file}"
+        fi
+      done
+
       # Keep track of the last good container as a fallback
       echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
 

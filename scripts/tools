@@ -182,6 +182,10 @@ function run_orders()
     LOG_TO_STDERR=1
   }
 
+  publish () {
+    PUBLISH_FROM="${1}"
+  }
+
   source "${1}" || true
 }
 
