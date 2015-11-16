@@ -13,7 +13,7 @@ if not jwt_obj["verified"] then
     local args = ngx.req.get_uri_args();
 
     ngx.status = ngx.HTTP_UNAUTHORIZED
-    ngx.say(jwt_obj.reason);
+    ngx.say("unauthorized - no valid token found");
     ngx.exit(ngx.HTTP_OK)
 
     -- or you can redirect to your website to get a new jwt token
