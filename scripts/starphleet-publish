@@ -69,6 +69,16 @@ location ${public_url}/ {
   gzip_proxied any;
   gzip_comp_level 6;
   include ${NGINX_CONF}/cors.conf;
+EOF
+
+if [[ "${jwt}" != '' && "${jwt}" != '-' ]]; then
+  info jwt enabled
+  jwt_contents=$([ "$(cat ${jwt})" == "" ] && echo "*" || echo "$(cat ${jwt})")
+  echo "  set \$jwt_roles ${jwt_contents};" >> "${MOUNT_CONF}"
+  echo "  access_by_lua_file /var/starphleet/nginx/lua/guard.lua;" >> "${MOUNT_CONF}"
+fi
+
+cat << EOF >> "${MOUNT_CONF}"
   if (\$http_cookie ~ "beta_${order}=(.*?)(;|$)") {
     set \$sendto \$1;
     rewrite ${public_url}/(.*) /\$sendto/\$1 last;
@@ -103,13 +113,6 @@ fi
 if [ ! -z "${DEVMODE_FORCE_AUTH}" ]; then
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} ${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
-fi
-
-if [[ "${jwt}" != '' && "${jwt}" != '-' ]]; then
-  info jwt enabled
-  jwt_contents=$([ "$(cat ${jwt})" == "" ] && echo "*" || echo "$(cat ${jwt})")
-  echo "  set \$jwt_roles ${jwt_contents};" >> "${MOUNT_CONF}"
-  echo "  access_by_lua_file /var/starphleet/nginx/lua/guard.lua;" >> "${MOUNT_CONF}"
 fi
 
 if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
