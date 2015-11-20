@@ -107,7 +107,8 @@ fi
 
 if [[ "${jwt}" != '' && "${jwt}" != '-' ]]; then
   info jwt enabled
-  echo "  set $jwt_secret \"${JWT_SECRET}\";"
+  jwt_contents=$([ "$(cat ${jwt})" == "" ] && echo "*" || echo "$(cat ${jwt})")
+  echo "  set \$jwt_roles ${jwt_contents};" >> "${MOUNT_CONF}"
   echo "  access_by_lua_file /var/starphleet/nginx/lua/guard.lua;" >> "${MOUNT_CONF}"
 fi
 
