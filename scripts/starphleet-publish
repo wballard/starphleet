@@ -71,7 +71,7 @@ location ${public_url}/ {
   include ${NGINX_CONF}/cors.conf;
 EOF
 
-# This section handles jwt authentication.  It has be here (before proxy_pass directive)
+# This section handles jwt authentication.  It has to be here (before proxy_pass directive)
 # because nxinx set var can't occur after proxy_pass directive
 if [[ "${jwt}" != '' && "${jwt}" != '-' ]]; then
   info jwt enabled

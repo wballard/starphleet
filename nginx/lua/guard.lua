@@ -25,11 +25,16 @@ for role in string.gmatch(ngx.var.jwt_roles, '([^,]+)') do
   table.insert(jwt_roles,1,role)
 end
 
+-- jwt:verify checks that the token can be decrypted,
+-- is salted with the specified secret, and has not expired
 local jwt_obj = jwt:verify(jwt_secret, ngx.var.arg_jwt, 0)
 if not jwt_obj["verified"] then
   jwt_obj = jwt:verify(jwt_secret, ngx.var.cookie_jwt, 0)
 end
 
+-- check the roles the user has in the toke against the roles
+-- specified in the .jwt file for the orders. Empty .jwt files 
+-- get rewritten to "*" in the starphleet_publish script
 if type(jwt_obj.payload) == "table" then
   for user_role in string.gmatch(jwt_obj.payload.role, '([^,]+)') do
     for _,v in pairs(jwt_roles) do
