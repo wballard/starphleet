@@ -10,5 +10,5 @@ if jwt_obj["verified"] then
   local token = { payload=jwt_obj.payload, header= { typ="JWT", alg="HS256"} }
   token.payload.exp = exp
   local jwt_cookie = jwt:sign(jwt_secret,token)
-  ngx.header['Set-Cookie'] = "jwt=" .. jwt_cookie .. "; Path=/; Expires=" .. ngx.cookie_time(ngx.time() + 600)
+  ngx.header['Set-Cookie'] = "jwt=" .. jwt_cookie .. "; Path=/; Expires=" .. ngx.cookie_time(exp)
 end
