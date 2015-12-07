@@ -51,6 +51,14 @@ if not jwt_obj["verified"] or not role_authorized then
   local full_request_uri = ngx.var.scheme .. '://' .. ngx.var.host .. ngx.var.request_uri
   return ngx.redirect(jwt_auth_site .. "?target=" ..ngx.escape_uri(full_request_uri) )
 else
+  -- Loop over existing request headers and remove anything starting with 'jwt-'
+  -- out of an abundance of security caution, so our jwt headers cannot be spoofed.
+  for k,v in pairs(ngx.req.get_headers()) do
+    if (string.sub(k,1,4) == 'jwt-') then 
+      ngx.req.set_header(k, nil)
+    end
+  end
+  -- Set up our JWT properties as request headers
   for k,v in pairs(jwt_obj.payload) do
     ngx.req.set_header("jwt-" .. k, v)
   end
