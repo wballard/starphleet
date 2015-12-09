@@ -1,7 +1,7 @@
 require "os"
 local jwt = require "resty.jwt"
 local jwt_secret = os.getenv("JWT_SECRET")
-local token_duration = 60
+local token_duration = 900
 
 local jwt_obj = jwt:verify(jwt_secret, ngx.var.arg_jwt, 0)
 if not jwt_obj["verified"] then
