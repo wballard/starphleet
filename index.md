@@ -239,7 +239,7 @@ authenticating on a per service basis.
 file named `.jwt`
 * In that file, on a single line provide a comma-separated list of roles
 allowed access to your service. If the value is `*` or the file is
-empty, then all roles are allowed access.
+empty, then any authenticated user regardless of role is allowed access.
   ```bash
   user,admin
   ```
@@ -257,11 +257,20 @@ empty, then all roles are allowed access.
   * `JWT_AUTH_SITE`
     * required
     * this is the starphleet service to which unauthenticated
-    users will be redirected. This site must be open to
-    non-authenticated users.  It is responsible for:
+    users will be redirected. This service is **not** provided by
+    Starphleet. Because the logic for authenticating users is domain
+    specific, the implementer must provide this service.
+    * This site must be open to non-authenticated users.  It is responsible for:
       1. Determining whether the user is valid
-      1. Constructing the *payload* to include a unique ID for the user
-         and a value for the role(s) they can access
+      1. Constructing the *payload* for the JWT token.  The payload
+         may include any meta data the implementer would like.
+         **NOTE:** The payload in any JWT token is
+         encoded, but not encrypted and should never contain sensitive
+         information.
+         * The payload property `role` is reserved by Starphleet
+         * Starphleet will check values in the `role` when determining
+         whether to grant access to the service
+         * Starphleet expects the values to be comma-delimited
       1. Signing the JWT token, which includes the payload
       1. Redirecting the user to the original target destination with the
          signed JWT token in a querystring paramter named `jwt`.
