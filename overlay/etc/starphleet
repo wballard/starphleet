@@ -23,7 +23,10 @@ export NGINX_CONF="${STARPHLEET_ROOT}/nginx"
 export BUILDPACKS="${STARPHLEET_ROOT}/buildpacks"
 export ADMIRAL="admiral"
 export ADMIRAL_HOME="/home/admiral"
+# If this file exist the hupper will regen the nginx configs and hup nginx
 export STARPHLEET_NGINX_HUP_TURD="/var/run/starphleet_hup_turd"
+# If this file exist the hupper will 'restart' nginx when done instead of hup
+export STARPHLEET_RESTART_NGINX_HUP_TURD="/var/run/starphleet_restart_hup_turd"
 export MAX_OPEN_FILES="4096"
 if [ "${TERM}" == "unknown" ]; then
   export TERM="xterm-256color"

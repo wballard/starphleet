@@ -145,6 +145,21 @@ function run_orders()
     REDIRECT_TO[$1]=$2
   }
 
+  add_header () {
+    HEADER_NAME=$1
+    info orders request additional header "$HEADER_NAME"
+    shift
+    # although it is perfectly ok ( it seems ) to redeclare an array when
+    # one of the same name exists ( it doesn't seem to do anything ) the
+    # desire is to only create one if it's needed, so to do this we use the
+    # lenght of the array as a proxy for existence as bash has no way to  check fo
+    # the existence of an empty array that I can find
+    if [ ${#SERVICE_HEADERS[@]} -eq 0 ]; then
+      declare -A -g SERVICE_HEADERS
+    fi
+    SERVICE_HEADERS[$HEADER_NAME]="$@"
+  }
+
   beta () {
     BETAS[$1]=$2
   }
@@ -153,10 +168,22 @@ function run_orders()
     PROXY_FOR_NAMES="$@"
   }
 
+  enable_cache_endpoint () {
+    ADD_CACHED_LOCATION="yes"
+  }
+
   server_names () {
     SERVER_NAMES_CONF_NAME=$1
     shift
     SERVER_NAMES="$@"
+  }
+
+  log_to_stderr () {
+    LOG_TO_STDERR=1
+  }
+
+  publish () {
+    PUBLISH_FROM="${1}"
   }
 
   source "${1}" || true
