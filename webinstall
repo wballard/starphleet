@@ -21,6 +21,8 @@ STARPHLEET_BRANCH=${STARPHLEET_BRANCH:-master}
 
 read -p "Please paste the SSH git URL to your headquarters:  " HEADQUARTERS_URL
 
+
+
 # We're gonna need git
 apt-get install -y git
 # Now grab this repo
@@ -33,6 +35,8 @@ cp ./starphleet-launcher /usr/bin
 ./starphleet-install
 # Set the headquarters
 starphleet-headquarters ${HEADQUARTERS_URL}
+# Run optional S3 mount config
+starphleet-mount-s3-bucket
 
 source `which tools`
 
