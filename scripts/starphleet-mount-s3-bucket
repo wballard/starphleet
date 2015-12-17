@@ -69,8 +69,11 @@ mkdir -p "${S3_BUCKET_MOUNT_DESTINATION}"
 MOUNTED_CHECK=$(df -P -T "${S3_BUCKET_MOUNT_DESTINATION}" | tail -n +2 | awk '{print $2}')
 [ "${MOUNTED_CHECK}" = "fuse.s3fs" ] && umount "${S3_BUCKET_MOUNT_DESTINATION}"
 
-# Create the s3fs password file
-echo "${S3_ACCESS_KEY}:${S3_SECRET_KEY}" > "${HOME}/.passwd-s3fs"
-chmod 400 "${HOME}/.passwd-s3fs"
+chown ubuntu:ubuntu "${S3_BUCKET_MOUNT_DESTINATION}"
 
-/usr/bin/s3fs "${S3_BUCKET_OPTIONS}" "${S3_BUCKET_NAME}" "${S3_BUCKET_MOUNT_DESTINATION}"
+# Create the s3fs password file
+echo "${S3_ACCESS_KEY}:${S3_SECRET_KEY}" > "/home/ubuntu/.passwd-s3fs"
+chmod 400 "/home/ubuntu/.passwd-s3fs"
+chown ubuntu:ubuntu "/home/ubuntu/.passwd-s3fs"
+
+su -l ubuntu -c "/usr/bin/s3fs '${S3_BUCKET_OPTIONS}' '${S3_BUCKET_NAME}' '${S3_BUCKET_MOUNT_DESTINATION}'"
