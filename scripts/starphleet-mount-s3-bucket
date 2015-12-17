@@ -63,7 +63,7 @@ if [ ! -f "/usr/bin/s3fs" ]; then
 fi
 
 # Create our destination
-mkdir -p "${S3_BUCKET_MOUNT_DESTINATION}"
+[ ! -d "${S3_BUCKET_MOUNT_DESTINATION}" ] && mkdir -p "${S3_BUCKET_MOUNT_DESTINATION}"
 
 # If the s3 bucket is already installed assume we are replacing it and unmount the current destination
 MOUNTED_CHECK=$(df -P -T "${S3_BUCKET_MOUNT_DESTINATION}" | tail -n +2 | awk '{print $2}')
