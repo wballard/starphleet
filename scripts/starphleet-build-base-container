@@ -1,13 +1,11 @@
-#! /usr/bin/env bash
+#! /usr/bin/env starphleet-launcher
 ### Usage:
 ###    starphleet-build-base-container
 ### --help
 ###
 ### This will build the container 'starphleet-base' from which all
 ### of the service containers will descend
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/tools
-help=$(grep "^### " "$0" | cut -c 5-)
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
+
+run_as_root_or_die
 
 starphleet-containermake "${STARPHLEET_BASE}" "${STARPHLEET_ROOT:-/var/starphleet}/containers/${STARPHLEET_BASE}"
