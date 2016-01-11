@@ -32,29 +32,30 @@ if not jwt_obj["verified"] then
   jwt_obj = jwt:verify(jwt_secret, ngx.var.cookie_jwt, 0)
 end
 
--- check the roles the user has in the toke against the roles
--- specified in the .jwt file for the orders. Empty .jwt files 
--- get rewritten to "*" in the starphleet_publish script
 if type(jwt_obj.payload) == "table" then
-  for user_role in string.gmatch(jwt_obj.payload.role, '([^,]+)') do
-    for _,v in pairs(jwt_roles) do
-      if trim(v) == trim(user_role) or trim(v) == '*' then
-        role_authorized = true
-        break
+  -- check that there is are exp and iat properties
+  -- and that iat is not more than  24 hours old
+  if jwt_obj.payload.exp and jwt_obj.payload.iat and ngx.time() - jwt_obj.payload.iat <= 24*60*60 then
+    -- check the roles the user has in the toke against the roles
+    -- specified in the .jwt file for the orders. Empty .jwt files
+    -- get rewritten to "*" in the starphleet_publish script
+    for user_role in string.gmatch(jwt_obj.payload.role, '([^,]+)') do
+      for _,v in pairs(jwt_roles) do
+        if trim(v) == trim(user_role) or trim(v) == '*' then
+          role_authorized = true
+          break
+        end
       end
+      if authenticated then break end
     end
-    if authenticated then break end
   end
 end
 
-if not jwt_obj["verified"] or not role_authorized then
-  local full_request_uri = ngx.var.scheme .. '://' .. ngx.var.host .. ngx.var.request_uri
-  return ngx.redirect(jwt_auth_site .. "?target=" ..ngx.escape_uri(full_request_uri) )
-else
+if jwt_obj["verified"] and role_authorized then
   -- Loop over existing request headers and remove anything starting with 'jwt-'
   -- out of an abundance of security caution, so our jwt headers cannot be spoofed.
   for k,v in pairs(ngx.req.get_headers()) do
-    if (string.sub(k,1,4) == 'jwt-') then 
+    if (string.sub(k,1,4) == 'jwt-') then
       ngx.req.set_header(k, nil)
     end
   end
@@ -62,4 +63,7 @@ else
   for k,v in pairs(jwt_obj.payload) do
     ngx.req.set_header("jwt-" .. k, v)
   end
+else
+  local full_request_uri = ngx.var.scheme .. '://' .. ngx.var.host .. ngx.var.request_uri
+  return ngx.redirect(jwt_auth_site .. "?target=" ..ngx.escape_uri(full_request_uri) )
 end
