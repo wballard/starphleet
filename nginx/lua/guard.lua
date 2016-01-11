@@ -33,8 +33,8 @@ if not jwt_obj["verified"] then
 end
 
 if type(jwt_obj.payload) == "table" then
-  -- check that there is are exp and iat properties
-  -- and that iat is not more than  24 hours old
+  -- check that there are exp and iat properties
+  -- and that iat is not more than 24 hours old
   if jwt_obj.payload.exp and jwt_obj.payload.iat and ngx.time() - jwt_obj.payload.iat <= 24*60*60 then
     -- check the roles the user has in the toke against the roles
     -- specified in the .jwt file for the orders. Empty .jwt files
