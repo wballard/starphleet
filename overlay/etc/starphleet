@@ -1,6 +1,6 @@
 #configure starphleet here
 #a default port for the forgetful order
-export PORT=3001
+export PORT=${PORT:-3001}
 export PUBLISH_PORT=0
 export LXC_ROOT="/var/lib/lxc"
 export STARPHLEET_SHARED_DATA="${LXC_ROOT}/data"
