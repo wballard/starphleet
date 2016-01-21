@@ -1,6 +1,6 @@
 #configure starphleet here
 #a default port for the forgetful order
-export PORT=3001
+export PORT=${PORT:-3001}
 export PUBLISH_PORT=0
 export LXC_ROOT="/var/lib/lxc"
 export STARPHLEET_SHARED_DATA="${LXC_ROOT}/data"
@@ -23,7 +23,10 @@ export NGINX_CONF="${STARPHLEET_ROOT}/nginx"
 export BUILDPACKS="${STARPHLEET_ROOT}/buildpacks"
 export ADMIRAL="admiral"
 export ADMIRAL_HOME="/home/admiral"
+# If this file exist the hupper will regen the nginx configs and hup nginx
 export STARPHLEET_NGINX_HUP_TURD="/var/run/starphleet_hup_turd"
+# If this file exist the hupper will 'restart' nginx when done instead of hup
+export STARPHLEET_RESTART_NGINX_HUP_TURD="/var/run/starphleet_restart_hup_turd"
 export MAX_OPEN_FILES="4096"
 if [ "${TERM}" == "unknown" ]; then
   export TERM="xterm-256color"
@@ -36,8 +39,10 @@ export USER_IDENTITY_COOKIE="starphleet_user"
 export NGINX_PUBLISHED_PATH="/var/starphleet/nginx/published"
 export NGINX_STATUS_CONFIG_SYMLINK="${NGINX_PUBLISHED_PATH}/starphleet_nginx_status.status"
 export NGINX_STATUS_ENDPOINT_CONFIG="/var/starphleet/nginx/status.conf"
+export STARPHLEET_DNS_ONLINE_STATUS_FILE="/tmp/.starphleet.online"
 # Declare drives we'd setup and where they should mount for starphleet install on EC2
 declare -A EC2_DRIVES
 EC2_DRIVES["/dev/xvdb"]="/var/lib/lxc"
 EC2_DRIVES["/dev/xvdc"]="/var/starphleet"
 EC2_DRIVES["/dev/xvdd"]="/var/log/biglogs"
+EC2_DRIVES["/dev/xvde"]="/var/lib/lxc/data"

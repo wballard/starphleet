@@ -13,7 +13,9 @@ do
     else
       export LOCAL_DIRECTORY=$(echo "${remote}" | sed -e 's[/remote$[[' | sed -e "s[^${HEADQUARTERS_LOCAL}/\?[${STARPHLEET_SHARED_DATA}/[")
     fi
+
     autodeploy () {
+      source `which tools`
       # Only checkout a remote once in devmode
       if dev_mode ; then
         [ -d "${LOCAL_DIRECTORY}" ] && return

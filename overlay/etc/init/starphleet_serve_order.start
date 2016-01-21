@@ -8,6 +8,10 @@ STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
 if [ "${UNPUBLISHED}" == "1" ]; then
   lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "2>&1 sleep 1000000" | logger -t "${order}" || mail_log
 else
-  lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "2>&1 setsid ~/start web" | logger -t "${order}" || mail_log
+  if [ "${LOG_TO_STDERR}" == "1" ]; then
+    lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "2>&1 setsid ~/start web" | logger -s -t "${order}" || mail_log
+  else
+    lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "2>&1 setsid ~/start web" | logger -t "${order}" || mail_log
+  fi
 fi
 echo 'stopped' > "${STATUS_FILE}"

@@ -79,6 +79,31 @@ do
         fi
       fi
 
+      ###################################
+      # Support for 'publish' command
+      ###################################
+      # If the above starphleet-publish worked and if we have any 'publish' files
+      # we need to also publish the nginx configs for our publish files.  This
+      # should be safe at this point since the above completed its health checks.
+      for publish_file in $(find "${CURRENT_ORDERS}/${order}/".publish_* 2> /dev/null); do
+        # Purge last run
+        unset CHECK
+        unset PUBLISH_DESTINATION
+
+        # Extract the publish destination off the file name
+        PUBLISH_DESTINATION=$(basename "${publish_file}" | sed -e 's|.publish_||')
+        # Double check that the publish file isn't stale by checking the original
+        # orders for the command
+        [ -f "${HEADQUARTERS_LOCAL}/${PUBLISH_DESTINATION}/orders" ] && CHECK=$(cat ${HEADQUARTERS_LOCAL}/${PUBLISH_DESTINATION}/orders | grep publish | grep "${order}")
+        if [ -n "${CHECK}" ]; then
+          warn "Publishing ${order} to ${PUBLISH_DESTINATION}"
+          starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${PUBLISH_DESTINATION}"
+        else
+          warn "Stale Publish Command: ${publish_file}"
+          rm "${publish_file}"
+        fi
+      done
+
       # Keep track of the last good container as a fallback
       echo "${name}" > "${CURRENT_ORDERS}/${order}/.last_known_good_container"
 
@@ -86,13 +111,24 @@ do
       starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
     done
 
+    # Support NGINX DNS online/offline operations.
+    if [ -f "${STARPHLEET_DNS_ONLINE_STATUS_FILE}" ] && [ ! -h "${NGINX_STATUS_CONFIG_SYMLINK}" ]; then
+      # Create the symlink
+      ln -s ${NGINX_STATUS_ENDPOINT_CONFIG} ${NGINX_STATUS_CONFIG_SYMLINK}
+    fi
+
     ######################
     # Validate Config / HUP
     ######################
 
     if [ -z "${ERROR}" ] && ${STARPHLEET_ROOT}/nginx/nginx -p "${NGINX_CONF}" -c nginx.conf -t; then
       # the config is good, let's get nginx running
-      reload starphleet_nginx || start starphleet_nginx
+      if [ -f "${STARPHLEET_RESTART_NGINX_HUP_TURD}" ]; then
+        restart starphleet_nginx || start starphleet_nginx
+        rm "${STARPHLEET_RESTART_NGINX_HUP_TURD}"
+      else
+        reload starphleet_nginx || start starphleet_nginx
+      fi
     else
       #we have a bad configuration, we'll need to do something about that
       warn "nginx configuration fails validity test, will not restart or apply configuration changes"

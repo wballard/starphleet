@@ -13,7 +13,7 @@ die_on_error
 
 get_ip(){
   container_name=$(cat "${CURRENT_ORDERS}/${ORDER}/.container")
-  ip=$(cat "${CURRENT_ORDERS/${ORDER}/.starphleetstatus.${container_name}.ip")
+  ip=$(cat "${CURRENT_ORDERS}/${ORDER}/.starphleetstatus.${container_name}.ip")
   echo "${ip}"
 }
 
