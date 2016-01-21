@@ -14,7 +14,7 @@ run_as_root_or_die
 function expose() {
 
   IP_ADDRESS=$(lxc-ls --fancy | grep "^${container_name}[[:space:]]" | awk '{ print $3; }')
-  
+
   if [ $1 == '22' ]
   then
     error "Sorry, I won't let you mess up SSH"
@@ -30,6 +30,8 @@ function expose() {
     for i in $( iptables -t nat --line-numbers -L OUTPUT | grep ^[0-9] | grep ${1} | awk '{ print $1 }' | tac ); do iptables -t nat -D OUTPUT $i; done
     iptables -t nat -I PREROUTING -p tcp -i eth0 --dport ${1} -j DNAT --to ${IP_ADDRESS}:${1}
     iptables -t nat -I OUTPUT -p tcp -o lo --dport ${1} -j DNAT --to ${IP_ADDRESS}:${1}
+    iptables -t nat -I PREROUTING -p udp -i eth0 --dport ${1} -j DNAT --to ${IP_ADDRESS}:${1}
+    iptables -t nat -I OUTPUT -p udp -o lo --dport ${1} -j DNAT --to ${IP_ADDRESS}:${1}
   fi
 }
 
