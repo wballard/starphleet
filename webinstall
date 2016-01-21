@@ -33,6 +33,8 @@ cp ./starphleet-launcher /usr/bin
 ./starphleet-install
 # Set the headquarters
 starphleet-headquarters ${HEADQUARTERS_URL}
+# Run optional S3 mount config
+starphleet-mount-s3-bucket
 
 source `which tools`
 
