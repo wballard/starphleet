@@ -63,6 +63,7 @@ if jwt_obj["verified"] and role_authorized then
   for k,v in pairs(jwt_obj.payload) do
     ngx.req.set_header("jwt-" .. k, v)
   end
+  ngx.ctx.jwt_obj = jwt_obj
 else
   local full_request_uri = ngx.var.scheme .. '://' .. ngx.var.host .. ngx.var.request_uri
   return ngx.redirect(jwt_auth_site .. "?target=" ..ngx.escape_uri(full_request_uri) )
