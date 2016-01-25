@@ -2,7 +2,7 @@ require "os"
 local jwt = require "resty.jwt"
 local jwt_secret = os.getenv("JWT_SECRET")
 local jwt_cookie_domain = os.getenv("JWT_COOKIE_DOMAIN")
-local token_duration = 900
+local token_duration = os.getenv("JWT_EXPIRATION") or 3600
 -- grab the already parsed and verified jwt_obj from the ngx per request cache
 local jwt_obj = ngx.ctx.jwt_obj
 
