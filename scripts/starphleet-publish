@@ -89,6 +89,9 @@ location ${public_url}/ {
   more_set_headers 'X-Starphleet-Service: ${public_url}';
   more_set_headers 'X-Starphleet-Container: ${container_name}';
 EOF
+if [ -n "${NGINX_LOCATION_CONFIGS}" ]; then
+  echo "${NGINX_LOCATION_CONFIGS}" >> "${MOUNT_CONF}"
+fi
 # If the Starphleet EC2 Region is set - also output this header
 if [ ! -z "${STARPHLEET_EC2_REGION}" ]; then
   echo "  more_set_headers 'X-Starphleet-Ship: ${STARPHLEET_EC2_REGION}';" >> "${MOUNT_CONF}"
@@ -117,11 +120,7 @@ if [[ "${ldap}" != '' && "${ldap}" != '-' ]] || [[ "${htpasswd}" != '' && "${htp
   # note: this needs an auth_basic that alway fails and has the same name as auth_ldap
   echo "  satisfy any;" >> "${MOUNT_CONF}"
   echo "  allow 192.168.0.0/16;" >> "${MOUNT_CONF}"
-  echo "  allow 172.16.0.0/12;" >> "${MOUNT_CONF}"
   echo "  allow 10.0.0.0/8;" >> "${MOUNT_CONF}"
-  # Allow no auth
-  echo "  allow 172.32.0.0/16;" >> "${MOUNT_CONF}"
-  echo "  allow 172.33.0.0/16;" >> "${MOUNT_CONF}"
 fi
 
 #closing off the location

@@ -186,6 +186,10 @@ function run_orders()
     PUBLISH_FROM="${1}"
   }
 
+  nginx_location_configs () {
+    NGINX_LOCATION_CONFIGS="$@"
+  }
+
   source "${1}" || true
 }
 
