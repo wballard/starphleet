@@ -215,7 +215,7 @@ This synchronizes a git repository to your ship that isn't a **service**, it is 
 * Your data will be available at `/var/data/${name}` inside your containers
 
 ## Authenticate with LDAP
-Starphleet can talk to your LDAP servers, authenticating on a per service basis. Set it up:
+Starphleet can talk to your LDAP servers, authenticating on a per service basis.
 
 * Make sure your headquarters has a `/ldap_servers` folder
 * Make a file in that folder, here is our example `guardian`
@@ -226,10 +226,70 @@ Starphleet can talk to your LDAP servers, authenticating on a per service basis.
   ```
 * Now you have a named LDAP server
 * In your service, make a file `/${service_name}/.ldap`
-* In that file, pase the name of the LDAP server, in this case
+* In that file, pass the name of the LDAP server, in this case
   ```bash
   guardian
   ```
+
+## Authenticate with JWT
+Starphleet can secure your services using JWT (JSON Web Tokens),
+authenticating on a per service basis.
+
+* In your starphleet headquarters, along side your `orders` file make a
+file named `.jwt`
+* In the `.jwt` file, on a single line provide a comma-separated list of roles
+allowed access to your service. If the value is `*` or the file is
+empty, then any authenticated user regardless of role is allowed access.
+  ```bash
+  user,admin
+  ```
+* You must provide an authentication application
+  * This is the service to which unauthenticated
+  users will be redirected. This service is **not** provided by
+  Starphleet. Because the logic for authenticating users is domain
+  specific, the implementer must provide this service.
+  * This site must be open to non-authenticated users.  It is responsible for:
+    1. Determining whether the user is valid
+    1. Constructing the *payload* for the JWT token.  The payload
+       may include any meta data the implementer would like.
+       **NOTE:** The payload in any JWT token is
+       encoded, but not encrypted and should never contain sensitive
+       information.
+       * The payload property `role` is reserved by Starphleet
+       * Starphleet will check values in the `role` when determining
+       whether to grant access to the service
+       * Starphleet expects the values to be comma-delimited
+    1. Signing the JWT token, which includes the payload
+    1. Redirecting the user to the original target destination with the
+       signed JWT token in a querystring paramter named `jwt`.
+* Include the following environment variables in the `.starphleet` config file in the root of your headquarters.
+  ```bash
+  export JWT_SECRET=myJwtSecret
+  export JWT_AUTH_SITE=/my_login_service
+  export JWT_COOKIE_DOMAIN=mysite.com
+  ```
+  * `JWT_SECRET`
+    * required
+    * this value will be used as the secret to sign and verify
+    JWT tokens.
+
+  * `JWT_AUTH_SITE`
+    * required
+    * this is URL to the authentication site referenced above
+
+  * `JWT_COOKIE_DOMAIN`
+    * optional
+    * if not provided, the JWT cookie will only be available to
+    the full domain of the original target destination (e.g.,
+    `myApp.mysite.com`)
+    * if it is provided, then the JWT cookie will be
+    scoped accordingly.
+    * Be sure to understand how cookie domains are applied.
+    For example, this feature can allow implementers to grant access to peer sub-domains
+    of the original target destination.
+    (e.g., `JWT_COOKIE_DOMAIN=mysite.com` will allow both
+    `myApp.mysite.com` and `someOtherHost.mysite.com` to access the
+    `jwt` cookie.
 
 ## Health Check my Service
 Orders service repository can supply a `{HEALTHCHECK}` like:
