@@ -267,6 +267,7 @@ empty, then any authenticated user regardless of role is allowed access.
   export JWT_SECRET=myJwtSecret
   export JWT_AUTH_SITE=/my_login_service
   export JWT_COOKIE_DOMAIN=mysite.com
+  export JWT_EXPIRATION=3600
   ```
   * `JWT_SECRET`
     * required
@@ -290,6 +291,12 @@ empty, then any authenticated user regardless of role is allowed access.
     (e.g., `JWT_COOKIE_DOMAIN=mysite.com` will allow both
     `myApp.mysite.com` and `someOtherHost.mysite.com` to access the
     `jwt` cookie.
+
+  * `JWT_EXPIRATION`
+    * optional
+    * defaults to 3600 seconds
+    * this is the initial expiration set on the `jwt` cookie
+
 
 ## Health Check my Service
 Orders service repository can supply a `{HEALTHCHECK}` like:
