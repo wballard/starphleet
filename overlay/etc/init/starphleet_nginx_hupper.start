@@ -54,7 +54,6 @@ do
         LDAP='-'
       fi
 
-
       # and JWT access, almost the same kind of thing -- but JTW
       if [ -f "${HEADQUARTERS_LOCAL}/${order}/.jwt" ]; then
         JWT="${HEADQUARTERS_LOCAL}/${order}/.jwt"
@@ -62,8 +61,23 @@ do
         JWT='-'
       fi
 
+      # DEFAULT_LDAP is only applied if no other auth conf exists
+      # lock down by default if the env var DEFAULT_LDAP is set and non-empty string 
+      if [ -n ${DEFAULT_LDAP} ]; then
+        DEFAULT_LDAP=${DEFAULT_LDAP}
+      else
+        DEFAULT_LDAP="-"
+      fi
+
+      # public explicitly overrides any other auth configuration
+      if [ -f "${HEADQUARTERS_LOCAL}/${order}/.public" ]; then
+        PUBLIC="TRUE"
+      else
+        PUBLIC="-"
+      fi
+
       # Now attempt to write the nginx configs (starphleet-publish)
-      if ! starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${JWT}" ; then
+      if ! starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${JWT}" "${DEFAULT_LDAP}" "${PUBLIC}" ; then
         # Errors on publish only happen if we can't find the IP which should
         # not be possible because the container isn't published until its
         # successfully running
@@ -73,7 +87,7 @@ do
         if [ -f "${CURRENT_ORDERS}/${order}/.last_known_good_container" ]; then
           name=$(cat "${CURRENT_ORDERS}/${order}/.last_known_good_container")
           warn "Falling back to container ${name}"
-          if ! starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${JWT}" ; then
+          if ! starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${JWT}" "${DEFAULT_LDAP}" "${PUBLIC}" ; then
             # If the fallback fails too we need to purge the files that are triggering a deploy
             # and as a final measure we attempt an additional soft deploy.  If that succeeds
             # these files get re-created.  If it STILL fails, somethings is broken
@@ -105,7 +119,7 @@ do
         [ -f "${HEADQUARTERS_LOCAL}/${PUBLISH_DESTINATION}/orders" ] && CHECK=$(cat ${HEADQUARTERS_LOCAL}/${PUBLISH_DESTINATION}/orders | grep publish | grep "${order}")
         if [ -n "${CHECK}" ]; then
           warn "Publishing ${order} to ${PUBLISH_DESTINATION}"
-          starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${JWT}" "${PUBLISH_DESTINATION}"
+          starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${JWT}" "${DEFAULT_LDAP}" "${PUBLIC}" "${PUBLISH_DESTINATION}"
         else
           warn "Stale Publish Command: ${publish_file}"
           rm "${publish_file}"

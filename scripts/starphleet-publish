@@ -1,6 +1,6 @@
 #!/usr/bin/env starphleet-launcher
 ### Usage:
-###    starphleet-publish <container_name> <order> <orders_file> <htpasswd> <ldap> <jwt> [<publish_path>]
+###    starphleet-publish <container_name> <order> <orders_file> <htpasswd> <ldap> <jwt> <default_ldap> <public> [<publish_path>]
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
@@ -72,7 +72,7 @@ location ${public_url}/ {
 EOF
 
 # This section handles jwt authentication.  It has to be here (before proxy_pass directive)
-# because nxinx set var can't occur after proxy_pass directive
+# because nginx set var can't occur after proxy_pass directive
 if [[ "${jwt}" != '' && "${jwt}" != '-' ]]; then
   info jwt enabled
   jwt_contents=$([ "$(cat ${jwt})" == "" ] && echo "*" || echo "$(cat ${jwt})")
