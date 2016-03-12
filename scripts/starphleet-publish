@@ -114,11 +114,11 @@ if [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
   echo "  auth_basic \"\";" >> "${MOUNT_CONF}"
   echo "  auth_basic_user_file ${htpasswd};" >> "${MOUNT_CONF}"
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
-  echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
+  echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;Path=/;" >> "${MOUNT_CONF}"
 fi
 if [ ! -z "${DEVMODE_FORCE_AUTH}" ]; then
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} ${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
-  echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
+  echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=${DEVMODE_FORCE_AUTH};Path=/;" >> "${MOUNT_CONF}"
 fi
 
 if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
@@ -126,12 +126,12 @@ if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
   echo "  auth_ldap \"Forbidden!\";" >> "${MOUNT_CONF}"
   echo "  auth_ldap_servers $(cat ${ldap});" >> "${MOUNT_CONF}"
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
-  echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
+  echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;Path=/;" >> "${MOUNT_CONF}"
 fi
 if [[ "${ldap}" != '' && "${ldap}" != '-' ]] || [[ "${jwt}" != '' && "${jwt}" != '-' ]] || [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
   # don't want to ldap authenticate from other containers on the ship
   # see http://forum.nginx.org/read.php?2,242713,242742#msg-242742
-  # note: this needs an auth_basic that alway fails and has the same name as auth_ldap
+  # note: this needs an auth_basic that always fails and has the same name as auth_ldap
   echo "  satisfy any;" >> "${MOUNT_CONF}"
   echo "  allow 192.168.0.0/16;" >> "${MOUNT_CONF}"
   echo "  allow 172.16.0.0/12;" >> "${MOUNT_CONF}"
@@ -175,13 +175,13 @@ EOF
     echo "  auth_basic \"\";" >> "${BARE_CONF}"
     echo "  auth_basic_user_file ${htpasswd};" >> "${BARE_CONF}"
     echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${BARE_CONF}"
-    echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
+    echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;Path=/;" >> "${MOUNT_CONF}"
   fi
   if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
     echo "  auth_ldap \"Forbidden!\";" >> "${BARE_CONF}"
     echo "  auth_ldap_servers $(cat ${ldap});" >> "${BARE_CONF}"
     echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${BARE_CONF}"
-    echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
+    echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;Path=/;" >> "${MOUNT_CONF}"
   fi
 
   echo -e "  }\n}" >> "${BARE_CONF}"
