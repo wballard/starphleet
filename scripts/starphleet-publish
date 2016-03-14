@@ -102,13 +102,16 @@ cat << EOF >> "${MOUNT_CONF}"
   more_set_headers 'X-Starphleet-Service: ${public_url}';
   more_set_headers 'X-Starphleet-Container: ${container_name}';
 EOF
+
 if [ -n "${NGINX_LOCATION_CONFIGS}" ]; then
   echo "${NGINX_LOCATION_CONFIGS}" >> "${MOUNT_CONF}"
 fi
+
 # If the Starphleet EC2 Region is set - also output this header
 if [ ! -z "${STARPHLEET_EC2_REGION}" ]; then
   echo "  more_set_headers 'X-Starphleet-Ship: ${STARPHLEET_EC2_REGION}';" >> "${MOUNT_CONF}"
 fi
+
 if [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
   info password file enabled
   echo "  auth_basic \"\";" >> "${MOUNT_CONF}"
@@ -116,6 +119,7 @@ if [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
 fi
+
 if [ ! -z "${DEVMODE_FORCE_AUTH}" ]; then
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} ${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
@@ -128,15 +132,30 @@ if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
 fi
-if [[ "${ldap}" != '' && "${ldap}" != '-' ]] || [[ "${jwt}" != '' && "${jwt}" != '-' ]] || [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
-  # don't want to ldap authenticate from other containers on the ship
+
+# unless explicitly public, enforce auth
+if [[ "${public}" != 'TRUE' ]] && [[ "${ldap}" = '' || "${ldap}" = '-' ]] && [[ "${htpasswd}" = '' || "${htpasswd}" = '-' ]]; then
+  if [[ "${default_ldap}" = '-' ]]; then
+    error "Cannot publish container ${container_name} because no auth is configured for this orders file and no default auth is configured for the phleet"
+    exit 1
+  fi
+  info Default LDAP enabled
+  echo "  auth_ldap \"Forbidden!\";" >> "${MOUNT_CONF}"
+  echo "  auth_ldap_servers $(cat ${default_ldap});" >> "${MOUNT_CONF}"
+  echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
+  echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
+fi
+
+if [[ "${ldap}" != '' && "${ldap}" != '-' ]] || [[ "${default_ldap}" != '' && "${default_ldap}" != '-' ]] || [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
+  # generally don't want to authenticate from other containers on the ship
+  # though container to container JWT auth is disallow since it relies on jwt identity headers
+  # ignore PUBLIC because it is already explicitly unsecured for all contexts
   # see http://forum.nginx.org/read.php?2,242713,242742#msg-242742
   # note: this needs an auth_basic that alway fails and has the same name as auth_ldap
   echo "  satisfy any;" >> "${MOUNT_CONF}"
   echo "  allow 192.168.0.0/16;" >> "${MOUNT_CONF}"
   echo "  allow 172.16.0.0/12;" >> "${MOUNT_CONF}"
   echo "  allow 10.0.0.0/8;" >> "${MOUNT_CONF}"
-  # Allow no auth
   echo "  allow 172.32.0.0/16;" >> "${MOUNT_CONF}"
   echo "  allow 172.33.0.0/16;" >> "${MOUNT_CONF}"
 fi
