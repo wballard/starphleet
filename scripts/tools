@@ -108,24 +108,49 @@ function expose() {
   true
 }
 
+# All the rules that surround the supported security measures
+# for starphleet.  For instance, if a certain security feature
+# has constraints, needs certain settings or files, or needs various
+# conditions to exist they should be tested here.  The environment,
+# when this is called should be "expected" to have everything we need.
+# If, when this is called, we do not have everything we need for a certain
+# security measure something is wrong.
 function validate_security() {
+  # SECURITY_MODE is set in the default starphleet config.  If it gets unset
+  # something went wrong so let the user know
   [ -z "${SECURITY_MODE}" ] && error "No Security Mode Set" && false && return
+
+  ################
+  # LDAP Rules
+  ################
   if [ "${SECURITY_MODE}" = "ldap" ]; then
     [ -z "${LDAP_SERVER}" ] && error "Must specify LDAP server" && false && return
   fi
+  ################
+  # JWT Rules
+  ################
   if [ "${SECURITY_MODE}" = "jwt" ]; then
     ( [ -z "${JWT_SECRET}" ] || \
       [ -z "${JWT_AUTH_SITE}" ] || \
       [ -z "${JWT_COOKIE_DOMAIN}" ] || \
       [ -z "${JWT_ROLES}" ] ) && error "All JWT vars not set" && false && return
   fi
+  ################
+  # HTPASSWD Rules
+  ################
   if [ "${SECURITY_MODE}" = "htpasswd" ]; then
     [ -z "${HTPASSWD}" ] && error "HTPASSWD not set with default" && false && return
   fi
+  ################
+  # Public Rules
+  ################
   if [ "${SECURITY_MODE}" = "public" ]; then
     true;
     return;
   fi
+  ################
+  # Default rule
+  ################
   # If all else fails our default is to puke
   error "SECURITY_MODE Broken" && false
 }
