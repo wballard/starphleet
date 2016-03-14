@@ -108,6 +108,23 @@ function expose() {
   true
 }
 
+function validate_security() {
+  [ -z "${SECURITY_MODE}" ] && error "No Security Mode Set" && false
+  if [ "${SECURITY_MODE}" = "ldap" ]; then
+    [ -z "${LDAP_SERVER}" ] && error "Must specify LDAP server" && false
+  fi
+  if [ "${SECURITY_MODE}" = "jwt" ]; then
+    ( [ -z "${JWT_SECRET}" ] || \
+      [ -z "${JWT_AUTH_SITE}" ] || \
+      [ -z "${JWT_COOKIE_DOMAIN}" ] || \
+      [ -z "${JWT_ROLES}" ] ) && error "All JWT vars not set" && false
+  fi
+  if [ "${SECURITY_MODE}" = "htpasswd" ]; then
+    [ -z "${HTPASSWD}" ] && error "HTPASSWD not set with default" && false
+  fi
+  true;
+}
+
 function run_orders()
 {
   autodeploy () {

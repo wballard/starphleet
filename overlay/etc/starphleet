@@ -46,3 +46,19 @@ EC2_DRIVES["/dev/xvdb"]="/var/lib/lxc"
 EC2_DRIVES["/dev/xvdc"]="/var/starphleet"
 EC2_DRIVES["/dev/xvdd"]="/var/log/biglogs"
 EC2_DRIVES["/dev/xvde"]="/var/lib/lxc/data"
+
+##########################################################
+# SECURITY
+##########################################################
+# Security mode can be one of the following:
+# htpasswd|ldap|public|jwt
+export SECURITY_MODE="htpasswd"
+# LDAP Needs
+export LDAP_SERVER=""
+# JWT Needs
+export JWT_SECRET=""
+export JWT_AUTH_SITE=""
+export JWT_COOKIE_DOMAIN=""
+export JWT_ROLES=""
+# HTPASSWD Needs
+export HTPASSWD=""

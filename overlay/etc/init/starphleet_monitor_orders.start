@@ -55,6 +55,11 @@ do
   unset DEPLOY_REASON
   unset PUBLISH_FROM
   run_orders "${order}"
+  #
+  if ! validate_security; then
+    error "Not Publishing ${order} - Security Not Setup Correctly"
+    continue
+  fi
   ###################################
   # Support for 'publish' command
   ###################################
