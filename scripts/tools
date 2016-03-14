@@ -227,6 +227,10 @@ function ec2_mounts() {
         mkfs.ext4 "${drive}"
         # Mount it where it goes
         mkdir -p "${EC2_DRIVES[$drive]}"
+
+        if [ "${EC2_DRIVES[$drive]}" != "/var/lib/lxc/data" ]; then
+          tune2fs -O ^has_journal "${drive}"
+        fi
         mount "${drive}" "${EC2_DRIVES[$drive]}"
         # Strip any mounts using this device from fstab
         cat /etc/fstab | grep -v "${drive}" > /tmp/fstab.tmp
