@@ -1,6 +1,6 @@
 #!/usr/bin/env starphleet-launcher
 ### Usage:
-###    starphleet-publish <container_name> <order> <orders_file> <htpasswd> <ldap> <jwt> [<publish_path>]
+###    starphleet-publish <container_name> <order> <orders_file> [<publish_path>]
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
