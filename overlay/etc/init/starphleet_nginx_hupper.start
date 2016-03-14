@@ -40,44 +40,59 @@ do
 
       STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
 
-      # http basic password authentication access
-      if [ -f "${HEADQUARTERS_LOCAL}/${order}/.htpasswd" ]; then
+      # note that you would never have gotten this far if you did not have at least
+      # one security policy configured at container build time either at the container level
+      # or the default hq level
+
+      # container configured http basic password authentication access
+      if [ -s "${HEADQUARTERS_LOCAL}/${order}/.htpasswd" ]; then
         HTPASSWD="${HEADQUARTERS_LOCAL}/${order}/.htpasswd"
       else
         HTPASSWD='-'
       fi
 
-      # and LDAP access, almost the same kind of thing -- but LDAPy
-      if [ -f "${HEADQUARTERS_LOCAL}/${order}/.ldap" ]; then
+      # container configured LDAP access, almost the same but LDAPy
+      if [ -s "${HEADQUARTERS_LOCAL}/${order}/.ldap" ]; then
         LDAP="${HEADQUARTERS_LOCAL}/${order}/.ldap"
       else
         LDAP='-'
       fi
 
-      # and JWT access, almost the same kind of thing -- but JTW
+      # container configured JWT access, for client-side, single-page apps
       if [ -f "${HEADQUARTERS_LOCAL}/${order}/.jwt" ]; then
         JWT="${HEADQUARTERS_LOCAL}/${order}/.jwt"
       else
         JWT='-'
       fi
 
-      # DEFAULT_LDAP is only applied if no other auth conf exists
-      # lock down by default if the env var DEFAULT_LDAP is set and non-empty string 
-      if [ -n ${DEFAULT_LDAP} ]; then
-        DEFAULT_LDAP=${DEFAULT_LDAP}
-      else
-        DEFAULT_LDAP="-"
-      fi
-
-      # public explicitly overrides any other auth configuration
+      # container configured public access explicitly allows anonymous access
       if [ -f "${HEADQUARTERS_LOCAL}/${order}/.public" ]; then
-        PUBLIC="TRUE"
+        PUBLIC="${HEADQUARTERS_LOCAL}/${order}/.public"
       else
         PUBLIC="-"
       fi
 
+      # if this container does not have a security policy, use the ship's default policy
+      if [[ ( "${HTPASSWD}" == '-' || "${HTPASSWD}" == '' ) && \
+        ( "${LDAP}" == '-' || "${LDAP}" == '' ) && \
+        ( "${JWT}" == '-' || "${JWT}" == '' ) && \
+        ( "${PUBLIC}" == '-' || "${PUBLIC}" == '' ) ]]; then
+
+        if [ -s "${HEADQUARTERS_LOCAL}/.htpasswd" ]; then
+          HTPASSWD="${HEADQUARTERS_LOCAL}/.htpasswd"
+        fi
+
+        if [ -s "${HEADQUARTERS_LOCAL}/.ldap" ]; then
+          LDAP="${HEADQUARTERS_LOCAL}/.ldap"
+        fi
+
+        if [ -f "${HEADQUARTERS_LOCAL}/.jwt" ]; then
+          JWT="${HEADQUARTERS_LOCAL}/.jwt"
+        fi
+      fi
+
       # Now attempt to write the nginx configs (starphleet-publish)
-      if ! starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${JWT}" "${DEFAULT_LDAP}" "${PUBLIC}" ; then
+      if ! starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${JWT}" ; then
         # Errors on publish only happen if we can't find the IP which should
         # not be possible because the container isn't published until its
         # successfully running
@@ -87,7 +102,7 @@ do
         if [ -f "${CURRENT_ORDERS}/${order}/.last_known_good_container" ]; then
           name=$(cat "${CURRENT_ORDERS}/${order}/.last_known_good_container")
           warn "Falling back to container ${name}"
-          if ! starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${JWT}" "${DEFAULT_LDAP}" "${PUBLIC}" ; then
+          if ! starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${JWT}" ; then
             # If the fallback fails too we need to purge the files that are triggering a deploy
             # and as a final measure we attempt an additional soft deploy.  If that succeeds
             # these files get re-created.  If it STILL fails, somethings is broken
@@ -119,7 +134,7 @@ do
         [ -f "${HEADQUARTERS_LOCAL}/${PUBLISH_DESTINATION}/orders" ] && CHECK=$(cat ${HEADQUARTERS_LOCAL}/${PUBLISH_DESTINATION}/orders | grep publish | grep "${order}")
         if [ -n "${CHECK}" ]; then
           warn "Publishing ${order} to ${PUBLISH_DESTINATION}"
-          starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${JWT}" "${DEFAULT_LDAP}" "${PUBLIC}" "${PUBLISH_DESTINATION}"
+          starphleet-publish "${name}" "${order}" "${HEADQUARTERS_LOCAL}/${order}/orders" "${HTPASSWD}" "${LDAP}" "${JWT}" "${PUBLISH_DESTINATION}"
         else
           warn "Stale Publish Command: ${publish_file}"
           rm "${publish_file}"

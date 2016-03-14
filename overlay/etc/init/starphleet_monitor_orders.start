@@ -19,7 +19,20 @@ for order in $(find "${HEADQUARTERS_LOCAL}" | grep '/orders$' | grep -v '/git' )
 do
   trace -----------------------
   info checking ${order}
-  #reset variables
+
+  # you have to have at least one security file
+  if [[ ! -s "${order%/*}/.htpasswd" ]] && \
+     [[ ! -s "${order%/*}/.ldap" ]] && \
+     [[ ! -f "${order%/*}/.jwt" ]] && \
+     [[ ! -f "${order%/*}/.public" ]] && \
+     [[ ! -s "${HEADQUARTERS_LOCAL}/.htpasswd" ]] && \
+     [[ ! -s "${HEADQUARTERS_LOCAL}/.ldap" ]] && \
+     [[ ! -f "${HEADQUARTERS_LOCAL}/.jwt" ]] && \
+     [[ ! -f "${HEADQUARTERS_LOCAL}/.public" ]]; then
+    error "Could not find any security policy for: #{order} - Refuse to build."
+    exit 1
+  fi
+
   source /etc/starphleet
   ORDER=$(echo "${order}" | sed -e 's[/orders$[[' | sed -e "s[${HEADQUARTERS_LOCAL}/\?[[")
   #make a place for the orders to be managed while running, this is separate
