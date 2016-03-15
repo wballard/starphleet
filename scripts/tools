@@ -116,12 +116,18 @@ function expose() {
 # If, when this is called, we do not have everything we need for a certain
 # security measure something is wrong.
 function validate_security() {
+
+  # In bash, the return values are odd.  Exiting with a Zero
+  # means you didn't have a problem.
+  #
+  # See:  http://glg.link/Ea8zjA
+  TRUE=0;
+  FALSE=1;
   # SECURITY_MODE is set in the default starphleet config.  If it gets unset
   # something went wrong so let the user know
-  if [ -z "${SECURITY_MODE}" ]; then
-    error "No Security Mode Set"
-    false
-    return
+  if ! echo "${SECURITY_MODE}" | egrep 'htpasswd|jwt|ldap|public' > /dev/null; then
+    error "Invalid security mode: [${SECURITY_MODE}]";
+    return ${FALSE};
   fi
 
   info Security Mode: ${SECURITY_MODE}
@@ -132,9 +138,9 @@ function validate_security() {
   if [ "${SECURITY_MODE}" = "ldap" ]; then
     if [ -z "${LDAP_SERVER}" ]; then
       error "Must specify LDAP server [${SECURITY_MODE}] ${LDAP_SERVER}"
-      false
+      return ${FALSE}
     fi
-    return
+    return ${TRUE}
   fi
   ################
   # JWT Rules
@@ -145,9 +151,9 @@ function validate_security() {
        [ -z "${JWT_COOKIE_DOMAIN}" ] || \
        [ -z "${JWT_ROLES}" ]; then
        error "All JWT vars not set"
-       false
+       return ${FALSE}
     fi
-    return
+    return ${TRUE}
   fi
   ################
   # HTPASSWD Rules
@@ -155,23 +161,22 @@ function validate_security() {
   if [ "${SECURITY_MODE}" = "htpasswd" ]; then
     if [ -z "${HTPASSWD}" ]; then
       error "HTPASSWD not set: ${HTPASSWD}"
-      false
+      return ${FALSE}
     fi
-    return
+    return ${TRUE}
   fi
   ################
   # Public Rules
   ################
   if [ "${SECURITY_MODE}" = "public" ]; then
-    true
-    return
+    return ${TRUE}
   fi
   ################
   # Default rule
   ################
   # If all else fails our default is to puke
-  error "SECURITY_MODE Broken"
-  false
+  error "Critical Error - Never get here!! OMG!"
+  return ${FALSE}
 }
 
 function run_orders()
