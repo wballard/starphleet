@@ -30,7 +30,7 @@ do
      [[ ! -f "${HEADQUARTERS_LOCAL}/.jwt" ]] && \
      [[ ! -f "${HEADQUARTERS_LOCAL}/.public" ]]; then
     error "Could not find any security policy for: ${order} - Refuse to build."
-    break
+    continue
   fi
 
   source /etc/starphleet
