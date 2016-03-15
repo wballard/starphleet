@@ -29,8 +29,8 @@ do
      [[ ! -s "${HEADQUARTERS_LOCAL}/.ldap" ]] && \
      [[ ! -f "${HEADQUARTERS_LOCAL}/.jwt" ]] && \
      [[ ! -f "${HEADQUARTERS_LOCAL}/.public" ]]; then
-    error "Could not find any security policy for: #{order} - Refuse to build."
-    exit 1
+    error "Could not find any security policy for: ${order} - Refuse to build."
+    break
   fi
 
   source /etc/starphleet
