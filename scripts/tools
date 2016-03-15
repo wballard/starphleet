@@ -118,41 +118,60 @@ function expose() {
 function validate_security() {
   # SECURITY_MODE is set in the default starphleet config.  If it gets unset
   # something went wrong so let the user know
-  [ -z "${SECURITY_MODE}" ] && error "No Security Mode Set" && false && return
+  if [ -z "${SECURITY_MODE}" ]; then
+    error "No Security Mode Set"
+    false
+    return
+  fi
+
+  info Security Mode: ${SECURITY_MODE}
 
   ################
   # LDAP Rules
   ################
   if [ "${SECURITY_MODE}" = "ldap" ]; then
-    [ -z "${LDAP_SERVER}" ] && error "Must specify LDAP server" && false && return
+    if [ -z "${LDAP_SERVER}" ]; then
+      error "Must specify LDAP server [${SECURITY_MODE}] ${LDAP_SERVER}"
+      false
+    fi
+    return
   fi
   ################
   # JWT Rules
   ################
   if [ "${SECURITY_MODE}" = "jwt" ]; then
-    ( [ -z "${JWT_SECRET}" ] || \
-      [ -z "${JWT_AUTH_SITE}" ] || \
-      [ -z "${JWT_COOKIE_DOMAIN}" ] || \
-      [ -z "${JWT_ROLES}" ] ) && error "All JWT vars not set" && false && return
+    if [ -z "${JWT_SECRET}" ] || \
+       [ -z "${JWT_AUTH_SITE}" ] || \
+       [ -z "${JWT_COOKIE_DOMAIN}" ] || \
+       [ -z "${JWT_ROLES}" ]; then
+       error "All JWT vars not set"
+       false
+    fi
+    return
   fi
   ################
   # HTPASSWD Rules
   ################
   if [ "${SECURITY_MODE}" = "htpasswd" ]; then
-    [ -z "${HTPASSWD}" ] && error "HTPASSWD not set with default" && false && return
+    if [ -z "${HTPASSWD}" ]; then
+      error "HTPASSWD not set: ${HTPASSWD}"
+      false
+    fi
+    return
   fi
   ################
   # Public Rules
   ################
   if [ "${SECURITY_MODE}" = "public" ]; then
-    true;
-    return;
+    true
+    return
   fi
   ################
   # Default rule
   ################
   # If all else fails our default is to puke
-  error "SECURITY_MODE Broken" && false
+  error "SECURITY_MODE Broken"
+  false
 }
 
 function run_orders()
