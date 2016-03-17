@@ -1,6 +1,6 @@
 #!/usr/bin/env starphleet-launcher
 ### Usage:
-###    starphleet-publish <container_name> <order> <orders_file> <htpasswd> <ldap> <jwt> [<publish_path>]
+###    starphleet-publish <container_name> <order> <orders_file> [<publish_path>]
 ### --help
 ###
 ### Publish HTTP traffic from the container out to the ship
@@ -17,6 +17,11 @@ declare -A BETAS
 # declare for redirects
 declare -A REDIRECT_TO
 run_orders "${orders_file}"
+
+if ! validate_security; then
+  error "Not Publishing ${order} - Security Not Setup Correctly"
+  exit 1
+fi
 
 ORIGINAL_ORDER_NAME="${order}"
 
@@ -56,6 +61,7 @@ test ! -d "${NGINX_CONF}/published" && mkdir -p "${NGINX_CONF}/published"
 test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_bare"
 mkdir -p "${NGINX_CONF}/proxy_for"
 mkdir -p "${NGINX_CONF}/named_servers"
+mkdir -p "${NGINX_CONF}/htpasswd"
 
 [ -f "${NGINX_CONF}/published/crt" ] || cp "${NGINX_CONF}/crt" "${NGINX_CONF}/published/crt"
 [ -f "${NGINX_CONF}/published/key" ] || cp "${NGINX_CONF}/key" "${NGINX_CONF}/published/key"
@@ -73,10 +79,9 @@ EOF
 
 # This section handles jwt authentication.  It has to be here (before proxy_pass directive)
 # because nxinx set var can't occur after proxy_pass directive
-if [[ "${jwt}" != '' && "${jwt}" != '-' ]]; then
+if [ "${SECURITY_MODE}" = 'jwt'] ; then
   info jwt enabled
-  jwt_contents=$([ "$(cat ${jwt})" == "" ] && echo "*" || echo "$(cat ${jwt})")
-  echo "  set \$jwt_roles ${jwt_contents};" >> "${MOUNT_CONF}"
+  echo "  set \$jwt_roles ${JWT_ROLES};" >> "${MOUNT_CONF}"
   echo "  access_by_lua_file /var/starphleet/nginx/lua/guard.lua;" >> "${MOUNT_CONF}"
   echo "  header_filter_by_lua_file /var/starphleet/nginx/lua/jwt_cookie.lua;" >> "${MOUNT_CONF}"
 fi
@@ -109,10 +114,13 @@ fi
 if [ ! -z "${STARPHLEET_EC2_REGION}" ]; then
   echo "  more_set_headers 'X-Starphleet-Ship: ${STARPHLEET_EC2_REGION}';" >> "${MOUNT_CONF}"
 fi
-if [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
+
+if [ "${SECURITY_MODE}" = 'htpasswd' ]; then
   info password file enabled
+  HTPASSWD_FILE="${NGINX_CONF}/htpasswd/${order}.htpasswd"
+  echo "${HTPASSWD}" > "${HTPASSWD_FILE}"
   echo "  auth_basic \"\";" >> "${MOUNT_CONF}"
-  echo "  auth_basic_user_file ${htpasswd};" >> "${MOUNT_CONF}"
+  echo "  auth_basic_user_file ${HTPASSWD_FILE};" >> "${MOUNT_CONF}"
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
 fi
@@ -120,15 +128,14 @@ if [ ! -z "${DEVMODE_FORCE_AUTH}" ]; then
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} ${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
 fi
-
-if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
+if [ "${SECURITY_MODE}" = 'ldap' ]; then
   info LDAP enabled
   echo "  auth_ldap \"Forbidden!\";" >> "${MOUNT_CONF}"
-  echo "  auth_ldap_servers $(cat ${ldap});" >> "${MOUNT_CONF}"
+  echo "  auth_ldap_servers $LDAP_SERVER;" >> "${MOUNT_CONF}"
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
 fi
-if [[ "${ldap}" != '' && "${ldap}" != '-' ]] || [[ "${jwt}" != '' && "${jwt}" != '-' ]] || [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
+if [ "${SECURITY_MODE}" != 'public' ]; then
   # don't want to ldap authenticate from other containers on the ship
   # see http://forum.nginx.org/read.php?2,242713,242742#msg-242742
   # note: this needs an auth_basic that alway fails and has the same name as auth_ldap
@@ -171,15 +178,19 @@ server {
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "upgrade";
 EOF
-  if [[ "${htpasswd}" != '' && "${htpasswd}" != '-' ]]; then
+  if [ "${SECURITY_MODE}" = 'htpasswd' ]; then
+    info password file enabled
+    HTPASSWD_FILE="${NGINX_CONF}/htpasswd/${order}.htpasswd"
+    echo "${HTPASSWD}" > "${HTPASSWD_FILE}"
     echo "  auth_basic \"\";" >> "${BARE_CONF}"
-    echo "  auth_basic_user_file ${htpasswd};" >> "${BARE_CONF}"
+    echo "  auth_basic_user_file ${HTPASSWD_FILE};" >> "${BARE_CONF}"
     echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${BARE_CONF}"
-    echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
+    echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${BARE_CONF}"
   fi
-  if [[ "${ldap}" != '' && "${ldap}" != '-' ]]; then
+  if [ "${SECURITY_MODE}" = 'ldap' ]; then
+    info LDAP enabled
     echo "  auth_ldap \"Forbidden!\";" >> "${BARE_CONF}"
-    echo "  auth_ldap_servers $(cat ${ldap});" >> "${BARE_CONF}"
+    echo "  auth_ldap_servers $LDAP_SERVER;" >> "${BARE_CONF}"
     echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${BARE_CONF}"
     echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
   fi

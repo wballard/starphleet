@@ -20,7 +20,7 @@ do
   trace -----------------------
   info checking ${order}
   #reset variables
-  source /etc/starphleet
+  source `which tools`
   ORDER=$(echo "${order}" | sed -e 's[/orders$[[' | sed -e "s[${HEADQUARTERS_LOCAL}/\?[[")
   #make a place for the orders to be managed while running, this is separate
   #from the order files in the headquarters
@@ -55,6 +55,11 @@ do
   unset DEPLOY_REASON
   unset PUBLISH_FROM
   run_orders "${order}"
+  #
+  if ! validate_security; then
+    error "Not Deploying ${order} - Security Not Setup Correctly"
+    continue
+  fi
   ###################################
   # Support for 'publish' command
   ###################################
