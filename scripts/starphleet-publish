@@ -79,7 +79,7 @@ EOF
 
 # This section handles jwt authentication.  It has to be here (before proxy_pass directive)
 # because nxinx set var can't occur after proxy_pass directive
-if [ "${SECURITY_MODE}" = 'jwt'] ; then
+if [ "${SECURITY_MODE}" = 'jwt' ] ; then
   info jwt enabled
   echo "  set \$jwt_roles ${JWT_ROLES};" >> "${MOUNT_CONF}"
   echo "  access_by_lua_file /var/starphleet/nginx/lua/guard.lua;" >> "${MOUNT_CONF}"
