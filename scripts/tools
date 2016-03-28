@@ -317,10 +317,13 @@ function ec2_mounts() {
   # If we have a mount for syslog we move our syslog to the new mount
   # and symlink back to the old
   if [ -d /var/log/biglogs ] && [ ! -L /var/log/syslog ]; then
-    stop rsyslog
-    mv /var/log/syslog /var/log/biglogs/syslog
-    ln -s /var/log/biglogs/syslog /var/log/syslog
-    start rsyslog
+    # Being super defensive.  A condition exists where the symlink
+    # prevented a start.  The bug was reported but not visually confirmed
+    # so might tweak this if I ever run across the bug.  
+    stop rsyslog || true
+    [ -f /var/log/syslog ] && mv /var/log/syslog /var/log/biglogs/syslog
+    [ -f /var/log/biglogs/syslog ] && [ ! -L /var/log/syslog ] && ln -s /var/log/biglogs/syslog /var/log/syslog
+    start rsyslog || true
   fi
 
 }
