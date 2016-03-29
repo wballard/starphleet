@@ -1,0 +1,628 @@
+---
+layout: default
+title: Home
+description: Starphleet Documentation
+isHome: true
+---
+
+<section class="bs-docs-section">
+  <h1 id="overview" class="page-header">Overview</h1>
+  <blockquote>
+    <p>Starphleet is a toolkit for turning virtual or physical machine infrastructure into a continuous deployment stack, running multiple Git-backed services on one more nodes via Linux containers.
+    </p>
+    <p>Starphleet borrows heavily from the concepts of the Twelve-Factor App, and uses an approach that avoids many of the problems inherent in existing autodeployment solutions:
+    </p>
+  </blockquote>
+
+  <ul>
+    <li>Conventional virtualization, with multiple operating systems running on shared physical hardware, wastes resources, specifically RAM and CPU. This costs real money.</li>
+    <li>Autodeploy PaaS has the same vendor lock-in risks of old proprietary software.</li>
+    <li>Continuous deployment is almost always a custom scripting exercise.</li>
+    <li>Multiple machine / clustered deployment is extra work.</li>
+    <li>Making many small services is more work than making megalith services.</li>
+    <li>Deployment systems all seem to be at the system not service level.</li>
+    <li>Every available autodeploy system requires that you set up servers to deploy your servers, which themselves aren't autodeployed.</li>
+  </ul>
+
+  <h3 id="features">Features</h3>
+
+  <ul>
+    <li>Linux CGROUP and container isolation</li>
+    <li>Continuous Deployment</li>
+    <li>Centralized Configuration</li>
+    <li>Easily combine many micro-services into a large application</li>
+  </ul>
+
+</section>
+
+<section class="bs-docs-section">
+  <h1 id="installation" class="page-header">Installation</h1>
+
+  <h3 id="aws-install">EC2 in AWS</h3>
+  <p>Starphleet includes
+    <a href="https://aws.amazon.com">Amazon Web Services (AWS)</a>
+    support. To initialize your phleet, you need to have an AWS account.</p>
+
+  <ol>
+    <li>Provision an Ubuntu EC2 Instance (Currently 14.04)</li>
+    <li>Login to your provisioned instance</li>
+    <li>Run the following command:</li>
+  </ol>
+
+{% highlight bash %}
+bash -c "$(curl -s https://raw.githubusercontent.com/wballard/starphleet/master/webinstall)" {% endhighlight %}
+
+  <h3 id="vmware-fusion-install">VMWare Fusion (Mac)</h3>
+  <p>To install on a mac computer you will need the following software</p>
+
+  <ul>
+    <li>
+      <a href="http://www.vmware.com/go/try-fusion-en">VMWare Fusion v. &gt;= 8.1.0</a>
+    </li>
+    <li>
+      <a href="http://store.vmware.com/store/vmware/en_US/home">VMWare Fusion License (Purchase Required)</a>
+    </li>
+    <li>
+      <a href="https://www.vagrantup.com/downloads.html">Vagrant</a>
+    </li>
+    <li>
+      <a href="http://docs.vagrantup.com/v2/vmware/installation.html">Vagrant VMWare Provider</a>
+    </li>
+    <li>
+      <a href="http://www.vagrantup.com/vmware#buy-now">VMWare Provider License (Purchase Required)</a>
+    </li>
+  </ul>
+
+  <p>Once all the software is installed you can install starphleet into vmware with the following steps</p>
+
+  <ol>
+    <li>Clone the
+      <a href="https://github.com/wballard/starphleet">GitHub repo</a>
+      locally</li>
+    <li>Change into the local directory</li>
+    <li>Run the following command:</li>
+  </ol>
+{% highlight bash %}
+${PWD}/vmware {% endhighlight %}
+</section>
+<section class="bs-docs-section">
+  <h1 id="definitions" class="page-header">Definitions</h1>
+  <h3 id="phleet">Phleet</h3>
+  <p>A
+    <a href="#phleet">phleet</a>
+    is a grouping of
+    <a href="#ship">starphleet ships</a>. The entire phleet points to a single
+    <a href="#headquartersrepo">headquarters</a>. These ships may be geographically located for latency or maintained in a single region. A phleet is comprised of machines that are intended to be identical for easy scaling.
+    <h3 id="ship">Ship</h3>
+    <p>
+      A ship is an Ubuntu 14.04 EC2 instance running a base install of Ubuntu. The starphleet installation will handle installing all needed software on the server.
+    </p>
+    <h3 id="headquartersrepo">Headquarters</h3>
+    <p>
+      The headquarters is a special
+      <a href="https://github.com/wballard/starphleet.headquarters">Git repo</a>
+      that is the
+      <i>brains</i>
+      of your
+      <a href="#phleet">phleet</a>. The Headquarters will store all your environment and configuration options. This repo will also contain all your credentials and confidential information. It is important to keep your headquarter security restrictive. An example and template headquarters can be found
+      <a href="https://github.com/wballard/starphleet.headquarters">here</a>.
+    </p>
+    <h3 id="orders">Orders</h3>
+    <p>The orders file is a special file inside a subdirectory off the root directory of the
+      <a href="#headquartersrepo">headquarters</a>.</p>
+
+    <p>Each subdirectory off the root of the
+      <a href="#headquartersrepo">headquarters</a>
+      is checked for an
+      <a href="#orders">orders file</a>. Starphleet will look inside the
+      <a href="#orders">orders file</a>
+      for deploy commands and environment variables for the service. There is a 1-1 mapping between the subdirectory that contains an
+      <a href="#orders">orders file</a>
+      and the url of the service deployed.</p>
+    <h3 id="service">Service</h3>
+    <p>A service is an app that responds to web requests.  The service should listen for web requests on the <code>$PORT</code> set in the Environment.  The service lives within an LXC Container and will be handed requests by the NGINX front end on the <a href="#ship">ship</a>.</p>
+    <h3 id="remotes">Remote</h3>
+    <p>Remotes are GitHub repos that are not intended to be deployed.  These special repos are instead intended to be resources for applications.  By specifying a remote inside a <a href="#service">service</a> endpoint directory the GitHub repo will be automatically checked out and synced in the <code>/var/data/$service_name</code> directory.</p>
+  </p>
+</section>
+
+<section class="bs-docs-section">
+  <h1 id="headquarters" class="page-header">Headquarters</h1>
+  <p> The <a href="#headquartersrepo">Starphleet Headquarters</a> is a Git repo with all the master configurations for the entire phleet of servers. It will contain the deploy commands for every service, keys for ssh console access to the ships, ssl certificates for the domain(s) you assign to the ship, configuration settings for authentication for each service as well as how the machine can reach LDAP servers, and any other major configuration item. </p>
+  <p> Aside from special directories, each directory in the headquarters is assumed to be a <a href="#remote">remote</a> or <a href="#service">service</a> </p>
+  <h3 id="reservedfiles">Reserved Files and Dirs</h3>
+  <p>The Headquarters has the followin special directories and files outlined below:</p>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th style="width: 130px;">Name</th>
+        <th style="width: 50px;">Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>/hq/.starphleet</td>
+        <td>file</td>
+        <td>The .starphleet file is in the root of the headquarters and handles global environment configuration for services and starphleet. This is where you'd override default starphleet configs for the entire phleet.  This is also where you'd set global environment settings for every service in an entire <a href="#phleet">phleet</a>.</td>
+      </tr>
+      <tr>
+        <td>/hq/authorized_keys</td>
+        <td>dir</td>
+        <td>The authorized_keys folder should container all the openssh public keys for users who want console access to the ships. The users will all login as "admiral" using their associated private key</td>
+      </tr>
+      <tr>
+        <td>/hq/beta_groups</td>
+        <td>dir</td>
+        <td>The beta_groups directory contains a list of files containing usernames inside the file. The names of the files are used in the orders to setup beta groups</td>
+      </tr>
+      <tr>
+        <td>/hq/ldap_servers</td>
+        <td>dir</td>
+        <td>The ldap_servers folder contains a list of files for all the ldap configurations used by the security system to secure services. The name of the files are used inside the orders files to configure the security for an endpoint.</td>
+      </tr>
+      <tr>
+        <td>/hq/overlay</td>
+        <td>dir</td>
+        <td>The overlay directory contains files intended to be dropped on to the file system of each ship. Their is a direct relationship between the file structure of the overlay directory and the file structure of the ship</td>
+      </tr>
+      <tr>
+        <td>/hq/ssl</td>
+        <td>dir</td>
+        <td>The ssl directory contains any of the SSL keys associated with the domains pointing to the ships in the phleet.</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="servicefiles">Service Files</h3>
+  <p>To create a service endpoint you create a new directory off the root of the headquarters. Inside the directory you create an orders file which contains configuration options and deploy commands for the service. This file will tell Starphleet which Git repo to deploy at this endpoint. The following is what the directory structure will look like along with a few of the files that might be associated with your service:</p>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th style="width: 130px;">Name</th>
+        <th style="width: 50px;">Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>/hq/$service</td>
+        <td>dir</td>
+        <td>Aside from the reserved files and directories in the headquarters each directory in your headquarters is considered a service endpoint. These directories will correspond to a service that gets exposed via NGINX and inside the directories you will place files that contain all the environment and details for the service.</td>
+      </tr>
+      <tr>
+        <td>/hq/service/orders</td>
+        <td>file</td>
+        <td>The orders file contains all the environment variables and
+          <a href="#commands">Starphleet commands</a>to get a service or remote deployed.</td>
+      </tr>
+      <tr>
+        <td>/hq/service/remote</td>
+        <td>file</td>
+        <td>There are times you may want to get data onto the server but the data is intended to be consumed by services. These are called "remotes". Just like a service, a remote is tracked for changes and automatically updated when the Git repo changes. THe data is stored inside the container in "/var/data/$service". $service corresponds with the service directory the remote file is located in.</td>
+      </tr>
+      <tr>
+        <td>/hq/service/on_containerize</td>
+        <td>file</td>
+        <td>
+          <i>The on_containerize script must be checked into the headquarters as executable to be executed by Starphleet.</i>
+          When Starphleet downloads a service it will run through the built-in Heroku buildpacks and try to determine the type of application.
+          <b>Before</b>
+          this process occurs, Starphleet will run the on_containerize script as root. This script can run commands that might help setup the container before the buildpack begins.</td>
+      </tr>
+      <tr>
+        <td>/hq/service/after_containerize</td>
+        <td>file</td>
+        <td>
+          <i>The after_containerize script must be checked into the headquarters as executable to be executed by Starphleet.</i>
+          When Starphleet downloads a service it will run through the built-in Heroku buildpacks and try to determine the type of application.
+          <b>After</b>
+          this process occurs, Starphleet will run the after_containerize script as root. This script can run commands that might help setup the container after the buildpack finishes.</td>
+      </tr>
+      <tr>
+        <td>/hq/service/$cron_file</td>
+        <td>file</td>
+        <td>
+          <i>$Cron jobs must be checked into the headquarters as executable to be executed by Starphleet.</i>
+          See <a href="#cronjobs">cron jobs</a> for more information</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="orderscommands">Orders Commands</h3>
+  <p>There are special Starphleet commands expected to be run in the orders file. Commands are:</p>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th style="width: 130px;">Command</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>autodeploy</td>
+        <td>This command is passed a single argument which is a link to a github repo. If the repo is private, the link must be an SSH link and Starphleet must have an SSH key installed with access to the repo. This command will build a container, run your application, and if successfully completed, mount the application to the path corresponding to the location of the orders file.</td>
+      </tr>
+      <tr>
+        <td>expose</td>
+        <td>Some services that run in a container need special ports exposed outside of the machine. Expose will open a hole in the local machine's firewall and forward traffic destined for the exposed port directly into the container.</td>
+      </tr>
+      <tr>
+        <td>unpublished</td>
+        <td>Starphleet will create a container at the location corresponding with the path to the orders file but will not expose the service for web traffic.</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="ordersvariables">Orders Variables</h3>
+  <p>All variables need to be exported to be available to your application. For instance:</p>
+{% highlight bash %}
+export FOO="BAR" {% endhighlight %}
+  <p>Variables are available to your application. Some variables are exposed to your application by Starphleet but can be <a href="#overrides">overridden.</a></p>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th style="width: 130px;">Variable</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PORT</td>
+        <td>The PORT your service will accept requests on.  This is the port NGINX will pass traffic through to your service.  This port is <b>not</b> exposed externally of the ship.</td>
+      </tr>
+      <tr>
+        <td>$ANY_OTHER</td>
+        <td>Any other environment variable set in the orders file will be passed to the application</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<section class="bs-docs-section">
+  <h1 id="overrides">Overrides</h1>
+  <p> Most of the configuration in Starphleet is handled by setting environment variables.  Starphleet exposes several environment variables to the applications that run in the containers.  You can set environment variables for a container in a few ways: </p>
+  <ul>
+    <li>Globally Across the Phleet</li> <li>Per-Ship</li>
+    <li>Per-Service</li>
+  </ul>
+  <p> It is also important to note that the above list also represents the order in which the environment is overridden. </p>
+  <h3 id="overridesglobally">Globally</h3>
+  <p> Environment Variables set globally will be available to all services on all ships in the phleet.  You can set these global environment files in the HQ in the <code>.starphleet</code> <a href="#reservedfiles">reserved file</a>. </p>
+  <h3 id="overridespership">Per-Ship</h3>
+  <p> In some cases it might be necessary to set environment variables that are specific to each <a href="#ship">ship</a> in a <a href="#phleet">phleet</a>.  These variables might be unique to a ship like its location.  These environment variables get set by adding files to a special directory on the ship.  Any file located in the <code>/etc/starphleet.d</code> directory will be sourced and available to all environments in Starphleet. </p>
+  <h3 id="overridesperservice">Per-Service</h3>
+  <p>
+    The orders file used to deploy a container also acts as the final location to set environment variables and override any defaults set upstream from your service.  Common settings in the orders file would include locations to resources, DB credentials, and the <a href="#authentication">authentication</a> mechanism you want Starphleet to use for your service.
+  </p>
+</section>
+<section class="bs-docs-section">
+  <h1 id="commands" class="page-header">Commands</h1>
+  <p>All variables need to be exported to be available to your application. For instance '<i>export FOO="BAR"</i>'. Variables are available to your application. Some variables are exposed to your application by Starphleet and can be overridden in your headquarters</p>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th style="width: 180px;">Command</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>starphleet-attach</td>
+        <td>Pass the name of the service and select which container.  Once inside the container you will be running as the <code>ubuntu</code> user which is the same as your service.</td>
+      </tr>
+      <tr>
+        <td>starphleet-dns-offline</td>
+        <td>If you make use of AWS Route 53 and point a healtcheck to your ships you will want to reference the path <code>/starphleet/nginx/status</code>.  The <code>starphleet-dns-offline</code> command will make the path unavailable which will softly fail your ship in route 53.  If your ship is part of a record set in route 53 this will take your machine out of the rotation or cause a failover scenario to other DNS records</td>
+      </tr>
+      <tr>
+        <td>starphleet-dns-online</td>
+        <td>If you make use of AWS Route 53 and point a healtcheck to your ships you will want to reference the path <code>/starphleet/nginx/status</code>.  The <code>starphleet-dns-online</code> command will make the path available which will make your ship healthy in Route 53.  If your ship is part of a record set in route 53 this will bring your machine online in the DNS rotation or heal from a failover.</td>
+      </tr>
+      <tr>
+        <td>starphleet-git</td>
+        <td>This command can be substituted for <code>git</code> but will make use of the keys provided to Starphleet when connecting to your git repo.</td>
+      </tr>
+      <tr>
+        <td>starphleet-headquarters</td>
+        <td>Without an argument this command will display the headquarters used by Starphleet.  Provided an arguement, this command will change the headquarters used by Starphleet.</td>
+      </tr>
+      <tr>
+        <td>starphleet-hup-nginx</td>
+        <td>It is not safe to restart NGINX manually.  The services responsible for configuring NGINX might be midway through their process and cause NGINX to fail a restart.  This command allows you to signal to the NGINX configuration engine built into Starphleet to attempt to reconfigure NGINX and reload the configs.</td>
+      </tr>
+      <tr>
+        <td>starphleet-restart-nginx</td>
+        <td>Much like the <code>starphleet-hup-nginx</code> command, this utility triggers the NGINX configuration engine built into Starphleet to attempt to reconfigure NGINX.  When this process completes NGINX is restarted instead of reloading.  Any services utilizing websockets will lose their connection.  Restarting NGINX can only be done manually through this command.  Starphleet never restarts NGINX automatically.</td>
+      </tr>
+      <tr>
+        <td>starphleet-orphan-reaper</td>
+        <td>When orders vanish from the <a href="#headquarters">headquarters</a>, Starphleet will not automatically kill containers that remain running.  These containers are <i>orphaned</i>.  There are not active orders for the containers but they still exist.  <code>starphleet-orphan-reaper</code> will purge any containers without matching orders.</td>
+      </tr>
+      <tr>
+        <td>starphleet-redeploy</td>
+        <td>This command accepts the name of a service.  This command will completely destroy any existance of the service even if the service is deployed.</td>
+      </tr>
+      <tr>
+        <td>starphleet-retry-deploy</td>
+        <td>This command will create fake shas for a service and attempt a deploy of the service.  What makes this command unique from <code>starphleet-redeploy</code> is that the current and active container will not be destroyed unless the newer container successfully deployes.  If the <code>starphleet-retry-deploy</code> container has an issue the active container will remain online.</td>
+      </tr>
+      <tr>
+        <td>starphleet-status</td>
+        <td>Provides a quick overview of the status of a container.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<section class="bs-docs-section">
+  <h1 id="buildpacks" class="page-header">Buildpacks</h1>
+  <h3 id="howbuildpackswork">How Buildpacks Work</h3>
+  <p>Buildpacks autodetect and provision services in containers for you. We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet orders file so simple is the use of buildpacks and platform package managers to install dynamic, service specific code, such as rubygems or npm and associated dependencies, that may vary with each push of your service. Note that
+    <b>Starphleet will only deploy one buildpack per Linux container</b>
+    - for services which are written in multiple languages, custom buildpacks may be required.</p>
+  <p>Starphleet currently includes support for Ruby, Python, NodeJS, and NGINX static buildpacks.</p>
+  <h3 id="defaultbuildpacks">Default Buildpacks</h3>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th style="width: 130px;">Buildpack</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <a href="https://github.com/igroff/heroku-buildpack-ruby">Ruby</a>
+        </td>
+        <td>
+          This will run bundle install and make use of your Procfile.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a href="https://github.com/igroff/heroku-buildpack-python">Python</a>
+        </td>
+        <td>TODO: Fill in</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="https://github.com/igroff/heroku-buildpack-nodejs">NodeJS</a>
+        </td>
+        <td>TODO: Fill In</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="https://github.com/wballard/nginx-buildpack">NGINX</a>
+        </td>
+        <td>Detect an index.html file and service static contact.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<section class="bs-docs-section">
+  <h1 id="authentication" class="page-header">Authentication</h1>
+  <p>Starphleet supports four primary mechanisms for authentication.</p>
+  <ul>
+    <li><a href="#publicconfiguration">public</a></li>
+    <li><a href="#htpasswdconfiguration">htpasswd</a></li>
+    <li><a href="#jwtconfiguration">jwt</a></li>
+    <li><a href="#ldapconfiguration">ldap</a></li>
+  </ul>
+  <p>
+    The authentication security mechanism for Starphleet control how each service is protected by authentication.  The default authentication mechanism is <code>htpasswd</code>.  The default security mechanism can be overridden using one of the <a href="#overrides">override mechanisms</a> and updating the configuration variables outlined below.
+  </p>
+  <h3 id="securitysettings">Security Settings</h3>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th style="width: 130px;">Variable</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>USER_IDENTITY_HEADER</code></td>
+        <td>This is the name of the header used by NGINX to store the "user" authenticated to the service.  The user will be set based on the <code>SECURITY_MODE</code> variable and will be dependent on the security mechanism used to authenticate the service.  This header will be passed to the web request sent to the apps running the the containers.  The apps can validate which user is making the request without baking their own authentication mechanism.</td>
+      </tr>
+      <tr>
+        <td><code>USER_IDENTITY_COOKIE</code></td>
+        <td>The name of the cookie assigned the username of an authenticated user.  Works the same as <code>USER_IDENTITY_HEADER</code></td>
+      </tr>
+      <tr>
+        <td><code>SECURITY_MODE</code></td>
+        <td>
+          This setting determines what <a href="#authentication">authentication</a> "mode" a service is deployed in.  This setting is intended to be <a href="#overrides">overridden</a> in the headquarters or in the <a href="#orders">orders file</a>.  This mode can be one of four settings:
+          <ul>
+            <li><a href="#publicconfiguration">public</a></li>
+            <li><a href="#htpasswdconfiguration">htpasswd</a></li>
+            <li><a href="#jwtconfiguration">jwt</a></li>
+            <li><a href="#ldapconfiguration">ldap</a></li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td><code>LDAP_SERVER</code></td>
+        <td>The name assigned here corresponds with the name of the file containing the <a href="#ldapconfiguration">LDAP configuration</a> you want to use to authenticate the service.</td>
+      </tr>
+      <tr>
+        <td><code>JWT_SECRET</code></td>
+        <td>This setting is <b>required</b>.  This value is used as the secret to sign and verify JWT tokens</td>
+      </tr>
+      <tr>
+        <td><code>JWT_AUTH_SITE</code></td>
+        <td>This setting is <b>required</b>.  The path to a login service that signs JWT tokens.</td>
+      </tr>
+      <tr>
+        <td><code>JWT_COOKIE_DOMAIN</code></td>
+        <td>
+          This setting is <b>optional</b>.
+          <ul>
+            <li>if not provided, the JWT cookie will only be available to the full domain of the original target destination (e.g., myApp.mysite.com)</li>
+            <li>if it is provided, then the JWT cookie will be scoped accordingly.</li>
+            <li>Be sure to understand how cookie domains are applied. For example, this feature can allow implementers to grant access to peer sub-domains of the original target destination. (e.g., JWT_COOKIE_DOMAIN=mysite.com will allow both myApp.mysite.com and someOtherHost.mysite.com to access the jwt cookie.  </li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td><code>JWT_ROLES</code></td>
+        <td>
+          This setting is <b>optional</b>.
+          <ul>
+            <li>defaults to 3600 seconds</li>
+            <li>this is the initial expiration set on the jwt cookie</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td><code>HTPASSWD</code></td>
+        <td>The appropriate HTPASSWD string associated with the <code>htpasswd</code> <code>SECURITY_MODE</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p><i>All variables need to be exported to be available to your application. For instance</i></p>
+{% highlight bash %}
+export FOO="BAR" {% endhighlight %}
+  <h3 id="publicconfiguration">Public Configuration</h3>
+  <p> Assigning the <code>SECURITY_MODE</code> setting to <code>public</code> requires no additional configuration.  Starphleet will serve the content behind a public endpoint openly. </p>
+  <h3 id="ldapconfiguration">LDAP Configuration</h3>
+  <p> Assigning the <code>SECURITY_MODE</code> setting to <code>ldap</code> requires additional configuration in the <a href="#headquarters">headquarters</a>.  The following is required: </p>
+  <ul>
+    <li>Create a <code>ldap_servers</code> folder in your <a href="#headquarters">headquarters</a></li>
+    <li>
+      Create a file with your LDAP settings inside the file.  The name of the file will be used by your services to reference this configuration.  The file should look like this:
+{% highlight bash %}
+export LDAP_URL='ldap://guardian-gc.glgresearch.com:3268/dc=glgroup,dc=com?sAMAccountName?sub?(objectCategory=person)(objectClass=User)'
+export LDAP_USER='domain\\sampleServiceAccount'
+export LDAP_PASSWORD='****' {% endhighlight %}
+    </li>
+    <li>In your <a href="#orders">orders file</a>, set <code>SECURITY_MODE</code> to <code>ldap</code>.  Set <code>LDAP_SERVER</code> to the name of the above file you just created</li>
+  </ul>
+  <p> Your orders file will now have <code>ldap</code> enabled and point to the above configuration on which LDAP server to use for authentication.  At this point, your service should be authenticating against LDAP. </p>
+  <h3 id="jwtconfiguration">JWT Configuration</h3>
+  <p> Assigning the <code>SECURITY_MODE</code> setting to <code>jwt</code> requires additional settings in the <a href="#headquarters">headquarters</a>.  You can configure these settings <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.</p>
+  <p> JWT requires an authentication application: </p>
+  <ul>
+    <li>This is the service to which unauthenticated users will be redirected. This service is not provided by Starphleet. Because the logic for authenticating users is domain specific, the implementer must provide this service.</li>
+    <li>This site must be open to non-authenticated users. It is responsible for:</li>
+    <ul>
+      <li>Determining whether the user is valid</li>
+      <li>Constructing the payload for the JWT token. The payload may include any meta data the implementer would like. <b>NOTE:</b> The payload in any JWT token is encoded, but not encrypted and should never contain sensitive information.</li>
+      <ul>
+        <li>The payload property role is reserved by Starphleet</li>
+        <li>Starphleet will check values in the role when determining whether to grant access to the service</li>
+        <li>Starphleet expects the values to be comma-delimited</li>
+      </ul>
+      <li>Signing the JWT token, which includes the payload</li>
+      <li>Redirecting the user to the original target destination with the signed JWT token in a querystring paramter named jwt.</li>
+    </ul>
+  </ul>
+  <h3 id="htpasswdconfiguration">HTPASSWD Configuration</h3>
+  <p> Assigning the <code>SECURITY_MODE</code> setting to <code>htpasswd</code> requires an additional environment settings in the <a href="#headquarters">headquarters</a>.  You can set this <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.  To get the appropriate string you can use the linux <code>htpasswd</code> command like the following:</a></p>
+{% highlight bash %}
+$ htpasswd -n -b changeusername changepasswd
+changeusername:$apr1$O7LcRpBk$Pv17p..kUwbcw5rxM4AEr0 {% endhighlight %}
+  <p> Copy the resulting string from above into a variable named <code>HTPASSWD</code>. </p>
+  <h3 id="accesscontrollists">Access Control Lists</h3>
+  <p>If you enable ldap or htpasswd authentication you can also limit a service to certain users. To enable per-user access to a service add a file to your service endpoint directory with the extension .acl. The file should contain a list of users separated by newlines.</p>
+  <p>Example (<code>example.acl</code>):</p>
+{% highlight bash %}
+jdoe
+jjdoe
+jsmith{% endhighlight %}
+  <p>The above service endpoint would only allow three users access - all others will be prompted to login.</p>
+</section>
+<section class="bs-docs-section">
+  <h1 id="healthchecks" class="page-header">Healthchecks</h1>
+  <p>Orders service repository can supply a <code>$HEALTHCHECK</code> like:</p>
+{% highlight bash %}
+export HEALTHCHECK='/'{% endhighlight %}
+<p>Upon deployment of a service update, Starphleet will issue a GET request to http://{container_ip}:{PORT}/{HEALTHCHECK}, and will expect an HTTP 200 response within 60 seconds. The {PORT} in the preceding URL will have the value specified in your orders.</p>
+<p>If you fail the check, the service doesn't deploy.</p>
+</section>
+<section class="bs-docs-section">
+  <h1 id="cronjobs" class="page-header">Cron Jobs</h1>
+  <p>Starphleet lets you specify <code>#@</code> directives in shell scripts in order to schedule jobs in a container. These with in containers with services, so the most common thing you do is curl yourself:</p>
+{% highlight bash %}
+#!/usr/bin/env bash
+#@ * * * * 1
+
+#This is a simple sh-at scheduled job example, it just hits the local
+#service -- which is on the container itself and so isn't at /echo
+curl http://localhost/on_container
+
+#and you can always hit the ship, in which case you need to use the service
+#url /echo
+curl http://localship/echo/on_ship {% endhighlight %}
+  <p>The #@ directive is just a cron scheduling expression captured inside the script itself.</p>
+</section>
+<section class="bs-docs-section">
+  <h1 id="devmode" class="page-header">Development Mode</h1>
+  <p>When Starphleet is installed on your local machine through vagrant the behavior of starphleet changes in a way that facilitates local development. Starphleet becomes your automated build-and-test environment. Starphleet will manage the following tasks for you:</p>
+  <ul>
+    <li>Checking out all GIT repos and remote files associated with your headquarters</li>
+    <li>Mapping the above mentioned repos to your machine</li>
+    <li>Automated Container Deployment on file changes (saves) (<a href="#unbindingdevdirectory">optional</a>)</li>
+  </ul>
+  <p>Utilizing Starphleet as your build-and-test environment has the benefit of simplifying your workflow. This also allows you to test your code changes against a real Starphleet environment that mimics your production systems.</p>
+  <h3 id="devmodeinstallation">Installation</h3>
+  <p>
+    Installing the <a href="#developmentmode">Devmode</a> version of Starphleet doesn't require additional steps.  Starphleet will automatically detect it has not been loaded on an Amazon instance and enable <a href="#developmentmode">Devmode</a>.  To get Starphleet installed on your machine you can find installation instructions <a href="#installation">here</a>.
+  </p>
+  <h3 id="howdevmodeworks">Configuration</h3>
+  <p>There are several ways you can configure the environment for a local Starphleet deployment:</p>
+  <ul>
+    <li>Export your variables manually</li>
+    <li>Create an environment file located at <code>${HOME}/.starphleet</code> and export the <a href="#requireddevmodevariables"> required variables.</a></li>
+    <li>Utilize web installation scripts (Examples can be found here)</li>
+    <li>Run the appropriate deployment script (ex vmware) and answer the prompts</li>
+  </ul>
+  <h3 id="requireddevmodevariables">Required Installation Variables</h3>
+  <p>
+    At a minimum you will need an un-password protected SSH key associated with your Git account for any private repositories associated with your Headquarters. You will need the following environment variables:
+  </p>
+{% highlight bash %}
+export STARPHLEET_HEADQUARTERS="https://github.com/wballard/starphleet.headquarters.git"
+export STARPHLEET_PRIVATE_KEY="${HOME}/.ssh/id_rsa"
+export STARPHLEET_PUBLIC_KEY="${HOME}/.ssh/id_rsa.pub"{% endhighlight %}
+  <h3 id="differencewithdevmode">Devmode Vs. Production</h3>
+  <p>Starphleet normally handles the deployment of all services after any change to the Git repos and/or orders envrionment.  When running Starphleet locally in development mode the behavior of Starphleet alters a bit.  These changes are:</p>
+  <ul>
+    <li>Git repos associated with your orders are checked out to a different location</li>
+    <li>Git repos are monitored for file changes rather than git commit changes for triggering deployments (optional)</li>
+    <li>Starphleet 'always' tries to start a dead container.</li>
+    <li>Starphleet uses date stamps instead of git hashes for container names</li>
+    <li>Your working git directory is linked directly to containers</li>
+  </ul>
+  <h3 id="unbindingdevdirectory">Unbind Dev Dir From Container</h3>
+  <p>The default behavior of Development mode links your working development directory all the way into the virtual containers. This is ideal if your build system typically uses something like gulp watch. You can run gulp watch and your changes will be realized immediately all the way inside the service container.</p>
+  <p>In some instances this behavior may be unfavorable. A few examples may be:
+  </p>
+  <ul>
+    <li>Your service doesn't use a build system</li>
+    <li>The build-pack for your service runs a 'rebuild' against your development directory and changes many files</li>
+    <li>You experience stability issues with HGFS in vmware</li>
+  </ul>
+  <p>
+    In these instances you may wish to unbind your development directory from the container. By adding a setting to your orders file you can change the behavior of Starphleet to instead detect changes as you save them in your development directory and run a full re-deploy of your containers automatically. To trigger this behavior you can add the following to your 'orders' inside your headquarters.
+  </p>
+{% highlight bash %}
+export DEVMODE_UNBIND_GIT_DIR="true" {% endhighlight %}
+  <h3 id="authindevmode">Authentication</h3>
+  <p>
+    Some services depend on authentication. Starphleet automatically supports LDAP and htpasswd authentication. Services are written in such a way that they depend on HTTP headers that are provided by the authentication method. If you need to simulate authenticated services in development mode you can add the following variable to your orders file:
+  </p>
+{% highlight bash %}
+export DEVMODE_FORCE_AUTH="[username]" {% endhighlight %}
+  <h3 id="disabledevmode">Disable Dev Mode</h3>
+  <p>
+    There may be instances where you want to force Starphleet to behave like a production environment locally on your machine. In those instances you can simply touch a file to disable Development Mode:
+  </p>
+{% highlight bash %}
+$ touch /var/starphleet/live {% endhighlight %}
+  <h3 id="startingdevmodeinstance">Starting Devmode Instance</h3>
+  <p> Starting your vagrant instance after it has been halted requires a few additional steps.  Once your linux machine has booted you need to reboot the Starphleet service.  Run the following commands to start the vagrant instance: </p>
+{% highlight bash %}
+$ vagrant up
+$ vagrant ssh
+$ sudo restart starphleet {% endhighlight %}
+  <h3 id="stoppingdevmodeinstance">Stopping Devmode Instance</h3>
+  <p> After <a href="#vmware-fusion-install">installing</a> your local development environment you may want to stop the local instance of Starphleet.  It is important to use Vagrant to manage this process.  Specifically, you will want to run the following command: </p>
+{% highlight bash %}
+$ vagrant halt {% endhighlight %}
+</section>
