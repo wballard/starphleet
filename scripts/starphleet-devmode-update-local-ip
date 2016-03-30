@@ -12,6 +12,9 @@
 #  | awk '{print $2}' \ <-- get the IP address
 #  | tail -n 1 > ~/starphleet_dev/data/.localhostip <-- save it where the orders can see it
 
+# Don't run if not on a Mac
+[ "$(uname -s)" != "Darwin" ] && exit 0
+
 mkdir -p "${HOME}/starphleet_dev/data"
 
 ifconfig -a \
