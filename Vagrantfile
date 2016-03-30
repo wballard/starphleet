@@ -30,6 +30,13 @@ sed -i.bak 's/answer AUTO_KMODS_ENABLED_ANSWER no/answer AUTO_KMODS_ENABLED_ANSW
 sed -i.bak 's/answer AUTO_KMODS_ENABLED no/answer AUTO_KMODS_ENABLED yes/g' /etc/vmware-tools/locations;
 SCRIPT
 
+system("
+  if [ #{ARGV[0]} = 'up' ] && [ -f ./scripts/starphleet-devmode-update-local-ip ]; then
+    ./scripts/starphleet-devmode-update-local-ip
+  fi
+")
+
+
 Vagrant::Config.run do |config|
   config.vm.provision :shell, :inline => $base_provision_script
 end
