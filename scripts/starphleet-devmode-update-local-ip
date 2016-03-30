@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# Quick Mac Helper Script
+#
+# Store the HOST IP in the data dir
+
+# ifconfig -a \   <-- get all interfaces
+#  | grep -A2 en \  <-- only use ethernet
+#  | grep -v inet6 \ <-- ignore ipv6
+#  | grep inet \  <-- get any real ip's
+#  | grep -v 127.0 \ <-- don't use loopback
+#  | awk '{print $2}' \ <-- get the IP address
+#  | tail -n 1 > ~/starphleet_dev/data/.localhostip <-- save it where the orders can see it
+
+# Don't run if not on a Mac
+[ "$(uname -s)" != "Darwin" ] && exit 0
+
+mkdir -p "${HOME}/starphleet_dev/data"
+
+ifconfig -a \
+  | grep -A2 en \
+  | grep -v inet6 \
+  | grep inet \
+  | grep -v 127.0 \
+  | awk '{print $2}' \
+  | tail -n 1 > "${HOME}/starphleet_dev/data/.localhostip"
