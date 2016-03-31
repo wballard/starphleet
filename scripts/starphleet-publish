@@ -85,9 +85,10 @@ if [ "${SECURITY_MODE}" = 'jwt' ] ; then
   echo "  set \$jwt_secret ${JWT_SECRET};" >> "${MOUNT_CONF}"
   # we have believe that tokens should not last for ever, so we
   # have a max age this is 7 days worth of seconds
-  echo "  set \$jwt_secret ${JWT_TOKEN_MAX_AGE:-604800};" >> "${MOUNT_CONF}"
+  echo "  set \$jwt_token_max_age ${JWT_TOKEN_MAX_AGE:-604800};" >> "${MOUNT_CONF}"
   echo "  set \$jwt_auth_site ${JWT_AUTH_SITE};" >> "${MOUNT_CONF}"
   echo "  set \$jwt_cookie_domain ${JWT_COOKIE_DOMAIN};" >> "${MOUNT_CONF}"
+  echo "  set \$public_url ${public_url};" >> "${MOUNT_CONF}"
   # default expiration of 3600 seconds
   echo "  set \$jwt_expiration ${JWT_EXPIRATION:-3600};" >> "${MOUNT_CONF}"
   echo "  access_by_lua_file /var/starphleet/nginx/lua/guard.lua;" >> "${MOUNT_CONF}"
