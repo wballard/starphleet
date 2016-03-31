@@ -1,20 +1,20 @@
-require "os"
 require "string"
 require "table"
 local jwt = require "resty.jwt"
-local jwt_secret = os.getenv("JWT_SECRET")
-local jwt_auth_site = os.getenv("JWT_AUTH_SITE")
+local jwt_secret = ngx.var.jwt_secret
+local jwt_auth_site = ngx.var.jwt_auth_site
+local jwt_token_max_age = ngx.var.jwt_token_max_age
 local jwt_roles = {}
 local role_authorized = false
 local leeway = 900
 local session = false
 
-if not jwt_auth_site then
+if not jwt_auth_site and jwt_auth_site != "" then
   ngx.log(ngx.ERR, "Error processing jwt authentication. Missing JWT_AUTH_SITE environment variable")
   return ngx.exit(500)
 end
 
-if not jwt_secret then
+if not jwt_secret and jwt_secret != "" then
   ngx.log(ngx.ERR, "Error processing jwt authentication. Missing JWT_SECRET environment variable")
   return ngx.exit(500)
 end
@@ -42,7 +42,7 @@ end
 if jwt_obj["verified"] and type(jwt_obj.payload) == "table" then
   -- check that there are exp and iat properties
   -- and that iat is not more than 24 hours old
-  if jwt_obj.payload.exp and jwt_obj.payload.iat and ngx.time() - jwt_obj.payload.iat <= 48*60*60 then
+  if jwt_obj.payload.exp and jwt_obj.payload.iat and ngx.time() - jwt_obj.payload.iat <= jwt_token_max_age then
     -- check the roles the user has in the token against the roles
     -- specified in the .jwt file for the orders. Empty .jwt files
     -- get rewritten to "*" in the starphleet_publish script

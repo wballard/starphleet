@@ -3,11 +3,10 @@ local ctx = ngx.ctx
 local jwt_obj = ctx.jwt_obj
 
 if jwt_obj and jwt_obj["verified"] then
-  require "os"
   local jwt = require "resty.jwt"
-  local jwt_secret = os.getenv("JWT_SECRET")
-  local jwt_cookie_domain = os.getenv("JWT_COOKIE_DOMAIN")
-  local token_duration = os.getenv("JWT_EXPIRATION") or 3600
+  local jwt_secret = ngx.var.jwt_secret
+  local jwt_cookie_domain = ngx.var.jwt_cookie_domain
+  local token_duration = ngx.var.jwt_expiration
   local payload = jwt_obj["payload"]
   local leeway = ctx.leeway
   -- if the token is verified but has expired, it must be within the leeway, so reissue a new token
