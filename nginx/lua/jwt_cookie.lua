@@ -1,6 +1,7 @@
 -- grab the already parsed and verified jwt_obj from the ngx per request cache
 local ctx = ngx.ctx
 local jwt_obj = ctx.jwt_obj
+local service_public_url = ngx.var.public_url
 
 if jwt_obj and jwt_obj["verified"] then
   local jwt = require "resty.jwt"
@@ -19,6 +20,6 @@ if jwt_obj and jwt_obj["verified"] then
     payload["exp"] = exp
     local jwt_cookie = jwt:sign(jwt_secret, { payload=payload, header=jwt_obj.header } )
     local cookie_domain = not jwt_cookie_domain and '' or '; Domain=' .. jwt_cookie_domain
-    ngx.header['Set-Cookie'] = "jwt=" .. jwt_cookie .. cookie_domain .. "; Path=/; Expires=" .. ngx.cookie_time(ngx.time() + token_duration + leeway)
+    ngx.header['Set-Cookie'] = "jwt=" .. jwt_cookie .. cookie_domain .. "; Path=" .. service_public_url .. "; Expires=" .. ngx.cookie_time(ngx.time() + token_duration + leeway)
   end
 end
