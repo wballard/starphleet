@@ -54,11 +54,11 @@ EC2_DRIVES["/dev/xvde"]="/var/lib/lxc/data"
 # htpasswd|ldap|public|jwt
 export SECURITY_MODE="htpasswd"
 # LDAP Needs
-export LDAP_SERVER=""
+unset LDAP_SERVER
 # JWT Needs
-export JWT_SECRET=""
-export JWT_AUTH_SITE=""
-export JWT_COOKIE_DOMAIN=""
-export JWT_ROLES=""
+unset JWT_SECRET
+unset JWT_AUTH_SITE
+unset JWT_COOKIE_DOMAIN
+unset JWT_ROLES
 # HTPASSWD Needs
-export HTPASSWD=""
+unset HTPASSWD

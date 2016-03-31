@@ -23,4 +23,4 @@ ifconfig -a \
   | grep inet \
   | grep -v 127.0 \
   | awk '{print $2}' \
-  | tail -n 1 > "${HOME}/starphleet_dev/data/.localhostip"
+  | head -n 1 > "${HOME}/starphleet_dev/data/.localhostip"
