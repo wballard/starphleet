@@ -135,7 +135,7 @@ if [ "${SECURITY_MODE}" = 'ldap' ]; then
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
 fi
-if [ "${SECURITY_MODE}" != 'public' ]; then
+if [ "${SECURITY_MODE}" != 'public' ] && ! dev_mode ; then
   # don't want to ldap authenticate from other containers on the ship
   # see http://forum.nginx.org/read.php?2,242713,242742#msg-242742
   # note: this needs an auth_basic that alway fails and has the same name as auth_ldap
@@ -143,9 +143,6 @@ if [ "${SECURITY_MODE}" != 'public' ]; then
   echo "  allow 192.168.0.0/16;" >> "${MOUNT_CONF}"
   echo "  allow 172.16.0.0/12;" >> "${MOUNT_CONF}"
   echo "  allow 10.0.0.0/8;" >> "${MOUNT_CONF}"
-  # Allow no auth
-  echo "  allow 172.32.0.0/16;" >> "${MOUNT_CONF}"
-  echo "  allow 172.33.0.0/16;" >> "${MOUNT_CONF}"
 fi
 
 #closing off the location
