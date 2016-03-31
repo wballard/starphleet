@@ -3,19 +3,19 @@ require "table"
 local jwt = require "resty.jwt"
 local jwt_secret = ngx.var.jwt_secret
 local jwt_auth_site = ngx.var.jwt_auth_site
-local jwt_token_max_age = ngx.var.jwt_token_max_age
+local jwt_token_max_age = tonumber(ngx.var.jwt_token_max_age)
 local jwt_roles = {}
 local role_authorized = false
 local leeway = 900
 local session = false
 
-if not jwt_auth_site and jwt_auth_site != "" then
-  ngx.log(ngx.ERR, "Error processing jwt authentication. Missing JWT_AUTH_SITE environment variable")
+if not jwt_auth_site or jwt_auth_site == "" then
+  ngx.log(ngx.ERR, "Error processing jwt authentication. Missing JWT_AUTH_SITE configuration value")
   return ngx.exit(500)
 end
 
-if not jwt_secret and jwt_secret != "" then
-  ngx.log(ngx.ERR, "Error processing jwt authentication. Missing JWT_SECRET environment variable")
+if not jwt_secret or jwt_secret == "" then
+  ngx.log(ngx.ERR, "Error processing jwt authentication. Missing JWT_SECRET configuration value")
   return ngx.exit(500)
 end
 
