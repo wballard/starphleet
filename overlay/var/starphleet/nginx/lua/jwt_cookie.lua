@@ -7,6 +7,7 @@ if jwt_obj and jwt_obj["verified"] then
   local jwt = require "resty.jwt"
   local jwt_secret = ngx.var.jwt_secret
   local jwt_cookie_domain = ngx.var.jwt_cookie_domain
+  local jwt_global_cookie = ngx.var.jwt_global_cookie
   local token_duration = ngx.var.jwt_expiration
   local payload = jwt_obj["payload"]
   local leeway = ctx.leeway
@@ -20,6 +21,10 @@ if jwt_obj and jwt_obj["verified"] then
     payload["exp"] = exp
     local jwt_cookie = jwt:sign(jwt_secret, { payload=payload, header=jwt_obj.header } )
     local cookie_domain = not jwt_cookie_domain and '' or '; Domain=' .. jwt_cookie_domain
-    ngx.header['Set-Cookie'] = "jwt=" .. jwt_cookie .. cookie_domain .. "; Path=" .. service_public_url .. "; Expires=" .. ngx.cookie_time(ngx.time() + token_duration + leeway)
+    if jwt_global_cookie == "true" then
+      ngx.header['Set-Cookie'] = "jwt=" .. jwt_cookie .. cookie_domain .. "; Path=/; Expires=" .. ngx.cookie_time(ngx.time() + token_duration + leeway)
+    else
+      ngx.header['Set-Cookie'] = "jwt=" .. jwt_cookie .. cookie_domain .. "; Path=" .. service_public_url .. "; Expires=" .. ngx.cookie_time(ngx.time() + token_duration + leeway)
+    end
   end
 end

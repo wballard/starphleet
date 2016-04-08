@@ -86,6 +86,9 @@ if [ "${SECURITY_MODE}" = 'jwt' ] ; then
   # we have believe that tokens should not last for ever, so we
   # have a max age this is 7 days worth of seconds
   echo "  set \$jwt_auth_site ${JWT_AUTH_SITE};" >> "${MOUNT_CONF}"
+  if [ -n "${JWT_GLOBAL_COOKIE}" -a "${JWT_GLOBAL_COOKIE}" != "false" ]; then
+    echo "  set \$jwt_global_cookie true;" >> "${MOUNT_CONF}"
+  fi
   echo "  set \$jwt_cookie_domain ${JWT_COOKIE_DOMAIN};" >> "${MOUNT_CONF}"
   echo "  set \$public_url ${public_url};" >> "${MOUNT_CONF}"
   # default expiration of 3600 seconds
