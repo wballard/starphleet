@@ -89,7 +89,7 @@ if [ "${SECURITY_MODE}" = 'jwt' ] ; then
   echo "  set \$jwt_cookie_domain ${JWT_COOKIE_DOMAIN};" >> "${MOUNT_CONF}"
   echo "  set \$public_url ${public_url};" >> "${MOUNT_CONF}"
   # default expiration of 3600 seconds
-  echo "  set \$jwt_expiration ${JWT_EXPIRATION_IN_SECONDS:-3600};" >> "${MOUNT_CONF}"
+  echo "  set \$jwt_expiration ${JWT_EXPIRATION_IN_SECONDS};" >> "${MOUNT_CONF}"
   echo "  access_by_lua_file /var/starphleet/nginx/lua/guard.lua;" >> "${MOUNT_CONF}"
   echo "  header_filter_by_lua_file /var/starphleet/nginx/lua/jwt_cookie.lua;" >> "${MOUNT_CONF}"
 fi

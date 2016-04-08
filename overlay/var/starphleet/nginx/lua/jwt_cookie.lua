@@ -13,7 +13,7 @@ if jwt_obj and jwt_obj["verified"] then
   -- if the token is verified but has expired, it must be within the leeway, so reissue a new token
   -- ctx.session is true iff we got the token from a cookie (rather than the querystring)
   if not ctx.session or (payload["exp"] and type(payload["exp"]) == "number" and payload["exp"] < ngx.now() ) then
-    -- if your jwt is from querystring, we give you the full JWT_EXPIRATION
+    -- if your jwt is from querystring, we give you the full JWT_EXPIRATION_IN_SECONDS
     -- if it's from a cookie and has expired within leeway, we give you another leeway
     local duration = ctx.session and leeway or token_duration
     local exp = ngx.time() + duration
