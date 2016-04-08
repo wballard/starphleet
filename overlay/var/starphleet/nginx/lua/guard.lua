@@ -3,7 +3,7 @@ require "table"
 local jwt = require "resty.jwt"
 local jwt_secret = ngx.var.jwt_secret
 local jwt_auth_site = ngx.var.jwt_auth_site
-local jwt_token_max_age = tonumber(ngx.var.jwt_token_max_age)
+local jwt_expiration = tonumber(ngx.var.jwt_expiration)
 local jwt_roles = {}
 local role_authorized = false
 local leeway = 900
@@ -42,7 +42,7 @@ end
 if jwt_obj["verified"] and type(jwt_obj.payload) == "table" then
   -- check that there are exp and iat properties
   -- and that iat is not more than 24 hours old
-  if jwt_obj.payload.exp and jwt_obj.payload.iat and ngx.time() - jwt_obj.payload.iat <= jwt_token_max_age then
+  if jwt_obj.payload.exp and jwt_obj.payload.iat and ngx.time() - jwt_obj.payload.iat <= jwt_expiration then
     -- check the roles the user has in the token against the roles
     -- specified in the .jwt file for the orders. Empty .jwt files
     -- get rewritten to "*" in the starphleet_publish script
