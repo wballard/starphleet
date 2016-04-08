@@ -85,7 +85,6 @@ if [ "${SECURITY_MODE}" = 'jwt' ] ; then
   echo "  set \$jwt_secret ${JWT_SECRET};" >> "${MOUNT_CONF}"
   # we have believe that tokens should not last for ever, so we
   # have a max age this is 7 days worth of seconds
-  echo "  set \$jwt_token_max_age ${JWT_TOKEN_MAX_AGE_IN_SECONDS:-604800};" >> "${MOUNT_CONF}"
   echo "  set \$jwt_auth_site ${JWT_AUTH_SITE};" >> "${MOUNT_CONF}"
   echo "  set \$jwt_cookie_domain ${JWT_COOKIE_DOMAIN};" >> "${MOUNT_CONF}"
   echo "  set \$public_url ${public_url};" >> "${MOUNT_CONF}"
