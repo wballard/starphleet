@@ -293,7 +293,7 @@ function ec2_mounts() {
   do
     if [ -b "${drive}" ]; then
       # If the drive doesn't have ext4 we presume it isn't setup yet
-      if [[ ! $(file -s "${drive}" | grep ext4) ]]; then
+      if ! file -s "${drive}" | grep ext ; then
         info Setting up ["${drive}"] for [${EC2_DRIVES[$drive]}]
         # Format the drive
         mkfs.ext4 "${drive}"
