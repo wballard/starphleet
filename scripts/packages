@@ -23,3 +23,6 @@ ntp
 postfix
 rsync
 awscli
+iotop
+iftop
+htop
