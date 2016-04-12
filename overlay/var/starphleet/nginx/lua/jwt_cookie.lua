@@ -33,6 +33,8 @@ if jwt_obj and jwt_obj["verified"] then
     -- and we create the cookie, here the interesting part is the expiration which is the JWT_EXPIRATION_IN_SECONDS from THE ORDERS
     -- plus the leeway value from the context which gives us a cookie that can expire AFTER the expiration of the JWT token it contains
     -- thus we can continue to make decisions based on the JWT token last issued instead of having no cookie at all when the token expires.
+    -- This behavior is acceptable because JWT token we use to get here is VALID it's only the exp value within that has been exceeded, and
+    -- given our leeway behavior we can go ahead and re-issue a token with a new expiration date (apply the leeway).
     ngx.header['Set-Cookie'] = "jwt=" .. jwt_cookie .. cookie_domain .. "; Path=" .. service_public_url .. "; Expires=" .. ngx.cookie_time(ngx.time() + token_duration + leeway)
   end
 end
