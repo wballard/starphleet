@@ -36,6 +36,8 @@ for drive in "${!EC2_DRIVES[@]}"
 do
   if [ -b "${drive}" ]; then
     info Setting up ["${drive}"] for [${EC2_DRIVES[$drive]}]
+    # Unmount if mounted
+    umount "${drive}" || true
     # Format the drive
     mkfs.ext4 "${drive}"
     # Mount it where it goes
