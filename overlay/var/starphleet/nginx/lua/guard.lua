@@ -9,11 +9,6 @@ local role_authorized = false
 local leeway = 900
 local session = false
 
-if not jwt_auth_site or jwt_auth_site == "" then
-  ngx.log(ngx.ERR, "Error processing jwt authentication. Missing JWT_AUTH_SITE configuration value")
-  return ngx.exit(500)
-end
-
 if not jwt_secret or jwt_secret == "" then
   ngx.log(ngx.ERR, "Error processing jwt authentication. Missing JWT_SECRET configuration value")
   return ngx.exit(500)
@@ -94,7 +89,11 @@ if jwt_obj["verified"] and role_authorized then
   if session then ctx.session = 'true' end
   ngx.ctx = ctx
 else
-  -- we got here because the token was deemed invalid, bounc 'em to the auth site
-  local full_request_uri = ngx.var.scheme .. '://' .. ngx.var.host .. ngx.var.request_uri
-  return ngx.redirect(jwt_auth_site .. "?target=" ..ngx.escape_uri(full_request_uri) )
+  if jwt_auth_site == "RETURN_401" then
+    ngx.exit(401)
+  else
+    -- we got here because the token was deemed invalid, bounc 'em to the auth site
+    local full_request_uri = ngx.var.scheme .. '://' .. ngx.var.host .. ngx.var.request_uri
+    return ngx.redirect(jwt_auth_site .. "?target=" ..ngx.escape_uri(full_request_uri) )
+  end
 end

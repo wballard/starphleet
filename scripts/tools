@@ -147,7 +147,6 @@ function validate_security() {
   ################
   if [ "${SECURITY_MODE}" = "jwt" ]; then
     if [ -z "${JWT_SECRET}" ] || \
-       [ -z "${JWT_AUTH_SITE}" ] || \
        [ -z "${JWT_COOKIE_DOMAIN}" ] || \
        [ -z "${JWT_EXPIRATION_IN_SECONDS}" ] || \
        [ -z "${JWT_ROLES}" ]; then
