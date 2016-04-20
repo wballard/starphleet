@@ -118,7 +118,7 @@ do
       #
       # The first container build
       #   - Grabs the git repo to a tmp dir (/home/admiral/tmp/<order>)
-      #   - Rsyncs the repo to /var/git (which maps to /hosthome)
+      #   - Rsyncs the repo to /hosthome/starphleet_dev (which maps to /hosthome)
       #   - Punts
       #
       # After the above process completes we takeover in here and deploy new

@@ -60,7 +60,7 @@ if dev_mode; then
   trace Local Dev mode
   if [ "${git_url}" != "-" ]; then
     # Only trample on the current git dir if it doesn't already exist
-    if [ ! -d "/var/git/${order}" ]; then
+    if [ ! -d "/hosthome/starphleet_dev/${order}" ]; then
       # Work around HGFS bug in vmware which pukes on large
       # git checkouts to a sync'd folder between vmware -> host
       #
@@ -80,20 +80,20 @@ if dev_mode; then
       [ -f /home/admiral/tmp/${order} ] && rm -rf /home/admiral/tmp/${order}
       sudo starphleet-git-synch "${git_url}" "/home/admiral/tmp/${order}"
       # Now move the files (once) to the starphleet_dev dir - which, in
-      # the container context where this is running is mapped to /var/git
-      sudo rsync -rlptD "/home/admiral/tmp/${order}/" "/var/git/${order}/" || true
-      sudo chmod -R +w "/var/git/${order}" || true
+      # the container context where this is running is mapped to /hosthome/starphleet_dev
+      sudo rsync -rlptD "/home/admiral/tmp/${order}/" "/hosthome/starphleet_dev/${order}/" || true
+      sudo chmod -R +w "/hosthome/starphleet_dev/${order}" || true
       # Once we remove the temporary directory.. starphleet will try to rebuild
-      # this container because it will detect there was a change in /var/git/<order>
+      # this container because it will detect there was a change in /hosthome/starphleet_dev/<order>
       sudo rm -rf "/home/admiral/tmp/${order}"
     fi
     # Some developers may wish to unbind the GIT directory to the actual app
     # deployment directory so that packages do not mangle their working git
     # directory.  Supporting both behaviors.
     if [ ! -z "${DEVMODE_UNBIND_GIT_DIR}" ]; then
-      sudo rsync -rlKt "/var/git/${order}/" \${APP_IN}/ || true
+      sudo rsync -rlKt "/hosthome/starphleet_dev/${order}/" \${APP_IN}/ || true
     else
-      ln -s /var/git/${order} \${APP_IN} || true
+      ln -s /hosthome/starphleet_dev/${order} \${APP_IN} || true
     fi
     sudo chown -R ubuntu:ubuntu \${APP_IN}
   fi

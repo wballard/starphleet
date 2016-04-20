@@ -283,8 +283,6 @@ function dev_mode() {
     false
   elif [ -d /hosthome ]; then
     true
-  elif [ -d /var/git ]; then
-    true
   else
     false
   fi
