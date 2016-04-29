@@ -7,7 +7,8 @@ VAGRANT_MEMSIZE = ENV['STARPHLEET_VAGRANT_MEMSIZE'] || '8192'
 SHIP_NAME = 'ship'
 
 $base_provision_script = <<SCRIPT
-sudo bash -c "$(curl -s https://raw.githubusercontent.com/wballard/starphleet/master/webinstall)"
+# sudo bash -c "$(curl -s https://raw.githubusercontent.com/wballard/starphleet/master/webinstall)"
+# sudo ./starphleet/vmware_hgfs_fix.sh
 # sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
 # sudo /starphleet/scripts/starphleet-install;
 sudo apt-get install -y nfs-kernel-server
@@ -24,16 +25,6 @@ system("
 
 Vagrant::Config.run do |config|
   config.vm.provision :shell, :inline => $base_provision_script
-  system('
-    SCP="scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
-    SSH="ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
-    ${SSH} "vagrant@ship.local" "sudo mkdir -p /var/starphleet/private_keys"
-    ${SSH} "vagrant@ship.local" "sudo chmod 777 /var/starphleet/private_keys"
-    ${SCP} "${STARPHLEET_PRIVATE_KEY}" "vagrant@ship.local:/var/starphleet/private_keys"
-    ${SSH} "vagrant@ship.local" "sudo chmod 600 /var/starphleet/private_keys"
-    ${SSH} "vagrant@ship.local" "sudo chmod 600 /var/starphleet/private_keys/*"
-    ${SSH} "vagrant@ship.local" "sudo chown root:root /var/starphleet/private_keys/*"
-  ')
 end
 
 
@@ -52,10 +43,20 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     # if Dir.exists? 'private_keys' and Dir.exists? 'public_keys' and File.exists? 'headquarters'
     #   next
     # end
+  end
 
-    if not (ENV['STARPHLEET_HEADQUARTERS'] or ENV['STARPHLEET_PUBLIC_KEY'] or ENV['STARPHLEET_PRIVATE_KEY'])
-      raise 'Please export STARPHLEET_HEADQUARTERS, STARPHLEET_PUBLIC_KEY, STARPHLEET_PRIVATE_KEY before continuing'
-    end
+  config.trigger.after :vmware_fusion, :stdout => true, :force => true do
+    system('
+      echo here
+      # SCP="scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
+      # SSH="ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
+      # ${SSH} "vagrant@ship.local" "sudo mkdir -p /var/starphleet/private_keys"
+      # ${SSH} "vagrant@ship.local" "sudo chmod 777 /var/starphleet/private_keys"
+      # ${SCP} "${STARPHLEET_PRIVATE_KEY}" "vagrant@ship.local:/var/starphleet/private_keys"
+      # ${SSH} "vagrant@ship.local" "sudo chmod 600 /var/starphleet/private_keys"
+      # ${SSH} "vagrant@ship.local" "sudo chmod 600 /var/starphleet/private_keys/*"
+      # ${SSH} "vagrant@ship.local" "sudo chown root:root /var/starphleet/private_keys/*"
+    ')
   end
 
   config.hostmanager.enabled = true
