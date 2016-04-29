@@ -278,6 +278,16 @@ function container_environment() {
   export PATH=${PATH}:/usr/local/bin
 }
 
+function unique_mode() {
+  if [ -f /var/starphleet/live ]; then
+    false
+  elif [ -d /hosthome ]; then
+    true
+  else
+    false
+  fi
+}
+
 function dev_mode() {
   if [ -f /var/starphleet/live ]; then
     false
