@@ -67,7 +67,7 @@ if [ "${git_url}" != "-" ]; then
     else
       ln -s "${HEADQUARTERS_LOCAL}/${order}/git" \${APP_IN} || true
     fi
-    sudo chown -R ubuntu:ubuntu \${APP_IN}
+    sudo chown -R ubuntu:ubuntu \${APP_IN} || true
   else
     starphleet-git-synch "${git_url}" \${APP_IN}
   fi
@@ -96,9 +96,7 @@ cat << EOF >> ${CONTAINER_BUILD_SCRIPT}
 trace Running buildpack
 if [ -n "\${BUILDPACK_CACHE_DIR}" ]
 then
-  if dev_mode; then
-    trace Buildpack caching is not needed in dev mode
-  else
+  if ! dev_mode ; then
     trace Buildpack caching is enabled
     sudo mkdir -p "\${BUILDPACK_CACHE_DIR}"
     sudo chown -R ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} "\${BUILDPACK_CACHE_DIR}"

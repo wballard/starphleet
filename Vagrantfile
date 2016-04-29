@@ -7,26 +7,29 @@ VAGRANT_MEMSIZE = ENV['STARPHLEET_VAGRANT_MEMSIZE'] || '8192'
 SHIP_NAME = 'ship'
 
 $base_provision_script = <<SCRIPT
+cd /
 # sudo bash -c "$(curl -s https://raw.githubusercontent.com/wballard/starphleet/master/webinstall)"
 # sudo ./starphleet/vmware_hgfs_fix.sh
-# sudo cp /starphleet/scripts/starphleet-launcher /usr/bin;
-# sudo /starphleet/scripts/starphleet-install;
 sudo apt-get install -y nfs-kernel-server
+# Install private keys
+sudo mkdir -p /var/starphleet/private_keys
+sudo mv /tmp/id_rsa /var/starphleet/private_keys
+sudo chmod 600 /var/starphleet/private_keys/*
+sudo chown root:root /var/starphleet/private_keys/*
+# Create mounts we will expose
+sudo mkdir -p /var/starphleet/headquarters
+sudo mkdir -p /var/lib/lxc/data
 echo "/var/starphleet/headquarters *(rw,sync,all_squash,no_subtree_check,anonuid=0,anongid=0)" > /tmp/exports
+echo "/var/lib/lxc/data *(rw,sync,all_squash,no_subtree_check,anonuid=0,anongid=0)" >> /tmp/exports
 sudo mv /tmp/exports /etc
+sudo /etc/init.d/nfs-kernel-server restart
 $([ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true;
 SCRIPT
 
-system("
-  if [ #{ARGV[0]} = 'up' ] && [ -f ./scripts/starphleet-devmode-update-local-ip ]; then
-    ./scripts/starphleet-devmode-update-local-ip
-  fi
-")
-
 Vagrant::Config.run do |config|
+  config.vm.provision "file", source: "#{ENV['STARPHLEET_PRIVATE_KEY']}", destination: "/tmp/id_rsa"
   config.vm.provision :shell, :inline => $base_provision_script
 end
-
 
 Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
 
@@ -43,19 +46,19 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     # if Dir.exists? 'private_keys' and Dir.exists? 'public_keys' and File.exists? 'headquarters'
     #   next
     # end
+    if not File.exists? './provisioned' and not (ENV['STARPHLEET_HEADQUARTERS'] or ENV['STARPHLEET_PUBLIC_KEY'] or ENV['STARPHLEET_PRIVATE_KEY'])
+      raise 'Please export STARPHLEET_HEADQUARTERS, STARPHLEET_PUBLIC_KEY, STARPHLEET_PRIVATE_KEY before continuing'
+    end
   end
 
-  config.trigger.after :vmware_fusion, :stdout => true, :force => true do
+  config.trigger.after :up, :stdout => true, :force => true do
     system('
-      echo here
-      # SCP="scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
-      # SSH="ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
-      # ${SSH} "vagrant@ship.local" "sudo mkdir -p /var/starphleet/private_keys"
-      # ${SSH} "vagrant@ship.local" "sudo chmod 777 /var/starphleet/private_keys"
-      # ${SCP} "${STARPHLEET_PRIVATE_KEY}" "vagrant@ship.local:/var/starphleet/private_keys"
-      # ${SSH} "vagrant@ship.local" "sudo chmod 600 /var/starphleet/private_keys"
-      # ${SSH} "vagrant@ship.local" "sudo chmod 600 /var/starphleet/private_keys/*"
-      # ${SSH} "vagrant@ship.local" "sudo chown root:root /var/starphleet/private_keys/*"
+    mkdir -p "${HOME}/starphleet_dev"
+    mkdir -p "${HOME}/starphleet_data"
+    sudo mount -o resvport ship.glgresearch.com:/var/starphleet/headquarters "${HOME}/starphleet_dev"
+    sudo mount -o resvport ship.glgresearch.com:/var/lib/lxc/data "${HOME}/starphleet_data"
+    [ -f ./scripts/starphleet-devmode-update-local-ip ] && ./scripts/starphleet-devmode-update-local-ip
+    touch .provisioned
     ')
   end
 

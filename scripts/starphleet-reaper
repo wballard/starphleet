@@ -18,19 +18,6 @@ do
   # Determine where nginx is pointing
   NGINX_CONTAINER=$(curl --connect-timeout 1 -s -XHEAD -i "http://localhost/${order}/" | grep "X-Starphleet-Container" | cut -f 2 -d " " | tr -dc '[[:print:]]')
 
-  # XXX: After this feature has been live a bit we can purge this...
-  #      For now, I'd like to quickly be able to resort to this Even
-  #      in production for quick debugging
-  if dev_mode ; then
-    log "NM: |${name}|"
-    log "OR: |${order}|"
-    log "SN: |${current_service_name}|"
-    log "CS: |${CURRENT_STATUS}|"
-    log "SF: |${STATUS_FILE}|"
-    log "CC: |${CURRENT_CONTAINER}|"
-    log "NC: |${NGINX_CONTAINER}|"
-  fi
-
   # *****************************
   # Guards
   # *****************************

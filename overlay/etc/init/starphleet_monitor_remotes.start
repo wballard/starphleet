@@ -9,8 +9,8 @@ do
     export LOCAL_DIRECTORY=$(echo "${remote}" | sed -e 's[/remote$[[' | sed -e "s[^${HEADQUARTERS_LOCAL}/\?[${STARPHLEET_SHARED_DATA}/[")
     autodeploy () {
       source `which tools`
-      # Only sync one time in unique_mode
-      unique_mode && [ -d "${LOCAL_DIRECTORY}"] || starphleet-git-synch "$1" "${LOCAL_DIRECTORY}"
+      # Only sync one time in dev_mode
+      dev_mode && [ -d "${LOCAL_DIRECTORY}"] || starphleet-git-synch "$1" "${LOCAL_DIRECTORY}"
     }
     export -f autodeploy
     export AUTODEPLOY

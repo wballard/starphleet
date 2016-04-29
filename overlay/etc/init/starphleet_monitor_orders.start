@@ -90,7 +90,7 @@ do
     # The directory we store our local git copy
     LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
     # Sync Only Once In Devmode and All The Time If Devmode Disabled
-    (unique_mode && [ -d "${LOCAL}" ]) || (starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}" && DEPLOY_REASON="Updated service")
+    (dev_mode && [ -d "${LOCAL}" ]) || (starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}" && DEPLOY_REASON="Updated service")
     # The name of the service container
     SERVICE_NAME="${ORDER}"
     # The 'LAST_RUN_FILE' is created each run for a container.  We use this files
@@ -101,7 +101,7 @@ do
     # Modified Dev Mode
     ############################################
     # Let starphleet be the build system
-    if unique_mode ; then
+    if dev_mode ; then
       if [ -n "${DEVMODE_UNBIND_GIT_DIR}" ] && [ -f "${LAST_RUN_FILE}" ]; then
         warn Unbind Mode Detected
 
@@ -164,7 +164,7 @@ do
   # If we are in dev mode then there is never a good enough reason in
   # ${DEPLOY_REASON} that we'd want a container with a sha so we
   # force the rest of the code to be skipped
-  if unique_mode ; then
+  if dev_mode ; then
     if [ -n "${UNPUBLISHED}" ] && [ -n "${DEPLOY_REASON}" ]; then
       echo ${ORDERS_SHA} > "${CURRENT_ORDER}/.orders_sha"
       SERVICE_NAME=$(echo "${ORDER}")

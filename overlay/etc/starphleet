@@ -48,6 +48,13 @@ EC2_DRIVES["/dev/xvdd"]="/var/log/biglogs"
 EC2_DRIVES["/dev/xvde"]="/var/lib/lxc/data"
 
 ##########################################################
+# DEVMODE
+##########################################################
+unset DEVMODE_UNBIND_GIT_DIR
+unset DEVMODE_FORCE_AUTH
+unset DEVMODE_ENABLED
+
+##########################################################
 # SECURITY
 ##########################################################
 # Security mode can be one of the following:
