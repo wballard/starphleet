@@ -54,12 +54,19 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     end
   end
 
+  config.trigger.before :halt, :stdout => true, :force => true do
+    system('
+    sudo umount "${HOME}/starphleet_dev"
+    sudo umount "${HOME}/starphleet_data"
+    ')
+  end
+
   config.trigger.after :up, :stdout => true, :force => true do
     system('
     mkdir -p "${HOME}/starphleet_dev"
     mkdir -p "${HOME}/starphleet_data"
-    sudo mount -o resvport ship.glgresearch.com:/var/starphleet/headquarters "${HOME}/starphleet_dev"
-    sudo mount -o resvport ship.glgresearch.com:/var/lib/lxc/data "${HOME}/starphleet_data"
+    sudo mount -o resvport,intr ship.glgresearch.com:/var/starphleet/headquarters "${HOME}/starphleet_dev"
+    sudo mount -o resvport,intr ship.glgresearch.com:/var/lib/lxc/data "${HOME}/starphleet_data"
     [ -f ./scripts/starphleet-devmode-update-local-ip ] && ./scripts/starphleet-devmode-update-local-ip
     touch .provisioned
     ')
