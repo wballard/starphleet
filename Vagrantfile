@@ -77,7 +77,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   config.hostmanager.aliases = [ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME, 'ship.local', 'ship.glgresearch.com']
 
   config.vm.hostname = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
-  # config.vm.synced_folder ".", "/starphleet"
+  config.vm.synced_folder ".", "/starphleet"
   # config.vm.synced_folder "~", "/hosthome"
 
   config.vm.provider :vmware_fusion do |f, override|
