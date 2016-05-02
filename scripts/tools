@@ -279,7 +279,7 @@ function container_environment() {
 }
 
 function dev_mode() {
-  if [ -n "${DEVMODE_ENABLED}" ]
+  if [ -n "${DEVMODE_ENABLED}" ]; then
     true
   else
     false
