@@ -51,7 +51,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     if File.file?('./.provisioned')
       next
     end
-    if not (ENV['STARPHLEET_HEADQUARTERS'] or ENV['STARPHLEET_PUBLIC_KEY'] or ENV['STARPHLEET_PRIVATE_KEY'])
+    if not (ENV['STARPHLEET_HEADQUARTERS'] or ENV['STARPHLEET_PRIVATE_KEY'])
       raise 'Please export STARPHLEET_HEADQUARTERS, STARPHLEET_PUBLIC_KEY, STARPHLEET_PRIVATE_KEY before continuing'
     end
   end
