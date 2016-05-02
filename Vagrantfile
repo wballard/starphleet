@@ -8,8 +8,10 @@ SHIP_NAME = 'ship'
 
 $base_provision_script = <<SCRIPT
 cd /
-sudo bash -c "$(curl -s https://raw.githubusercontent.com/wballard/starphleet/master/webinstall)"
-sudo ./starphleet/vmware_hgfs_fix.sh
+sudo rsync -rav /vagrant/ /starphleet/
+sudo sudo cp /starphleet/scripts/starphleet-launcher /usr/bin
+sudo /starphleet/scripts/starphleet-install
+sudo /starphleet/vmware_hgfs_fix.sh
 sudo apt-get install -y nfs-kernel-server
 # Install private keys
 sudo mkdir -p /var/starphleet/private_keys
