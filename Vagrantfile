@@ -8,11 +8,11 @@ SHIP_NAME = 'ship'
 
 $base_provision_script = <<SCRIPT
 cd /
-# sudo rsync -rav --exclude=".vagrant" /vagrant/ /starphleet/
+sudo rsync -rav --exclude=".vagrant" /vagrant/ /starphleet/
 sudo sudo cp /starphleet/scripts/starphleet-launcher /usr/bin
 sudo /starphleet/scripts/starphleet-install
 echo "answer AUTO_KMODS_ENABLED yes" | sudo tee -a /etc/vmware-tools/locations
-# sudo /starphleet/vmware_hgfs_fix.sh
+sudo /starphleet/vmware_hgfs_fix.sh
 sudo apt-get install -y nfs-kernel-server
 # Install private keys
 sudo mkdir -p /var/starphleet/private_keys
@@ -26,7 +26,7 @@ echo "/var/starphleet/headquarters *(rw,sync,all_squash,no_subtree_check,anonuid
 echo "/var/lib/lxc/data *(rw,sync,all_squash,no_subtree_check,anonuid=0,anongid=0)" >> /tmp/exports
 sudo mv /tmp/exports /etc
 sudo /etc/init.d/nfs-kernel-server restart
-$([ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']}) || true;
+$[ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']} || true;
 SCRIPT
 
 Vagrant::Config.run do |config|
@@ -80,7 +80,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   config.hostmanager.aliases = [ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME, 'ship.local', 'ship.glgresearch.com']
 
   config.vm.hostname = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
-  config.vm.synced_folder ".", "/starphleet"
+  # config.vm.synced_folder ".", "/starphleet"
   # config.vm.synced_folder "~", "/hosthome"
 
   config.vm.provider :vmware_fusion do |f, override|
