@@ -10,7 +10,7 @@ do
     autodeploy () {
       source `which tools`
       # Only sync one time in dev_mode
-      dev_mode && [ -d "${LOCAL_DIRECTORY}"] || starphleet-git-synch "$1" "${LOCAL_DIRECTORY}"
+      starphleet-git-synch "$1" "${LOCAL_DIRECTORY}"
     }
     export -f autodeploy
     export AUTODEPLOY

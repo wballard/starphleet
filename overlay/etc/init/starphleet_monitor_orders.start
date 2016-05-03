@@ -121,9 +121,7 @@ do
     [ ! -f "${LAST_RUN_FILE}" ] && touch "${LAST_RUN_FILE}" && DEPLOY_REASON="First Deploy"
   fi
 
-  # If in dev_mode and the directory already exists we don't sync more than Once
-  # Otherwise, always sync the git dir and deploy on changes
-  dev_mode && [ -d "${LOCAL}" ] || [ -n "${SERVICE_GIT_URL}" ] && starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}" && DEPLOY_REASON="Git Repo Changed"
+  [ -n "${SERVICE_GIT_URL}" ] && starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}" && DEPLOY_REASON="Git Repo Changed"
 
   #if there is any reason to start a container -- well, go to it
   if [ -n "${DEPLOY_REASON}" ]; then
