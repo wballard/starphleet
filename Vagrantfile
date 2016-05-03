@@ -26,7 +26,7 @@ echo "/var/starphleet/headquarters *(rw,sync,all_squash,no_subtree_check,anonuid
 echo "/var/lib/lxc/data *(rw,sync,all_squash,no_subtree_check,anonuid=0,anongid=0)" >> /tmp/exports
 sudo mv /tmp/exports /etc
 sudo /etc/init.d/nfs-kernel-server restart
-$[ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']} || true;
+[ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']} || true;
 SCRIPT
 
 Vagrant::Config.run do |config|
@@ -45,10 +45,6 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   end
 
   config.trigger.before :up, :stdout => true, :force => true do
-    # If the machine is already provisioned - Don't do it again
-    # if Dir.exists? 'private_keys' and Dir.exists? 'public_keys' and File.exists? 'headquarters'
-    #   next
-    # end
     if File.file?('./.provisioned')
       next
     end
@@ -80,8 +76,6 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   config.hostmanager.aliases = [ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME, 'ship.local', 'ship.glgresearch.com']
 
   config.vm.hostname = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
-  # config.vm.synced_folder ".", "/starphleet"
-  # config.vm.synced_folder "~", "/hosthome"
 
   config.vm.provider :vmware_fusion do |f, override|
     override.vm.box = ENV['BOX_NAME'] || 'trusty-vmware'
@@ -100,6 +94,5 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     override.vm.box = ENV['BOX_NAME'] || 'parallels/ubuntu-14.04'
     f.name = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
     f.customize ["set", :id, "--memsize", VAGRANT_MEMSIZE]
-    # config.vm.synced_folder "./", "/vagrant", id: "some_id"
   end
 end
