@@ -138,7 +138,7 @@ do
     #versions
     if [ -n "${ORDER}" ] && [ -n "${ORDERS_SHA}" ] && [ -n "${SERVICE_SHA}" ]; then
       dev_mode \
-        && SERVICE_NAME="${ORDER}-$(date +d%y%m%d-d%H%M%S)"
+        && SERVICE_NAME="${ORDER}-$(date +d%y%m%d-d%H%M%S)" \
         || SERVICE_NAME=$(echo "${ORDER}-${ORDERS_SHA}-${SERVICE_SHA}")
     else
       warn "Critical Info Missing - Not Deploying Container:  O: ${ORDER} OS: ${ORDERS_SHA} SS:${SERVICE_SHA}"

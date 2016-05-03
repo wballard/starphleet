@@ -26,7 +26,10 @@ echo "/var/starphleet/headquarters *(rw,sync,all_squash,no_subtree_check,anonuid
 echo "/var/lib/lxc/data *(rw,sync,all_squash,no_subtree_check,anonuid=0,anongid=0)" >> /tmp/exports
 sudo mv /tmp/exports /etc
 sudo /etc/init.d/nfs-kernel-server restart
-[ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] && starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']} || true;
+[ -n "#{ENV['STARPHLEET_HEADQUARTERS']}" ] \
+  && [ -f /usr/bin/starphleet-headquarters ] \
+  && /usr/bin/starphleet-headquarters #{ENV['STARPHLEET_HEADQUARTERS']} \
+  || true;
 SCRIPT
 
 Vagrant::Config.run do |config|
@@ -60,12 +63,18 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     ')
   end
 
+  config.trigger.before :destroy, :stdout => true, :force => true do
+    system('
+    [ -f ".provisioned" ] && rm ".provisioned"
+    ')
+  end
+
   config.trigger.after :up, :stdout => true, :force => true do
     system('
     mkdir -p "${HOME}/starphleet_dev"
     mkdir -p "${HOME}/starphleet_data"
-    sudo mount -o resvport,intr ship.glgresearch.com:/var/starphleet/headquarters "${HOME}/starphleet_dev"
-    sudo mount -o resvport,intr ship.glgresearch.com:/var/lib/lxc/data "${HOME}/starphleet_data"
+    sudo mount -o resvport,soft,intr ship.glgresearch.com:/var/starphleet/headquarters "${HOME}/starphleet_dev"
+    sudo mount -o resvport,soft,intr ship.glgresearch.com:/var/lib/lxc/data "${HOME}/starphleet_data"
     [ -f ./scripts/starphleet-devmode-update-local-ip ] && ./scripts/starphleet-devmode-update-local-ip
     touch .provisioned
     ')
@@ -88,6 +97,14 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     override.vm.box = ENV['BOX_NAME'] || 'trusty-virtualbox'
     override.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
     f.customize ["modifyvm", :id, "--memory", VAGRANT_MEMSIZE]
+    config.vm.network "private_network", :type => 'dhcp', :adapter => 2
+    config.hostmanager.ip_resolver = proc do |machine|
+      result = ""
+      machine.communicate.execute("ifconfig eth1") do |type, data|
+        result << data if type == :stdout
+      end
+      (ip = /^\s*inet .*?(\d+\.\d+\.\d+\.\d+)\s+/.match(result)) && ip[1]
+    end
   end
 
   config.vm.provider :parallels do |f, override|
