@@ -181,4 +181,4 @@ echo SSH Private Key:   ${STARPHLEET_PRIVATE_KEY}
 
 echo "Go get some coffee.  This will take a while..."
 
-vagrant up --provider vmware_fusion
+vagrant up --provider virtualbox

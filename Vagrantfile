@@ -92,6 +92,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
 
   config.vm.provider :virtualbox do |f, override|
     override.vm.box = ENV['BOX_NAME'] || 'trusty-virtualbox'
+    override.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
     f.customize ["modifyvm", :id, "--memory", VAGRANT_MEMSIZE]
   end
 
