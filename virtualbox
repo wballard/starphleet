@@ -1,20 +1,184 @@
 #!/usr/bin/env bash
-if vagrant plugin list | grep -s vagrant-triggers; then
-  echo "vagrant-triggers already installed"
-else
-  echo "installing prerequisite vagrant-triggers"
-  vagrant plugin install vagrant-triggers
+#######################################################################
+## Author:          Benjamin Hudgens
+## Date:            March 28, 2015
+##
+## Description:     Setup the necessary environment to install
+##                  starphleet via vagrant
+#######################################################################
+
+# *********************
+# Config
+# *********************
+
+ENVIRONMENT_FILE="${HOME}/.starphleet"
+STARPHLEET_DEV_DIR="${HOME}/starphleet_dev"
+STARPHLEET_PRIVATE_KEY_FILE="${HOME}/.ssh/starphleet"
+
+# *********************
+# Fix Promiscuious mode crash
+#
+# Bug Fix
+#   See:  https://github.com/coreos/coreos-vagrant/issues/123
+# *********************
+
+sudo touch '/Library/Preferences/VMware Fusion/promiscAuthorized'
+
+# *********************
+# Helpers
+# *********************
+
+function test_git() {
+  SUCCESS=$(ssh -i ${1} git@github.com 2>&1 | grep "successfully authenticated")
+}
+
+function get_starphleet_branch() {
+  read -p "Which branch for your Headquarters: " STARPHLEET_HEADQUARTERS_BRANCH
+}
+
+function headquarters_branch_help() {
+cat <<EOF
+
+  In development mode it is strongly recommended that you create a branch for
+  yourself in the development headquarters git repo.
+
+  The concensus is that it is rude to make changes to the main branch unless
+  they are global and are intended for everyone to consume.
+
+  Current Headquarters:  ${STARPHLEET_HEADQUARTERS}
+
+EOF
+}
+
+function starphleet_dev_help() {
+cat <<EOF
+
+  The starphleet dev directory already exists on your machine.  This implies
+  you may have previous work still in this directory:
+
+    ${STARPHLEET_DEV_DIR}
+
+  If you are doing a clean install of a new headquarters you may want to remove
+  this directory and start fresh.
+
+EOF
+}
+
+function stale_vagrant_help() {
+cat <<EOF
+
+
+  ---------------------
+  !!WARNING!!
+
+  It is possible you did not cleanly destroy a previous vagrant installation.
+  This may have left stale data in your local machines "/etc/hosts" file.
+  You may be unable to reach your ship after a successful deployment.
+
+  You most likely want to remove this stale data before installing.  You can
+  cleanup this data by editing the following file:
+
+      /etc/hosts
+
+  You should remove any lines that are similar to this:
+
+      ## vagrant-hostmanager-start id: f2ae1ca9-1ddf-419e-a3e8-37fd4f23143a
+      172.16.114.129	ship ship ship.local ship.glgresearch.com
+      ## vagrant-hostmanager-end
+
+EOF
+}
+
+function key_help() {
+cat <<EOF
+
+  You must put a non-password protected key file here:
+
+     ${STARPHLEET_PRIVATE_KEY_FILE}
+
+
+  To generate a new key you can try (do not enter a password - hit <enter>):
+
+    ssh-keygen -b 1024 -t rsa -f ${HOME}/.ssh/starphleet
+
+
+  Make sure your key is setup with GitHub.  Read here:
+
+    https://help.github.com/articles/generating-ssh-keys/
+
+EOF
+}
+
+# *********************
+# Environment Setup
+# *********************
+
+# Check if the user has an environment file
+[ -f "${ENVIRONMENT_FILE}" ] && source "${ENVIRONMENT_FILE}"
+
+# If the user doesn't cleanly shutdown vagrant it can leave
+# stale host records in /etc/hosts
+# Let's warn them and possibly punt
+if [ "$(cat /etc/hosts | grep 'vagrant-hostmanager')" != "" ]; then
+  stale_vagrant_help
+  unset ANSWER
+  read -p "Do you want to exit and fix this? [y/N]: " ANSWER
+
+  if [ "${ANSWER}" == "y" ] || [ "${ANSWER}" == "Y" ]; then
+    exit 1
+  fi
 fi
 
-if vagrant plugin list | grep -s vagrant-hostmanager; then
-  echo "vagrant-hostmanager already installed"
-else
-  echo "installing prerequisite vagrant-hostmanager"
-  vagrant plugin install vagrant-hostmanager
+# Make sure a headquarters is set
+if [ -z "${STARPHLEET_HEADQUARTERS}" ]; then
+  read -p "Please paste a starphleet headquarters: " STARPHLEET_HEADQUARTERS
+  export STARPHLEET_HEADQUARTERS="${STARPHLEET_HEADQUARTERS}"
 fi
 
-if [ -f ~/.starphleet ] ; then
-  source ~/.starphleet && vagrant up --provider virtualbox
-else
-  echo "~/.starphleet not found"
+# Require users to specify a branch explicitly so they remember not to trample
+# on everyone else.  If their headquarters doesn't contain a branch .. prompt
+if [ -z "$(echo ${STARPHLEET_HEADQUARTERS} | grep '#')" ]; then
+  headquarters_branch_help
+  get_starphleet_branch
+  # They should now have a branch set - so if the variable isn't empty
+  # that's good and we set the branch on their headquarters.  Otherwise,
+  # at this point we should not proceed
+  if [ -n "${STARPHLEET_HEADQUARTERS_BRANCH}" ]; then
+    export STARPHLEET_HEADQUARTERS="${STARPHLEET_HEADQUARTERS}#${STARPHLEET_HEADQUARTERS_BRANCH}"
+  else
+    exit 1
+  fi
 fi
+
+
+# Graceful fallback if the user didn't setup the keys in their environment
+if [ -z "${STARPHLEET_PRIVATE_KEY}" ]; then
+  # Test to make sure their key connects to github without issue
+  [ -f "${STARPHLEET_PRIVATE_KEY_FILE}" ] && \
+  test_git "${STARPHLEET_PRIVATE_KEY_FILE}"
+  # If success - export the starphleet key
+  if [ ! -z "${SUCCESS}" ]; then
+    export STARPHLEET_PRIVATE_KEY="${STARPHLEET_PRIVATE_KEY_FILE}"
+  else
+    # Starphleet key didn't work out - be a pal and try their default key
+    test_git "${HOME}/.ssh/id_rsa"
+    if [ ! -z "${SUCCESS}" ]; then
+      export STARPHLEET_PRIVATE_KEY="${HOME}/.ssh/id_rsa"
+    else
+      # Sheesh - nothing is working
+      key_help
+      exit 1
+    fi
+  fi
+fi
+
+# *********************
+# Main
+# *********************
+
+echo Starphleet HQ:     ${STARPHLEET_HEADQUARTERS}
+echo SSH Private Key:   ${STARPHLEET_PRIVATE_KEY}
+
+echo "Go get some coffee.  This will take a while..."
+
+vagrant up --provider vmware_fusion
