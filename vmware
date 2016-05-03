@@ -129,18 +129,6 @@ if [ "$(cat /etc/hosts | grep 'vagrant-hostmanager')" != "" ]; then
   fi
 fi
 
-# If the dev dir exists - maybe they have some previous work in that directory..
-# we should ask if they want to delete it first
-if [ -d "${STARPHLEET_DEV_DIR}" ]; then
-  starphleet_dev_help
-  unset ANSWER
-  read -p "Do you want to delete the ~/starphleet_dev directory? [y/N]: " ANSWER
-  # Remove the dev dor upon request
-  if [ "${ANSWER}" == "y" ] || [ "${ANSWER}" == "Y" ]; then
-    rm -rf "${STARPHLEET_DEV_DIR}"
-  fi
-fi
-
 # Make sure a headquarters is set
 if [ -z "${STARPHLEET_HEADQUARTERS}" ]; then
   read -p "Please paste a starphleet headquarters: " STARPHLEET_HEADQUARTERS

@@ -8,10 +8,11 @@ SHIP_NAME = 'ship'
 
 $base_provision_script = <<SCRIPT
 cd /
-sudo rsync -rav /vagrant/ /starphleet/
+# sudo rsync -rav --exclude=".vagrant" /vagrant/ /starphleet/
 sudo sudo cp /starphleet/scripts/starphleet-launcher /usr/bin
 sudo /starphleet/scripts/starphleet-install
-sudo /starphleet/vmware_hgfs_fix.sh
+echo "answer AUTO_KMODS_ENABLED yes" | sudo tee -a /etc/vmware-tools/locations
+# sudo /starphleet/vmware_hgfs_fix.sh
 sudo apt-get install -y nfs-kernel-server
 # Install private keys
 sudo mkdir -p /var/starphleet/private_keys
