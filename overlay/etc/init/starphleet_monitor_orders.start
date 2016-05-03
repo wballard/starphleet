@@ -26,18 +26,21 @@ do
   #from the order files in the headquarters
   CURRENT_ORDER="${CURRENT_ORDERS}/${ORDER}"
   mkdir -p "${CURRENT_ORDER}"
+
+  unset ORDERS_DIFF
+  unset DEPLOY_REASON
+
   #use git to determine if the orders have changed since the last publish
   if [ -f "${CURRENT_ORDER}/.orders_sha" ]; then
     DEPLOYED_ORDERS_SHA=$(cat "${CURRENT_ORDER}/.orders_sha")
     get_VERSION_DIFF ${HEADQUARTERS_LOCAL} ${ORDERS_SHA} ${DEPLOYED_ORDERS_SHA} $(dirname "${order}")
-    if [ -n "${VERSION_DIFF}" ]; then
-      ORDERS_DIFF="Updated orders"
-    else
-      ORDERS_DIFF="NONE"
-    fi
+    [ -n "${VERSION_DIFF}" ] && ORDERS_DIFF="Updated orders"
   else
     ORDERS_DIFF="New orders"
   fi
+
+  [ -n "${ORDERS_DIFF}" ] && DEPLOY_REASON="${ORDERS_DIFF}"
+
   # k, so.  in this scope we don't actually care about the betas BUT
   # we do want it to be an associative array... if we DO NOT explicitly
   # make it associative it will implicitly be created as indexed, if you
@@ -52,127 +55,76 @@ do
   #this lets folks get creative in orders files as needed
   unset SERVICE_GIT_URL
   unset UNPUBLISHED
-  unset DEPLOY_REASON
   unset PUBLISH_FROM
+  # Slurp the environment from the orders
   run_orders "${order}"
-  #
+  # If the conditions for the security mode set for this container are not
+  # met then we will not deploy this container.
   if ! validate_security; then
     error "Not Deploying ${order} - Security Not Setup Correctly"
     continue
   fi
-  ###################################
-  # Support for 'publish' command
-  ###################################
-  # The publish command sets a variable called "PUBLISH_FROM" with the the value
-  # being the argument passed to the command.  The value is intended to be
-  # the endpoint we want to publish at a new endpoint.  Below, if PUBLISH_FROM
-  # is set after running the orders AND the endpoint we want to alias does indeed
-  # exist, we will touch a status file resembling ".publish_$location".
-  # The location is basically tells the endpoint to mount itself at 'location' also.
-  #
-  # For example:
-  #   if -f ./current_orders/example1/.publish_example2; then
-  #       /example1 will also publish to /example2
-  #
-  # See: starphleet_nginx_hupper.start for more
-  if [ -n "${PUBLISH_FROM}" ] && [ -d "${CURRENT_ORDERS}${PUBLISH_FROM}" ]; then
-    if [ ! -f "${CURRENT_ORDERS}${PUBLISH_FROM}/.publish_${ORDER}" ]; then
-      warn "Publish Detected: ${CURRENT_ORDERS}${PUBLISH_FROM}/.publish_${ORDER}"
-      touch "${CURRENT_ORDERS}${PUBLISH_FROM}/.publish_${ORDER}"
-      starphleet-hup-nginx
-    fi
-    continue
-  fi
-  [ "${ORDERS_DIFF}" != "NONE" ] && DEPLOY_REASON="${ORDERS_DIFF}"
 
-  #if there is a service repo, pull and synch it
-  if [ -n "${SERVICE_GIT_URL}" ]; then
-    # The directory we store our local git copy
-    LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
-    # Sync Only Once In Devmode and All The Time If Devmode Disabled
-    (dev_mode && [ -d "${LOCAL}" ]) || (starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}" && DEPLOY_REASON="Updated service")
-    # The name of the service container
-    SERVICE_NAME="${ORDER}"
+
+  # The directory we store our local git copy
+  LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
+
+
+  if [ -n "${DEVMODE_UNBIND_GIT_DIR}" ] && dev_mode ; then
     # The 'LAST_RUN_FILE' is created each run for a container.  We use this files
     # modified time to determine if anything 'new' has been created/changed
     # since our last deployment of a container
-    LAST_RUN_FILE="/tmp/.${SERVICE_NAME}-starphleet_last_run"
+    LAST_RUN_FILE="/tmp/.${ORDER}-starphleet_last_run"
     ############################################
     # Modified Dev Mode
     ############################################
     # Let starphleet be the build system
-    if dev_mode ; then
-      if [ -n "${DEVMODE_UNBIND_GIT_DIR}" ] && [ -f "${LAST_RUN_FILE}" ]; then
-        warn Unbind Mode Detected
-
-        # **************************************
-        # File Change Detection
-        # **************************************
-        # Only check for changed files if the they specified to unbind the git dir
-        RUNNING=$(lxc-ls -f | grep RUNNING | grep --extended-regexp -e "^${SERVICE_NAME}-([a-f0-9]){7}-([a-f0-9]){7}"  | cut -f1 -d" ")
-        # Define a temp file to check for changed files
-        CHANGED_FILES_FILE="/tmp/${ORDER}.starphleet.newfiles"
-        # Exclude git and node_modules directory which heavily improves performance.
-        EXCLUDES='-not ( -path *node_modules* -prune ) -and -not ( -path *.git* -prune ) -type f'
-        # Look for a changed file in the directory - punt after the first one
-        find "${LOCAL}" ${EXCLUDES} -newer "${LAST_RUN_FILE}" -print -quit > "${CHANGED_FILES_FILE}"
-        # Slurp in those files
-        FILES_CHANGED=$(cat ${CHANGED_FILES_FILE})
-        # If there were any changed files
-        if [ -n "${FILES_CHANGED}" ]; then
-          # Go through any running containers (albiet, there should only be one)
-          for container in $(echo ${RUNNING}); do
-            # Stop the container
-            warn Redeploying ${container} - ${FILES_CHANGED}
-            # Redeploy the same container.  This will re-run start but not
-            # rebuild all-the-things
-            touch "${LAST_RUN_FILE}"
-            # This should force the container to respawn
-            stop starphleet_serve_order name="${container}"
-            # ...but if it doesn't - we'll start it backup anyway
-            start --no-wait starphleet_serve_order name="${container}" order="${ORDER}"
-          done
-          # Cleanup
-          rm ${CHANGED_FILES_FILE}
-          # Cleanup
-          unset DEVMODE_UNBIND_GIT_DIR
-          unset FILES_CHANGED
-          unset CHANGED_FILES_FILE
-          unset RUNNING
-        fi
-      fi
-      # If no run file exists this container has never been deployed so
-      # starphleet must have just started
-      if [ ! -f "${LAST_RUN_FILE}" ]  || [ -n "${DEPLOY_REASON}" ]; then
-        # Use date stamps for containers (that are formatted like shas)
-        #    - Allows normal starphleet commands to operate
-        #    - Gives the user an indication of time of deployment
-        DATE_TIME=$(date +d%y%m%d-d%H%M%S)
-        # Flag that this has been deployed
+    if [ -f "${LAST_RUN_FILE}" ]; then
+      warn Unbind Mode Detected
+      # **************************************
+      # File Change Detection
+      # **************************************
+      # Only check for changed files if the they specified to unbind the git dir
+      RUNNING=$(lxc-ls -f | grep RUNNING | grep --extended-regexp -e "^${ORDER}-([a-f0-9]){7}-([a-f0-9]){7}"  | cut -f1 -d" ")
+      # Define a temp file to check for changed files
+      CHANGED_FILES_FILE="/tmp/${ORDER}.starphleet.newfiles"
+      # Exclude git and node_modules directory which heavily improves performance.
+      EXCLUDES='-not ( -path *node_modules* -prune ) -and -not ( -path *.git* -prune ) -type f'
+      # Look for a changed file in the directory - punt after the first one
+      find "${LOCAL}" ${EXCLUDES} -newer "${LAST_RUN_FILE}" -print -quit > "${CHANGED_FILES_FILE}"
+      # Slurp in those files
+      FILES_CHANGED=$(cat ${CHANGED_FILES_FILE})
+      # If there were any changed files
+      if [ -n "${FILES_CHANGED}" ]; then
+        # Go through any running containers (albiet, there should only be one)
+        for container in $(echo ${RUNNING}); do
+          # Stop the container
+          warn Redeploying ${container} - ${FILES_CHANGED}
+          # This should force the container to respawn
+          stop starphleet_serve_order name="${container}"
+          # ...but if it doesn't - we'll start it backup anyway
+          start --no-wait starphleet_serve_order name="${container}" order="${ORDER}"
+        done
+        # rebuild all-the-things
         touch "${LAST_RUN_FILE}"
-        # Be nice and list why we are deploying
-        warn Dev Mode Deployment: "${DEPLOY_REASON}"
-        # Just like in production - we respect order changes
-        echo ${ORDERS_SHA} > "${CURRENT_ORDER}/.orders_sha"
-        # Deploy with Date Stamps in Dev Mode
-        start --no-wait starphleet_serve_order name="${SERVICE_NAME}-${DATE_TIME}" order="${ORDER}"
-        # Now that we are deploying - make sure we unset our reason
-        unset DEPLOY_REASON
+        # Cleanup
+        rm ${CHANGED_FILES_FILE}
+        # Cleanup
+        unset DEVMODE_UNBIND_GIT_DIR
+        unset FILES_CHANGED
+        unset CHANGED_FILES_FILE
+        unset RUNNING
       fi
     fi
+    # If the file doesn't exist this would be our first deploy.  We need to get the container
+    # started so we'll go ahead and flag the container for start
+    [ ! -f "${LAST_RUN_FILE}" ] && touch "${LAST_RUN_FILE}" && DEPLOY_REASON="First Deploy"
   fi
-  # If we are in dev mode then there is never a good enough reason in
-  # ${DEPLOY_REASON} that we'd want a container with a sha so we
-  # force the rest of the code to be skipped
-  if dev_mode ; then
-    if [ -n "${UNPUBLISHED}" ] && [ -n "${DEPLOY_REASON}" ]; then
-      echo ${ORDERS_SHA} > "${CURRENT_ORDER}/.orders_sha"
-      SERVICE_NAME=$(echo "${ORDER}")
-      DATE_TIME=$(date +d%y%m%d-d%H%M%S)
-      start --no-wait starphleet_serve_order name="${SERVICE_NAME}-${DATE_TIME}" order="${ORDER}"
-    fi
-    continue
-  fi
+
+  # If in dev_mode and the directory already exists we don't sync more than Once
+  # Otherwise, always sync the git dir and deploy on changes
+  dev_mode && [ -d "${LOCAL}" ] || [ -n "${SERVICE_GIT_URL}" ] && starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}" && DEPLOY_REASON="Git Repo Changed"
+
   #if there is any reason to start a container -- well, go to it
   if [ -n "${DEPLOY_REASON}" ]; then
     warn "${DEPLOY_REASON}"
@@ -185,7 +137,9 @@ do
     #of these starts up a new container that will run in parallel with prior
     #versions
     if [ -n "${ORDER}" ] && [ -n "${ORDERS_SHA}" ] && [ -n "${SERVICE_SHA}" ]; then
-      SERVICE_NAME=$(echo "${ORDER}-${ORDERS_SHA}-${SERVICE_SHA}")
+      dev_mode \
+        && SERVICE_NAME="${ORDER}-$(date +d%y%m%d-d%H%M%S)"
+        || SERVICE_NAME=$(echo "${ORDER}-${ORDERS_SHA}-${SERVICE_SHA}")
     else
       warn "Critical Info Missing - Not Deploying Container:  O: ${ORDER} OS: ${ORDERS_SHA} SS:${SERVICE_SHA}"
       continue
@@ -193,4 +147,5 @@ do
     #this is done with no-wait since upstart will prevent duplicate starts
     start --no-wait starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
   fi
+  unset DEPLOY_REASON
 done
