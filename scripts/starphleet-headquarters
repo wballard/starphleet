@@ -14,6 +14,7 @@ run_as_root_or_die
 
 if [ -n "${url}" ]; then
   echo export HEADQUARTERS_REMOTE="${url}" > "${HEADQUARTERS_SOURCE}"
+  [ -d "${HEADQUARTERS_LOCAL}" ] && rm -rf "${HEADQUARTERS_LOCAL}"/..?* "${HEADQUARTERS_LOCAL}"/.[!.]* ${HEADQUARTERS_LOCAL}/*
   info Headquarters set to ${url}
 elif [ -f "${HEADQUARTERS_SOURCE}" ]; then
   info Headquarters is $(cat ${HEADQUARTERS_SOURCE})
