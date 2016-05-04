@@ -86,6 +86,9 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/starphleet"
   config.vm.synced_folder "~", "/hosthome"
 
+  # ssh agent forwarding, so that SSH keys can be used without passphrase if previously decrypted on host machine
+  config.ssh.forward_agent = true
+
   config.vm.provider :vmware_fusion do |f, override|
     # override.vm.network "public_network"
     override.vm.box = ENV['BOX_NAME'] || 'trusty-vmware'
