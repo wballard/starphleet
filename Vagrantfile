@@ -4,7 +4,7 @@
 require 'fileutils'
 
 VAGRANT_MEMSIZE = ENV['STARPHLEET_VAGRANT_MEMSIZE'] || '8192'
-SHIP_NAME = [ENV['STARPHLEET_SHIP_NAME'] || 'ship', 'ship.local']
+SHIP_NAME = ENV['STARPHLEET_SHIP_NAME'] || 'ship.local'
 
 $base_provision_script = <<SCRIPT
 cd /
@@ -82,7 +82,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
 
   config.hostmanager.enabled = true
   config.hostmanager.manage_host = true
-  config.hostmanager.aliases = SHIP_NAME
+  # config.hostmanager.aliases = SHIP_NAME
 
   config.vm.hostname = SHIP_NAME
 
