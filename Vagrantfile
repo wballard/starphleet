@@ -4,7 +4,7 @@
 require 'fileutils'
 
 VAGRANT_MEMSIZE = ENV['STARPHLEET_VAGRANT_MEMSIZE'] || '8192'
-SHIP_NAME = 'ship'
+SHIP_NAME = [ENV['STARPHLEET_SHIP_NAME'] || 'ship', 'ship.local']
 
 $base_provision_script = <<SCRIPT
 cd /
@@ -73,8 +73,8 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     system('
     mkdir -p "${HOME}/starphleet_dev"
     mkdir -p "${HOME}/starphleet_data"
-    sudo mount -o resvport,soft,intr ship.glgresearch.com:/var/starphleet/headquarters "${HOME}/starphleet_dev"
-    sudo mount -o resvport,soft,intr ship.glgresearch.com:/var/lib/lxc/data "${HOME}/starphleet_data"
+    sudo mount -o resvport,soft,intr ' + SHIP_NAME + ':/var/starphleet/headquarters "${HOME}/starphleet_dev"
+    sudo mount -o resvport,soft,intr ' + SHIP_NAME + ':/var/lib/lxc/data "${HOME}/starphleet_data"
     [ -f ./scripts/starphleet-devmode-update-local-ip ] && ./scripts/starphleet-devmode-update-local-ip
     touch .provisioned
     ')
@@ -82,14 +82,14 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
 
   config.hostmanager.enabled = true
   config.hostmanager.manage_host = true
-  config.hostmanager.aliases = [ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME, 'ship.local', 'ship.glgresearch.com']
+  config.hostmanager.aliases = SHIP_NAME
 
-  config.vm.hostname = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
+  config.vm.hostname = SHIP_NAME
 
   config.vm.provider :vmware_fusion do |f, override|
     override.vm.box = ENV['BOX_NAME'] || 'trusty-vmware'
     override.vm.box_url = "https://s3.amazonaws.com/glg_starphleet/trusty-14.04-amd64-vmwarefusion.box"
-    f.vmx["displayName"] = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
+    f.vmx["displayName"] = SHIP_NAME
     f.vmx["memsize"] = VAGRANT_MEMSIZE
   end
 
@@ -109,7 +109,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
 
   config.vm.provider :parallels do |f, override|
     override.vm.box = ENV['BOX_NAME'] || 'parallels/ubuntu-14.04'
-    f.name = ENV['STARPHLEET_SHIP_NAME'] || SHIP_NAME
+    f.name = SHIP_NAME
     f.customize ["set", :id, "--memsize", VAGRANT_MEMSIZE]
   end
 end
