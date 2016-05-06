@@ -113,12 +113,7 @@ ${PWD}/vmware {% endhighlight %}
 
     <p>Each subdirectory off the root of the
       <a href="#headquartersrepo">headquarters</a>
-      is checked for an
-      <a href="#orders">orders file</a>. Starphleet will look inside the
-      <a href="#orders">orders file</a>
-      for deploy commands and environment variables for the service. There is a 1-1 mapping between the subdirectory that contains an
-      <a href="#orders">orders file</a>
-      and the url of the service deployed.</p>
+      is checked for an orders file. Starphleet will look inside the orders file for deploy commands and environment variables for the service. There is a 1-1 mapping between the subdirectory that contains an orders file and the url of the service deployed.</p>
     <h3 id="service">Service</h3>
     <p>A service is an app that responds to web requests.  The service should listen for web requests on the <code>$PORT</code> set in the Environment.  The service lives within an LXC Container and will be handed requests by the NGINX front end on the <a href="#ship">ship</a>.</p>
     <h3 id="remotes">Remote</h3>
@@ -154,7 +149,7 @@ ${PWD}/vmware {% endhighlight %}
       <tr>
         <td>/hq/beta_groups</td>
         <td>dir</td>
-        <td>The beta_groups directory contains a list of files containing usernames inside the file. The names of the files are used in the orders to setup beta groups</td>
+        <td>The beta_groups directory contains a list of files containing usernames inside the file. The names of the files are used in the <a href="#orders">orders</a> to setup beta groups</td>
       </tr>
       <tr>
         <td>/hq/ldap_servers</td>
@@ -289,7 +284,7 @@ export FOO="BAR" {% endhighlight %}
   <p> In some cases it might be necessary to set environment variables that are specific to each <a href="#ship">ship</a> in a <a href="#phleet">phleet</a>.  These variables might be unique to a ship like its location.  These environment variables get set by adding files to a special directory on the ship.  Any file located in the <code>/etc/starphleet.d</code> directory will be sourced and available to all environments in Starphleet. </p>
   <h3 id="overridesperservice">Per-Service</h3>
   <p>
-    The <a href="#orders">orders file</a> used to deploy a container also acts as the final location to set environment variables and override any defaults set upstream from your service.  Common settings in the <a href="#orders">orders file</a> would include locations to resources, DB credentials, and the <a href="#authentication">authentication</a> mechanism you want Starphleet to use for your service.
+    The <a href="#orders">orders file</a> used to deploy a container also acts as the final location to set environment variables and override any defaults set upstream from your service.  Common settings in the orders file would include locations to resources, DB credentials, and the <a href="#authentication">authentication</a> mechanism you want Starphleet to use for your service.
   </p>
 </section>
 <section class="bs-docs-section">
@@ -333,7 +328,7 @@ export FOO="BAR" {% endhighlight %}
       </tr>
       <tr>
         <td>starphleet-orphan-reaper</td>
-        <td>When orders vanish from the <a href="#headquarters">headquarters</a>, Starphleet will not automatically kill containers that remain running.  These containers are <i>orphaned</i>.  There are not active orders for the containers but they still exist.  <code>starphleet-orphan-reaper</code> will purge any containers without matching orders.</td>
+        <td>When <a href="#orders">orders</a> vanish from the <a href="#headquarters">headquarters</a>, Starphleet will not automatically kill containers that remain running.  These containers are <i>orphaned</i>.  There are not active orders for the containers but they still exist.  <code>starphleet-orphan-reaper</code> will purge any containers without matching orders.</td>
       </tr>
       <tr>
         <td>starphleet-redeploy</td>
@@ -493,7 +488,7 @@ export LDAP_PASSWORD='****' {% endhighlight %}
     </li>
     <li>In your <a href="#orders">orders file</a>, set <code>SECURITY_MODE</code> to <code>ldap</code>.  Set <code>LDAP_SERVER</code> to the name of the above file you just created</li>
   </ul>
-  <p> Your <a href="#orders">orders file</a> will now have <code>ldap</code> enabled and point to the above configuration on which LDAP server to use for authentication.  At this point, your service should be authenticating against LDAP. </p>
+  <p> Your orders file will now have <code>ldap</code> enabled and point to the above configuration on which LDAP server to use for authentication.  At this point, your service should be authenticating against LDAP. </p>
   <h3 id="jwtconfiguration">JWT Configuration</h3>
   <p> Assigning the <code>SECURITY_MODE</code> setting to <code>jwt</code> requires additional settings in the <a href="#headquarters">headquarters</a>.  You can configure these settings <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.</p>
   <p> JWT requires an authentication application: </p>
@@ -529,7 +524,7 @@ jsmith{% endhighlight %}
 </section>
 <section class="bs-docs-section">
   <h1 id="healthchecks" class="page-header">Healthchecks</h1>
-  <p>Orders service repository can supply a <code>$HEALTHCHECK</code> like:</p>
+  <p><a href="#orders">orders</a> service repository can supply a <code>$HEALTHCHECK</code> like:</p>
 {% highlight bash %}
 export HEALTHCHECK='/'{% endhighlight %}
 <p>Upon deployment of a service update, Starphleet will issue a GET request to http://{container_ip}:{PORT}/{HEALTHCHECK}, and will expect an HTTP 200 response within 60 seconds. The {PORT} in the preceding URL will have the value specified in your orders.</p>
@@ -581,7 +576,7 @@ export STARPHLEET_HEADQUARTERS="https://github.com/wballard/starphleet.headquart
 export STARPHLEET_PRIVATE_KEY="${HOME}/.ssh/id_rsa"
 export STARPHLEET_PUBLIC_KEY="${HOME}/.ssh/id_rsa.pub"{% endhighlight %}
   <h3 id="differencewithdevmode">Devmode Vs. Production</h3>
-  <p>Starphleet normally handles the deployment of all services after any change to the Git repos and/or orders envrionment.  When running Starphleet locally in development mode the behavior of Starphleet alters a bit.  These changes are:</p>
+  <p>Starphleet normally handles the deployment of all services after any change to the Git repos and/or <a href="#orders">orders</a> envrionment.  When running Starphleet locally in development mode the behavior of Starphleet alters a bit.  These changes are:</p>
   <ul>
     <li>Git repos associated with your orders are checked out to a different location</li>
     <li>Git repos are monitored for file changes rather than git commit changes for triggering deployments (optional)</li>
