@@ -128,7 +128,7 @@ ${PWD}/vmware {% endhighlight %}
 
 <section class="bs-docs-section">
   <h1 id="headquarters" class="page-header">Headquarters</h1>
-  <p> The <a href="#headquartersrepo">Starphleet Headquarters</a> is a Git repo with all the master configurations for the entire phleet of servers. It will contain the deploy commands for every service, keys for ssh console access to the ships, ssl certificates for the domain(s) you assign to the ship, configuration settings for authentication for each service as well as how the machine can reach LDAP servers, and any other major configuration item. </p>
+  <p> The <a href="#headquartersrepo">Starphleet Headquarters</a> is a Git repo with all the master configurations for the entire phleet of servers. It will contain the deploy commands for every service, keys for ssh console access to the <a href="#ship">ships</a>, ssl certificates for the domain(s) you assign to the ship, configuration settings for authentication for each service as well as how the machine can reach LDAP servers, and any other major configuration item. </p>
   <p> Aside from special directories, each directory in the headquarters is assumed to be a <a href="#remote">remote</a> or <a href="#service">service</a> </p>
   <h3 id="reservedfiles">Reserved Files and Dirs</h3>
   <p>The Headquarters has the followin special directories and files outlined below:</p>
@@ -149,7 +149,7 @@ ${PWD}/vmware {% endhighlight %}
       <tr>
         <td>/hq/authorized_keys</td>
         <td>dir</td>
-        <td>The authorized_keys folder should container all the openssh public keys for users who want console access to the ships. The users will all login as "admiral" using their associated private key</td>
+        <td>The authorized_keys folder should container all the openssh public keys for users who want console access to the s<a href="#ship">ships</a>. The users will all login as "admiral" using their associated private key</td>
       </tr>
       <tr>
         <td>/hq/beta_groups</td>
@@ -164,12 +164,12 @@ ${PWD}/vmware {% endhighlight %}
       <tr>
         <td>/hq/overlay</td>
         <td>dir</td>
-        <td>The overlay directory contains files intended to be dropped on to the file system of each ship. Their is a direct relationship between the file structure of the overlay directory and the file structure of the ship</td>
+        <td>The overlay directory contains files intended to be dropped on to the file system of each <a href="#ship">ship</a>. Their is a direct relationship between the file structure of the overlay directory and the file structure of the ship</td>
       </tr>
       <tr>
         <td>/hq/ssl</td>
         <td>dir</td>
-        <td>The ssl directory contains any of the SSL keys associated with the domains pointing to the ships in the phleet.</td>
+        <td>The ssl directory contains any of the SSL keys associated with the domains pointing to the <a href="#ship">ships</a> in the phleet.</td>
       </tr>
     </tbody>
   </table>
@@ -266,7 +266,7 @@ export FOO="BAR" {% endhighlight %}
     <tbody>
       <tr>
         <td>PORT</td>
-        <td>The PORT your service will accept requests on.  This is the port NGINX will pass traffic through to your service.  This port is <b>not</b> exposed externally of the ship.</td>
+        <td>The PORT your service will accept requests on.  This is the port NGINX will pass traffic through to your service.  This port is <b>not</b> exposed externally of the <a href="#ship">ship</a>.</td>
       </tr>
       <tr>
         <td>$ANY_OTHER</td>
@@ -284,7 +284,7 @@ export FOO="BAR" {% endhighlight %}
   </ul>
   <p> It is also important to note that the above list also represents the order in which the environment is overridden. </p>
   <h3 id="overridesglobally">Globally</h3>
-  <p> Environment Variables set globally will be available to all services on all ships in the phleet.  You can set these global environment files in the HQ in the <code>.starphleet</code> <a href="#reservedfiles">reserved file</a>. </p>
+  <p> Environment Variables set globally will be available to all services on all <a href="#ship">ships</a> in the phleet.  You can set these global environment files in the HQ in the <code>.starphleet</code> <a href="#reservedfiles">reserved file</a>. </p>
   <h3 id="overridespership">Per-Ship</h3>
   <p> In some cases it might be necessary to set environment variables that are specific to each <a href="#ship">ship</a> in a <a href="#phleet">phleet</a>.  These variables might be unique to a ship like its location.  These environment variables get set by adding files to a special directory on the ship.  Any file located in the <code>/etc/starphleet.d</code> directory will be sourced and available to all environments in Starphleet. </p>
   <h3 id="overridesperservice">Per-Service</h3>
@@ -309,11 +309,11 @@ export FOO="BAR" {% endhighlight %}
       </tr>
       <tr>
         <td>starphleet-dns-offline</td>
-        <td>If you make use of AWS Route 53 and point a healtcheck to your ships you will want to reference the path <code>/starphleet/nginx/status</code>.  The <code>starphleet-dns-offline</code> command will make the path unavailable which will softly fail your ship in route 53.  If your ship is part of a record set in route 53 this will take your machine out of the rotation or cause a failover scenario to other DNS records</td>
+        <td>If you make use of AWS Route 53 and point a healtcheck to your <a href="#ship">ships</a> you will want to reference the path <code>/starphleet/nginx/status</code>.  The <code>starphleet-dns-offline</code> command will make the path unavailable which will softly fail your ship in route 53.  If your ship is part of a record set in route 53 this will take your machine out of the rotation or cause a failover scenario to other DNS records</td>
       </tr>
       <tr>
         <td>starphleet-dns-online</td>
-        <td>If you make use of AWS Route 53 and point a healtcheck to your ships you will want to reference the path <code>/starphleet/nginx/status</code>.  The <code>starphleet-dns-online</code> command will make the path available which will make your ship healthy in Route 53.  If your ship is part of a record set in route 53 this will bring your machine online in the DNS rotation or heal from a failover.</td>
+        <td>If you make use of AWS Route 53 and point a healtcheck to your s<a href="#ship">ships</a> you will want to reference the path <code>/starphleet/nginx/status</code>.  The <code>starphleet-dns-online</code> command will make the path available which will make your ship healthy in Route 53.  If your ship is part of a record set in route 53 this will bring your machine online in the DNS rotation or heal from a failover.</td>
       </tr>
       <tr>
         <td>starphleet-git</td>
