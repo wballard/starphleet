@@ -88,9 +88,7 @@ ${PWD}/vmware {% endhighlight %}
 <section class="bs-docs-section">
   <h1 id="definitions" class="page-header">Definitions</h1>
   <h3 id="phleet">Phleet</h3>
-  <p>A
-    <a href="#phleet">phleet</a>
-    is a grouping of
+  <p>A phleet is a grouping of
     <a href="#ship">starphleet ships</a>. The entire phleet points to a single
     <a href="#headquartersrepo">headquarters</a>. These ships may be geographically located for latency or maintained in a single region. A phleet is comprised of machines that are intended to be identical for easy scaling.
     <h3 id="ship">Ship</h3>
@@ -123,7 +121,7 @@ ${PWD}/vmware {% endhighlight %}
 
 <section class="bs-docs-section">
   <h1 id="headquarters" class="page-header">Headquarters</h1>
-  <p> The <a href="#headquartersrepo">Starphleet Headquarters</a> is a Git repo with all the master configurations for the entire phleet of servers. It will contain the deploy commands for every service, keys for ssh console access to the <a href="#ship">ships</a>, ssl certificates for the domain(s) you assign to the ship, configuration settings for authentication for each service as well as how the machine can reach LDAP servers, and any other major configuration item. </p>
+  <p> The <a href="#headquartersrepo">Starphleet Headquarters</a> is a Git repo with all the master configurations for the entire <a href="#phleet">phleet</a> of servers. It will contain the deploy commands for every service, keys for ssh console access to the <a href="#ship">ships</a>, ssl certificates for the domain(s) you assign to the ship, configuration settings for authentication for each service as well as how the machine can reach LDAP servers, and any other major configuration item. </p>
   <p> Aside from special directories, each directory in the headquarters is assumed to be a <a href="#remote">remote</a> or <a href="#service">service</a> </p>
   <h3 id="reservedfiles">Reserved Files and Dirs</h3>
   <p>The Headquarters has the followin special directories and files outlined below:</p>
@@ -139,7 +137,7 @@ ${PWD}/vmware {% endhighlight %}
       <tr>
         <td>/hq/.starphleet</td>
         <td>file</td>
-        <td>The .starphleet file is in the root of the headquarters and handles global environment configuration for services and starphleet. This is where you'd override default starphleet configs for the entire phleet.  This is also where you'd set global environment settings for every service in an entire <a href="#phleet">phleet</a>.</td>
+        <td>The .starphleet file is in the root of the headquarters and handles global environment configuration for services and starphleet. This is where you'd override default starphleet configs for the entire <a href="#phleet">phleet</a>.  This is also where you'd set global environment settings for every service in an entire phleet.</td>
       </tr>
       <tr>
         <td>/hq/authorized_keys</td>
@@ -164,7 +162,7 @@ ${PWD}/vmware {% endhighlight %}
       <tr>
         <td>/hq/ssl</td>
         <td>dir</td>
-        <td>The ssl directory contains any of the SSL keys associated with the domains pointing to the <a href="#ship">ships</a> in the phleet.</td>
+        <td>The ssl directory contains any of the SSL keys associated with the domains pointing to the <a href="#ship">ships</a> in the <a href="#phleet">phleet</a>.</td>
       </tr>
     </tbody>
   </table>
@@ -274,12 +272,12 @@ export FOO="BAR" {% endhighlight %}
   <h1 id="overrides">Overrides</h1>
   <p> Most of the configuration in Starphleet is handled by setting environment variables.  Starphleet exposes several environment variables to the applications that run in the containers.  You can set environment variables for a container in a few ways: </p>
   <ul>
-    <li>Globally Across the Phleet</li> <li>Per-Ship</li>
+    <li>Globally Across the <a href="#phleet">Phleet</a></li> <li>Per-Ship</li>
     <li>Per-Service</li>
   </ul>
   <p> It is also important to note that the above list also represents the order in which the environment is overridden. </p>
   <h3 id="overridesglobally">Globally</h3>
-  <p> Environment Variables set globally will be available to all services on all <a href="#ship">ships</a> in the phleet.  You can set these global environment files in the HQ in the <code>.starphleet</code> <a href="#reservedfiles">reserved file</a>. </p>
+  <p> Environment Variables set globally will be available to all services on all <a href="#ship">ships</a> in the <a href="#phleet">phleet</a>.  You can set these global environment files in the HQ in the <code>.starphleet</code> <a href="#reservedfiles">reserved file</a>. </p>
   <h3 id="overridespership">Per-Ship</h3>
   <p> In some cases it might be necessary to set environment variables that are specific to each <a href="#ship">ship</a> in a <a href="#phleet">phleet</a>.  These variables might be unique to a ship like its location.  These environment variables get set by adding files to a special directory on the ship.  Any file located in the <code>/etc/starphleet.d</code> directory will be sourced and available to all environments in Starphleet. </p>
   <h3 id="overridesperservice">Per-Service</h3>
