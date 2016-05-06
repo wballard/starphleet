@@ -8,7 +8,7 @@ isHome: true
 <section class="bs-docs-section">
   <h1 id="overview" class="page-header">Overview</h1>
   <blockquote>
-    <p>Starphleet is a toolkit for turning virtual or physical machine infrastructure into a continuous deployment stack, running multiple Git-backed services on one more nodes via Linux containers.
+    <p>Starphleet is a toolkit for turning virtual or physical machine infrastructure into a continuous deployment stack, running multiple Git-backed services on one or more nodes via Linux containers.
     </p>
     <p>Starphleet borrows heavily from the concepts of the Twelve-Factor App, and uses an approach that avoids many of the problems inherent in existing autodeployment solutions:
     </p>
@@ -159,7 +159,7 @@ ${PWD}/vmware {% endhighlight %}
       <tr>
         <td>/hq/ldap_servers</td>
         <td>dir</td>
-        <td>The ldap_servers folder contains a list of files for all the ldap configurations used by the security system to secure services. The name of the files are used inside the orders files to configure the security for an endpoint.</td>
+        <td>The ldap_servers folder contains a list of files for all the ldap configurations used by the security system to secure services. The name of the files are used inside the <a href="#orders">orders files</a> to configure the security for an endpoint.</td>
       </tr>
       <tr>
         <td>/hq/overlay</td>
@@ -174,7 +174,7 @@ ${PWD}/vmware {% endhighlight %}
     </tbody>
   </table>
   <h3 id="servicefiles">Service Files</h3>
-  <p>To create a service endpoint you create a new directory off the root of the headquarters. Inside the directory you create an orders file which contains configuration options and deploy commands for the service. This file will tell Starphleet which Git repo to deploy at this endpoint. The following is what the directory structure will look like along with a few of the files that might be associated with your service:</p>
+  <p>To create a service endpoint you create a new directory off the root of the headquarters. Inside the directory you create an <a href="#orders">orders file</a> which contains configuration options and deploy commands for the service. This file will tell Starphleet which Git repo to deploy at this endpoint. The following is what the directory structure will look like along with a few of the files that might be associated with your service:</p>
   <table class="table table-bordered table-striped">
     <thead>
       <tr>
@@ -192,7 +192,7 @@ ${PWD}/vmware {% endhighlight %}
       <tr>
         <td>/hq/service/orders</td>
         <td>file</td>
-        <td>The orders file contains all the environment variables and
+        <td>The <a href="#orders">orders file</a> contains all the environment variables and
           <a href="#commands">Starphleet commands</a>to get a service or remote deployed.</td>
       </tr>
       <tr>
@@ -228,7 +228,7 @@ ${PWD}/vmware {% endhighlight %}
     </tbody>
   </table>
   <h3 id="orderscommands">Orders Commands</h3>
-  <p>There are special Starphleet commands expected to be run in the orders file. Commands are:</p>
+  <p>There are special Starphleet commands expected to be run in the <a href="#orders">orders file</a>. Commands are:</p>
   <table class="table table-bordered table-striped">
     <thead>
       <tr>
@@ -239,7 +239,7 @@ ${PWD}/vmware {% endhighlight %}
     <tbody>
       <tr>
         <td>autodeploy</td>
-        <td>This command is passed a single argument which is a link to a github repo. If the repo is private, the link must be an SSH link and Starphleet must have an SSH key installed with access to the repo. This command will build a container, run your application, and if successfully completed, mount the application to the path corresponding to the location of the orders file.</td>
+        <td>This command is passed a single argument which is a link to a github repo. If the repo is private, the link must be an SSH link and Starphleet must have an SSH key installed with access to the repo. This command will build a container, run your application, and if successfully completed, mount the application to the path corresponding to the location of the <a href="#orders">orders file</a>.</td>
       </tr>
       <tr>
         <td>expose</td>
@@ -247,7 +247,7 @@ ${PWD}/vmware {% endhighlight %}
       </tr>
       <tr>
         <td>unpublished</td>
-        <td>Starphleet will create a container at the location corresponding with the path to the orders file but will not expose the service for web traffic.</td>
+        <td>Starphleet will create a container at the location corresponding with the path to the <a href="#orders">orders file</a> but will not expose the service for web traffic.</td>
       </tr>
     </tbody>
   </table>
@@ -270,7 +270,7 @@ export FOO="BAR" {% endhighlight %}
       </tr>
       <tr>
         <td>$ANY_OTHER</td>
-        <td>Any other environment variable set in the orders file will be passed to the application</td>
+        <td>Any other environment variable set in the <a href="#orders">orders file</a> will be passed to the application</td>
       </tr>
     </tbody>
   </table>
@@ -289,7 +289,7 @@ export FOO="BAR" {% endhighlight %}
   <p> In some cases it might be necessary to set environment variables that are specific to each <a href="#ship">ship</a> in a <a href="#phleet">phleet</a>.  These variables might be unique to a ship like its location.  These environment variables get set by adding files to a special directory on the ship.  Any file located in the <code>/etc/starphleet.d</code> directory will be sourced and available to all environments in Starphleet. </p>
   <h3 id="overridesperservice">Per-Service</h3>
   <p>
-    The orders file used to deploy a container also acts as the final location to set environment variables and override any defaults set upstream from your service.  Common settings in the orders file would include locations to resources, DB credentials, and the <a href="#authentication">authentication</a> mechanism you want Starphleet to use for your service.
+    The <a href="#orders">orders file</a> used to deploy a container also acts as the final location to set environment variables and override any defaults set upstream from your service.  Common settings in the <a href="#orders">orders file</a> would include locations to resources, DB credentials, and the <a href="#authentication">authentication</a> mechanism you want Starphleet to use for your service.
   </p>
 </section>
 <section class="bs-docs-section">
@@ -353,7 +353,7 @@ export FOO="BAR" {% endhighlight %}
 <section class="bs-docs-section">
   <h1 id="buildpacks" class="page-header">Buildpacks</h1>
   <h3 id="howbuildpackswork">How Buildpacks Work</h3>
-  <p>Buildpacks autodetect and provision services in containers for you. We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet orders file so simple is the use of buildpacks and platform package managers to install dynamic, service specific code, such as rubygems or npm and associated dependencies, that may vary with each push of your service. Note that
+  <p>Buildpacks autodetect and provision services in containers for you. We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet <a href="#orders">orders file</a> so simple is the use of buildpacks and platform package managers to install dynamic, service specific code, such as rubygems or npm and associated dependencies, that may vary with each push of your service. Note that
     <b>Starphleet will only deploy one buildpack per Linux container</b>
     - for services which are written in multiple languages, custom buildpacks may be required.</p>
   <p>Starphleet currently includes support for Ruby, Python, NodeJS, and NGINX static buildpacks.</p>
@@ -493,7 +493,7 @@ export LDAP_PASSWORD='****' {% endhighlight %}
     </li>
     <li>In your <a href="#orders">orders file</a>, set <code>SECURITY_MODE</code> to <code>ldap</code>.  Set <code>LDAP_SERVER</code> to the name of the above file you just created</li>
   </ul>
-  <p> Your orders file will now have <code>ldap</code> enabled and point to the above configuration on which LDAP server to use for authentication.  At this point, your service should be authenticating against LDAP. </p>
+  <p> Your <a href="#orders">orders file</a> will now have <code>ldap</code> enabled and point to the above configuration on which LDAP server to use for authentication.  At this point, your service should be authenticating against LDAP. </p>
   <h3 id="jwtconfiguration">JWT Configuration</h3>
   <p> Assigning the <code>SECURITY_MODE</code> setting to <code>jwt</code> requires additional settings in the <a href="#headquarters">headquarters</a>.  You can configure these settings <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.</p>
   <p> JWT requires an authentication application: </p>
@@ -599,13 +599,13 @@ export STARPHLEET_PUBLIC_KEY="${HOME}/.ssh/id_rsa.pub"{% endhighlight %}
     <li>You experience stability issues with HGFS in vmware</li>
   </ul>
   <p>
-    In these instances you may wish to unbind your development directory from the container. By adding a setting to your orders file you can change the behavior of Starphleet to instead detect changes as you save them in your development directory and run a full re-deploy of your containers automatically. To trigger this behavior you can add the following to your 'orders' inside your headquarters.
+    In these instances you may wish to unbind your development directory from the container. By adding a setting to your <a href="#orders">orders file</a> you can change the behavior of Starphleet to instead detect changes as you save them in your development directory and run a full re-deploy of your containers automatically. To trigger this behavior you can add the following to your 'orders' inside your headquarters.
   </p>
 {% highlight bash %}
 export DEVMODE_UNBIND_GIT_DIR="true" {% endhighlight %}
   <h3 id="authindevmode">Authentication</h3>
   <p>
-    Some services depend on authentication. Starphleet automatically supports LDAP and htpasswd authentication. Services are written in such a way that they depend on HTTP headers that are provided by the authentication method. If you need to simulate authenticated services in development mode you can add the following variable to your orders file:
+    Some services depend on authentication. Starphleet automatically supports LDAP and htpasswd authentication. Services are written in such a way that they depend on HTTP headers that are provided by the authentication method. If you need to simulate authenticated services in development mode you can add the following variable to your <a href="#orders">orders file</a>:
   </p>
 {% highlight bash %}
 export DEVMODE_FORCE_AUTH="[username]" {% endhighlight %}
