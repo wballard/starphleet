@@ -91,7 +91,7 @@ do
       # Exclude git and node_modules directory which heavily improves performance.
       EXCLUDES='-not ( -path *node_modules* -prune ) -and -not ( -path *.git* -prune ) -type f'
       # Look for a changed file in the directory - punt after the first one
-      find "${LOCAL}" ${EXCLUDES} -newer "${LAST_RUN_FILE}" -print -quit > "${CHANGED_FILES_FILE}"
+      [ -d "${LOCAL}" ] && find "${LOCAL}" ${EXCLUDES} -newer "${LAST_RUN_FILE}" -print -quit > "${CHANGED_FILES_FILE}"
       # Slurp in those files
       FILES_CHANGED=$(cat ${CHANGED_FILES_FILE})
       # If there were any changed files
@@ -127,10 +127,13 @@ do
   if [ -n "${DEPLOY_REASON}" ]; then
     warn "${DEPLOY_REASON}"
     echo ${ORDERS_SHA} > "${CURRENT_ORDER}/.orders_sha"
+    # Unpublished containers may not have a service sha
+    # so set a default just-in-case so these containers
+    # deploy even if they don't have an 'autodeploy'
+    [ -n "${UNPUBLISHED}" ] && SERVICE_SHA="d000000"
     if [ -d "${LOCAL}" ]; then
       get_CURRENT_SHA "${LOCAL}"
       SERVICE_SHA="${CURRENT_SHA}"
-      [ -n "${UNPUBLISHED}" ] && SERVICE_SHA="d000000"
     fi
     #sha for both the service and the orders asking for it, changing either
     #of these starts up a new container that will run in parallel with prior
