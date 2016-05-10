@@ -130,6 +130,7 @@ do
     if [ -d "${LOCAL}" ]; then
       get_CURRENT_SHA "${LOCAL}"
       SERVICE_SHA="${CURRENT_SHA}"
+      [ -n "${UNPUBLISHED}" ] && SERVICE_SHA="d000000"
     fi
     #sha for both the service and the orders asking for it, changing either
     #of these starts up a new container that will run in parallel with prior
