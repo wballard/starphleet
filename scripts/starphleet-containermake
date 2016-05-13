@@ -38,9 +38,13 @@ fi
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 #mounting host system dirs into the lxc container
 
+dev_mode \
+  && STARPHLEET_ROOT_CONTAINER_PERMISSION="rw" \
+  || STARPHLEET_ROOT_CONTAINER_PERMISSION="r"
+
 #starphleet-base is a create, all orders are a clones to delta0
 cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs/${STARPHLEET_ROOT:-var/starphleet} none bind,r 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs/${STARPHLEET_ROOT} none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
 lxc.mount.entry = ${ADMIRAL_HOME} ${CONTAINER_ROOT}/rootfs/${ADMIRAL_HOME} none defaults,bind,create=dir 0 0
 EOF
 
