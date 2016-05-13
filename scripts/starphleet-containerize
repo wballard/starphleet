@@ -62,12 +62,15 @@ if [ "${git_url}" != "-" ]; then
     # Some developers may wish to unbind the GIT directory to the actual app
     # deployment directory so that packages do not mangle their working git
     # directory.  Supporting both behaviors.
-    if [ -n "${DEVMODE_UNBIND_GIT_DIR}" ]; then
-      sudo rsync -rlKt "${HEADQUARTERS_LOCAL}/${order}/git/" \${APP_IN}/ || true
-    else
-      ln -s "${HEADQUARTERS_LOCAL}/${order}/git" \${APP_IN} || true
+    if [ -d "${HEADQUARTERS_LOCAL}/${order}/git" ]; then
+      if [ -n "${DEVMODE_UNBIND_GIT_DIR}" ]; then
+        sudo rsync -rlKt "${HEADQUARTERS_LOCAL}/${order}/git/" \${APP_IN}/ || true
+        sudo chown -R ubuntu:ubuntu \${APP_IN} || true
+      else
+        sudo chown -R ubuntu:ubuntu "${HEADQUARTERS_LOCAL}/${order}/git"
+        ln -s "${HEADQUARTERS_LOCAL}/${order}/git" \${APP_IN} || true
+      fi
     fi
-    sudo chown -R ubuntu:ubuntu \${APP_IN} || true
   else
     starphleet-git-synch "${git_url}" \${APP_IN}
   fi
