@@ -110,12 +110,13 @@ local _isValidToken = function(tokenType, token)
       --     - Tokens expiration cant have been set above "max"
       --     - Tokens issued time cannot exceed the services configured
       --       expiration time
-      if tokenType == "url" then
-        return token.payload.svc == ngx.var.public_url
+      if tokenType == "url" and
+        token.payload.svc == ngx.var.public_url then
+        return true
       end
-      if token.payload.svc then
-        return false
-      end
+      -- Now we are testing the service level configurable expirations
+      -- since the token sent to us must be either a Auth Bearer (REST)
+      -- or Cookie based JWT token
       if ngx.time() - token.payload.iat <= jwt_expiration_in_seconds and
         token.payload.exp - token.payload.iat >= jwt_max_expiration_duration_in_seconds then
         return true
