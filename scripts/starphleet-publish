@@ -81,21 +81,13 @@ EOF
 # because nxinx set var can't occur after proxy_pass directive
 if [ "${SECURITY_MODE}" = 'jwt' ] ; then
   info jwt enabled
-  echo "  set \$jwt_roles ${JWT_ROLES};" >> "${MOUNT_CONF}"
   echo "  set \$jwt_secret ${JWT_SECRET};" >> "${MOUNT_CONF}"
-  # if this is NOT set, the service will return a 401 if request is not authorized
-  # instead of redirecting the request
-  if [ -n "${JWT_AUTH_SITE}" ] ; then
-    echo "  set \$jwt_auth_site ${JWT_AUTH_SITE};" >> "${MOUNT_CONF}"
-  else
-    echo "  set \$jwt_auth_site RETURN_401;" >> "${MOUNT_CONF}"
-  fi
+  echo "  set \$jwt_auth_site ${JWT_AUTH_SITE};" >> "${MOUNT_CONF}"
   echo "  set \$jwt_cookie_domain ${JWT_COOKIE_DOMAIN};" >> "${MOUNT_CONF}"
   echo "  set \$public_url ${public_url};" >> "${MOUNT_CONF}"
   # default expiration of 3600 seconds
-  echo "  set \$jwt_expiration ${JWT_EXPIRATION_IN_SECONDS};" >> "${MOUNT_CONF}"
-  echo "  access_by_lua_file /var/starphleet/nginx/lua/guard.lua;" >> "${MOUNT_CONF}"
-  echo "  header_filter_by_lua_file /var/starphleet/nginx/lua/jwt_cookie.lua;" >> "${MOUNT_CONF}"
+  echo "  set \$jwt_expiration_in_seconds ${JWT_EXPIRATION_IN_SECONDS};" >> "${MOUNT_CONF}"
+  echo "  access_by_lua_file /var/starphleet/nginx/lua/jwt.lua;" >> "${MOUNT_CONF}"
 fi
 
 cat << EOF >> "${MOUNT_CONF}"
