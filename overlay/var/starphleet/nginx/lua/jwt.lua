@@ -1,5 +1,6 @@
 require "string"
 require "table"
+local cjson = require "cjson"
 local jwt = require "resty.jwt"
 local jwt_secret = ngx.var.jwt_secret
 local jwt_auth_site = ngx.var.jwt_auth_site
@@ -20,13 +21,26 @@ end
 -- * Helper Methods
 -- *****************************************************************************
 
--- TODO: Documentation
+------------------------------------------------------------------------------
+-- @function _sendUserToLogin()
+--
+-- Build the appropriate URL based on the calling service' "auth_site"
+-- setting.  Then redirect the user to the "auth_site".  This function
+-- will be called anywhere a JWT token fails to meet the criteria to
+-- allow the user to proceed
+------------------------------------------------------------------------------
 local _sendUserToLogin = function()
   local full_request_uri = ngx.var.scheme .. '://' .. ngx.var.host .. ngx.var.request_uri
   return ngx.redirect(jwt_auth_site .. "?target=" .. ngx.escape_uri(full_request_uri))
 end
 
--- TODO: Documentation
+------------------------------------------------------------------------------
+-- @function _getAuthorizationHeader()
+--
+-- Return the body of the Authorization header after stripping out
+-- any fragments of "Bearer".  The resulting string will either be
+-- the JWT token or an empty string of Authorization wasn't passed
+------------------------------------------------------------------------------
 local _getAuthorizationHeader = function()
   if headers["Authorization"] then
     return headers["Authorization"]:gsub("Bearer ","")
@@ -35,7 +49,21 @@ local _getAuthorizationHeader = function()
   return ""
 end
 
--- TODO: Documentation
+------------------------------------------------------------------------------
+-- @function _resetHeaders(token)
+--
+-- Pass the results of "resty:verify" to this method to reset any "jwt-*"
+-- headers to match the "payload" portion of the jwt token.
+--
+-- The headers will be available to apps like this:
+--   jwt-iat: $token.payload.iat
+--   jwt-exp: $token.payload.exp
+--   jwt-roles: $token.payload.roles
+--   ...etc
+--
+-- The first iteration deletes anything starting with "jwt-".  The second
+-- loop re-maps the payload to headers
+------------------------------------------------------------------------------
 local _resetHeaders = function(token)
   for k,v in pairs(ngx.req.get_headers()) do
     if (string.sub(k,1,4) == 'jwt-') then
@@ -83,61 +111,59 @@ local _isValidToken = function(tokenType, token)
       --     - Tokens issued time cannot exceed the services configured
       --       expiration time
       if tokenType == "url" then
-        ngx.log(ngx.ERR,"URL Token - ",token.payload.svc == ngx.var.public_url)
         return token.payload.svc == ngx.var.public_url
       end
       if token.payload.svc then
-        ngx.log(ngx.ERR,"Any Other Token With SVC",ngx.time())
         return false
       end
       if ngx.time() - token.payload.iat <= jwt_expiration_in_seconds and
         token.payload.exp - token.payload.iat >= jwt_max_expiration_duration_in_seconds then
-        ngx.log(ngx.ERR,"Expire Times Okay")
         return true
       end
   end
-  ngx.log(ngx.ERR,"Return Catchall")
   return false
 end
 
--- Print contents of `tbl`, with indentation.
--- `indent` sets the initial level of indentation.
-local buffer = ""
-function tprint (tbl, indent)
-  if not indent then indent = 0 end
-  for k, v in pairs(tbl) do
-    buffer = buffer .. string.rep("  ", indent) .. k .. ": "
-    if type(v) == "table" then
-      -- buffer = buffer .. formatting
-      tprint(v, indent+1)
-    elseif type(v) == 'boolean' then
-      buffer = buffer .. tostring(v) .. " "
-    else
-      buffer = buffer .. v .. " "
-    end
-  end
-  return buffer
-end
+-- *****************************************************************************
+-- * Main
+-- *****************************************************************************
 
--- TODO: Documentation
+------------------------------------------------------------------------------
+-- Decode each of the token types.  We handle things slightly different
+-- based on how the caller sent us the JWT token.  From a high level:
+--    * Passing JWT via URL allows custom expiration times but
+--      confines your JWT token to a specific service.
+--    * After a URL token authenticates, a cookie is returned
+--      populated assigned an experation set in the orders.
+--    * The "cookie" JWT token can be passed via the "Authorization"
+--      header to REST api's.  These kinds of requests result in a "401"
+--      if the JWT token is not valid or expires instead of redirecting
+--      to the login app
+------------------------------------------------------------------------------
 local authorizationBearerString = _getAuthorizationHeader()
 local verified_url_token = jwt:verify(jwt_secret, ngx.var.arg_jwt, 0)
 local verified_cookie_token = jwt:verify(jwt_secret, ngx.var.cookie_jwt, 0)
 local verified_bearer_token = jwt:verify(jwt_secret, authorizationBearerString, 0)
 
-buffer = ""
-ngx.log(ngx.ERR,"Tokens - url - ",tprint(verified_url_token))
-buffer = ""
-ngx.log(ngx.ERR,"Tokens - cookie - ",tprint(verified_cookie_token))
-buffer = ""
-ngx.log(ngx.ERR,"Tokens - header - ",authorizationBearerString, tprint(verified_bearer_token))
-
-
+------------------------------------------------------------------------------
+-- If the token was passed via the "Authorization: Bearer" header
+-- all we do is validate the token and let the request proceed.
+-- a cookie does not get refreshed or generated for these requests
+------------------------------------------------------------------------------
 if _isValidToken("bearer", verified_bearer_token) then
-  ngx.log(ngx.ERR,"Bearer Success")
+  -- ** Reset any headers starting with jwt- with fields in our payload ** --
   return _resetHeaders(verified_bearer_token)
 end
 
+------------------------------------------------------------------------------
+-- JWT tokens passed via the URL have priority over a JWT token
+-- set via the cookie.  The JWT token passed in the URL must
+-- have the claim "svc" binding the URL based token to only one
+-- service.  An app can use the resulting cookie (set below)
+-- for calls to other services and/or to refresh the session
+-- associated with the JWT token that was originally passed in the URL.
+-- Below - We associate the 'token' with whichever token is valid first
+------------------------------------------------------------------------------
 local token = nil
 if _isValidToken("url", verified_url_token) then
   token = verified_url_token
@@ -145,28 +171,54 @@ elseif _isValidToken("cookie", verified_cookie_token) then
   token = verified_cookie_token
 end
 
+------------------------------------------------------------------------------
+-- If the above process results in a valid token then we set the cookie
+-- with the appropriate JWT payload
+------------------------------------------------------------------------------
 if (token) then
 
+  ------------------------------------------------------------------------------
+  -- Refresh the expire time
+  ------------------------------------------------------------------------------
   token.payload.exp = ngx.time() + jwt_expiration_in_seconds
 
+  ------------------------------------------------------------------------------
+  -- If the "svc" claim exists we purge it and then rebuild the JWT token
+  -- without the svc claim to be assigned to the cookie below
+  ------------------------------------------------------------------------------
+  token.payload["svc"] = nil
   local signedJwtToken = jwt:sign(jwt_secret, { payload=token.payload, header=token.header } )
 
+
+  ------------------------------------------------------------------------------
+  -- LUA does not support string appends OR ternary operations
+  -- Even still, for now, I'm keeping the format for easy
+  -- manipulations.  Dynamically build a cookie string to assign
+  -- the JWT session token to the request
+  ------------------------------------------------------------------------------
   local cookieString = ""
   cookieString = cookieString .. (signedJwtToken and "jwt=" .. signedJwtToken or '')
   cookieString = cookieString .. (jwt_cookie_domain and '; Domain=' .. jwt_cookie_domain or '')
   cookieString = cookieString .. (ngx.var.public_url and '; Path=' .. ngx.var.public_url or '')
-  cookieString = cookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(ngx.time() + jwt_expiration_in_seconds) or '')
-  -- and we create the cookie, here the interesting part is the expiration which is the JWT_EXPIRATION_IN_SECONDS from THE ORDERS
-  -- plus the leeway value from the context which gives us a cookie that can expire AFTER the expiration of the JWT token it contains
-  -- thus we can continue to make decisions based on the JWT token last issued instead of having no cookie at all when the token expires.
-  -- This behavior is acceptable because JWT token we use to get here is VALID it's only the exp value within that has been exceeded, and
-  -- given our leeway behavior we can go ahead and re-issue a token with a new expiration date (apply the leeway).
+  cookieString = cookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
   ngx.header['Set-Cookie'] = cookieString
+  -- ** Reset any headers starting with jwt- with fields in our payload ** --
   return _resetHeaders(token)
 end
 
+  ------------------------------------------------------------------------------
+  -- We get to here if none of the tokens succeeded in being valid.
+  -- Before we redirect the user to the login page we check to see
+  -- if the request was made using the Authorization header.  If it was
+  -- made using the Auth header, this was an API call and we set status
+  -- to 401 letting the API call know it needs to re-authenticate.
+  ------------------------------------------------------------------------------
 if authorizationBearerString ~= "" then
   return ngx.exit(401)
 end
 
+  ------------------------------------------------------------------------------
+  -- If we get here, no condition existed to verify a JWT token sent to us
+  -- and thus, no matter what, we redirect the user to the login page
+  ------------------------------------------------------------------------------
 _sendUserToLogin()
