@@ -91,7 +91,7 @@ local _isValidToken = function(tokenType, token)
         return false
       end
       if ngx.time() - token.payload.iat <= jwt_expiration_in_seconds and
-        token.payload.exp - token.payload.iat <= jwt_max_expiration_duration then
+        token.payload.exp - token.payload.iat >= jwt_max_expiration_duration_in_seconds then
         ngx.log(ngx.ERR,"Expire Times Okay")
         return true
       end
