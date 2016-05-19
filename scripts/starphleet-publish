@@ -104,6 +104,7 @@ cat << EOF >> "${MOUNT_CONF}"
   proxy_set_header X-Forwarded-Host \$host;
   proxy_set_header X-Forwarded-Server \$host;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Starphleet-Authentic "${STARPHLEET_AUTHENTIC_TOKEN}";
   proxy_set_header X-Starphleet-Service-Name: ${order};
   proxy_set_header Host \$http_host;
   # headers go here
@@ -118,7 +119,7 @@ if [ -n "${NGINX_LOCATION_CONFIGS}" ]; then
   echo "${NGINX_LOCATION_CONFIGS}" >> "${MOUNT_CONF}"
 fi
 # If the Starphleet EC2 Region is set - also output this header
-if [ ! -z "${STARPHLEET_EC2_REGION}" ]; then
+if [ -n "${STARPHLEET_EC2_REGION}" ]; then
   echo "  more_set_headers 'X-Starphleet-Ship: ${STARPHLEET_EC2_REGION}';" >> "${MOUNT_CONF}"
 fi
 
