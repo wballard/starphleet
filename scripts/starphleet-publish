@@ -75,25 +75,28 @@ location ${public_url}/ {
   gzip_proxied any;
   gzip_comp_level 6;
   include ${NGINX_CONF}/cors.conf;
+  set \$sendto '';
 EOF
 
 # This section handles jwt authentication.  It has to be here (before proxy_pass directive)
 # because nxinx set var can't occur after proxy_pass directive
 if [ "${SECURITY_MODE}" = 'jwt' ] ; then
-  info jwt enabled
-  echo "  set \$jwt_secret ${JWT_SECRET};" >> "${MOUNT_CONF}"
-  echo "  set \$jwt_auth_site ${JWT_AUTH_SITE};" >> "${MOUNT_CONF}"
-  echo "  set \$jwt_cookie_domain ${JWT_COOKIE_DOMAIN};" >> "${MOUNT_CONF}"
-  echo "  set \$public_url ${public_url};" >> "${MOUNT_CONF}"
-  # default expiration of 3600 seconds
-  echo "  set \$jwt_expiration_in_seconds ${JWT_EXPIRATION_IN_SECONDS};" >> "${MOUNT_CONF}"
-  echo "  access_by_lua_file /var/starphleet/nginx/lua/jwt.lua;" >> "${MOUNT_CONF}"
+info jwt enabled
+cat << EOF >> "${MOUNT_CONF}"
+  set \$jwt_secret ${JWT_SECRET};
+  set \$jwt_auth_site ${JWT_AUTH_SITE};
+  set \$jwt_cookie_domain ${JWT_COOKIE_DOMAIN};
+  set \$public_url ${public_url};
+  set \$jwt_login '';
+  set \$jwt_expiration_in_seconds ${JWT_EXPIRATION_IN_SECONDS};
+  rewrite_by_lua_file /var/starphleet/nginx/lua/jwt.lua;
+EOF
 fi
 
 cat << EOF >> "${MOUNT_CONF}"
   if (\$http_cookie ~ "beta_${order}=(.*?)(;|$)") {
     set \$sendto \$1;
-    rewrite ${public_url}/(.*) /\$sendto/\$1 last;
+    rewrite ${public_url}/(.*) \$sendto/\$1 last;
   }
   rewrite ${public_url}/(.*) /\$1 break;
   proxy_pass http://${IP_ADDRESS}:${PORT};
