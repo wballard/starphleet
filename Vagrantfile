@@ -5,6 +5,7 @@ require 'fileutils'
 
 VAGRANT_MEMSIZE = ENV['STARPHLEET_VAGRANT_MEMSIZE'] || '8192'
 SHIP_NAME = ENV['STARPHLEET_SHIP_NAME'] || 'ship.local'
+SHIP_HOSTNAME = SHIP_NAME.split('.')[0]
 
 $base_provision_script = <<SCRIPT
 cd /
@@ -82,14 +83,14 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
 
   config.hostmanager.enabled = true
   config.hostmanager.manage_host = true
-  # config.hostmanager.aliases = SHIP_NAME
+  config.hostmanager.aliases = [ SHIP_NAME, 'ship.local', SHIP_HOSTNAME ]
 
-  config.vm.hostname = SHIP_NAME
+  config.vm.hostname = SHIP_HOSTNAME
 
   config.vm.provider :vmware_fusion do |f, override|
     override.vm.box = ENV['BOX_NAME'] || 'trusty-vmware'
     override.vm.box_url = "https://s3.amazonaws.com/glg_starphleet/trusty-14.04-amd64-vmwarefusion.box"
-    f.vmx["displayName"] = SHIP_NAME
+    f.vmx["displayName"] = SHIP_HOSTNAME
     f.vmx["memsize"] = VAGRANT_MEMSIZE
   end
 
@@ -109,7 +110,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
 
   config.vm.provider :parallels do |f, override|
     override.vm.box = ENV['BOX_NAME'] || 'parallels/ubuntu-14.04'
-    f.name = SHIP_NAME
+    f.name = SHIP_HOSTNAME
     f.customize ["set", :id, "--memsize", VAGRANT_MEMSIZE]
   end
 end
