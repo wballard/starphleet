@@ -32,6 +32,8 @@ end
 local _sendUserToLogin = function()
   local redirectUrl = ngx.var.request_uri
   redirectUrl = redirectUrl:gsub(ngx.var.public_url, jwt_auth_site)
+  ngx.req.set_header('X-Starphleet-Redirect', "true");
+  ngx.req.set_header('X-Starphleet-OriginalUrl', ngx.var.request_uri);
   return ngx.exec(redirectUrl)
 end
 
@@ -172,8 +174,6 @@ if _isValidToken("url", verified_url_token) then
 elseif _isValidToken("cookie", verified_cookie_token) then
   token = verified_cookie_token
 end
-
-ngx.log(ngx.ERR,"HELLOE!?")
 
 ------------------------------------------------------------------------------
 -- If the above process results in a valid token then we set the cookie
