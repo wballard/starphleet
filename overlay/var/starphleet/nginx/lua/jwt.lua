@@ -34,6 +34,7 @@ local _sendUserToLogin = function()
   redirectUrl = redirectUrl:gsub(ngx.var.public_url, jwt_auth_site)
   ngx.req.set_header('X-Starphleet-Redirect', "true");
   ngx.req.set_header('X-Starphleet-OriginalUrl', ngx.var.request_uri);
+  ngx.req.set_header('X-Starphleet-Authentic', ngx.var.authentic_token);
   return ngx.exec(redirectUrl)
 end
 
