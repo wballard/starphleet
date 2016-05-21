@@ -50,6 +50,8 @@ EC2_DRIVES["/dev/xvde"]="/var/lib/lxc/data"
 ##########################################################
 # DEVMODE
 ##########################################################
+export DEVMODE_BUILD_CACHE="${DEVMODE_BUILD_CACHE:-'/home/ubuntu/.devmode_build_cache'}"
+
 unset DEVMODE_UNBIND_GIT_DIR
 unset DEVMODE_FORCE_AUTH
 unset DEVMODE_ENABLED

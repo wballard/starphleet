@@ -29,6 +29,7 @@ if [ "${name}" == "${LAST_KNOWN_GOOD_CONTAINER}" -a "${name}" == "${DO_WE_HAVE_T
   lxc-attach --name ${name} -- bash starphleet-wait-network
   if dev_mode && [ -n "${DEVMODE_UNBIND_GIT_DIR}" ]; then
     lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "rsync -rlKt '${ORDER_LOCAL}/' '/home/ubuntu/app/'"
+    lxc-attach --name ${name} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "[ -f '${DEVMODE_BUILD_CACHE}' ] && rsync -rav --exclude-from='${DEVMODE_BUILD_CACHE}' --delete '${ORDER_LOCAL}/' '/home/ubuntu/app/'"
   fi
 else
   warn "creating a new container"
