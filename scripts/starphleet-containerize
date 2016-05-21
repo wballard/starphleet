@@ -114,7 +114,7 @@ trace Post-prepping container
 [ -x ${orders_dir}/after_containerize ] && sudo ${orders_dir}/after_containerize
 
 # Keep track of different files from out build process
-sudo rsync -ruvn --delete "${HEADQUARTERS_LOCAL}/${order}/git/" \${APP_IN}/ | grep -iE "^deleting " | sed -e 's|^deleting ||' > ${DEVMODE_BUILD_CACHE}
+devmode && sudo rsync -ruvn --delete "${HEADQUARTERS_LOCAL}/${order}/git/" \${APP_IN}/ | grep -iE "^deleting " | sed -e 's|^deleting ||' > ${DEVMODE_BUILD_CACHE}
 
 trace Container ready
 
