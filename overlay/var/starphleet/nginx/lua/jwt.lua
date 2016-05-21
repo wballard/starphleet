@@ -71,11 +71,11 @@ end
 local _resetHeaders = function(token)
   for k,v in pairs(ngx.req.get_headers()) do
     if (string.sub(k,1,4) == 'jwt-') then
-      ngx.header[k] = nil
+      ngx.req.set_header(k,nil)
     end
   end
   for k,v in pairs(token.payload) do
-    ngx.header["jwt-" .. k] = cjson.encode(v)
+    ngx.req.set_header("jwt-" .. k,cjson.encode(v))
   end
 end
 
