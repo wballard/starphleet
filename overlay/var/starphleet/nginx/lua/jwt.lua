@@ -75,7 +75,7 @@ local _resetHeaders = function(token)
     end
   end
   for k,v in pairs(token.payload) do
-    ngx.header["jwt-" .. k] = v
+    ngx.header["jwt-" .. k] = cjson.encode(v)
   end
 end
 
@@ -121,8 +121,8 @@ local _isValidToken = function(tokenType, token)
       -- Now we are testing the service level configurable expirations
       -- since the token sent to us must be either a Auth Bearer (REST)
       -- or Cookie based JWT token
-      if ngx.time() - token.payload.iat <= jwt_expiration_in_seconds and
-        token.payload.exp - token.payload.iat >= jwt_max_expiration_duration_in_seconds then
+      if ngx.time() - token.payload.iat <= jwt_expiration_in_seconds then -- and
+        -- token.payload.exp - token.payload.iat >= jwt_max_expiration_duration_in_seconds then
         return true
       end
   end
@@ -170,8 +170,13 @@ end
 -- Below - We associate the 'token' with whichever token is valid first
 ------------------------------------------------------------------------------
 local token = nil
+local redirect = nil
 if _isValidToken("url", verified_url_token) then
   token = verified_url_token
+  redirect = ngx.var.request_uri
+  redirect = redirect:gsub([[jwt=[^&]*&?]],"")
+  redirect = redirect:gsub([[%?$]],"")
+  redirect = redirect:gsub([[&$]],"")
 elseif _isValidToken("cookie", verified_cookie_token) then
   token = verified_cookie_token
 end
@@ -208,6 +213,11 @@ if (token) then
   cookieString = cookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
   ngx.header['Set-Cookie'] = cookieString
   -- ** Reset any headers starting with jwt- with fields in our payload ** --
+
+  if redirect then
+    return ngx.redirect(redirect)
+  end
+
   return _resetHeaders(token)
 end
 
