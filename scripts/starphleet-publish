@@ -75,7 +75,6 @@ location ${public_url}/ {
   gzip_proxied any;
   gzip_comp_level 6;
   include ${NGINX_CONF}/cors.conf;
-  set \$sendto '';
 EOF
 
 # This section handles jwt authentication.  It has to be here (before proxy_pass directive)
