@@ -3,6 +3,7 @@
 
 require 'fileutils'
 
+VAGRANT_CPUS = ENV['STARPHLEET_VAGRANT_CPUS'] || `expr $(sysctl -n hw.physicalcpu) / 2`
 VAGRANT_MEMSIZE = ENV['STARPHLEET_VAGRANT_MEMSIZE'] || '8192'
 SHIP_NAME = ENV['STARPHLEET_SHIP_NAME'] || 'ship.local'
 SHIP_HOSTNAME = SHIP_NAME.split('.')[0]
@@ -98,6 +99,7 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
     override.vm.box = ENV['BOX_NAME'] || 'trusty-virtualbox'
     override.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
     f.customize ["modifyvm", :id, "--memory", VAGRANT_MEMSIZE]
+    f.customize ["modifyvm", :id, "--cpus", VAGRANT_CPUS]
     config.vm.network "private_network", :type => 'dhcp', :adapter => 2
     config.hostmanager.ip_resolver = proc do |machine|
       result = ""
