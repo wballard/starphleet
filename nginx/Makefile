@@ -13,7 +13,7 @@ ${NGINX}: always
 	mkdir -p ${INSTALL_LOCATION}
 	cd ${BUILD_ROOT}/LuaJIT-2.0.4 && make && make install
 	cd ${BUILD_ROOT}/lua-cjson-2.1.0 && make && make install
-	cd ${NGINX_ROOT} && ./configure --with-mail --with-mail_ssl_module --with-http_ssl_module \
+	cd ${NGINX_ROOT} && ./configure --with-mail --with-http_v2_module --with-mail_ssl_module --with-http_ssl_module \
 		--prefix=${INSTALL_LOCATION} \
 		--with-ld-opt="-Wl,-rpath,/usr/local/bin/luajit" \
 		--add-module=${BUILD_ROOT}/headers-more-nginx-module-0.25 \
