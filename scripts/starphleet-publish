@@ -68,7 +68,6 @@ mkdir -p "${NGINX_CONF}/htpasswd"
 
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
-
 location ${public_url}/ {
   gzip on;
   gzip_types *;
@@ -79,7 +78,7 @@ EOF
 
 # This section handles jwt authentication.  It has to be here (before proxy_pass directive)
 # because nxinx set var can't occur after proxy_pass directive
-if echo "${SECURITY_MODE}" | grep 'jwt' ] ; then
+if [ "${SECURITY_MODE}" = 'jwt' ]; then
 info jwt enabled
 cat << EOF >> "${MOUNT_CONF}"
   set \$jwt_secret ${JWT_SECRET};
@@ -122,7 +121,7 @@ if [ -n "${STARPHLEET_EC2_REGION}" ]; then
   echo "  more_set_headers 'X-Starphleet-Ship: ${STARPHLEET_EC2_REGION}';" >> "${MOUNT_CONF}"
 fi
 
-if echo "${SECURITY_MODE}" | grep 'htpasswd' ; then
+if [ "${SECURITY_MODE}" = 'htpasswd' ]; then
   info password file enabled
   HTPASSWD_FILE="${NGINX_CONF}/htpasswd/${order}.htpasswd"
   echo "${HTPASSWD}" > "${HTPASSWD_FILE}"
@@ -135,7 +134,7 @@ if [ -n "${DEVMODE_FORCE_AUTH}" ]; then
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} ${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
 fi
-if echo "${SECURITY_MODE}" | grep 'ldap' ; then
+if [ "${SECURITY_MODE}" = 'ldap' ]; then
   info LDAP enabled
   echo "  auth_ldap \"Forbidden!\";" >> "${MOUNT_CONF}"
   echo "  auth_ldap_servers $LDAP_SERVER;" >> "${MOUNT_CONF}"
