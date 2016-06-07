@@ -135,7 +135,7 @@ function validate_security() {
   ################
   # LDAP Rules
   ################
-  if [ "${SECURITY_MODE}" = "ldap" ]; then
+  if echo "${SECURITY_MODE}" | grep 'ldap' ; then
     if [ -z "${LDAP_SERVER}" ]; then
       error "Must specify LDAP server [${SECURITY_MODE}] ${LDAP_SERVER}"
       return ${FALSE}
@@ -145,11 +145,11 @@ function validate_security() {
   ################
   # JWT Rules
   ################
-  if [ "${SECURITY_MODE}" = "jwt" ]; then
+  if echo "${SECURITY_MODE}" | grep 'jwt' ; then
     if [ -z "${JWT_SECRET}" ] || \
        [ -z "${JWT_COOKIE_DOMAIN}" ] || \
-       [ -z "${JWT_EXPIRATION_IN_SECONDS}" ] || \
-       [ -z "${JWT_ROLES}" ]; then
+       [ -z "${JWT_COOKIE_NAME}" ] || \
+       [ -z "${JWT_EXPIRATION_IN_SECONDS}" ]; then
        error "All JWT vars not set"
        return ${FALSE}
     fi
@@ -158,7 +158,7 @@ function validate_security() {
   ################
   # HTPASSWD Rules
   ################
-  if [ "${SECURITY_MODE}" = "htpasswd" ]; then
+  if echo "${SECURITY_MODE}" | grep 'htpasswd' ; then
     if [ -z "${HTPASSWD}" ]; then
       error "HTPASSWD not set: ${HTPASSWD}"
       return ${FALSE}

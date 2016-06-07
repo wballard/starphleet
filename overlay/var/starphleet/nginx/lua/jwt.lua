@@ -5,6 +5,7 @@ local jwt = require "resty.jwt"
 local jwt_secret = ngx.var.jwt_secret
 local jwt_auth_site = ngx.var.jwt_auth_site
 local jwt_cookie_domain = ngx.var.jwt_cookie_domain
+local jwt_cookie_name = ngx.var.jwt_cookie_name
 local jwt_expiration_in_seconds = tonumber(ngx.var.jwt_expiration_in_seconds)
 local headers = ngx.req.get_headers()
 
@@ -92,7 +93,7 @@ end
 --   * iat and exp fields must be valid numbers
 --   * Must not be expired
 ------------------------------------------------------------------------------
-local _isValidToken = function(tokenType, token)
+local _isValidToken = function(token)
   if token["verified"] and
     type(token["payload"]) == "table" and
     token.payload.iat and
@@ -100,31 +101,13 @@ local _isValidToken = function(tokenType, token)
     type(token.payload.iat) == "number" and
     type(token.payload.exp) == "number" and
     token.payload.exp >= ngx.time() then
-      -- At this point the token itself has all the items
-      -- we expect.  Now we need to validate the various
-      -- conditions in which we may receive a token
-      --   * If token was passed via URL:
-      --     - Must contain "svc" claim
-      --     - "svc" claim must match the requested service
-      --     - This is required to allow URL tokens to override
-      --       expiration settings but be locked to a specific
-      --       service
-      --   * If token was passed via Cookie or Bearer
-      --     - Can NOT contain "svc"
-      --     - Tokens expiration cant have been set above "max"
-      --     - Tokens issued time cannot exceed the services configured
-      --       expiration time
-      if tokenType == "url" and
-        token.payload.svc == ngx.var.public_url then
-        return true
-      end
       -- Now we are testing the service level configurable expirations
       -- since the token sent to us must be either a Auth Bearer (REST)
       -- or Cookie based JWT token
-      if ngx.time() - token.payload.iat <= jwt_expiration_in_seconds then -- and
+      -- if ngx.time() - token.payload.iat <= jwt_expiration_in_seconds then -- and
         -- token.payload.exp - token.payload.iat >= jwt_max_expiration_duration_in_seconds then
-        return true
-      end
+    return true
+      -- end
   end
   return false
 end
@@ -147,18 +130,8 @@ end
 ------------------------------------------------------------------------------
 local authorizationBearerString = _getAuthorizationHeader()
 local verified_url_token = jwt:verify(jwt_secret, ngx.var.arg_jwt, 0)
-local verified_cookie_token = jwt:verify(jwt_secret, ngx.var.cookie_jwt, 0)
+local verified_cookie_token = jwt:verify(jwt_secret, ngx.var["cookie_" .. jwt_cookie_name], 0)
 local verified_bearer_token = jwt:verify(jwt_secret, authorizationBearerString, 0)
-
-------------------------------------------------------------------------------
--- If the token was passed via the "Authorization: Bearer" header
--- all we do is validate the token and let the request proceed.
--- a cookie does not get refreshed or generated for these requests
-------------------------------------------------------------------------------
-if _isValidToken("bearer", verified_bearer_token) then
-  -- ** Reset any headers starting with jwt- with fields in our payload ** --
-  return _resetHeaders(verified_bearer_token)
-end
 
 ------------------------------------------------------------------------------
 -- JWT tokens passed via the URL have priority over a JWT token
@@ -171,14 +144,16 @@ end
 ------------------------------------------------------------------------------
 local token = nil
 local redirect = nil
-if _isValidToken("url", verified_url_token) then
+if _isValidToken(verified_url_token) then
   token = verified_url_token
   redirect = ngx.var.request_uri
   redirect = redirect:gsub([[jwt=[^&]*&?]],"")
   redirect = redirect:gsub([[%?$]],"")
   redirect = redirect:gsub([[&$]],"")
-elseif _isValidToken("cookie", verified_cookie_token) then
+elseif _isValidToken(verified_cookie_token) then
   token = verified_cookie_token
+elseif _isValidToken(verified_bearer_token) then
+  token = verified_bearer_token
 end
 
 ------------------------------------------------------------------------------
@@ -193,10 +168,8 @@ if (token) then
   token.payload.exp = ngx.time() + jwt_expiration_in_seconds
 
   ------------------------------------------------------------------------------
-  -- If the "svc" claim exists we purge it and then rebuild the JWT token
-  -- without the svc claim to be assigned to the cookie below
+  -- Create a new jwt token
   ------------------------------------------------------------------------------
-  token.payload["svc"] = nil
   local signedJwtToken = jwt:sign(jwt_secret, { payload=token.payload, header=token.header } )
 
 
@@ -207,9 +180,9 @@ if (token) then
   -- the JWT session token to the request
   ------------------------------------------------------------------------------
   local cookieString = ""
-  cookieString = cookieString .. (signedJwtToken and "jwt=" .. signedJwtToken or '')
+  cookieString = cookieString .. (signedJwtToken and jwt_cookie_name .. "=" .. signedJwtToken or '')
   cookieString = cookieString .. (jwt_cookie_domain and '; Domain=' .. jwt_cookie_domain or '')
-  cookieString = cookieString .. (ngx.var.public_url and '; Path=' .. ngx.var.public_url or '')
+  cookieString = cookieString .. '; Path=/'
   cookieString = cookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
   ngx.header['Set-Cookie'] = cookieString
   -- ** Reset any headers starting with jwt- with fields in our payload ** --

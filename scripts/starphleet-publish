@@ -79,17 +79,17 @@ EOF
 
 # This section handles jwt authentication.  It has to be here (before proxy_pass directive)
 # because nxinx set var can't occur after proxy_pass directive
-if [ "${SECURITY_MODE}" = 'jwt' ] ; then
+if echo "${SECURITY_MODE}" | grep 'jwt' ] ; then
 info jwt enabled
 cat << EOF >> "${MOUNT_CONF}"
   set \$jwt_secret ${JWT_SECRET};
   set \$jwt_auth_site ${JWT_AUTH_SITE};
   set \$jwt_cookie_domain ${JWT_COOKIE_DOMAIN};
+  set \$jwt_cookie_name ${JWT_COOKIE_NAME};
   set \$public_url ${public_url};
-  set \$jwt_login '';
   set \$jwt_expiration_in_seconds ${JWT_EXPIRATION_IN_SECONDS};
   set \$authentic_token "${STARPHLEET_AUTHENTIC_TOKEN}";
-  rewrite_by_lua_file /var/starphleet/nginx/lua/jwt.lua;
+  access_by_lua_file /var/starphleet/nginx/lua/jwt.lua;
 EOF
 fi
 
@@ -122,20 +122,20 @@ if [ -n "${STARPHLEET_EC2_REGION}" ]; then
   echo "  more_set_headers 'X-Starphleet-Ship: ${STARPHLEET_EC2_REGION}';" >> "${MOUNT_CONF}"
 fi
 
-if [ "${SECURITY_MODE}" = 'htpasswd' ]; then
+if echo "${SECURITY_MODE}" | grep 'htpasswd' ; then
   info password file enabled
   HTPASSWD_FILE="${NGINX_CONF}/htpasswd/${order}.htpasswd"
   echo "${HTPASSWD}" > "${HTPASSWD_FILE}"
-  echo "  auth_basic \"\";" >> "${MOUNT_CONF}"
+  echo "  auth_basic \"Forbidden!\";" >> "${MOUNT_CONF}"
   echo "  auth_basic_user_file ${HTPASSWD_FILE};" >> "${MOUNT_CONF}"
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
 fi
-if [ ! -z "${DEVMODE_FORCE_AUTH}" ]; then
+if [ -n "${DEVMODE_FORCE_AUTH}" ]; then
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} ${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=${DEVMODE_FORCE_AUTH};" >> "${MOUNT_CONF}"
 fi
-if [ "${SECURITY_MODE}" = 'ldap' ]; then
+if echo "${SECURITY_MODE}" | grep 'ldap' ; then
   info LDAP enabled
   echo "  auth_ldap \"Forbidden!\";" >> "${MOUNT_CONF}"
   echo "  auth_ldap_servers $LDAP_SERVER;" >> "${MOUNT_CONF}"
