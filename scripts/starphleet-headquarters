@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env starphleet-launcher
 ### Usage:
 ###    starphleet-headquarters [<url>]
 ### --help
@@ -9,14 +9,12 @@
 ### branch rather than default master.
 ###
 ### If <url> is not specified, this script will try to print the headquarters.
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "${DIR}/tools"
-help=$(grep "^### " "$0" | cut -c 5-)
-eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
-set -e
+
+run_as_root_or_die
 
 if [ -n "${url}" ]; then
   echo export HEADQUARTERS_REMOTE="${url}" > "${HEADQUARTERS_SOURCE}"
+  [ -d "${HEADQUARTERS_LOCAL}" ] && rm -rf "${HEADQUARTERS_LOCAL}"/..?* "${HEADQUARTERS_LOCAL}"/.[!.]* ${HEADQUARTERS_LOCAL}/*
   info Headquarters set to ${url}
 elif [ -f "${HEADQUARTERS_SOURCE}" ]; then
   info Headquarters is $(cat ${HEADQUARTERS_SOURCE})

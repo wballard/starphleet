@@ -15,12 +15,10 @@
 # Don't run if not on a Mac
 [ "$(uname -s)" != "Darwin" ] && exit 0
 
-mkdir -p "${HOME}/starphleet_dev/data"
-
 ifconfig -a \
   | grep -A2 en \
   | grep -v inet6 \
   | grep inet \
   | grep -v 127.0 \
   | awk '{print $2}' \
-  | head -n 1 > "${HOME}/starphleet_dev/data/.localhostip"
+  | head -n 1 > "${HOME}/starphleet_data/.localhostip"
