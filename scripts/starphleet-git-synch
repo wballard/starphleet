@@ -23,6 +23,8 @@ reclone () {
   starphleet-git clone -b ${BRANCH} "${REMOTE}" "${local}" || fatal clone error
 }
 
+dev_mode && [ -d "${local}/.git" ] && exit 1
+
 if [ -d "${local}/.git" ]; then
   info synch ${remote} to ${local}
   cd "${local}"

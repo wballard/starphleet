@@ -19,12 +19,12 @@ STARPHLEET_BRANCH=${STARPHLEET_BRANCH:-master}
 ## Main Foo
 ##############################################################################
 
-read -p "Please paste the SSH git URL to your headquarters:  " HEADQUARTERS_URL
+[ -n "${HEADQUARTERS_URL}" ] || read -p "Please paste the SSH git URL to your headquarters:  " HEADQUARTERS_URL
 
 # We're gonna need git
 apt-get install -y git
 # Now grab this repo
-git clone -b ${STARPHLEET_BRANCH} ${STARPHLEET_REPO}
+git clone -b "${STARPHLEET_BRANCH}" "${STARPHLEET_REPO}"
 # Head into scripts
 cd starphleet/scripts
 # Move launcher into place
@@ -32,7 +32,7 @@ cp ./starphleet-launcher /usr/bin
 # Let the magic begin
 ./starphleet-install
 # Set the headquarters
-starphleet-headquarters ${HEADQUARTERS_URL}
+starphleet-headquarters "${HEADQUARTERS_URL}"
 
 source `which tools`
 

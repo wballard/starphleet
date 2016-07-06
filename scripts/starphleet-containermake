@@ -38,10 +38,14 @@ fi
 CONTAINER_CONF=${TMPDIR-/tmp}/${CONTAINER_NAME}.conf
 #mounting host system dirs into the lxc container
 
+dev_mode \
+  && STARPHLEET_ROOT_CONTAINER_PERMISSION="rw" \
+  || STARPHLEET_ROOT_CONTAINER_PERMISSION="r"
+
 #starphleet-base is a create, all orders are a clones to delta0
 cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs/${STARPHLEET_ROOT:-var/starphleet} none bind,r 0 0
-lxc.mount.entry = ${ADMIRAL_HOME} ${CONTAINER_ROOT}/rootfs/${ADMIRAL_HOME} none defaults,bind,create=dir 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT} none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${ADMIRAL_HOME} ${CONTAINER_ROOT}/rootfs${ADMIRAL_HOME} none defaults,bind,create=dir 0 0
 EOF
 
 trap 'rm -rf ${CONTAINER_CONF}' EXIT
@@ -78,32 +82,7 @@ else
     CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
   fi
 
-  if dev_mode ; then
-    info Local Dev mode appending mount to ${CONTAINER_CONF}
-    # Edit:  This needs to take into account that these directories are properly
-    #        mounted as an HGFS file system or we need to punt completely
-    #
-    #        This helps survive a reboot where HGFS has not come up yet but
-    #        starphleet has started
-    # TODO: But what about parallels or virtualbox?
-    TEST=$(mount | grep /hosthome | grep vmhgfs)
-    [ -z "${TEST}" ] && exit 1
-    # Proceed with original authors code
-    STARPHLEET_DEV_DIR=/hosthome/starphleet_dev
-    # Make the dirs
-    mkdir -p "${STARPHLEET_DEV_DIR}"
-    mkdir -p "${STARPHLEET_DEV_DIR}/data"
-    mkdir -p "${CONTAINER_OVERLAY}/var/git"
-    # Fix the perms on the dirs
-    chmod 777 "${STARPHLEET_DEV_DIR}"
-    chmod 777 "${STARPHLEET_DEV_DIR}"
-    chmod 777 "${CONTAINER_OVERLAY}/var/git"
-    # add one additional mount point to the lxc container config.  Wil expose the container git dir to the host
-    echo "lxc.mount.entry = ${STARPHLEET_DEV_DIR}/data ${CONTAINER_ROOT}/rootfs/var/data none bind,rw 0 0" >> ${CONTAINER_CONF}
-    echo "lxc.mount.entry = ${STARPHLEET_DEV_DIR} ${CONTAINER_ROOT}/rootfs/var/git none bind,rw 0 0" >> ${CONTAINER_CONF}
-  else
-    echo "lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none rbind,rw 0 0" >> ${CONTAINER_CONF}
-  fi
+  echo "lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none rbind,rw 0 0" >> ${CONTAINER_CONF}
 
 
   #make a directory where we can mount back to the ship and a config file to mount

@@ -16,11 +16,6 @@ do
       service postfix reload || true
       starphleet-hup-nginx
     fi
-  else
-    warn "**"
-    warn You have no headquarters, add one with
-    warn starphleet-headquarters giturl
-    warn "**"
   fi
   # we'll wait a bit, and fall through allowing our respawn
   # to start us up again
