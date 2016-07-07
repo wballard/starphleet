@@ -150,10 +150,10 @@ if _isValidToken(verified_url_token) then
   redirect = redirect:gsub([[jwt=[^&]*&?]],"")
   redirect = redirect:gsub([[%?$]],"")
   redirect = redirect:gsub([[&$]],"")
-elseif _isValidToken(verified_cookie_token) then
-  token = verified_cookie_token
 elseif _isValidToken(verified_bearer_token) then
   token = verified_bearer_token
+elseif _isValidToken(verified_cookie_token) then
+  token = verified_cookie_token
 end
 
 ------------------------------------------------------------------------------
