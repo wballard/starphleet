@@ -161,13 +161,8 @@ end
 ------------------------------------------------------------------------------
 -- Access Flags:
 -- If the valid token contains 'af' (access flags) we will limit
--- the response at a service level based on these flags.  The lack
--- of flags
+-- the response at a service level based on these flags.
 ------------------------------------------------------------------------------
-
-ngx.log(ngx.ERR, "GOT HERE")
-ngx.log(ngx.ERR, jwt_access_flags)
-ngx.log(ngx.ERR, bit.band(token.payload.af, jwt_access_flags))
 
 if token
   and token.payload
