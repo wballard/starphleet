@@ -85,6 +85,7 @@ cat << EOF >> "${MOUNT_CONF}"
   set \$jwt_auth_site ${JWT_AUTH_SITE};
   set \$jwt_cookie_domain ${JWT_COOKIE_DOMAIN};
   set \$jwt_cookie_name ${JWT_COOKIE_NAME};
+  set \$jwt_access_flags ${JWT_ACCESS_FLAGS};
   set \$public_url ${public_url};
   set \$jwt_expiration_in_seconds ${JWT_EXPIRATION_IN_SECONDS};
   set \$authentic_token "${STARPHLEET_AUTHENTIC_TOKEN}";

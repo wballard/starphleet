@@ -1,9 +1,11 @@
 require "string"
 require "table"
-local cjson = require "cjson"
-local jwt = require "resty.jwt"
+local bit = require("bit")
+local cjson = require("cjson")
+local jwt = require("resty.jwt")
 local jwt_secret = ngx.var.jwt_secret
 local jwt_auth_site = ngx.var.jwt_auth_site
+local jwt_access_flags = ngx.var.jwt_access_flags
 local jwt_cookie_domain = ngx.var.jwt_cookie_domain
 local jwt_cookie_name = ngx.var.jwt_cookie_name
 local jwt_expiration_in_seconds = tonumber(ngx.var.jwt_expiration_in_seconds)
@@ -157,6 +159,26 @@ elseif _isValidToken(verified_cookie_token) then
 end
 
 ------------------------------------------------------------------------------
+-- Access Flags:
+-- If the valid token contains 'af' (access flags) we will limit
+-- the response at a service level based on these flags.  The lack
+-- of flags
+------------------------------------------------------------------------------
+
+ngx.log(ngx.ERR, "GOT HERE")
+ngx.log(ngx.ERR, jwt_access_flags)
+ngx.log(ngx.ERR, bit.band(token.payload.af, jwt_access_flags))
+
+if token
+  and token.payload
+  and token.payload.af
+  and jwt_access_flags
+  and jwt_access_flags ~= ""
+  and bit.band(token.payload.af, jwt_access_flags) == 0 then
+  return ngx.exit(403)
+end
+
+------------------------------------------------------------------------------
 -- If the above process results in a valid token then we set the cookie
 -- with the appropriate JWT payload
 ------------------------------------------------------------------------------
@@ -185,12 +207,12 @@ if (token) then
   cookieString = cookieString .. '; Path=/'
   cookieString = cookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
   ngx.header['Set-Cookie'] = cookieString
-  -- ** Reset any headers starting with jwt- with fields in our payload ** --
 
   if redirect then
     return ngx.redirect(redirect)
   end
 
+  -- ** Reset any headers starting with jwt- with fields in our payload ** --
   return _resetHeaders(token)
 end
 

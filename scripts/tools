@@ -148,6 +148,7 @@ function validate_security() {
   if [ "${SECURITY_MODE}" = 'jwt' ]; then
     if [ -z "${JWT_SECRET}" ] || \
        [ -z "${JWT_COOKIE_DOMAIN}" ] || \
+       [ -z "${JWT_ACCESS_FLAGS}" ] || \
        [ -z "${JWT_COOKIE_NAME}" ] || \
        [ -z "${JWT_EXPIRATION_IN_SECONDS}" ]; then
        error "All JWT vars not set"
