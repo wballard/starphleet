@@ -40,6 +40,7 @@ export NGINX_PUBLISHED_PATH="/var/starphleet/nginx/published"
 export NGINX_STATUS_CONFIG_SYMLINK="${NGINX_PUBLISHED_PATH}/starphleet_nginx_status.status"
 export NGINX_STATUS_ENDPOINT_CONFIG="/var/starphleet/nginx/status.conf"
 export STARPHLEET_DNS_ONLINE_STATUS_FILE="/tmp/.starphleet.online"
+export STARPHLEET_AUTHENTIC_TOKEN="CHANGEME"
 # Declare drives we'd setup and where they should mount for starphleet install on EC2
 declare -A EC2_DRIVES
 EC2_DRIVES["/dev/xvdb"]="/var/lib/lxc"

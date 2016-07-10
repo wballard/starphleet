@@ -75,33 +75,29 @@ location ${public_url}/ {
   gzip_proxied any;
   gzip_comp_level 6;
   include ${NGINX_CONF}/cors.conf;
+  set \$sendto '';
 EOF
 
 # This section handles jwt authentication.  It has to be here (before proxy_pass directive)
 # because nxinx set var can't occur after proxy_pass directive
 if [ "${SECURITY_MODE}" = 'jwt' ] ; then
-  info jwt enabled
-  echo "  set \$jwt_roles ${JWT_ROLES};" >> "${MOUNT_CONF}"
-  echo "  set \$jwt_secret ${JWT_SECRET};" >> "${MOUNT_CONF}"
-  # if this is NOT set, the service will return a 401 if request is not authorized
-  # instead of redirecting the request
-  if [ -n "${JWT_AUTH_SITE}" ] ; then
-    echo "  set \$jwt_auth_site ${JWT_AUTH_SITE};" >> "${MOUNT_CONF}"
-  else
-    echo "  set \$jwt_auth_site RETURN_401;" >> "${MOUNT_CONF}"
-  fi
-  echo "  set \$jwt_cookie_domain ${JWT_COOKIE_DOMAIN};" >> "${MOUNT_CONF}"
-  echo "  set \$public_url ${public_url};" >> "${MOUNT_CONF}"
-  # default expiration of 3600 seconds
-  echo "  set \$jwt_expiration ${JWT_EXPIRATION_IN_SECONDS};" >> "${MOUNT_CONF}"
-  echo "  access_by_lua_file /var/starphleet/nginx/lua/guard.lua;" >> "${MOUNT_CONF}"
-  echo "  header_filter_by_lua_file /var/starphleet/nginx/lua/jwt_cookie.lua;" >> "${MOUNT_CONF}"
+info jwt enabled
+cat << EOF >> "${MOUNT_CONF}"
+  set \$jwt_secret ${JWT_SECRET};
+  set \$jwt_auth_site ${JWT_AUTH_SITE};
+  set \$jwt_cookie_domain ${JWT_COOKIE_DOMAIN};
+  set \$public_url ${public_url};
+  set \$jwt_login '';
+  set \$jwt_expiration_in_seconds ${JWT_EXPIRATION_IN_SECONDS};
+  set \$authentic_token "${STARPHLEET_AUTHENTIC_TOKEN}";
+  rewrite_by_lua_file /var/starphleet/nginx/lua/jwt.lua;
+EOF
 fi
 
 cat << EOF >> "${MOUNT_CONF}"
   if (\$http_cookie ~ "beta_${order}=(.*?)(;|$)") {
     set \$sendto \$1;
-    rewrite ${public_url}/(.*) /\$sendto/\$1 last;
+    rewrite ${public_url}/(.*) \$sendto/\$1 last;
   }
   rewrite ${public_url}/(.*) /\$1 break;
   proxy_pass http://${IP_ADDRESS}:${PORT};
@@ -123,7 +119,7 @@ if [ -n "${NGINX_LOCATION_CONFIGS}" ]; then
   echo "${NGINX_LOCATION_CONFIGS}" >> "${MOUNT_CONF}"
 fi
 # If the Starphleet EC2 Region is set - also output this header
-if [ ! -z "${STARPHLEET_EC2_REGION}" ]; then
+if [ -n "${STARPHLEET_EC2_REGION}" ]; then
   echo "  more_set_headers 'X-Starphleet-Ship: ${STARPHLEET_EC2_REGION}';" >> "${MOUNT_CONF}"
 fi
 
