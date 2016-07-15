@@ -520,15 +520,89 @@ jsmith{% endhighlight %}
     <p>
      When Starphleet receives a valid JWT Token as part of a request to a JWT authenticated service the jwt token is used to create a global cookie.  The cookie is used to maintain the "session" of the user.  The cookie name can be configured by setting the <code>JWT_COOKIE_NAME</code> configuration variable.  It is important that the <code>JWT_AUTH_SITE</code> and service protected by JWT all use the same <code>JWT_COOKIE_NAME</code>.
     </p>
-  <h3 id="jwturlparam">Url Parameter</h3>
+  <h3 id="jwturlparam">JWT Url Parameter</h3>
     <p> One of the ways to pass a JWT token to Starphleet is through a URL Parameter.  As an example: </p>
 {% highlight bash %}
 https://starphleet.example.com/theservice/?jwt=$token{% endhighlight %}
-    <p> Passing a valid JWT token via the URL will take precident over a token passed as the users session in a cookie.  If the JWT Token passed as a URL parameter is valid it will replace the users session JWT token. </p>
+    <p> Passing a valid JWT token via the URL will take precedent over a token passed as the users session in a cookie.  If the JWT Token passed as a URL parameter is valid it will replace the users session JWT token. </p>
   <h3 id="jwtcookie">JWT Cookie</h3>
-  <h3 id="jwtheader">Url Parameter</h3>
-    <p> Assigning the <code>SECURITY_MODE</code> setting to <code>jwt</code> requires additional settings in the <a href="#headquarters">headquarters</a>.  You can configure these settings <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.</p>
-    <p> JWT Requires the following settings:</p>
+    <p> Starphleet automatically sets a globally pathed cookie when it receives a valid JWT token.  The name of the cookie can be configured using the <code>JWT_COOKIE_NAME</code> configuration option.  This cookie can be used by applications to query the JWT token about properties set in the cookie by the authentication application. </p>
+  <h3 id="jwtheader">JWT Authorization Header</h3>
+    A client side app can pass a JWT token as part of request through the authorization header.  When Starphleet receives a request using this method the response will be different if the JWT token is invalid.  Starphleet will respond with a status of 401 instead of a silent redirect to the authorization app.  Passing a JWT Token utilizing this method is most appropriate for background API calls.  The calling app can appropriately error handle the response.
+  <h3 id="jwtauthenticationapp">JWT Authentication App</h3>
+  <h3 id="jwtconfigurationoptions">Configuration Options</h3>
+    <p> JWT <b>requires</b> the following settings:</p>
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th style="width: 130px;">Variable</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>USER_IDENTITY_HEADER</code></td>
+          <td>This is the name of the header used by NGINX to store the "user" authenticated to the service.  The user will be set based on the <code>SECURITY_MODE</code> variable and will be dependent on the security mechanism used to authenticate the service.  This header will be passed to the web request sent to the apps running the the containers.  The apps can validate which user is making the request without baking their own authentication mechanism.</td>
+        </tr>
+        <tr>
+          <td><code>USER_IDENTITY_COOKIE</code></td>
+          <td>The name of the cookie assigned the username of an authenticated user.  Works the same as <code>USER_IDENTITY_HEADER</code></td>
+        </tr>
+        <tr>
+          <td><code>SECURITY_MODE</code></td>
+          <td>
+            This setting determines what <a href="#authentication">authentication</a> "mode" a service is deployed in.  This setting is intended to be <a href="#overrides">overridden</a> in the headquarters or in the <a href="#orders">orders file</a>.  This mode can be one of four settings:
+            <ul>
+              <li><a href="#publicconfiguration">public</a></li>
+              <li><a href="#htpasswdconfiguration">htpasswd</a></li>
+              <li><a href="#jwtconfiguration">jwt</a></li>
+              <li><a href="#ldapconfiguration">ldap</a></li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td><code>LDAP_SERVER</code></td>
+          <td>The name assigned here corresponds with the name of the file containing the <a href="#ldapconfiguration">LDAP configuration</a> you want to use to authenticate the service.</td>
+        </tr>
+        <tr>
+          <td><code>JWT_SECRET</code></td>
+          <td>This setting is <b>required</b>.  This value is used as the secret to sign and verify JWT tokens</td>
+        </tr>
+        <tr>
+          <td><code>JWT_AUTH_SITE</code></td>
+          <td>This setting is <b>required</b>.  The path to a login service that signs JWT tokens.</td>
+        </tr>
+        <tr>
+          <td><code>JWT_ACCESS_FLAGS</code></td>
+          <td>Integer value for a bitmask that corresponds to access for a service</td>
+        </tr>
+        <tr>
+          <td><code>JWT_COOKIE_DOMAIN</code></td>
+          <td>
+            This setting is <b>optional</b>.
+            <ul>
+              <li>if not provided, the JWT cookie will only be available to the full domain of the original target destination (e.g., myApp.mysite.com)</li>
+              <li>if it is provided, then the JWT cookie will be scoped accordingly.</li>
+              <li>Be sure to understand how cookie domains are applied. For example, this feature can allow implementers to grant access to peer sub-domains of the original target destination. (e.g., JWT_COOKIE_DOMAIN=mysite.com will allow both myApp.mysite.com and someOtherHost.mysite.com to access the jwt cookie.  </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td><code>JWT_ROLES</code></td>
+          <td>
+            This setting is <b>optional</b>.
+            <ul>
+              <li>defaults to 3600 seconds</li>
+              <li>this is the initial expiration set on the jwt cookie</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td><code>HTPASSWD</code></td>
+          <td>The appropriate HTPASSWD string associated with the <code>htpasswd</code> <code>SECURITY_MODE</code>.</td>
+        </tr>
+      </tbody>
+    </table>
     <ul>
       <li>JWT_SECRET</li>
       <li>JWT_AUTH_SITE</li>
