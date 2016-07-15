@@ -442,6 +442,10 @@ export FOO="BAR" {% endhighlight %}
         <td>This setting is <b>required</b>.  The path to a login service that signs JWT tokens.</td>
       </tr>
       <tr>
+        <td><code>JWT_ACCESS_FLAGS</code></td>
+        <td>Integer value for a bitmask that corresponds to access for a service</td>
+      </tr>
+      <tr>
         <td><code>JWT_COOKIE_DOMAIN</code></td>
         <td>
           This setting is <b>optional</b>.
@@ -488,23 +492,7 @@ export LDAP_PASSWORD='****' {% endhighlight %}
   </ul>
   <p> Your orders file will now have <code>ldap</code> enabled and point to the above configuration on which LDAP server to use for authentication.  At this point, your service should be authenticating against LDAP. </p>
   <h3 id="jwtconfiguration">JWT Configuration</h3>
-  <p> Assigning the <code>SECURITY_MODE</code> setting to <code>jwt</code> requires additional settings in the <a href="#headquarters">headquarters</a>.  You can configure these settings <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.</p>
-  <p> JWT requires an authentication application: </p>
-  <ul>
-    <li>This is the service to which unauthenticated users will be redirected. This service is not provided by Starphleet. Because the logic for authenticating users is domain specific, the implementer must provide this service.</li>
-    <li>This site must be open to non-authenticated users. It is responsible for:</li>
-    <ul>
-      <li>Determining whether the user is valid</li>
-      <li>Constructing the payload for the JWT token. The payload may include any meta data the implementer would like. <b>NOTE:</b> The payload in any JWT token is encoded, but not encrypted and should never contain sensitive information.</li>
-      <ul>
-        <li>The payload property role is reserved by Starphleet</li>
-        <li>Starphleet will check values in the role when determining whether to grant access to the service</li>
-        <li>Starphleet expects the values to be comma-delimited</li>
-      </ul>
-      <li>Signing the JWT token, which includes the payload</li>
-      <li>Redirecting the user to the original target destination with the signed JWT token in a querystring paramter named jwt.</li>
-    </ul>
-  </ul>
+  <p> JWT Authentication works by looking for a specific token when a request is made.  If the token is invalid the request silently redirects to a service running on the same ship.  The service is responsible for authenicating the user and providing a token.  The token can then be used to retry the original request.  Details about utilizing JWT authenication can be found <a href="#jwtdetails">here</a>.
   <h3 id="htpasswdconfiguration">HTPASSWD Configuration</h3>
   <p> Assigning the <code>SECURITY_MODE</code> setting to <code>htpasswd</code> requires an additional environment settings in the <a href="#headquarters">headquarters</a>.  You can set this <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.  To get the appropriate string you can use the linux <code>htpasswd</code> command like the following:</a></p>
 {% highlight bash %}
@@ -519,6 +507,49 @@ jdoe
 jjdoe
 jsmith{% endhighlight %}
   <p>The above service endpoint would only allow three users access - all others will be prompted to login.</p>
+</section>
+<section class="bs-docs-section">
+  <h1 id="jwtdetails" class="page-header">JWT Details</h1>
+    <p> JWT Authentication works by looking for a specific token when a request is made.  If the token is invalid the request silently redirects to a service running on the same ship.  The service is responsible for authenicating the user and providing a token.  The token can then be used to retry the original requenst.
+    <p> There are three ways to pass a JWT token with your request: </p>
+    <ul>
+      <li>Url Param</li>
+      <li>Cookie</li>
+      <li>Header</li>
+    </ul>
+  <h3 id="jwturlparam">Url Parameter</h3>
+  <h3 id="jwtcookie">Url Parameter</h3>
+  <h3 id="jwtheader">Url Parameter</h3>
+    <p> Assigning the <code>SECURITY_MODE</code> setting to <code>jwt</code> requires additional settings in the <a href="#headquarters">headquarters</a>.  You can configure these settings <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.</p>
+    <p> JWT Requires the following settings:</p>
+    <ul>
+      <li>JWT_SECRET</li>
+      <li>JWT_AUTH_SITE</li>
+      <li>JWT_COOKIE_DOMAIN</li>
+      <li>JWT_COOKIE_NAME</li>
+      <li>JWT_EXPIRATION_IN_SECONDS</li>
+      <li>JWT_ACCESS_FLAGS</li>
+    </ul>
+    <p> These settings are explained in the <a href="#securitysettings">security settings</a> section. </p>
+    <p>
+      Unlike other security methods
+    </p>
+    <p> JWT requires an authentication application: </p>
+    <ul>
+      <li>This is the service to which unauthenticated users will be redirected. This service is not provided by Starphleet. Because the logic for authenticating users is domain specific, the implementer must provide this service.</li>
+      <li>This site must be open to non-authenticated users. It is responsible for:</li>
+      <ul>
+        <li>Determining whether the user is valid</li>
+        <li>Constructing the payload for the JWT token. The payload may include any meta data the implementer would like. <b>NOTE:</b> The payload in any JWT token is encoded, but not encrypted and should never contain sensitive information.</li>
+        <ul>
+          <li>The payload property role is reserved by Starphleet</li>
+          <li>Starphleet will check values in the role when determining whether to grant access to the service</li>
+          <li>Starphleet expects the values to be comma-delimited</li>
+        </ul>
+        <li>Signing the JWT token, which includes the payload</li>
+        <li>Redirecting the user to the original target destination with the signed JWT token in a querystring paramter named jwt.</li>
+      </ul>
+    </ul>
 </section>
 <section class="bs-docs-section">
   <h1 id="healthchecks" class="page-header">Healthchecks</h1>
