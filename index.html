@@ -510,15 +510,21 @@ jsmith{% endhighlight %}
 </section>
 <section class="bs-docs-section">
   <h1 id="jwtdetails" class="page-header">JWT Details</h1>
-    <p> JWT Authentication works by looking for a specific token when a request is made.  If the token is invalid the request silently redirects to a service running on the same ship.  The service is responsible for authenicating the user and providing a token.  The token can then be used to retry the original requenst.
+    <p> JWT Authentication works by looking for a specific jwt token when a request is received by Starphleet.  If the jwt token is invalid the request silently redirects to a service running on the same ship.  The service is responsible for authenicating the user and providing a token.  The token can then be used to retry the original request.
     <p> There are three ways to pass a JWT token with your request: </p>
     <ul>
       <li>Url Param</li>
       <li>Cookie</li>
       <li>Header</li>
     </ul>
+    <p>
+     When Starphleet receives a valid JWT Token as part of a request to a JWT authenticated service the jwt token is used to create a global cookie.  The cookie is used to maintain the "session" of the user.  The cookie name can be configured by setting the <code>JWT_COOKIE_NAME</code> configuration variable.  It is important that the <code>JWT_AUTH_SITE</code> and service protected by JWT all use the same <code>JWT_COOKIE_NAME</code>
+    </p>
   <h3 id="jwturlparam">Url Parameter</h3>
-  <h3 id="jwtcookie">Url Parameter</h3>
+    <p>
+
+    </p>
+  <h3 id="jwtcookie">JWT Cookie</h3>
   <h3 id="jwtheader">Url Parameter</h3>
     <p> Assigning the <code>SECURITY_MODE</code> setting to <code>jwt</code> requires additional settings in the <a href="#headquarters">headquarters</a>.  You can configure these settings <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.</p>
     <p> JWT Requires the following settings:</p>
