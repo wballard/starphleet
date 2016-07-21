@@ -121,12 +121,7 @@ EOF
     info "  --"
     info "    "
 
-    # The git directories are relocated in dev_mode
-    if dev_mode; then
-      ORDER_LOCAL="${STARPHLEET_DEV_DIR}/${ORDER}"
-    else
-      ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
-    fi
+    ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
 
     # Snag GIT infoz
     if [ -d "${ORDER_LOCAL}" ]; then

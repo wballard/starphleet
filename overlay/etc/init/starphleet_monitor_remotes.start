@@ -1,6 +1,4 @@
 #!/bin/bash
-
-STARPHLEET_DEV_DIR=/hosthome/starphleet_dev/data
 while [ 1 ]
 do
   source `which tools`
@@ -8,18 +6,10 @@ do
   #auto deploy each ordered remote
   for remote in $(find "${HEADQUARTERS_LOCAL}" | grep '/remote$' | grep -v '/git')
   do
-    if dev_mode ; then
-      export LOCAL_DIRECTORY=$(echo "${remote}" | sed -e 's[/remote$[[' | sed -e "s[^${HEADQUARTERS_LOCAL}/\?[${STARPHLEET_DEV_DIR}/[")
-    else
-      export LOCAL_DIRECTORY=$(echo "${remote}" | sed -e 's[/remote$[[' | sed -e "s[^${HEADQUARTERS_LOCAL}/\?[${STARPHLEET_SHARED_DATA}/[")
-    fi
-
+    export LOCAL_DIRECTORY=$(echo "${remote}" | sed -e 's[/remote$[[' | sed -e "s[^${HEADQUARTERS_LOCAL}/\?[${STARPHLEET_SHARED_DATA}/[")
     autodeploy () {
       source `which tools`
-      # Only checkout a remote once in devmode
-      if dev_mode ; then
-        [ -d "${LOCAL_DIRECTORY}" ] && return
-      fi
+      # Only sync one time in dev_mode
       starphleet-git-synch "$1" "${LOCAL_DIRECTORY}"
     }
     export -f autodeploy

@@ -279,11 +279,7 @@ function container_environment() {
 }
 
 function dev_mode() {
-  if [ -f /var/starphleet/live ]; then
-    false
-  elif [ -d /hosthome ]; then
-    true
-  elif [ -d /var/git ]; then
+  if [ -n "${DEVMODE_ENABLED}" ]; then
     true
   else
     false
