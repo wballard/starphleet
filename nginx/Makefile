@@ -19,7 +19,7 @@ ${NGINX}: always
 		--add-module=${BUILD_ROOT}/headers-more-nginx-module-0.25 \
 		--add-module=${BUILD_ROOT}/nginx-auth-ldap \
 		--add-module=${BUILD_ROOT}/ngx_devel_kit-0.2.19 \
-		--add-module=${BUILD_ROOT}/lua-nginx-module-0.9.20 \
+		--add-module=${BUILD_ROOT}/lua-nginx-module-0.10.5 \
 		--with-pcre
 	cd ${NGINX_ROOT} && make install
 	cp ${INSTALL_LOCATION}/sbin/nginx ${NGINX}
