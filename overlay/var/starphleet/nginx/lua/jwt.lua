@@ -25,6 +25,19 @@ end
 -- *****************************************************************************
 
 ------------------------------------------------------------------------------
+-- @function _replace()
+--
+-- Doing a direct string replace in LUA with dynamic text requires escaping
+-- all the special lua chars.  Found the solution, implemented below, here:
+-- http://stackoverflow.com/a/29379912
+------------------------------------------------------------------------------
+local function _replace(str, what, with)
+  what = string.gsub(what, "[%(%)%.%+%-%*%?%[%]%^%$%%]", "%%%1") -- escape pattern
+  with = string.gsub(with, "[%%]", "%%%%") -- escape replacement
+  return string.gsub(str, what, with)
+end
+
+------------------------------------------------------------------------------
 -- @function _sendUserToLogin()
 --
 -- Build the appropriate URL based on the calling service' "auth_site"
@@ -34,7 +47,7 @@ end
 ------------------------------------------------------------------------------
 local _sendUserToLogin = function()
   local redirectUrl = ngx.var.request_uri
-  redirectUrl = redirectUrl:gsub(ngx.var.public_url, jwt_auth_site)
+  redirectUrl = _replace(redirectUrl, ngx.var.public_url, jwt_auth_site)
   ngx.req.set_header('X-Starphleet-Redirect', "true");
   ngx.req.set_header('X-Starphleet-OriginalUrl', ngx.var.request_uri);
   ngx.req.set_header('X-Starphleet-Authentic', ngx.var.authentic_token);
