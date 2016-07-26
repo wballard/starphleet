@@ -8,6 +8,7 @@ local jwt_auth_site = ngx.var.jwt_auth_site
 local jwt_access_flags = ngx.var.jwt_access_flags
 local jwt_cookie_domain = ngx.var.jwt_cookie_domain
 local jwt_cookie_name = ngx.var.jwt_cookie_name
+local jwt_max_token_age_in_seconds = ngx.var.jwt_max_token_age_in_seconds
 local jwt_expiration_in_seconds = tonumber(ngx.var.jwt_expiration_in_seconds)
 local headers = ngx.req.get_headers()
 
@@ -106,6 +107,7 @@ end
 --   * Must include a payload
 --   * Must include the reserved 'iat'/'exp' jwt claims
 --   * iat and exp fields must be valid numbers
+--   * Token is not older than the max age configured
 --   * Must not be expired
 ------------------------------------------------------------------------------
 local _isValidToken = function(token)
@@ -115,14 +117,15 @@ local _isValidToken = function(token)
     token.payload.exp and
     type(token.payload.iat) == "number" and
     type(token.payload.exp) == "number" and
-    token.payload.exp >= ngx.time() then
-      -- Now we are testing the service level configurable expirations
-      -- since the token sent to us must be either a Auth Bearer (REST)
-      -- or Cookie based JWT token
-      -- if ngx.time() - token.payload.iat <= jwt_expiration_in_seconds then -- and
-        -- token.payload.exp - token.payload.iat >= jwt_max_expiration_duration_in_seconds then
+    -- XXX: Still not convinced this provides more protection
+    --      beyond the expire time of the cookie set at the
+    --      service level.  Requires further thinking.
+    ngx.time() - token.payload.iat <= jwt_max_token_age_in_seconds then
+    -- XXX: I do not believe this is necessary as it is part of the
+    --      verify for JWT.  Future deletion forthcoming
+    -- token.payload.exp >= ngx.time() then
+    --
     return true
-      -- end
   end
   return false
 end

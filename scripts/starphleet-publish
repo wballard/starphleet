@@ -87,6 +87,7 @@ cat << EOF >> "${MOUNT_CONF}"
   set \$jwt_cookie_name ${JWT_COOKIE_NAME};
   set \$jwt_access_flags ${JWT_ACCESS_FLAGS};
   set \$public_url ${public_url};
+  set \$jwt_max_token_age_in_seconds ${JWT_MAX_TOKEN_AGE_IN_SECONDS};
   set \$jwt_expiration_in_seconds ${JWT_EXPIRATION_IN_SECONDS};
   set \$authentic_token "${STARPHLEET_AUTHENTIC_TOKEN}";
   access_by_lua_file /var/starphleet/nginx/lua/jwt.lua;
