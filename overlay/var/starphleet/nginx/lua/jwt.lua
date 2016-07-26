@@ -8,7 +8,7 @@ local jwt_auth_site = ngx.var.jwt_auth_site
 local jwt_access_flags = ngx.var.jwt_access_flags
 local jwt_cookie_domain = ngx.var.jwt_cookie_domain
 local jwt_cookie_name = ngx.var.jwt_cookie_name
-local jwt_max_token_age_in_seconds = ngx.var.jwt_max_token_age_in_seconds
+local jwt_max_token_age_in_seconds = tonumber(ngx.var.jwt_max_token_age_in_seconds)
 local jwt_expiration_in_seconds = tonumber(ngx.var.jwt_expiration_in_seconds)
 local headers = ngx.req.get_headers()
 
