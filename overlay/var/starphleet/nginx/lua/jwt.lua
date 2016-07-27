@@ -117,16 +117,11 @@ local _isValidToken = function(token)
     token.payload.exp and
     type(token.payload.iat) == "number" and
     type(token.payload.exp) == "number" and
-    -- XXX: Still not convinced this provides more protection
-    --      beyond the expire time of the cookie set at the
-    --      service level.  Requires further thinking.
     ngx.time() - token.payload.iat <= jwt_max_token_age_in_seconds then
-    -- XXX: I do not believe this is necessary as it is part of the
-    --      verify for JWT.  Future deletion forthcoming
-    -- token.payload.exp >= ngx.time() then
     --
     return true
   end
+  --
   return false
 end
 
