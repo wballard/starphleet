@@ -663,7 +663,7 @@ curl -H "Authorization: Bearer $token" https://starphleet.example.com{% endhighl
     <p> Given the above example if we wanted to set someone as a Plumber <b>and</b> a Mechanic then the bitmask would look like <code>0101</code>. If my JWT Authentication App assigned a bitmask of <code>0111</code> as the role of my user, I would know that the user was a Plumber, Engineer, and </b>Mechanic</p>
     <p> If I wanted to only allow a Plumber and Engineer to use a service then I would set the environment variable <code>JWT_ACCESS_FLAGS</code> in my orders file to <code>0011</code>. </p>
   <h4 id="jwtusingbitmasks">Bitmasks: Putting It All Together</h4>
-    <p> The final part of understanding bitmasks is understanding that we can't actually store the bitmask in its pure form.  In order to use bitmasks we convert them to Decimal. </p>
+    <p> The final part of understanding bitmasks is understanding that we can't actually assign the bitmask in its pure form.  In order to assign bitmasks we convert them to Decimal. </p>
     <p> In our example above if we wanted to flag a user as a <b>Plumber</b> and <b>Mechanic</b> we would need to assign them a bitmask of <code>5</code> (<code>0101</code>). </p>
     <p> If we want to restrict our service to only <b>Engineers</b>, we would set the <code>JWT_ACCESS_FLAGS</code> environment variable to <code>2</code> (<code>0010</code>). </p>
   <h3 id="jwtaccessflags">JWT Access Flags</h3>
