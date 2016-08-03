@@ -575,60 +575,12 @@ https://starphleet.example.com/theservice/?jwt=$token{% endhighlight %}
     <p> A client side app can pass a JWT token as part of request through the Authorization header using the Bearer claim.  When Starphleet receives a request using this method the response will be different if the JWT token is invalid.  Starphleet will respond with a status of 401 instead of a silent redirect to the authorization app.  Passing a JWT Token utilizing this method is most appropriate for background API calls.  The calling app can appropriately error handle the response. </p>
 {% highlight bash %}
 curl -H "Authorization: Bearer $token" https://starphleet.example.com{% endhighlight %}
-  <h3 id="jwtaccessflags">JWT Access Flags</h3>
-    <p> Starphleet supports an optional feature to granularly control access to services based on FLAGS.  This feature requires a configuration at the service level.  Additionally, this feature must be implemented in the authentication application that generates your JWT tokens. </p>
-    <p> To make use of this feature you will set a bitmask in your orders using the Decimal representation.  The variable is <code>JWT_ACCESS_FLAGS</code>. </p>
-    <p> The authentication app must also provide a claim named <code>af</code>. </p>
-  <h4 id="jwtaccessflagsexampleaccessgranted">Example: Access Granted</h4>
-    <ul>
-      <li>User <b>jdoe</b> logs in and is assigned <b>af ("access flags")</b> of:
-        <ul>
-          <li><code>Integer: 17 (bitmask: 010010)</code></li>
-        </ul>
-      </li>
-      <li>Service <code>/app1</code> sets the variable <code>JWT_ACCESS_FLAGS</code>:
-        <ul>
-          <li><code>Integer: 24 (bitmask: 011000)</code></li>
-        </ul>
-      </li>
-      <li>Flags at bit location <b>16</b>:<code>Integer: 16 (bitmask: 010000)</code> match:</li>
-        <ul>
-          <li><code>17 (bitmask: 010010)</code></li>
-          <li><code>24 (bitmask: 011000)</code></li>
-          <li>------------------------------ &</li>
-          <li><code>16 (bitmask: 0<span class="bg-danger"></span>10000)</code></li>
-        </ul>
-      <li>User is granted access</li>
-    </ul>
-  <h4 id="jwtaccessflagsexampleaccessdenied">Example: Access Denied</h4>
-    <ul>
-      <li>User <b>jdoe</b> logs in and is assigned <b>af ("access flags")</b> of:
-        <ul>
-          <li><code>Integer: 56 (bitmask: 111000)</code></li>
-        </ul>
-      </li>
-      <li>Service <code>/app1</code> sets the variable <code>JWT_ACCESS_FLAGS</code>:
-        <ul>
-          <li><code>Integer: 03 (bitmask: 000011)</code></li>
-        </ul>
-      </li>
-      <li>No flags match:</li>
-        <ul>
-          <li><code>17 (bitmask: 111000)</code></li>
-          <li><code>24 (bitmask: 000011)</code></li>
-          <li>------------------------------ &</li>
-          <li><code>0 (bitmask: 0<span class="bg-danger"></span>10000)</code></li>
-        </ul>
-      <li>User is denied access</li>
-    </ul>
-    <p>
-      You do not need to understand every part of bitwise operators to make use of flags.  For an explanation of how bitmasks work as they pertain to Starphleet, you can read more details in the <a href="#jwtbitmasks">bitmasks section</a>.
-    </p>
+
   <h3 id="jwtbitmasks">Bitmasks</h3>
     <p> Bitmasks can be used to store boolean type flags in an extremely small amount of space.  This makes them an easy candidate for JWT Tokens where space is limited and each character can bloat the token a lot.  Additionally, bitmasks are efficient for a computer to compare and manipulate. </p>
     <p> This documentation does not intend to explain the entirety of concepts with bitmasks.  Below is a brief description of how to quickly make use of them. </p>
   <h4 id="jwtbitmaskstonumbers">Bitmasks To Numbers</h4>
-    <p> Probably the most confusing thing about bitmasks is that bitmasks are often times represented as an integer.  It is important to understand how to convert integers into a series of bits if you want to use them as flags.  Any single number can represent a whole list of flags. </p>
+    <p> Probably the most confusing thing about bitmasks is that bitmasks are represented as integers.  It is important to understand how to convert integers into a series of bits if you want to use them as flags.  Any single number can represent a whole list of flags. </p>
     <p> In order to use bitmasks you must first understand the following table: </p>
     <table class="table table-bordered table-striped">
       <thead>
@@ -698,8 +650,9 @@ curl -H "Authorization: Bearer $token" https://starphleet.example.com{% endhighl
       <li>Mechanic</li>
     </ul>
     <p> When our auth app creates the JWT Token it will determine what kind of user is logging in.  Some users might be both Mechanics AND Engineers. Some users may only fit one role. Now lets assume that we have a number of services running on Starphleet.  Some of our services can only be accessed by plumbers.  Some our services can be accessed by both Plumbers and Mechanics.  Some by all of these. </p>
-    <p> The first thing we must do is assign bit columns to our roles.  What does this mean?</p>
-    <p> A bitmask is nothing more than a serios of <code>1's</code> and <code>0's</code>. An example of a bitmask might look something like <code>0101</code>.  In this example we have 4 bits.  Each bit can be 1 for <code>true</code> or 0 for <code>false</code>. </p>
+    <p> The first thing we must do is assign bit columns to our roles. </p>
+  <h4 id="jwtwhatitmeanstoassignmeaningtocolumns">Assinging Meanings To Columns</h4>
+    <p> A bitmask is nothing more than a series of <code>1's</code> and <code>0's</code>. An example of a bitmask might look something like <code>0101</code>.  In this example we have 4 bits.  Each bit can be 1 for <code>true</code> or 0 for <code>false</code>. </p>
     <p> To illustrate how to use a bitmask we are going to refer to our example list of roles above and assign arbitrary meanings to each one of these bits.  We have four columns.  Starting from the <span class="text-danger"><b><i>right</i></b></span> side: </p>
     <ul>
       <li>Assign the first column to <b>Plumber</b> (<code>0001</code>)</li>
@@ -713,7 +666,56 @@ curl -H "Authorization: Bearer $token" https://starphleet.example.com{% endhighl
     <p> The final part of understanding bitmasks is understanding that we can't actually store the bitmask in its pure form.  In order to use bitmasks we convert them to Decimal. </p>
     <p> In our example above if we wanted to flag a user as a <b>Plumber</b> and <b>Mechanic</b> we would need to assign them a bitmask of <code>5</code> (<code>0101</code>). </p>
     <p> If we want to restrict our service to only <b>Engineers</b>, we would set the <code>JWT_ACCESS_FLAGS</code> environment variable to <code>2</code> (<code>0010</code>). </p>
-
+  <h3 id="jwtaccessflags">JWT Access Flags</h3>
+    <p> To understand how this works it is <b>imperitive</b> that you fully understand how bitmasks work and how the bitwise operator works.  If these concepts are foreign to you read the <a href="#jwtbitmasks">bitmask</a> section.  Familiarize yourself with the basic principles behind bitmasks and then continue reading. </p>
+    <p> Starphleet supports an optional feature to granularly control access to services based on FLAGS.  This feature requires a configuration at the service level.  Additionally, this feature must be implemented in the <a href="#jwtauthenticationapp">authentication application</a> that generates your JWT tokens. </p>
+    <p> To make use of this feature you will set a bitmask in your orders using the Decimal representation.  The variable is <code>JWT_ACCESS_FLAGS</code>. </p>
+    <p> The authentication app must also provide a claim named <code>af</code>. </p>
+    <h4 id="jwtaccessflagsexampleaccessgranted">Example: Access Granted</h4>
+      <ul>
+        <li>User <b>jdoe</b> logs in and is assigned <b>af ("access flags")</b> of:
+          <ul>
+            <li><code>Integer: 17 (bitmask: 010010)</code></li>
+          </ul>
+        </li>
+        <li>In the orders file for a service running at <code>/app1</code> the environment variable <code>JWT_ACCESS_FLAGS</code> is set like:
+          <ul>
+            <li><code>Integer: 24 (bitmask: 011000)</code></li>
+          </ul>
+        </li>
+        <li>Flags at bit location <b>16</b>:<code>Integer: 16 (bitmask: 010000)</code> match:</li>
+          <ul>
+            <li><code>17 (bitmask: 010010)</code></li>
+            <li><code>24 (bitmask: 011000)</code></li>
+            <li>------------------------------ &</li>
+            <li><code>16 (bitmask: 010000)</code></li>
+          </ul>
+        <li>User is granted access</li>
+      </ul>
+    <h4 id="jwtaccessflagsexampleaccessdenied">Example: Access Denied</h4>
+      <ul>
+        <li>User <b>jdoe</b> logs in and is assigned <b>af ("access flags")</b> of:
+          <ul>
+            <li><code>Integer: 56 (bitmask: 111000)</code></li>
+          </ul>
+        </li>
+        <li>In the orders file for a service running at <code>/app1</code> the environment variable <code>JWT_ACCESS_FLAGS</code> is set like:
+          <ul>
+            <li><code>Integer: 03 (bitmask: 000011)</code></li>
+          </ul>
+        </li>
+        <li>No flags match:</li>
+          <ul>
+            <li><code>56 (bitmask: 111000)</code></li>
+            <li><code>03 (bitmask: 000011)</code></li>
+            <li>------------------------------ &</li>
+            <li><code>0 (bitmask: 000000)</code></li>
+          </ul>
+        <li>User is denied access</li>
+      </ul>
+      <p>
+        You do not need to understand every part of bitwise operators to make use of flags.  For an explanation of how bitmasks work as they pertain to Starphleet, you can read more details in the <a href="#jwtbitmasks">bitmasks section</a>.
+      </p>
   <h3 id="jwtauthenticationapp">JWT Authentication App</h3>
   <h3 id="jwtconfigurationoptions">Configuration Options</h3>
     <p> JWT <b>requires</b> the following settings:</p>
