@@ -429,47 +429,7 @@ export FOO="BAR" {% endhighlight %}
           </ul>
         </td>
       </tr>
-      <tr>
-        <td><code>LDAP_SERVER</code></td>
-        <td>The name assigned here corresponds with the name of the file containing the <a href="#ldapconfiguration">LDAP configuration</a> you want to use to authenticate the service.</td>
-      </tr>
-      <tr>
-        <td><code>JWT_SECRET</code></td>
-        <td>This setting is <b>required</b>.  This value is used as the secret to sign and verify JWT tokens</td>
-      </tr>
-      <tr>
-        <td><code>JWT_AUTH_SITE</code></td>
-        <td>This setting is <b>required</b>.  The path to a login service that signs JWT tokens.</td>
-      </tr>
-      <tr>
-        <td><code>JWT_ACCESS_FLAGS</code></td>
-        <td>Integer value for a bitmask that corresponds to access for a service</td>
-      </tr>
-      <tr>
-        <td><code>JWT_COOKIE_DOMAIN</code></td>
-        <td>
-          This setting is <b>optional</b>.
-          <ul>
-            <li>if not provided, the JWT cookie will only be available to the full domain of the original target destination (e.g., myApp.mysite.com)</li>
-            <li>if it is provided, then the JWT cookie will be scoped accordingly.</li>
-            <li>Be sure to understand how cookie domains are applied. For example, this feature can allow implementers to grant access to peer sub-domains of the original target destination. (e.g., JWT_COOKIE_DOMAIN=mysite.com will allow both myApp.mysite.com and someOtherHost.mysite.com to access the jwt cookie.  </li>
-          </ul>
-        </td>
-      </tr>
-      <tr>
-        <td><code>JWT_ROLES</code></td>
-        <td>
-          This setting is <b>optional</b>.
-          <ul>
-            <li>defaults to 3600 seconds</li>
-            <li>this is the initial expiration set on the jwt cookie</li>
-          </ul>
-        </td>
-      </tr>
-      <tr>
-        <td><code>HTPASSWD</code></td>
-        <td>The appropriate HTPASSWD string associated with the <code>htpasswd</code> <code>SECURITY_MODE</code>.</td>
-      </tr>
+
     </tbody>
   </table>
   <p><i>All variables need to be exported to be available to your application. For instance</i></p>
@@ -478,6 +438,21 @@ export FOO="BAR" {% endhighlight %}
   <h3 id="publicconfiguration">Public Configuration</h3>
   <p> Assigning the <code>SECURITY_MODE</code> setting to <code>public</code> requires no additional configuration.  Starphleet will serve the content behind a public endpoint openly. </p>
   <h3 id="ldapconfiguration">LDAP Configuration</h3>
+  <p> This security mode requires the following environment variable(s): </p>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th style="width: 130px;">Variable</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>LDAP_SERVER</code></td>
+        <td>The name assigned here corresponds with the name of the file containing the <a href="#ldapconfiguration">LDAP configuration</a> you want to use to authenticate the service.</td>
+      </tr>
+    </tbody>
+  </table>
   <p> Assigning the <code>SECURITY_MODE</code> setting to <code>ldap</code> requires additional configuration in the <a href="#headquarters">headquarters</a>.  The following is required: </p>
   <ul>
     <li>Create a <code>ldap_servers</code> folder in your <a href="#headquarters">headquarters</a></li>
@@ -492,8 +467,24 @@ export LDAP_PASSWORD='****' {% endhighlight %}
   </ul>
   <p> Your orders file will now have <code>ldap</code> enabled and point to the above configuration on which LDAP server to use for authentication.  At this point, your service should be authenticating against LDAP. </p>
   <h3 id="jwtconfiguration">JWT Configuration</h3>
-  <p> JWT Authentication works by looking for a specific token when a request is made.  If the token is invalid the request silently redirects to a service running on the same ship.  The service is responsible for authenicating the user and providing a token.  The token can then be used to retry the original request.  Details about utilizing JWT authenication can be found <a href="#jwtdetails">here</a>.
+  <p> JWT Authentication works by looking for a specific token when a request is made.  If the token is invalid the request silently redirects to a service running on the same ship.  The service is responsible for authenicating the user and providing a token.  The token can then be used to retry the original request. </p>
+  <p class="text-danger"> <b> Details about utilizing JWT authenication can be found <a href="#jwtdetails">here</a>. </b> </p>
   <h3 id="htpasswdconfiguration">HTPASSWD Configuration</h3>
+  <p> This security mode requires the following environment variable(s): </p>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th style="width: 130px;">Variable</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>HTPASSWD</code></td>
+        <td>The appropriate HTPASSWD string associated with the <code>htpasswd</code> <code>SECURITY_MODE</code>.</td>
+      </tr>
+    </tbody>
+  </table>
   <p> Assigning the <code>SECURITY_MODE</code> setting to <code>htpasswd</code> requires an additional environment settings in the <a href="#headquarters">headquarters</a>.  You can set this <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.  To get the appropriate string you can use the linux <code>htpasswd</code> command like the following:</a></p>
 {% highlight bash %}
 $ htpasswd -n -b changeusername changepasswd
@@ -520,15 +511,209 @@ jsmith{% endhighlight %}
     <p>
      When Starphleet receives a valid JWT Token as part of a request to a JWT authenticated service the jwt token is used to create a global cookie.  The cookie is used to maintain the "session" of the user.  The cookie name can be configured by setting the <code>JWT_COOKIE_NAME</code> configuration variable.  It is important that the <code>JWT_AUTH_SITE</code> and service protected by JWT all use the same <code>JWT_COOKIE_NAME</code>.
     </p>
+  <h3 id="jwturlparam">JWT Environment Settings</h3>
+    <p> This security mode requires the following environment variable(s): </p>
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th style="width: 130px;">Variable</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td><code>JWT_SECRET</code></td>
+        <td>This setting is <b>required</b>.  This value is used as the secret to sign and verify JWT tokens</td>
+      </tr>
+      <tr>
+        <td><code>JWT_AUTH_SITE</code></td>
+        <td>This setting is <b>required</b>.  The path to a login service that signs JWT tokens.</td>
+      </tr>
+      <tr>
+        <td><code>JWT_COOKIE_NAME</code></td>
+        <td>This setting is <b>required</b>.  The cookie name intended to be used to store the JWT Session Token.</td>
+      </tr>
+      <tr>
+        <td><code>JWT_MAX_TOKEN_AGE_IN_SECONDS</code></td>
+        <td>This setting is <b>required</b>.  This settings is checked against the <code>iat</code> claim in the token.  Set globally you can ensure a token extending beyond your max thresshold would be flagged as invalid</td>
+      </tr>
+      <tr>
+        <td><code>JWT_EXPIRATION_IN_SECONDS</code></td>
+        <td>This setting is <b>required</b>.  When Starphleet creates a JWT Token during a valid request the session will last as long as this setting.  The session is extended each request by this setting.</td>
+      </tr>
+      <tr>
+        <td><code>JWT_COOKIE_DOMAIN</code></td>
+        <td>
+          This setting is <b>optional</b>.
+          <ul>
+            <li>if not provided, the JWT cookie will only be available to the full domain of the original target destination (e.g., myApp.mysite.com)</li>
+            <li>if it is provided, then the JWT cookie will be scoped accordingly.</li>
+            <li>Be sure to understand how cookie domains are applied. For example, this feature can allow implementers to grant access to peer sub-domains of the original target destination. (e.g., JWT_COOKIE_DOMAIN=mysite.com will allow both myApp.mysite.com and someOtherHost.mysite.com to access the jwt cookie.  </li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td><code>JWT_ACCESS_FLAGS</code></td>
+        <td>
+          <p> This setting is <b>optional</b>. </p>
+          <ul>
+            <li>Used in conjunction with <code>af</code> claim <a href="#jwtbitmasks">bitmask</a> in JWT token</li>
+            <li>Any matching mask in token and this setting permits entry</li>
+            <li>If <code>af</code> claim exists and flags do not match, request rejected with 403</li>
+          </ul>
+          <p> More details can be found in the <a href="#jwtaccessflags">JWT Access Flags</a> section. </p>
+        </td>
+      </tr>
+      </tbody>
+    </table>
   <h3 id="jwturlparam">JWT Url Parameter</h3>
     <p> One of the ways to pass a JWT token to Starphleet is through a URL Parameter.  As an example: </p>
 {% highlight bash %}
 https://starphleet.example.com/theservice/?jwt=$token{% endhighlight %}
     <p> Passing a valid JWT token via the URL will take precedent over a token passed as the users session in a cookie.  If the JWT Token passed as a URL parameter is valid it will replace the users session JWT token. </p>
-  <h3 id="jwtcookie">JWT Cookie</h3>
-    <p> Starphleet automatically sets a globally pathed cookie when it receives a valid JWT token.  The name of the cookie can be configured using the <code>JWT_COOKIE_NAME</code> configuration option.  This cookie can be used by applications to query the JWT token about properties set in the cookie by the authentication application. </p>
   <h3 id="jwtheader">JWT Authorization Header</h3>
-    A client side app can pass a JWT token as part of request through the authorization header.  When Starphleet receives a request using this method the response will be different if the JWT token is invalid.  Starphleet will respond with a status of 401 instead of a silent redirect to the authorization app.  Passing a JWT Token utilizing this method is most appropriate for background API calls.  The calling app can appropriately error handle the response.
+    <p> A client side app can pass a JWT token as part of request through the Authorization header using the Bearer claim.  When Starphleet receives a request using this method the response will be different if the JWT token is invalid.  Starphleet will respond with a status of 401 instead of a silent redirect to the authorization app.  Passing a JWT Token utilizing this method is most appropriate for background API calls.  The calling app can appropriately error handle the response. </p>
+{% highlight bash %}
+curl -H "Authorization: Bearer $token" https://starphleet.example.com{% endhighlight %}
+  <h3 id="jwtaccessflags">JWT Access Flags</h3>
+    <p> Starphleet supports an optional feature to granularly control access to services based on FLAGS.  This feature requires a configuration at the service level.  Additionally, this feature must be implemented in the authentication application that generates your JWT tokens. </p>
+    <p> To make use of this feature you will set a bitmask in your orders using the Decimal representation.  The variable is <code>JWT_ACCESS_FLAGS</code>. </p>
+    <p> The authentication app must also provide a claim named <code>af</code>. </p>
+  <h4 id="jwtaccessflagsexampleaccessgranted">Example: Access Granted</h4>
+    <ul>
+      <li>User <b>jdoe</b> logs in and is assigned <b>af ("access flags")</b> of:
+        <ul>
+          <li><code>Integer: 17 (bitmask: 010010)</code></li>
+        </ul>
+      </li>
+      <li>Service <code>/app1</code> sets the variable <code>JWT_ACCESS_FLAGS</code>:
+        <ul>
+          <li><code>Integer: 24 (bitmask: 011000)</code></li>
+        </ul>
+      </li>
+      <li>Flags at bit location <b>16</b>:<code>Integer: 16 (bitmask: 010000)</code> match:</li>
+        <ul>
+          <li><code>17 (bitmask: 010010)</code></li>
+          <li><code>24 (bitmask: 011000)</code></li>
+          <li>------------------------------ &</li>
+          <li><code>16 (bitmask: 0<span class="bg-danger"></span>10000)</code></li>
+        </ul>
+      <li>User is granted access</li>
+    </ul>
+  <h4 id="jwtaccessflagsexampleaccessdenied">Example: Access Denied</h4>
+    <ul>
+      <li>User <b>jdoe</b> logs in and is assigned <b>af ("access flags")</b> of:
+        <ul>
+          <li><code>Integer: 56 (bitmask: 111000)</code></li>
+        </ul>
+      </li>
+      <li>Service <code>/app1</code> sets the variable <code>JWT_ACCESS_FLAGS</code>:
+        <ul>
+          <li><code>Integer: 03 (bitmask: 000011)</code></li>
+        </ul>
+      </li>
+      <li>No flags match:</li>
+        <ul>
+          <li><code>17 (bitmask: 111000)</code></li>
+          <li><code>24 (bitmask: 000011)</code></li>
+          <li>------------------------------ &</li>
+          <li><code>0 (bitmask: 0<span class="bg-danger"></span>10000)</code></li>
+        </ul>
+      <li>User is denied access</li>
+    </ul>
+    <p>
+      You do not need to understand every part of bitwise operators to make use of flags.  For an explanation of how bitmasks work as they pertain to Starphleet, you can read more details in the <a href="#jwtbitmasks">bitmasks section</a>.
+    </p>
+  <h3 id="jwtbitmasks">Bitmasks</h3>
+    <p> Bitmasks can be used to store boolean type flags in an extremely small amount of space.  This makes them an easy candidate for JWT Tokens where space is limited and each character can bloat the token a lot.  Additionally, bitmasks are efficient for a computer to compare and manipulate. </p>
+    <p> This documentation does not intend to explain the entirety of concepts with bitmasks.  Below is a brief description of how to quickly make use of them. </p>
+  <h4 id="jwtbitmaskstonumbers">Bitmasks To Numbers</h4>
+    <p> Probably the most confusing thing about bitmasks is that bitmasks are often times represented as an integer.  It is important to understand how to convert integers into a series of bits if you want to use them as flags.  Any single number can represent a whole list of flags. </p>
+    <p> In order to use bitmasks you must first understand the following table: </p>
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th></th>
+          <th>2<sup>6</sup></th>
+          <th>2<sup>4</sup></th>
+          <th>2<sup>3</sup></th>
+          <th>2<sup>2</sup></th>
+          <th>2<sup>1</sup></th>
+          <th>2<sup>0</sup></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Decimal</td>
+          <td>32</td>
+          <td>16</td>
+          <td>8</td>
+          <td>4</td>
+          <td>2</td>
+          <td>1</td>
+        </tr>
+      </tbody>
+    </table>
+    <p> Using the above table you can see that the right most column starts with 1 and moves left by increases exponents of <code>2</code>.  If I wanted to represent a number in "<code>bits</code>" you would put a "<code>1</code>" in the columns that added up to the number.  </p>
+    <p> Using the table above lets convert the number <code>6</code> to a bitmask: </p>
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th></th>
+          <th>2<sup>6</sup></th>
+          <th>2<sup>4</sup></th>
+          <th>2<sup>3</sup></th>
+          <th>2<sup>2</sup></th>
+          <th>2<sup>1</sup></th>
+          <th>2<sup>0</sup></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Decimal</td>
+          <td>32</td>
+          <td>16</td>
+          <td>8</td>
+          <td class="bg-success">4</td>
+          <td class="bg-success">2</td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td>Bitmask</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td class="bg-warning">1</td>
+          <td class="bg-warning">1</td>
+          <td>0</td>
+        </tr>
+      </tbody>
+    </table>
+    <p> We have a bitmask that looks like <code>000110</code>.  Using the chart we can see that in Decimal form this represents <code>4 + 2 = 6</code>.</p>
+  <h4 id="jwtusingbitmasks">Using Bitmasks as Flags</h4>
+    <p> To understand bitmasks as flags lets first propose a scenario.  Let's assume that we have different types of users: </p>
+    <ul>
+      <li>Plumber</li>
+      <li>Engineer</li>
+      <li>Mechanic</li>
+    </ul>
+    <p> When our auth app creates the JWT Token it will determine what kind of user is logging in.  Some users might be both Mechanics AND Engineers. Some users may only fit one role. Now lets assume that we have a number of services running on Starphleet.  Some of our services can only be accessed by plumbers.  Some our services can be accessed by both Plumbers and Mechanics.  Some by all of these. </p>
+    <p> The first thing we must do is assign bit columns to our roles.  What does this mean?</p>
+    <p> A bitmask is nothing more than a serios of <code>1's</code> and <code>0's</code>. An example of a bitmask might look something like <code>0101</code>.  In this example we have 4 bits.  Each bit can be 1 for <code>true</code> or 0 for <code>false</code>. </p>
+    <p> To illustrate how to use a bitmask we are going to refer to our example list of roles above and assign arbitrary meanings to each one of these bits.  We have four columns.  Starting from the <span class="text-danger"><b><i>right</i></b></span> side: </p>
+    <ul>
+      <li>Assign the first column to <b>Plumber</b> (<code>0001</code>)</li>
+      <li>Assign the second column to <b>Engineer</b> (<code>0010</code>)</li>
+      <li>Assign the third column to <b>Mechanic</b> (<code>0100</code>)</li>
+      <li>Assign the fourth column to <b>Future Use</b> (<code>1000</code>)</li>
+    </ul>
+    <p> Given the above example if we wanted to set someone as a Plumber <b>and</b> a Mechanic then the bitmask would look like <code>0101</code>. If my JWT Authentication App assigned a bitmask of <code>0111</code> as the role of my user, I would know that the user was a Plumber, Engineer, and </b>Mechanic</p>
+    <p> If I wanted to only allow a Plumber and Engineer to use a service then I would set the environment variable <code>JWT_ACCESS_FLAGS</code> in my orders file to <code>0011</code>. </p>
+  <h4 id="jwtusingbitmasks">Bitmasks: Putting It All Together</h4>
+    <p> The final part of understanding bitmasks is understanding that we can't actually store the bitmask in its pure form.  In order to use bitmasks we convert them to Decimal. </p>
+    <p> In our example above if we wanted to flag a user as a <b>Plumber</b> and <b>Mechanic</b> we would need to assign them a bitmask of <code>5</code> (<code>0101</code>). </p>
+    <p> If we want to restrict our service to only <b>Engineers</b>, we would set the <code>JWT_ACCESS_FLAGS</code> environment variable to <code>2</code> (<code>0010</code>). </p>
+
   <h3 id="jwtauthenticationapp">JWT Authentication App</h3>
   <h3 id="jwtconfigurationoptions">Configuration Options</h3>
     <p> JWT <b>requires</b> the following settings:</p>
@@ -541,14 +726,6 @@ https://starphleet.example.com/theservice/?jwt=$token{% endhighlight %}
       </thead>
       <tbody>
         <tr>
-          <td><code>USER_IDENTITY_HEADER</code></td>
-          <td>This is the name of the header used by NGINX to store the "user" authenticated to the service.  The user will be set based on the <code>SECURITY_MODE</code> variable and will be dependent on the security mechanism used to authenticate the service.  This header will be passed to the web request sent to the apps running the the containers.  The apps can validate which user is making the request without baking their own authentication mechanism.</td>
-        </tr>
-        <tr>
-          <td><code>USER_IDENTITY_COOKIE</code></td>
-          <td>The name of the cookie assigned the username of an authenticated user.  Works the same as <code>USER_IDENTITY_HEADER</code></td>
-        </tr>
-        <tr>
           <td><code>SECURITY_MODE</code></td>
           <td>
             This setting determines what <a href="#authentication">authentication</a> "mode" a service is deployed in.  This setting is intended to be <a href="#overrides">overridden</a> in the headquarters or in the <a href="#orders">orders file</a>.  This mode can be one of four settings:
@@ -559,6 +736,14 @@ https://starphleet.example.com/theservice/?jwt=$token{% endhighlight %}
               <li><a href="#ldapconfiguration">ldap</a></li>
             </ul>
           </td>
+        </tr>
+        <tr>
+          <td><code>USER_IDENTITY_HEADER</code></td>
+          <td>This is the name of the header used by NGINX to store the "user" authenticated to the service.  The user will be set based on the <code>SECURITY_MODE</code> variable and will be dependent on the security mechanism used to authenticate the service.  This header will be passed to the web request sent to the apps running the the containers.  The apps can validate which user is making the request without baking their own authentication mechanism.</td>
+        </tr>
+        <tr>
+          <td><code>USER_IDENTITY_COOKIE</code></td>
+          <td>The name of the cookie assigned the username of an authenticated user.  Works the same as <code>USER_IDENTITY_HEADER</code></td>
         </tr>
         <tr>
           <td><code>LDAP_SERVER</code></td>
