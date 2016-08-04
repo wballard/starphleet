@@ -157,14 +157,14 @@ local verified_bearer_token = jwt:verify(jwt_secret, authorizationBearerString, 
 ------------------------------------------------------------------------------
 local token = nil
 local redirect = nil
-if _isValidToken(verified_url_token) then
+if _isValidToken(verified_bearer_token) then
+  token = verified_bearer_token
+elseif _isValidToken(verified_url_token) then
   token = verified_url_token
   redirect = ngx.var.request_uri
   redirect = redirect:gsub([[jwt=[^&]*&?]],"")
   redirect = redirect:gsub([[%?$]],"")
   redirect = redirect:gsub([[&$]],"")
-elseif _isValidToken(verified_bearer_token) then
-  token = verified_bearer_token
 elseif _isValidToken(verified_cookie_token) then
   token = verified_cookie_token
 end
