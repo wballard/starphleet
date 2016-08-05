@@ -667,7 +667,7 @@ curl -H "Authorization: Bearer $token" https://starphleet.example.com{% endhighl
     <p> In our example above if we wanted to flag a user as a <b>Plumber</b> and <b>Mechanic</b> we would need to assign them a bitmask of <code>5</code> (<code>0101</code>). </p>
     <p> If we want to restrict our service to only <b>Engineers</b>, we would set the <code>JWT_ACCESS_FLAGS</code> environment variable to <code>2</code> (<code>0010</code>). </p>
   <h3 id="jwtaccessflags">JWT Access Flags</h3>
-    <p> To understand how this works it is <b>imperitive</b> that you fully understand how bitmasks work and how the bitwise operator works.  If these concepts are foreign to you read the <a href="#jwtbitmasks">bitmask</a> section.  Familiarize yourself with the basic principles behind bitmasks and then continue reading. </p>
+    <p> To understand how this works it is <b>imperitive</b> that you fully understand how bitmasks work and how the bitwise-and (&) operator works.  If these concepts are foreign to you read the <a href="#jwtbitmasks">bitmask</a> section.  Familiarize yourself with the basic principles behind bitmasks and then continue reading. </p>
     <p> Starphleet supports an optional feature to granularly control access to services based on FLAGS.  This feature requires a configuration at the service level.  Additionally, this feature must be implemented in the <a href="#jwtauthenticationapp">authentication application</a> that generates your JWT tokens. </p>
     <p> To make use of this feature you will set a bitmask in your orders using the Decimal representation.  The variable is <code>JWT_ACCESS_FLAGS</code>. </p>
     <p> The authentication app must also provide a claim named <code>af</code>. </p>
