@@ -5,6 +5,7 @@ sudo stop starphleet_monitor_remotes
 sudo stop starphleet_monitor_headquarters
 sudo stop starphleet_nginx_hupper
 sudo stop starphleet_reaper
+sudo starphleet-restart-nginx
 sudo /starphleet/scripts/perform-overlay
 sudo start starphleet_monitor_orders
 sudo start starphleet_monitor_remotes

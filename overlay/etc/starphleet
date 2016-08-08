@@ -40,6 +40,7 @@ export NGINX_PUBLISHED_PATH="/var/starphleet/nginx/published"
 export NGINX_STATUS_CONFIG_SYMLINK="${NGINX_PUBLISHED_PATH}/starphleet_nginx_status.status"
 export NGINX_STATUS_ENDPOINT_CONFIG="/var/starphleet/nginx/status.conf"
 export STARPHLEET_DNS_ONLINE_STATUS_FILE="/tmp/.starphleet.online"
+export STARPHLEET_AUTHENTIC_TOKEN="CHANGEME"
 # Declare drives we'd setup and where they should mount for starphleet install on EC2
 declare -A EC2_DRIVES
 EC2_DRIVES["/dev/xvdb"]="/var/lib/lxc"
@@ -68,7 +69,9 @@ unset LDAP_SERVER
 unset JWT_SECRET
 unset JWT_AUTH_SITE
 unset JWT_COOKIE_DOMAIN
-unset JWT_ROLES
+unset JWT_ACCESS_FLAGS
+unset JWT_COOKIE_NAME
 unset JWT_EXPIRATION_IN_SECONDS
+unset JWT_MAX_TOKEN_AGE_IN_SECONDS
 # HTPASSWD Needs
 unset HTPASSWD
