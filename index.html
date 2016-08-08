@@ -485,7 +485,7 @@ export LDAP_PASSWORD='****' {% endhighlight %}
       </tr>
     </tbody>
   </table>
-  <p> Assigning the <code>SECURITY_MODE</code> setting to <code>htpasswd</code> requires an additional environment settings in the <a href="#headquarters">headquarters</a>.  You can set this <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.  To get the appropriate string you can use the linux <code>htpasswd</code> command like the following:</a></p>
+  <p> Assigning the <code>SECURITY_MODE</code> setting to <code>htpasswd</code> requires an additional environment settings in the <a href="#headquarters">headquarters</a>.  You can set this <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.  To get the appropriate string you can use the linux <code>htpasswd</code> command like the following:</p>
 {% highlight bash %}
 $ htpasswd -n -b changeusername changepasswd
 changeusername:$apr1$O7LcRpBk$Pv17p..kUwbcw5rxM4AEr0 {% endhighlight %}
@@ -501,7 +501,7 @@ jsmith{% endhighlight %}
 </section>
 <section class="bs-docs-section">
   <h1 id="jwtdetails" class="page-header">JWT Details</h1>
-    <p> JWT Authentication works by looking for a specific jwt token when a request is received by Starphleet.  If the jwt token is invalid the request silently redirects to a service running on the same ship.  The service is responsible for authenicating the user and providing a token.  The token can then be used to retry the original request.
+    <p> JWT Authentication works by looking for a specific jwt token when a request is received by Starphleet.  If the jwt token is invalid the request silently redirects to a service running on the same ship.  The service is responsible for authenicating the user and providing a token.  The token can then be used to retry the original request. </p>
     <p> There are three ways to pass a JWT token with your request: </p>
     <ul>
       <li>Url Param</li>
@@ -511,7 +511,7 @@ jsmith{% endhighlight %}
     <p>
      When Starphleet receives a valid JWT Token as part of a request to a JWT authenticated service the jwt token is used to create a global cookie.  The cookie is used to maintain the "session" of the user.  The cookie name can be configured by setting the <code>JWT_COOKIE_NAME</code> configuration variable.  It is important that the <code>JWT_AUTH_SITE</code> and service protected by JWT all use the same <code>JWT_COOKIE_NAME</code>.
     </p>
-  <h3 id="jwturlparam">JWT Environment Settings</h3>
+  <h3 id="jwtenvironmentsettins">JWT Environment Settings</h3>
     <p> This security mode requires the following environment variable(s): </p>
     <table class="table table-bordered table-striped">
       <thead>
@@ -660,9 +660,9 @@ curl -H "Authorization: Bearer $token" https://starphleet.example.com{% endhighl
       <li>Assign the third column to <b>Mechanic</b> (<code>0100</code>)</li>
       <li>Assign the fourth column to <b>Future Use</b> (<code>1000</code>)</li>
     </ul>
-    <p> Given the above example if we wanted to set someone as a Plumber <b>and</b> a Mechanic then the bitmask would look like <code>0101</code>. If my JWT Authentication App assigned a bitmask of <code>0111</code> as the role of my user, I would know that the user was a Plumber, Engineer, and </b>Mechanic</p>
+    <p> Given the above example if we wanted to set someone as a Plumber <b>and</b> a Mechanic then the bitmask would look like <code>0101</code>. If my JWT Authentication App assigned a bitmask of <code>0111</code> as the role of my user, I would know that the user was a Plumber, Engineer, and Mechanic</p>
     <p> If I wanted to only allow a Plumber and Engineer to use a service then I would set the environment variable <code>JWT_ACCESS_FLAGS</code> in my orders file to <code>0011</code>. </p>
-  <h4 id="jwtusingbitmasks">Bitmasks: Putting It All Together</h4>
+  <h4 id="jwtputtingitalltogether">Bitmasks: Putting It All Together</h4>
     <p> The final part of understanding bitmasks is understanding that we can't actually assign the bitmask in its pure form.  In order to assign bitmasks we convert them to Decimal. </p>
     <p> In our example above if we wanted to flag a user as a <b>Plumber</b> and <b>Mechanic</b> we would need to assign them a bitmask of <code>5</code> (<code>0101</code>). </p>
     <p> If we want to restrict our service to only <b>Engineers</b>, we would set the <code>JWT_ACCESS_FLAGS</code> environment variable to <code>2</code> (<code>0010</code>). </p>
@@ -685,7 +685,7 @@ curl -H "Authorization: Bearer $token" https://starphleet.example.com{% endhighl
         </li>
         <li>Flags at bit location <b>16</b>:<code>Integer: 16 (bitmask: 010000)</code> match:</li>
           <ul>
-            <li><code>17 (bitmask: 010010)</code></li>
+            <li><code>17 (bitmask: 010001)</code></li>
             <li><code>24 (bitmask: 011000)</code></li>
             <li>------------------------------ &</li>
             <li><code>16 (bitmask: 010000)</code></li>
@@ -717,6 +717,16 @@ curl -H "Authorization: Bearer $token" https://starphleet.example.com{% endhighl
         You do not need to understand every part of bitwise operators to make use of flags.  For an explanation of how bitmasks work as they pertain to Starphleet, you can read more details in the <a href="#jwtbitmasks">bitmasks section</a>.
       </p>
   <h3 id="jwtauthenticationapp">JWT Authentication App</h3>
+    <p> The JWT Authentication app is responsible for assigning the profile and properties for a user into the globally used JWT Token.  Before the authentication app performs this function it should validate the user in whatever mechanism is appropriate.  The following are special considerations for the service: </p>
+    <ul>
+      <li>Requests to the app are silent.  It is best to directly forbid direct requests and verify the request is a redirect</li>
+      <li>The app must be using the <code>public</code> security mode</li>
+      <li>The app must provide the login form for all paths and http methods.</li>
+      <li>The app must generate the jwt token using the same <code>JWT_SECRET</code> configured for Starphleet.</li>
+    </ul>
+    <p>
+
+    </p>
 
 </section>
 <section class="bs-docs-section">
