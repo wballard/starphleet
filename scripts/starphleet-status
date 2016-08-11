@@ -107,7 +107,7 @@ EOF
 
     # This grabs the container NGINX is currently configured to point to which
     # is not always the same is what starphleet thinks is the latest container
-    NGINX_POINTING_AT=$(curl --connect-timeout 1 -s -XHEAD -i "http://localhost/${ORDER}/" | grep "X-Starphleet-Container" | cut -f 2 -d " " | tr -dc '[[:print:]]')
+    NGINX_POINTING_AT=$(curl --connect-timeout 1 -s -XHEAD -H "Authorization: Bearer BadToken" -i "http://localhost/${ORDER}/" | grep "X-Starphleet-Container" | cut -f 2 -d " " | tr -dc '[[:print:]]')
 
     # If trouble is set and everything is healthy we skip this one (eg, continue)
     if [ "${trouble}" == "true" ] &&
