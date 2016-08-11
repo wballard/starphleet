@@ -1,5 +1,5 @@
 SHELL=/usr/bin/env bash
-.PHONY: clean always
+.PHONY: clean unzip always
 
 BUILD_ROOT=$(CURDIR)
 NGINX_ROOT=$(CURDIR)/nginx-1.9.15
@@ -9,7 +9,7 @@ LUAJIT_LIB=/usr/local/lib/lua/luajit-2.0
 LUAJIT_INC=/usr/local/include/luajit-2.0
 .EXPORT_ALL_VARIABLES:
 
-${NGINX}: always
+${NGINX}: unzip always
 	mkdir -p ${INSTALL_LOCATION}
 	cd ${BUILD_ROOT}/LuaJIT-2.0.4 && make && make install
 	cd ${BUILD_ROOT}/lua-cjson-2.1.0 && make && make install
