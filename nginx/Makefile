@@ -1,5 +1,5 @@
 SHELL=/usr/bin/env bash
-.PHONY: clean unzip always
+.PHONY: clean unzip
 
 BUILD_ROOT=$(CURDIR)
 NGINX_ROOT=$(CURDIR)/nginx-1.9.15
@@ -9,8 +9,9 @@ LUAJIT_LIB=/usr/local/lib/lua/luajit-2.0
 LUAJIT_INC=/usr/local/include/luajit-2.0
 .EXPORT_ALL_VARIABLES:
 
-${NGINX}: unzip always
+${NGINX}: unzip
 	mkdir -p ${INSTALL_LOCATION}
+	cd ${BUILD_ROOT}/openssl-1.0.2h && ./config --prefix=${INSTALL_LOCATION} && make depend && make
 	cd ${BUILD_ROOT}/LuaJIT-2.0.4 && make && make install
 	cd ${BUILD_ROOT}/lua-cjson-2.1.0 && make && make install
 	cd ${NGINX_ROOT} && ./configure --with-mail --with-http_v2_module --with-mail_ssl_module --with-http_ssl_module \
@@ -25,19 +26,12 @@ ${NGINX}: unzip always
 	cp ${INSTALL_LOCATION}/sbin/nginx ${NGINX}
 
 unzip:
-	tar xfvz ${BUILD_ROOT}/LuaJIT-2.0.4.tar.gz
-	tar xfvz ${BUILD_ROOT}/headers-more-nginx-module-0.25.tar.gz
-	tar xfvz ${BUILD_ROOT}/lua-cjson-2.1.0.tar.gz
-	tar xfvz ${BUILD_ROOT}/lua-nginx-module-0.10.5.tar.gz
-	tar xfvz ${BUILD_ROOT}/lua-resty-hmac.tar.gz
-	tar xfvz ${BUILD_ROOT}/lua-resty-jwt-0.1.2.tar.gz
-	tar xfvz ${BUILD_ROOT}/lua-resty-string-0.09.tar.gz
-	tar xfvz ${BUILD_ROOT}/nginx-1.9.15.tar.gz
-	tar xfvz ${BUILD_ROOT}/nginx-auth-ldap.tar.gz
-	tar xfvz ${BUILD_ROOT}/ngx_devel_kit-0.2.19.tar.gz
-
+	for name in $$(ls *.tar.gz); do tar xfvz $$name; done
 clean:
-	echo $(CURDIR)
-	-rm -rf ${INSTALL_LOCATION}
-	-rm -f ${NGINX}
-	cd ${NGINX_ROOT} && make clean
+	@echo $(CURDIR)
+	@-rm -rf $(INSTALL_LOCATION)
+	@-for name in $$(ls *.tar.gz); do DIRNAME=$$(basename -s .tar.gz $$name); test -d $$DIRNAME && rm -rf $$DIRNAME; done
+	@-rm -rf ${INSTALL_LOCATION}
+	@-rm -f ${NGINX}
+	-test -d ${NGINX_ROOT} && cd ${NGINX_ROOT} && make clean
+
