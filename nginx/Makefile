@@ -24,9 +24,20 @@ ${NGINX}: always
 	cd ${NGINX_ROOT} && make install
 	cp ${INSTALL_LOCATION}/sbin/nginx ${NGINX}
 
+unzip:
+	tar xfvz ${BUILD_ROOT}/LuaJIT-2.0.4.tar.gz
+	tar xfvz ${BUILD_ROOT}/headers-more-nginx-module-0.25.tar.gz
+	tar xfvz ${BUILD_ROOT}/lua-cjson-2.1.0.tar.gz
+	tar xfvz ${BUILD_ROOT}/lua-nginx-module-0.10.5.tar.gz
+	tar xfvz ${BUILD_ROOT}/lua-resty-hmac.tar.gz
+	tar xfvz ${BUILD_ROOT}/lua-resty-jwt-0.1.2.tar.gz
+	tar xfvz ${BUILD_ROOT}/lua-resty-string-0.09.tar.gz
+	tar xfvz ${BUILD_ROOT}/nginx-1.9.15.tar.gz
+	tar xfvz ${BUILD_ROOT}/nginx-auth-ldap.tar.gz
+	tar xfvz ${BUILD_ROOT}/ngx_devel_kit-0.2.19.tar.gz
+
 clean:
 	echo $(CURDIR)
 	-rm -rf ${INSTALL_LOCATION}
 	-rm -f ${NGINX}
 	cd ${NGINX_ROOT} && make clean
-
