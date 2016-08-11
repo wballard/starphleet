@@ -97,7 +97,7 @@ fi
 cat << EOF >> "${MOUNT_CONF}"
   if (\$http_cookie ~ "beta_${order}=(.*?)(;|$)") {
     set \$sendto \$1;
-    rewrite ${public_url}/(.*) \$sendto/\$1 last;
+    rewrite ${public_url}/(.*) /\$sendto/\$1 last;
   }
   rewrite ${public_url}/(.*) /\$1 break;
   proxy_pass http://${IP_ADDRESS}:${PORT};
