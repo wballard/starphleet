@@ -29,10 +29,10 @@ ${NGINX}: unzip
 unzip:
 	set -x && for name in $$(ls *.tar.gz); do tar --no-same-owner --no-same-permissions -xzf $$name; done
 clean:
-	@echo $(CURDIR)
-	@-rm -rf $(INSTALL_LOCATION)
-	@-for name in $$(ls *.tar.gz); do DIRNAME=$$(basename -s .tar.gz $$name); test -d $$DIRNAME && rm -rf $$DIRNAME; done
-	@-rm -rf ${INSTALL_LOCATION}
-	@-rm -f ${NGINX}
-	-test -d ${NGINX_ROOT} && cd ${NGINX_ROOT} && make clean
+	echo $(CURDIR)
+	rm -rf $(INSTALL_LOCATION)
+	for name in $$(ls *.tar.gz); do DIRNAME=$$(basename -s .tar.gz $$name); test -d $$DIRNAME && rm -rf $$DIRNAME; done
+	rm -rf ${INSTALL_LOCATION}
+	rm -f ${NGINX}
+	test -d ${NGINX_ROOT} && cd ${NGINX_ROOT} && make clean
 
