@@ -17,7 +17,7 @@ ${NGINX}: unzip
 	cd ${NGINX_ROOT} && ./configure --with-mail --with-http_v2_module --with-mail_ssl_module --with-http_ssl_module \
 		--prefix=${INSTALL_LOCATION} \
 		--with-ld-opt="-Wl,-rpath,/usr/local/bin/luajit" \
-		--with-openssl=${BUILD_ROOT}/openssl-1.0.2h
+		--with-openssl=${BUILD_ROOT}/openssl-1.0.2h \
 		--add-module=${BUILD_ROOT}/headers-more-nginx-module-0.25 \
 		--add-module=${BUILD_ROOT}/nginx-auth-ldap \
 		--add-module=${BUILD_ROOT}/ngx_devel_kit-0.2.19 \
