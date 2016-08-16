@@ -571,6 +571,7 @@ jsmith{% endhighlight %}
 {% highlight bash %}
 https://starphleet.example.com/theservice/?jwt=$token{% endhighlight %}
     <p> Passing a valid JWT token via the URL will take precedent over a token passed as the users session in a cookie.  If the JWT Token passed as a URL parameter is valid it will replace the users session JWT token. </p>
+    <p> When the token is passed via a url parameter the request will be redirected to the same incoming URL but with the JWT token stripped from the URL.  Sometimes this behavior is not desired.  The caller can disable the redirect behavior by passing <code>?disablejwtredirect=true</code> in the url in addition to the JWT Token.  Including the <b>disable</b> parameter will still accept the URL JWT Token but will not redirect and strip the token out of the URL. </p>
   <h3 id="jwtheader">JWT Authorization Header</h3>
     <p> A client side app can pass a JWT token as part of request through the Authorization header using the Bearer claim.  When Starphleet receives a request using this method the response will be different if the JWT token is invalid.  Starphleet will respond with a status of 401 instead of a silent redirect to the authorization app.  Passing a JWT Token utilizing this method is most appropriate for background API calls.  The calling app can appropriately error handle the response. </p>
 {% highlight bash %}
