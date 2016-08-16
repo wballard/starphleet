@@ -162,10 +162,12 @@ if _isValidToken(verified_bearer_token) then
   token = verified_bearer_token
 elseif _isValidToken(verified_url_token) then
   token = verified_url_token
-  redirect = ngx.var.request_uri
-  redirect = redirect:gsub([[jwt=[^&]*&?]],"")
-  redirect = redirect:gsub([[%?$]],"")
-  redirect = redirect:gsub([[&$]],"")
+  if not string.find(ngx.var.request_uri, "disablejwtredirect=") then
+    redirect = ngx.var.request_uri
+    redirect = redirect:gsub([[jwt=[^&]*&?]],"")
+    redirect = redirect:gsub([[%?$]],"")
+    redirect = redirect:gsub([[&$]],"")
+  end
 elseif _isValidToken(verified_cookie_token) then
   token = verified_cookie_token
 end
