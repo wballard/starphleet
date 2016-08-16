@@ -16,7 +16,7 @@ do
   # Get the latest successful container deployment
   CURRENT_CONTAINER=$(cat ${CURRENT_ORDERS}/${order}/.container)
   # Determine where nginx is pointing
-  NGINX_CONTAINER=$(curl --connect-timeout 1 -s -XHEAD -i "http://localhost/${order}/" | grep "X-Starphleet-Container" | cut -f 2 -d " " | tr -dc '[[:print:]]')
+  NGINX_CONTAINER=$(curl --connect-timeout 1 -s -XHEAD -i "http://localhost/${order}/" | grep -i "X-Starphleet-Container" | cut -f 2 -d " " | tr -dc '[[:print:]]')
 
   # *****************************
   # Guards
