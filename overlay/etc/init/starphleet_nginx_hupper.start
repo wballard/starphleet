@@ -21,7 +21,6 @@ do
     rm "${NGINX_CONF}"/published_bare/* 2> /dev/null
     rm "${NGINX_CONF}"/proxy_for/* 2> /dev/null
     rm "${NGINX_CONF}"/named_servers/* 2> /dev/null
-    rm "${NGINX_CONF}"/htpasswd/* 2> /dev/null
 
     # Run all the accessory nginx configuration tools
     starphleet-ldap-servers
