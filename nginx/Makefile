@@ -27,7 +27,7 @@ ${NGINX}: unzip
 	cp ${INSTALL_LOCATION}/sbin/nginx ${NGINX}
 
 unzip:
-	set -x && for name in $$(ls *.tar.gz); do tar --no-same-owner --no-same-permissions -xzf $$name; done
+	for name in $$(ls *.tar.gz); do tar --no-same-owner --no-same-permissions -xzf $$name; done
 clean:
 	@echo $(CURDIR)
 	@-rm -rf $(INSTALL_LOCATION)
