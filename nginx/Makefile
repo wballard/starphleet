@@ -2,7 +2,7 @@ SHELL=/usr/bin/env bash
 .PHONY: clean unzip
 
 BUILD_ROOT=$(CURDIR)
-NGINX_ROOT=$(CURDIR)/nginx-1.9.15
+NGINX_ROOT=$(CURDIR)/nginx-1.11.3
 INSTALL_LOCATION=$(CURDIR)/build_output
 NGINX=$(CURDIR)/nginx
 LUAJIT_LIB=/usr/local/lib/lua/luajit-2.0
