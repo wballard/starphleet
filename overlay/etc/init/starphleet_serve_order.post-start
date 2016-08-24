@@ -64,6 +64,8 @@ else
   # Update this containers status with 'online'
   echo 'online' > "${STATUS_FILE}"
 
+  # Announce HUPS in case someone goes crazy
+  echo "HUP_REQUESTED: ${order} ${name}" | logger
   # Trigger new publish configs and a hup of nginx
   starphleet-hup-nginx
   # For good measure
