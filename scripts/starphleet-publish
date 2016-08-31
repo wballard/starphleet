@@ -83,9 +83,11 @@ info jwt enabled
 cat << EOF >> "${MOUNT_CONF}"
   set \$jwt_secret ${JWT_SECRET};
   set \$jwt_auth_site ${JWT_AUTH_SITE};
+  set \$jwt_auth_header ${USER_IDENTITY_HEADER};
   set \$jwt_cookie_domain ${JWT_COOKIE_DOMAIN};
   set \$jwt_cookie_name ${JWT_COOKIE_NAME};
   set \$jwt_access_flags ${JWT_ACCESS_FLAGS};
+  set \$jwt_revocation_dir ${JWT_REVOCATION_DIR};
   set \$public_url ${public_url};
   set \$jwt_max_token_age_in_seconds ${JWT_MAX_TOKEN_AGE_IN_SECONDS};
   set \$jwt_expiration_in_seconds ${JWT_EXPIRATION_IN_SECONDS};

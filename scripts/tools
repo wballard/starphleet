@@ -149,6 +149,7 @@ function validate_security() {
     if [ -z "${JWT_SECRET}" ] || \
        [ -z "${JWT_COOKIE_DOMAIN}" ] || \
        [ -z "${JWT_ACCESS_FLAGS}" ] || \
+       [ -z "${JWT_REVOCATION_DIR}" ] || \
        [ -z "${JWT_COOKIE_NAME}" ] || \
        [ -z "${JWT_MAX_TOKEN_AGE_IN_SECONDS}" ] || \
        [ -z "${JWT_EXPIRATION_IN_SECONDS}" ]; then

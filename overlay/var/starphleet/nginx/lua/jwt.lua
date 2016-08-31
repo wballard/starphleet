@@ -5,9 +5,11 @@ local cjson = require("cjson")
 local jwt = require("resty.jwt")
 local jwt_secret = ngx.var.jwt_secret
 local jwt_auth_site = ngx.var.jwt_auth_site
+local jwt_auth_header = ngx.var.jwt_auth_header
 local jwt_access_flags = ngx.var.jwt_access_flags
 local jwt_cookie_domain = ngx.var.jwt_cookie_domain
 local jwt_cookie_name = ngx.var.jwt_cookie_name
+local jwt_revocation_dir = ngx.var.jwt_revocation_dir
 local jwt_max_token_age_in_seconds = tonumber(ngx.var.jwt_max_token_age_in_seconds)
 local jwt_expiration_in_seconds = tonumber(ngx.var.jwt_expiration_in_seconds)
 local headers = ngx.req.get_headers()
@@ -36,6 +38,23 @@ local function _replace(str, what, with)
   what = string.gsub(what, "[%(%)%.%+%-%*%?%[%]%^%$%%]", "%%%1") -- escape pattern
   with = string.gsub(with, "[%%]", "%%%%") -- escape replacement
   return string.gsub(str, what, with)
+end
+
+------------------------------------------------------------------------------
+-- @function _fileExists(fileName)
+--
+-- Check if a file exists.  We use a file system check to revoke JWT tokens
+-- Using the solution found here:
+--   http://stackoverflow.com/a/4991602
+------------------------------------------------------------------------------
+function _fileExists(fileName)
+   local file = io.open(fileName,"r")
+   if file ~= nil then
+     io.close(file)
+     return true
+   else
+     return false
+   end
 end
 
 ------------------------------------------------------------------------------
@@ -89,11 +108,18 @@ end
 local _resetHeaders = function(token)
   for k,v in pairs(ngx.req.get_headers()) do
     if (string.sub(k,1,4) == 'jwt-') then
-      ngx.req.set_header(k,nil)
+      ngx.req.set_header(k, nil)
     end
   end
   for k,v in pairs(token.payload) do
-    ngx.req.set_header("jwt-" .. k,cjson.encode(v))
+    ngx.req.set_header("jwt-" .. k, cjson.encode(v))
+  end
+
+  -- If the "un" claim exists in the valid JWT token we will
+  -- set the jwt_auth_header which mimics the behavior of the
+  -- other authentication methods
+  if token.payload.un and type(token.payload.un) == "string" then
+    ngx.req.set_header(jwt_auth_header, token.payload.un)
   end
 end
 
@@ -120,6 +146,15 @@ local _isValidToken = function(token)
     type(token.payload.exp) == "number" and
     ngx.time() - token.payload.iat <= jwt_max_token_age_in_seconds then
     --
+    -- To support revocations - we will now check if a jid exists - and,
+    -- if it exists then we will revoke the token if a file exists in
+    -- the revocation dir with the jid as the name of the file.  This should
+    -- later be amended to enforce jid's
+    if token.payload.jid and
+    _fileExists(jwt_revocation_dir .. "/" .. token.payload.jid) then
+      return false
+    end
+    --
     return true
   end
   --
@@ -133,14 +168,15 @@ end
 ------------------------------------------------------------------------------
 -- Decode each of the token types.  We handle things slightly different
 -- based on how the caller sent us the JWT token.  From a high level:
---    * Passing JWT via URL allows custom expiration times but
---      confines your JWT token to a specific service.
---    * After a URL token authenticates, a cookie is returned
---      populated assigned an experation set in the orders.
---    * The "cookie" JWT token can be passed via the "Authorization"
---      header to REST api's.  These kinds of requests result in a "401"
---      if the JWT token is not valid or expires instead of redirecting
---      to the login app
+--    * Passing JWT via URL will get you in the door and starphleet
+--      will set a cookie using the payload from your token.  The first
+--      action will be a 302 redirect back to the same URL stripped
+--      of the jwt token from the url.
+--    * You can pass a token via the Authorization: Bearer header and
+--      starphleet will treat your request as an API call
+--    * You can set your own cookie using the JWT_COOKIE_NAME
+--      and JWT_COOKIE_DOMAIN params appropriately.  It is recommended
+--      to pass the token via the URL.
 ------------------------------------------------------------------------------
 local authorizationBearerString = _getAuthorizationHeader()
 local verified_url_token = jwt:verify(jwt_secret, ngx.var.arg_jwt, 0)
@@ -148,13 +184,9 @@ local verified_cookie_token = jwt:verify(jwt_secret, ngx.var["cookie_" .. jwt_co
 local verified_bearer_token = jwt:verify(jwt_secret, authorizationBearerString, 0)
 
 ------------------------------------------------------------------------------
--- JWT tokens passed via the URL have priority over a JWT token
--- set via the cookie.  The JWT token passed in the URL must
--- have the claim "svc" binding the URL based token to only one
--- service.  An app can use the resulting cookie (set below)
--- for calls to other services and/or to refresh the session
--- associated with the JWT token that was originally passed in the URL.
--- Below - We associate the 'token' with whichever token is valid first
+-- Below we follow the rules described above.  We respect a url param
+-- "disablejwtredirect", which, when present - we will NOT redirect
+-- and strip the JWT token from the URL.
 ------------------------------------------------------------------------------
 local token = nil
 local redirect = nil
@@ -177,7 +209,6 @@ end
 -- If the valid token contains 'af' (access flags) we will limit
 -- the response at a service level based on these flags.
 ------------------------------------------------------------------------------
-
 if token
   and token.payload
   and token.payload.af
