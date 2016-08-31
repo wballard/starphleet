@@ -124,6 +124,32 @@ local _resetHeaders = function(token)
 end
 
 ------------------------------------------------------------------------------
+-- @function _isJwtTokenIdentityChanging(token)
+--
+-- Pass two payloads that result from a "resty:verify" to this method
+-- to determine if their jid has changed.  If the jid has changed
+-- we will return true
+--
+-- We check that two tokens passed are:
+--   * Valid
+--   * Both contain jid
+--   * Jid has changed
+--
+------------------------------------------------------------------------------
+local _isJwtTokenIdentityChanging = function(jwt_token_one, jwt_token_two)
+  if jwt_token_one["valid"] and
+    jwt_token_two["valid"] and
+    jwt_token_one.payload.jid and
+    jwt_token_two.payload.jid and
+    jwt_token_one.payload.jid ~= jwt_token_two.payload.jid then
+    --
+    return true
+  end
+  --
+  return false
+end
+
+------------------------------------------------------------------------------
 -- @function _isValidToken(token)
 --
 -- Pass the results of "resty:verify" to this method to determine if result
@@ -201,7 +227,9 @@ elseif _isValidToken(verified_url_token) then
     redirect = redirect:gsub([[&$]],"")
   end
 elseif _isValidToken(verified_cookie_token) then
-  token = verified_cookie_token
+  if not _isJwtTokenIdentityChanging(verified_url_token, verified_cookie_token) then
+    token = verified_cookie_token
+  end
 end
 
 ------------------------------------------------------------------------------
