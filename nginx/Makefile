@@ -11,7 +11,7 @@ LUAJIT_INC=/usr/local/include/luajit-2.0
 
 ${NGINX}: unzip
 	mkdir -p ${INSTALL_LOCATION}
-	cd ${BUILD_ROOT}/openssl-1.0.2h && ./config && make depend && make
+	cd ${BUILD_ROOT}/openssl-1.0.2j && ./config && make depend && make
 	cd ${BUILD_ROOT}/LuaJIT-2.0.4 && make && make install
 	cd ${BUILD_ROOT}/lua-cjson-2.1.0 && make && make install
 	cd ${NGINX_ROOT} && ./configure --with-mail --with-http_v2_module --with-mail_ssl_module --with-http_ssl_module \
