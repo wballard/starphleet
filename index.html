@@ -8,7 +8,7 @@ isHome: true
 <section class="bs-docs-section">
   <h1 id="overview" class="page-header">Overview</h1>
   <blockquote>
-    <p>Starphleet is a toolkit for turning virtual or physical machine infrastructure into a continuous deployment stack, running multiple Git-backed services on one more nodes via Linux containers.
+    <p>Starphleet is a toolkit for turning virtual or physical machine infrastructure into a continuous deployment stack, running multiple Git-backed services on one or more nodes via Linux containers.
     </p>
     <p>Starphleet borrows heavily from the concepts of the Twelve-Factor App, and uses an approach that avoids many of the problems inherent in existing autodeployment solutions:
     </p>
@@ -88,9 +88,7 @@ ${PWD}/vmware {% endhighlight %}
 <section class="bs-docs-section">
   <h1 id="definitions" class="page-header">Definitions</h1>
   <h3 id="phleet">Phleet</h3>
-  <p>A
-    <a href="#phleet">phleet</a>
-    is a grouping of
+  <p>A phleet is a grouping of
     <a href="#ship">starphleet ships</a>. The entire phleet points to a single
     <a href="#headquartersrepo">headquarters</a>. These ships may be geographically located for latency or maintained in a single region. A phleet is comprised of machines that are intended to be identical for easy scaling.
     <h3 id="ship">Ship</h3>
@@ -113,12 +111,7 @@ ${PWD}/vmware {% endhighlight %}
 
     <p>Each subdirectory off the root of the
       <a href="#headquartersrepo">headquarters</a>
-      is checked for an
-      <a href="#orders">orders file</a>. Starphleet will look inside the
-      <a href="#orders">orders file</a>
-      for deploy commands and environment variables for the service. There is a 1-1 mapping between the subdirectory that contains an
-      <a href="#orders">orders file</a>
-      and the url of the service deployed.</p>
+      is checked for an orders file. Starphleet will look inside the orders file for deploy commands and environment variables for the service. There is a 1-1 mapping between the subdirectory that contains an orders file and the url of the service deployed.</p>
     <h3 id="service">Service</h3>
     <p>A service is an app that responds to web requests.  The service should listen for web requests on the <code>$PORT</code> set in the Environment.  The service lives within an LXC Container and will be handed requests by the NGINX front end on the <a href="#ship">ship</a>.</p>
     <h3 id="remotes">Remote</h3>
@@ -128,7 +121,7 @@ ${PWD}/vmware {% endhighlight %}
 
 <section class="bs-docs-section">
   <h1 id="headquarters" class="page-header">Headquarters</h1>
-  <p> The <a href="#headquartersrepo">Starphleet Headquarters</a> is a Git repo with all the master configurations for the entire phleet of servers. It will contain the deploy commands for every service, keys for ssh console access to the ships, ssl certificates for the domain(s) you assign to the ship, configuration settings for authentication for each service as well as how the machine can reach LDAP servers, and any other major configuration item. </p>
+  <p> The <a href="#headquartersrepo">Starphleet Headquarters</a> is a Git repo with all the master configurations for the entire <a href="#phleet">phleet</a> of servers. It will contain the deploy commands for every service, keys for ssh console access to the <a href="#ship">ships</a>, ssl certificates for the domain(s) you assign to the ship, configuration settings for authentication for each service as well as how the machine can reach LDAP servers, and any other major configuration item. </p>
   <p> Aside from special directories, each directory in the headquarters is assumed to be a <a href="#remote">remote</a> or <a href="#service">service</a> </p>
   <h3 id="reservedfiles">Reserved Files and Dirs</h3>
   <p>The Headquarters has the followin special directories and files outlined below:</p>
@@ -144,37 +137,37 @@ ${PWD}/vmware {% endhighlight %}
       <tr>
         <td>/hq/.starphleet</td>
         <td>file</td>
-        <td>The .starphleet file is in the root of the headquarters and handles global environment configuration for services and starphleet. This is where you'd override default starphleet configs for the entire phleet.  This is also where you'd set global environment settings for every service in an entire <a href="#phleet">phleet</a>.</td>
+        <td>The .starphleet file is in the root of the headquarters and handles global environment configuration for services and starphleet. This is where you'd override default starphleet configs for the entire <a href="#phleet">phleet</a>.  This is also where you'd set global environment settings for every service in an entire phleet.</td>
       </tr>
       <tr>
         <td>/hq/authorized_keys</td>
         <td>dir</td>
-        <td>The authorized_keys folder should container all the openssh public keys for users who want console access to the ships. The users will all login as "admiral" using their associated private key</td>
+        <td>The authorized_keys folder should container all the openssh public keys for users who want console access to the s<a href="#ship">ships</a>. The users will all login as "admiral" using their associated private key</td>
       </tr>
       <tr>
         <td>/hq/beta_groups</td>
         <td>dir</td>
-        <td>The beta_groups directory contains a list of files containing usernames inside the file. The names of the files are used in the orders to setup beta groups</td>
+        <td>The beta_groups directory contains a list of files containing usernames inside the file. The names of the files are used in the <a href="#orders">orders</a> to setup beta groups</td>
       </tr>
       <tr>
         <td>/hq/ldap_servers</td>
         <td>dir</td>
-        <td>The ldap_servers folder contains a list of files for all the ldap configurations used by the security system to secure services. The name of the files are used inside the orders files to configure the security for an endpoint.</td>
+        <td>The ldap_servers folder contains a list of files for all the ldap configurations used by the security system to secure services. The name of the files are used inside the <a href="#orders">orders files</a> to configure the security for an endpoint.</td>
       </tr>
       <tr>
         <td>/hq/overlay</td>
         <td>dir</td>
-        <td>The overlay directory contains files intended to be dropped on to the file system of each ship. Their is a direct relationship between the file structure of the overlay directory and the file structure of the ship</td>
+        <td>The overlay directory contains files intended to be dropped on to the file system of each <a href="#ship">ship</a>. Their is a direct relationship between the file structure of the overlay directory and the file structure of the ship</td>
       </tr>
       <tr>
         <td>/hq/ssl</td>
         <td>dir</td>
-        <td>The ssl directory contains any of the SSL keys associated with the domains pointing to the ships in the phleet.</td>
+        <td>The ssl directory contains any of the SSL keys associated with the domains pointing to the <a href="#ship">ships</a> in the <a href="#phleet">phleet</a>.</td>
       </tr>
     </tbody>
   </table>
   <h3 id="servicefiles">Service Files</h3>
-  <p>To create a service endpoint you create a new directory off the root of the headquarters. Inside the directory you create an orders file which contains configuration options and deploy commands for the service. This file will tell Starphleet which Git repo to deploy at this endpoint. The following is what the directory structure will look like along with a few of the files that might be associated with your service:</p>
+  <p>To create a service endpoint you create a new directory off the root of the headquarters. Inside the directory you create an <a href="#orders">orders file</a> which contains configuration options and deploy commands for the service. This file will tell Starphleet which Git repo to deploy at this endpoint. The following is what the directory structure will look like along with a few of the files that might be associated with your service:</p>
   <table class="table table-bordered table-striped">
     <thead>
       <tr>
@@ -192,7 +185,7 @@ ${PWD}/vmware {% endhighlight %}
       <tr>
         <td>/hq/service/orders</td>
         <td>file</td>
-        <td>The orders file contains all the environment variables and
+        <td>The <a href="#orders">orders file</a> contains all the environment variables and
           <a href="#commands">Starphleet commands</a>to get a service or remote deployed.</td>
       </tr>
       <tr>
@@ -228,7 +221,7 @@ ${PWD}/vmware {% endhighlight %}
     </tbody>
   </table>
   <h3 id="orderscommands">Orders Commands</h3>
-  <p>There are special Starphleet commands expected to be run in the orders file. Commands are:</p>
+  <p>There are special Starphleet commands expected to be run in the <a href="#orders">orders file</a>. Commands are:</p>
   <table class="table table-bordered table-striped">
     <thead>
       <tr>
@@ -239,7 +232,7 @@ ${PWD}/vmware {% endhighlight %}
     <tbody>
       <tr>
         <td>autodeploy</td>
-        <td>This command is passed a single argument which is a link to a github repo. If the repo is private, the link must be an SSH link and Starphleet must have an SSH key installed with access to the repo. This command will build a container, run your application, and if successfully completed, mount the application to the path corresponding to the location of the orders file.</td>
+        <td>This command is passed a single argument which is a link to a github repo. If the repo is private, the link must be an SSH link and Starphleet must have an SSH key installed with access to the repo. This command will build a container, run your application, and if successfully completed, mount the application to the path corresponding to the location of the <a href="#orders">orders file</a>.</td>
       </tr>
       <tr>
         <td>expose</td>
@@ -247,7 +240,7 @@ ${PWD}/vmware {% endhighlight %}
       </tr>
       <tr>
         <td>unpublished</td>
-        <td>Starphleet will create a container at the location corresponding with the path to the orders file but will not expose the service for web traffic.</td>
+        <td>Starphleet will create a container at the location corresponding with the path to the <a href="#orders">orders file</a> but will not expose the service for web traffic.</td>
       </tr>
     </tbody>
   </table>
@@ -266,11 +259,11 @@ export FOO="BAR" {% endhighlight %}
     <tbody>
       <tr>
         <td>PORT</td>
-        <td>The PORT your service will accept requests on.  This is the port NGINX will pass traffic through to your service.  This port is <b>not</b> exposed externally of the ship.</td>
+        <td>The PORT your service will accept requests on.  This is the port NGINX will pass traffic through to your service.  This port is <b>not</b> exposed externally of the <a href="#ship">ship</a>.</td>
       </tr>
       <tr>
         <td>$ANY_OTHER</td>
-        <td>Any other environment variable set in the orders file will be passed to the application</td>
+        <td>Any other environment variable set in the <a href="#orders">orders file</a> will be passed to the application</td>
       </tr>
     </tbody>
   </table>
@@ -279,17 +272,17 @@ export FOO="BAR" {% endhighlight %}
   <h1 id="overrides">Overrides</h1>
   <p> Most of the configuration in Starphleet is handled by setting environment variables.  Starphleet exposes several environment variables to the applications that run in the containers.  You can set environment variables for a container in a few ways: </p>
   <ul>
-    <li>Globally Across the Phleet</li> <li>Per-Ship</li>
+    <li>Globally Across the <a href="#phleet">Phleet</a></li> <li>Per-Ship</li>
     <li>Per-Service</li>
   </ul>
   <p> It is also important to note that the above list also represents the order in which the environment is overridden. </p>
   <h3 id="overridesglobally">Globally</h3>
-  <p> Environment Variables set globally will be available to all services on all ships in the phleet.  You can set these global environment files in the HQ in the <code>.starphleet</code> <a href="#reservedfiles">reserved file</a>. </p>
+  <p> Environment Variables set globally will be available to all services on all <a href="#ship">ships</a> in the <a href="#phleet">phleet</a>.  You can set these global environment files in the HQ in the <code>.starphleet</code> <a href="#reservedfiles">reserved file</a>. </p>
   <h3 id="overridespership">Per-Ship</h3>
   <p> In some cases it might be necessary to set environment variables that are specific to each <a href="#ship">ship</a> in a <a href="#phleet">phleet</a>.  These variables might be unique to a ship like its location.  These environment variables get set by adding files to a special directory on the ship.  Any file located in the <code>/etc/starphleet.d</code> directory will be sourced and available to all environments in Starphleet. </p>
   <h3 id="overridesperservice">Per-Service</h3>
   <p>
-    The orders file used to deploy a container also acts as the final location to set environment variables and override any defaults set upstream from your service.  Common settings in the orders file would include locations to resources, DB credentials, and the <a href="#authentication">authentication</a> mechanism you want Starphleet to use for your service.
+    The <a href="#orders">orders file</a> used to deploy a container also acts as the final location to set environment variables and override any defaults set upstream from your service.  Common settings in the orders file would include locations to resources, DB credentials, and the <a href="#authentication">authentication</a> mechanism you want Starphleet to use for your service.
   </p>
 </section>
 <section class="bs-docs-section">
@@ -309,11 +302,11 @@ export FOO="BAR" {% endhighlight %}
       </tr>
       <tr>
         <td>starphleet-dns-offline</td>
-        <td>If you make use of AWS Route 53 and point a healtcheck to your ships you will want to reference the path <code>/starphleet/nginx/status</code>.  The <code>starphleet-dns-offline</code> command will make the path unavailable which will softly fail your ship in route 53.  If your ship is part of a record set in route 53 this will take your machine out of the rotation or cause a failover scenario to other DNS records</td>
+        <td>If you make use of AWS Route 53 and point a healtcheck to your <a href="#ship">ships</a> you will want to reference the path <code>/starphleet/nginx/status</code>.  The <code>starphleet-dns-offline</code> command will make the path unavailable which will softly fail your ship in route 53.  If your ship is part of a record set in route 53 this will take your machine out of the rotation or cause a failover scenario to other DNS records</td>
       </tr>
       <tr>
         <td>starphleet-dns-online</td>
-        <td>If you make use of AWS Route 53 and point a healtcheck to your ships you will want to reference the path <code>/starphleet/nginx/status</code>.  The <code>starphleet-dns-online</code> command will make the path available which will make your ship healthy in Route 53.  If your ship is part of a record set in route 53 this will bring your machine online in the DNS rotation or heal from a failover.</td>
+        <td>If you make use of AWS Route 53 and point a healtcheck to your s<a href="#ship">ships</a> you will want to reference the path <code>/starphleet/nginx/status</code>.  The <code>starphleet-dns-online</code> command will make the path available which will make your ship healthy in Route 53.  If your ship is part of a record set in route 53 this will bring your machine online in the DNS rotation or heal from a failover.</td>
       </tr>
       <tr>
         <td>starphleet-git</td>
@@ -333,7 +326,7 @@ export FOO="BAR" {% endhighlight %}
       </tr>
       <tr>
         <td>starphleet-orphan-reaper</td>
-        <td>When orders vanish from the <a href="#headquarters">headquarters</a>, Starphleet will not automatically kill containers that remain running.  These containers are <i>orphaned</i>.  There are not active orders for the containers but they still exist.  <code>starphleet-orphan-reaper</code> will purge any containers without matching orders.</td>
+        <td>When <a href="#orders">orders</a> vanish from the <a href="#headquarters">headquarters</a>, Starphleet will not automatically kill containers that remain running.  These containers are <i>orphaned</i>.  There are not active orders for the containers but they still exist.  <code>starphleet-orphan-reaper</code> will purge any containers without matching orders.</td>
       </tr>
       <tr>
         <td>starphleet-redeploy</td>
@@ -353,7 +346,7 @@ export FOO="BAR" {% endhighlight %}
 <section class="bs-docs-section">
   <h1 id="buildpacks" class="page-header">Buildpacks</h1>
   <h3 id="howbuildpackswork">How Buildpacks Work</h3>
-  <p>Buildpacks autodetect and provision services in containers for you. We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet orders file so simple is the use of buildpacks and platform package managers to install dynamic, service specific code, such as rubygems or npm and associated dependencies, that may vary with each push of your service. Note that
+  <p>Buildpacks autodetect and provision services in containers for you. We would like to give a huge thanks to Heroku for having open buildpacks, and to the open source community for making and extending them. The trick that makes the Starphleet <a href="#orders">orders file</a> so simple is the use of buildpacks and platform package managers to install dynamic, service specific code, such as rubygems or npm and associated dependencies, that may vary with each push of your service. Note that
     <b>Starphleet will only deploy one buildpack per Linux container</b>
     - for services which are written in multiple languages, custom buildpacks may be required.</p>
   <p>Starphleet currently includes support for Ruby, Python, NodeJS, and NGINX static buildpacks.</p>
@@ -436,43 +429,7 @@ export FOO="BAR" {% endhighlight %}
           </ul>
         </td>
       </tr>
-      <tr>
-        <td><code>LDAP_SERVER</code></td>
-        <td>The name assigned here corresponds with the name of the file containing the <a href="#ldapconfiguration">LDAP configuration</a> you want to use to authenticate the service.</td>
-      </tr>
-      <tr>
-        <td><code>JWT_SECRET</code></td>
-        <td>This setting is <b>required</b>.  This value is used as the secret to sign and verify JWT tokens</td>
-      </tr>
-      <tr>
-        <td><code>JWT_AUTH_SITE</code></td>
-        <td>This setting is <b>required</b>.  The path to a login service that signs JWT tokens.</td>
-      </tr>
-      <tr>
-        <td><code>JWT_COOKIE_DOMAIN</code></td>
-        <td>
-          This setting is <b>optional</b>.
-          <ul>
-            <li>if not provided, the JWT cookie will only be available to the full domain of the original target destination (e.g., myApp.mysite.com)</li>
-            <li>if it is provided, then the JWT cookie will be scoped accordingly.</li>
-            <li>Be sure to understand how cookie domains are applied. For example, this feature can allow implementers to grant access to peer sub-domains of the original target destination. (e.g., JWT_COOKIE_DOMAIN=mysite.com will allow both myApp.mysite.com and someOtherHost.mysite.com to access the jwt cookie.  </li>
-          </ul>
-        </td>
-      </tr>
-      <tr>
-        <td><code>JWT_ROLES</code></td>
-        <td>
-          This setting is <b>optional</b>.
-          <ul>
-            <li>defaults to 3600 seconds</li>
-            <li>this is the initial expiration set on the jwt cookie</li>
-          </ul>
-        </td>
-      </tr>
-      <tr>
-        <td><code>HTPASSWD</code></td>
-        <td>The appropriate HTPASSWD string associated with the <code>htpasswd</code> <code>SECURITY_MODE</code>.</td>
-      </tr>
+
     </tbody>
   </table>
   <p><i>All variables need to be exported to be available to your application. For instance</i></p>
@@ -481,6 +438,21 @@ export FOO="BAR" {% endhighlight %}
   <h3 id="publicconfiguration">Public Configuration</h3>
   <p> Assigning the <code>SECURITY_MODE</code> setting to <code>public</code> requires no additional configuration.  Starphleet will serve the content behind a public endpoint openly. </p>
   <h3 id="ldapconfiguration">LDAP Configuration</h3>
+  <p> This security mode requires the following environment variable(s): </p>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th style="width: 130px;">Variable</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>LDAP_SERVER</code></td>
+        <td>The name assigned here corresponds with the name of the file containing the <a href="#ldapconfiguration">LDAP configuration</a> you want to use to authenticate the service.</td>
+      </tr>
+    </tbody>
+  </table>
   <p> Assigning the <code>SECURITY_MODE</code> setting to <code>ldap</code> requires additional configuration in the <a href="#headquarters">headquarters</a>.  The following is required: </p>
   <ul>
     <li>Create a <code>ldap_servers</code> folder in your <a href="#headquarters">headquarters</a></li>
@@ -495,25 +467,25 @@ export LDAP_PASSWORD='****' {% endhighlight %}
   </ul>
   <p> Your orders file will now have <code>ldap</code> enabled and point to the above configuration on which LDAP server to use for authentication.  At this point, your service should be authenticating against LDAP. </p>
   <h3 id="jwtconfiguration">JWT Configuration</h3>
-  <p> Assigning the <code>SECURITY_MODE</code> setting to <code>jwt</code> requires additional settings in the <a href="#headquarters">headquarters</a>.  You can configure these settings <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.</p>
-  <p> JWT requires an authentication application: </p>
-  <ul>
-    <li>This is the service to which unauthenticated users will be redirected. This service is not provided by Starphleet. Because the logic for authenticating users is domain specific, the implementer must provide this service.</li>
-    <li>This site must be open to non-authenticated users. It is responsible for:</li>
-    <ul>
-      <li>Determining whether the user is valid</li>
-      <li>Constructing the payload for the JWT token. The payload may include any meta data the implementer would like. <b>NOTE:</b> The payload in any JWT token is encoded, but not encrypted and should never contain sensitive information.</li>
-      <ul>
-        <li>The payload property role is reserved by Starphleet</li>
-        <li>Starphleet will check values in the role when determining whether to grant access to the service</li>
-        <li>Starphleet expects the values to be comma-delimited</li>
-      </ul>
-      <li>Signing the JWT token, which includes the payload</li>
-      <li>Redirecting the user to the original target destination with the signed JWT token in a querystring paramter named jwt.</li>
-    </ul>
-  </ul>
+  <p> JWT Authentication works by looking for a specific token when a request is made.  If the token is invalid the request silently redirects to a service running on the same ship.  The service is responsible for authenicating the user and providing a token.  The token can then be used to retry the original request. </p>
+  <p class="text-danger"> <b> Details about utilizing JWT authenication can be found <a href="#jwtdetails">here</a>. </b> </p>
   <h3 id="htpasswdconfiguration">HTPASSWD Configuration</h3>
-  <p> Assigning the <code>SECURITY_MODE</code> setting to <code>htpasswd</code> requires an additional environment settings in the <a href="#headquarters">headquarters</a>.  You can set this <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.  To get the appropriate string you can use the linux <code>htpasswd</code> command like the following:</a></p>
+  <p> This security mode requires the following environment variable(s): </p>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th style="width: 130px;">Variable</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>HTPASSWD</code></td>
+        <td>The appropriate HTPASSWD string associated with the <code>htpasswd</code> <code>SECURITY_MODE</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p> Assigning the <code>SECURITY_MODE</code> setting to <code>htpasswd</code> requires an additional environment settings in the <a href="#headquarters">headquarters</a>.  You can set this <a href="#overridesglobally">globally</a> or <a href="overridesperservice">per-service</a>.  To get the appropriate string you can use the linux <code>htpasswd</code> command like the following:</p>
 {% highlight bash %}
 $ htpasswd -n -b changeusername changepasswd
 changeusername:$apr1$O7LcRpBk$Pv17p..kUwbcw5rxM4AEr0 {% endhighlight %}
@@ -528,8 +500,239 @@ jsmith{% endhighlight %}
   <p>The above service endpoint would only allow three users access - all others will be prompted to login.</p>
 </section>
 <section class="bs-docs-section">
+  <h1 id="jwtdetails" class="page-header">JWT Details</h1>
+    <p> JWT Authentication works by looking for a specific jwt token when a request is received by Starphleet.  If the jwt token is invalid the request silently redirects to a service running on the same ship.  The service is responsible for authenicating the user and providing a token.  The token can then be used to retry the original request. </p>
+    <p> There are three ways to pass a JWT token with your request: </p>
+    <ul>
+      <li>Url Param</li>
+      <li>Cookie</li>
+      <li>Header</li>
+    </ul>
+    <p>
+     When Starphleet receives a valid JWT Token as part of a request to a JWT authenticated service the jwt token is used to create a global cookie.  The cookie is used to maintain the "session" of the user.  The cookie name can be configured by setting the <code>JWT_COOKIE_NAME</code> configuration variable.  It is important that the <code>JWT_AUTH_SITE</code> and service protected by JWT all use the same <code>JWT_COOKIE_NAME</code>.
+    </p>
+  <h3 id="jwtenvironmentsettins">JWT Environment Settings</h3>
+    <p> This security mode requires the following environment variable(s): </p>
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th style="width: 130px;">Variable</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td><code>JWT_SECRET</code></td>
+        <td>This setting is <b>required</b>.  This value is used as the secret to sign and verify JWT tokens</td>
+      </tr>
+      <tr>
+        <td><code>JWT_AUTH_SITE</code></td>
+        <td>This setting is <b>required</b>.  The path to a login service that signs JWT tokens.</td>
+      </tr>
+      <tr>
+        <td><code>JWT_COOKIE_NAME</code></td>
+        <td>This setting is <b>required</b>.  The cookie name intended to be used to store the JWT Session Token.</td>
+      </tr>
+      <tr>
+        <td><code>JWT_MAX_TOKEN_AGE_IN_SECONDS</code></td>
+        <td>This setting is <b>required</b>.  This settings is checked against the <code>iat</code> claim in the token.  Set globally you can ensure a token extending beyond your max thresshold would be flagged as invalid</td>
+      </tr>
+      <tr>
+        <td><code>JWT_EXPIRATION_IN_SECONDS</code></td>
+        <td>This setting is <b>required</b>.  When Starphleet creates a JWT Token during a valid request the session will last as long as this setting.  The session is extended each request by this setting.</td>
+      </tr>
+      <tr>
+        <td><code>JWT_COOKIE_DOMAIN</code></td>
+        <td>
+          This setting is <b>optional</b>.
+          <ul>
+            <li>if not provided, the JWT cookie will only be available to the full domain of the original target destination (e.g., myApp.mysite.com)</li>
+            <li>if it is provided, then the JWT cookie will be scoped accordingly.</li>
+            <li>Be sure to understand how cookie domains are applied. For example, this feature can allow implementers to grant access to peer sub-domains of the original target destination. (e.g., JWT_COOKIE_DOMAIN=mysite.com will allow both myApp.mysite.com and someOtherHost.mysite.com to access the jwt cookie.  </li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td><code>JWT_ACCESS_FLAGS</code></td>
+        <td>
+          <p> This setting is <b>optional</b>. </p>
+          <ul>
+            <li>Used in conjunction with <code>af</code> claim <a href="#jwtbitmasks">bitmask</a> in JWT token</li>
+            <li>Any matching mask in token and this setting permits entry</li>
+            <li>If <code>af</code> claim exists and flags do not match, request rejected with 403</li>
+          </ul>
+          <p> More details can be found in the <a href="#jwtaccessflags">JWT Access Flags</a> section. </p>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  <h3 id="jwturlparam">JWT Url Parameter</h3>
+    <p> One of the ways to pass a JWT token to Starphleet is through a URL Parameter.  As an example: </p>
+{% highlight bash %}
+https://starphleet.example.com/theservice/?jwt=$token{% endhighlight %}
+    <p> Passing a valid JWT token via the URL will take precedent over a token passed as the users session in a cookie.  If the JWT Token passed as a URL parameter is valid it will replace the users session JWT token. </p>
+    <p> When the token is passed via a url parameter the request will be redirected to the same incoming URL but with the JWT token stripped from the URL.  Sometimes this behavior is not desired.  The caller can disable the redirect behavior by passing <code>?disablejwtredirect=true</code> in the url in addition to the JWT Token.  Including the <b>disable</b> parameter will still accept the URL JWT Token but will not redirect and strip the token out of the URL. </p>
+  <h3 id="jwtheader">JWT Authorization Header</h3>
+    <p> A client side app can pass a JWT token as part of request through the Authorization header using the Bearer claim.  When Starphleet receives a request using this method the response will be different if the JWT token is invalid.  Starphleet will respond with a status of 401 instead of a silent redirect to the authorization app.  Passing a JWT Token utilizing this method is most appropriate for background API calls.  The calling app can appropriately error handle the response. </p>
+{% highlight bash %}
+curl -H "Authorization: Bearer $token" https://starphleet.example.com{% endhighlight %}
+
+  <h3 id="jwtbitmasks">Bitmasks</h3>
+    <p> Bitmasks can be used to store boolean type flags in an extremely small amount of space.  This makes them an easy candidate for JWT Tokens where space is limited and each character can bloat the token a lot.  Additionally, bitmasks are efficient for a computer to compare and manipulate. </p>
+    <p> This documentation does not intend to explain the entirety of concepts with bitmasks.  Below is a brief description of how to quickly make use of them. </p>
+  <h4 id="jwtbitmaskstonumbers">Bitmasks To Numbers</h4>
+    <p> Probably the most confusing thing about bitmasks is that bitmasks are represented as integers.  It is important to understand how to convert integers into a series of bits if you want to use them as flags.  Any single number can represent a whole list of flags. </p>
+    <p> In order to use bitmasks you must first understand the following table: </p>
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th></th>
+          <th>2<sup>6</sup></th>
+          <th>2<sup>4</sup></th>
+          <th>2<sup>3</sup></th>
+          <th>2<sup>2</sup></th>
+          <th>2<sup>1</sup></th>
+          <th>2<sup>0</sup></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Decimal</td>
+          <td>32</td>
+          <td>16</td>
+          <td>8</td>
+          <td>4</td>
+          <td>2</td>
+          <td>1</td>
+        </tr>
+      </tbody>
+    </table>
+    <p> Using the above table you can see that the right most column starts with 1 and moves left by increases exponents of <code>2</code>.  If I wanted to represent a number in "<code>bits</code>" you would put a "<code>1</code>" in the columns that added up to the number.  </p>
+    <p> Using the table above lets convert the number <code>6</code> to a bitmask: </p>
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th></th>
+          <th>2<sup>6</sup></th>
+          <th>2<sup>4</sup></th>
+          <th>2<sup>3</sup></th>
+          <th>2<sup>2</sup></th>
+          <th>2<sup>1</sup></th>
+          <th>2<sup>0</sup></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Decimal</td>
+          <td>32</td>
+          <td>16</td>
+          <td>8</td>
+          <td class="bg-success">4</td>
+          <td class="bg-success">2</td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td>Bitmask</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td class="bg-warning">1</td>
+          <td class="bg-warning">1</td>
+          <td>0</td>
+        </tr>
+      </tbody>
+    </table>
+    <p> We have a bitmask that looks like <code>000110</code>.  Using the chart we can see that in Decimal form this represents <code>4 + 2 = 6</code>.</p>
+  <h4 id="jwtusingbitmasks">Using Bitmasks as Flags</h4>
+    <p> To understand bitmasks as flags lets first propose a scenario.  Let's assume that we have different types of users: </p>
+    <ul>
+      <li>Plumber</li>
+      <li>Engineer</li>
+      <li>Mechanic</li>
+    </ul>
+    <p> When our auth app creates the JWT Token it will determine what kind of user is logging in.  Some users might be both Mechanics AND Engineers. Some users may only fit one role. Now lets assume that we have a number of services running on Starphleet.  Some of our services can only be accessed by plumbers.  Some our services can be accessed by both Plumbers and Mechanics.  Some by all of these. </p>
+    <p> The first thing we must do is assign bit columns to our roles. </p>
+  <h4 id="jwtwhatitmeanstoassignmeaningtocolumns">Assinging Meanings To Columns</h4>
+    <p> A bitmask is nothing more than a series of <code>1's</code> and <code>0's</code>. An example of a bitmask might look something like <code>0101</code>.  In this example we have 4 bits.  Each bit can be 1 for <code>true</code> or 0 for <code>false</code>. </p>
+    <p> To illustrate how to use a bitmask we are going to refer to our example list of roles above and assign arbitrary meanings to each one of these bits.  We have four columns.  Starting from the <span class="text-danger"><b><i>right</i></b></span> side: </p>
+    <ul>
+      <li>Assign the first column to <b>Plumber</b> (<code>0001</code>)</li>
+      <li>Assign the second column to <b>Engineer</b> (<code>0010</code>)</li>
+      <li>Assign the third column to <b>Mechanic</b> (<code>0100</code>)</li>
+      <li>Assign the fourth column to <b>Future Use</b> (<code>1000</code>)</li>
+    </ul>
+    <p> Given the above example if we wanted to set someone as a Plumber <b>and</b> a Mechanic then the bitmask would look like <code>0101</code>. If my JWT Authentication App assigned a bitmask of <code>0111</code> as the role of my user, I would know that the user was a Plumber, Engineer, and Mechanic</p>
+    <p> If I wanted to only allow a Plumber and Engineer to use a service then I would set the environment variable <code>JWT_ACCESS_FLAGS</code> in my orders file to <code>0011</code>. </p>
+  <h4 id="jwtputtingitalltogether">Bitmasks: Putting It All Together</h4>
+    <p> The final part of understanding bitmasks is understanding that we can't actually assign the bitmask in its pure form.  In order to assign bitmasks we convert them to Decimal. </p>
+    <p> In our example above if we wanted to flag a user as a <b>Plumber</b> and <b>Mechanic</b> we would need to assign them a bitmask of <code>5</code> (<code>0101</code>). </p>
+    <p> If we want to restrict our service to only <b>Engineers</b>, we would set the <code>JWT_ACCESS_FLAGS</code> environment variable to <code>2</code> (<code>0010</code>). </p>
+  <h3 id="jwtaccessflags">JWT Access Flags</h3>
+    <p> To understand how this works it is <b>imperitive</b> that you fully understand how bitmasks work and how the bitwise-and (&) operator works.  If these concepts are foreign to you read the <a href="#jwtbitmasks">bitmask</a> section.  Familiarize yourself with the basic principles behind bitmasks and then continue reading. </p>
+    <p> Starphleet supports an optional feature to granularly control access to services based on FLAGS.  This feature requires a configuration at the service level.  Additionally, this feature must be implemented in the <a href="#jwtauthenticationapp">authentication application</a> that generates your JWT tokens. </p>
+    <p> To make use of this feature you will set a bitmask in your orders using the Decimal representation.  The variable is <code>JWT_ACCESS_FLAGS</code>. </p>
+    <p> The authentication app must also provide a claim named <code>af</code>. </p>
+    <h4 id="jwtaccessflagsexampleaccessgranted">Example: Access Granted</h4>
+      <ul>
+        <li>User <b>jdoe</b> logs in and is assigned <b>af ("access flags")</b> of:
+          <ul>
+            <li><code>Integer: 17 (bitmask: 010001)</code></li>
+          </ul>
+        </li>
+        <li>In the orders file for a service running at <code>/app1</code> the environment variable <code>JWT_ACCESS_FLAGS</code> is set like:
+          <ul>
+            <li><code>Integer: 24 (bitmask: 011000)</code></li>
+          </ul>
+        </li>
+        <li>Flags at bit location <b>16</b>:<code>Integer: 16 (bitmask: 010000)</code> match:</li>
+          <ul>
+            <li><code>17 (bitmask: 010001)</code></li>
+            <li><code>24 (bitmask: 011000)</code></li>
+            <li>------------------------------ &</li>
+            <li><code>16 (bitmask: 010000)</code></li>
+          </ul>
+        <li>User is granted access</li>
+      </ul>
+    <h4 id="jwtaccessflagsexampleaccessdenied">Example: Access Denied</h4>
+      <ul>
+        <li>User <b>jdoe</b> logs in and is assigned <b>af ("access flags")</b> of:
+          <ul>
+            <li><code>Integer: 56 (bitmask: 111000)</code></li>
+          </ul>
+        </li>
+        <li>In the orders file for a service running at <code>/app1</code> the environment variable <code>JWT_ACCESS_FLAGS</code> is set like:
+          <ul>
+            <li><code>Integer: 03 (bitmask: 000011)</code></li>
+          </ul>
+        </li>
+        <li>No flags match:</li>
+          <ul>
+            <li><code>56 (bitmask: 111000)</code></li>
+            <li><code>03 (bitmask: 000011)</code></li>
+            <li>------------------------------ &</li>
+            <li><code>0 (bitmask: 000000)</code></li>
+          </ul>
+        <li>User is denied access</li>
+      </ul>
+      <p>
+        You do not need to understand every part of bitwise operators to make use of flags.  For an explanation of how bitmasks work as they pertain to Starphleet, you can read more details in the <a href="#jwtbitmasks">bitmasks section</a>.
+      </p>
+  <h3 id="jwtauthenticationapp">JWT Authentication App</h3>
+    <p> The JWT Authentication app is responsible for assigning the profile and properties for a user into the globally used JWT Token.  Before the authentication app performs this function it should validate the user in whatever mechanism is appropriate.  The following are special considerations for the service: </p>
+    <ul>
+      <li>Requests to the app are silent.  It is best to directly forbid direct requests and verify the request is a redirect</li>
+      <li>The app must be using the <code>public</code> security mode</li>
+      <li>The app must provide the login form for all paths and http methods.</li>
+      <li>The app must generate the jwt token using the same <code>JWT_SECRET</code> configured for Starphleet.</li>
+    </ul>
+    <p>
+
+    </p>
+
+</section>
+<section class="bs-docs-section">
   <h1 id="healthchecks" class="page-header">Healthchecks</h1>
-  <p>Orders service repository can supply a <code>$HEALTHCHECK</code> like:</p>
+  <p><a href="#orders">orders</a> service repository can supply a <code>$HEALTHCHECK</code> like:</p>
 {% highlight bash %}
 export HEALTHCHECK='/'{% endhighlight %}
 <p>Upon deployment of a service update, Starphleet will issue a GET request to http://{container_ip}:{PORT}/{HEALTHCHECK}, and will expect an HTTP 200 response within 60 seconds. The {PORT} in the preceding URL will have the value specified in your orders.</p>
@@ -581,7 +784,7 @@ export STARPHLEET_HEADQUARTERS="https://github.com/wballard/starphleet.headquart
 export STARPHLEET_PRIVATE_KEY="${HOME}/.ssh/id_rsa"
 export STARPHLEET_PUBLIC_KEY="${HOME}/.ssh/id_rsa.pub"{% endhighlight %}
   <h3 id="differencewithdevmode">Devmode Vs. Production</h3>
-  <p>Starphleet normally handles the deployment of all services after any change to the Git repos and/or orders envrionment.  When running Starphleet locally in development mode the behavior of Starphleet alters a bit.  These changes are:</p>
+  <p>Starphleet normally handles the deployment of all services after any change to the Git repos and/or <a href="#orders">orders</a> envrionment.  When running Starphleet locally in development mode the behavior of Starphleet alters a bit.  These changes are:</p>
   <ul>
     <li>Git repos associated with your orders are checked out to a different location</li>
     <li>Git repos are monitored for file changes rather than git commit changes for triggering deployments (optional)</li>
@@ -599,13 +802,13 @@ export STARPHLEET_PUBLIC_KEY="${HOME}/.ssh/id_rsa.pub"{% endhighlight %}
     <li>You experience stability issues with HGFS in vmware</li>
   </ul>
   <p>
-    In these instances you may wish to unbind your development directory from the container. By adding a setting to your orders file you can change the behavior of Starphleet to instead detect changes as you save them in your development directory and run a full re-deploy of your containers automatically. To trigger this behavior you can add the following to your 'orders' inside your headquarters.
+    In these instances you may wish to unbind your development directory from the container. By adding a setting to your <a href="#orders">orders file</a> you can change the behavior of Starphleet to instead detect changes as you save them in your development directory and run a full re-deploy of your containers automatically. To trigger this behavior you can add the following to your 'orders' inside your headquarters.
   </p>
 {% highlight bash %}
 export DEVMODE_UNBIND_GIT_DIR="true" {% endhighlight %}
   <h3 id="authindevmode">Authentication</h3>
   <p>
-    Some services depend on authentication. Starphleet automatically supports LDAP and htpasswd authentication. Services are written in such a way that they depend on HTTP headers that are provided by the authentication method. If you need to simulate authenticated services in development mode you can add the following variable to your orders file:
+    Some services depend on authentication. Starphleet automatically supports LDAP and htpasswd authentication. Services are written in such a way that they depend on HTTP headers that are provided by the authentication method. If you need to simulate authenticated services in development mode you can add the following variable to your <a href="#orders">orders file</a>:
   </p>
 {% highlight bash %}
 export DEVMODE_FORCE_AUTH="[username]" {% endhighlight %}
