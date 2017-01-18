@@ -16,15 +16,6 @@ STARPHLEET_DEV_DIR="${HOME}/starphleet_dev"
 STARPHLEET_PRIVATE_KEY_FILE="${HOME}/.ssh/starphleet"
 
 # *********************
-# Fix Promiscuious mode crash
-#
-# Bug Fix
-#   See:  https://github.com/coreos/coreos-vagrant/issues/123
-# *********************
-
-sudo touch '/Library/Preferences/VMware Fusion/promiscAuthorized'
-
-# *********************
 # Helpers
 # *********************
 
