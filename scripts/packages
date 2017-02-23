@@ -8,7 +8,10 @@ python
 g++
 make
 pkg-config
-lxc
+liblxc1=1.0.8-0ubuntu0.4
+lxc=1.0.8-0ubuntu0.4
+python3-lxc=1.0.8-0ubuntu0.4
+lxc-templates=1.0.8-0ubuntu0.4
 man
 python-pip
 nodejs
