@@ -27,6 +27,8 @@ do
       #   - The container had a successful
       #   - This container is building
       if [ -f "${CONTAINER_DIRECTORY}/.container" ] ||
+         [ "${CURRENT_STATUS}" == "online" ] ||
+         [ "${CURRENT_STATUS}" == "checking" ] ||
          [ "${CURRENT_STATUS}" == "building" ]; then
          info "Unable to reap '$(basename ${CONTAINER_DIRECTORY})' due to status: ${CURRENT_STATUS}"
          continue;
