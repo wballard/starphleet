@@ -1,0 +1,46 @@
+#!/bin/bash
+source `which tools`
+
+while [ 1 ]
+do
+  ############################
+  # Rebuild Dead Containers
+  ############################
+
+
+  if [ ! -d "${CURRENT_ORDERS}" ]; then
+    info "Current Orders Doesn't exist: ${CURRENT_ORDERS}"
+    sleep ${STARPHLEET_PULSE}
+    continue;
+  fi
+
+  for CONTAINER_DIRECTORY in $(find "${CURRENT_ORDERS}" -type d)
+  do
+    unset BUILD
+
+    for SERVICE_STATUS_FILE in $(find "${CONTAINER_DIRECTORY}" -type f -name ".starphleetstatus*" | grep --extended-regexp -e ".*-([a-f0-9]){7}$")
+    do
+  
+      CURRENT_STATUS=$(cat "${SERVICE_STATUS_FILE}")
+
+      # We won't rebuild a ship if
+      #   - The container had a successful
+      #   - This container is building
+      if [ -f "${CONTAINER_DIRECTORY}/.container" ] ||
+         [ "${CURRENT_STATUS}" == "building" ]; then
+         info "Unable to reap '$(basename ${CONTAINER_DIRECTORY})' due to status: ${CURRENT_STATUS}"
+         continue;
+      fi
+
+      BUILD="true"
+    done
+
+    if [ -n "${BUILD}" ]; then
+      SERVICE=$(basename "${CONTAINER_DIRECTORY}")
+      echo starphleet-redeploy "${SERVICE}"
+    fi
+  done
+
+  # Keep on the pulse
+  sleep "${STARPHLEET_PULSE}"
+done
