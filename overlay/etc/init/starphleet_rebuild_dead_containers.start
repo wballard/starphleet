@@ -20,7 +20,7 @@ do
 
     for SERVICE_STATUS_FILE in $(find "${CONTAINER_DIRECTORY}" -type f -name ".starphleetstatus*" | grep --extended-regexp -e ".*-([a-f0-9]){7}$")
     do
-  
+
       CURRENT_STATUS=$(cat "${SERVICE_STATUS_FILE}")
 
       # We won't rebuild a ship if
@@ -37,7 +37,7 @@ do
 
     if [ -n "${BUILD}" ]; then
       SERVICE=$(basename "${CONTAINER_DIRECTORY}")
-      echo starphleet-redeploy "${SERVICE}"
+      starphleet-redeploy "${SERVICE}"
     fi
   done
 
