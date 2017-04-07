@@ -14,11 +14,11 @@ do
     continue;
   fi
 
-  for CONTAINER_DIRECTORY in $(find "${CURRENT_ORDERS}" -type d)
+  for CONTAINER_DIRECTORY in $(find "${CURRENT_ORDERS}" -mindepth 1 -type d)
   do
     unset BUILD
 
-    for SERVICE_STATUS_FILE in $(find "${CONTAINER_DIRECTORY}" -type f -name ".starphleetstatus*" | grep --extended-regexp -e ".*-([a-f0-9]){7}$")
+    for SERVICE_STATUS_FILE in $(find "${CONTAINER_DIRECTORY}" -mindepth 1 -type f -name ".starphleetstatus*" | grep --extended-regexp -e ".*-([a-f0-9]){7}$")
     do
 
       CURRENT_STATUS=$(cat "${SERVICE_STATUS_FILE}")
@@ -30,14 +30,14 @@ do
          [ "${CURRENT_STATUS}" == "online" ] ||
          [ "${CURRENT_STATUS}" == "checking" ] ||
          [ "${CURRENT_STATUS}" == "building" ]; then
-         info "Not rebuilding '$(basename ${CONTAINER_DIRECTORY})' due to status: ${CURRENT_STATUS}"
          continue;
       fi
 
-      BUILD="true"
+      BUILD="${CURRENT_STATUS}"
     done
 
     if [ -n "${BUILD}" ]; then
+      info "Rebuilding `'$(basename ${CONTAINER_DIRECTORY})'` due to ${BUILD}"
       SERVICE=$(basename "${CONTAINER_DIRECTORY}")
       starphleet-redeploy "${SERVICE}"
     fi
