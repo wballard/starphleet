@@ -37,7 +37,7 @@ do
     done
 
     if [ -n "${BUILD}" ]; then
-      info "Rebuilding `'$(basename ${CONTAINER_DIRECTORY})'` due to ${BUILD}"
+      info "Rebuilding '$(basename ${CONTAINER_DIRECTORY})' due to ${BUILD}"
       SERVICE=$(basename "${CONTAINER_DIRECTORY}")
       starphleet-redeploy "${SERVICE}"
     fi
