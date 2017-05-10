@@ -22,7 +22,7 @@ ADMIRALAUTHKEYS=${ADMIRALAUTHKEYS:-"${HEADQUARTERS_LOCAL}/authorized_keys"}
 # base touch on auth file to create
 touch ${AUTHFILE}
 #look for public keys pushed on the ship as well as in the headquarters
-for f in $(find "${ADMIRALAUTHKEYS}" "${PUBLIC_KEYS}")
+for f in $(find "${ADMIRALAUTHKEYS}" "${PUBLIC_KEYS}" | grep -v '.git')
 do
   if ssh-keygen -l -f "${f}" > /dev/null; then
     #direct ssh as the admiral
@@ -49,7 +49,7 @@ CAPTAINAUTHKEYS=${CAPTAINAUTHKEYS:-"${HEADQUARTERS_LOCAL}/authorized_keys"}
 # base touch on auth file to create
 touch ${AUTHFILE}
 #look for public keys pushed on the ship as well as in the headquarters
-for f in $(find "${CAPTAINAUTHKEYS}" "${PUBLIC_KEYS}")
+for f in $(find "${CAPTAINAUTHKEYS}" "${PUBLIC_KEYS}" | grep -v '.git')
 do
   if ssh-keygen -l -f "${f}" > /dev/null; then
     #direct ssh as the admiral
