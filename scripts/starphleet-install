@@ -114,7 +114,22 @@ source ${DIR}/tools
 
 #role account for folks acting as the admiral, do this really early
 #as it will provide the home directory
-make_admiral
+# Captain
+make_user "${CAPTAIN}" "${CAPTAIN_HOME}"
+adduser "${CAPTAIN}" adm
+
+# Admiral Only
+make_user "${ADMIRAL}" "${ADMIRAL_HOME}"
+mkdir -p "${STARPHLEET_ROOT}"
+chown -R "${ADMIRAL}":"${ADMIRAL}" "${STARPHLEET_ROOT}"
+adduser "${ADMIRAL}" sudo
+adduser "${ADMIRAL}" adm
+adduser "${ADMIRAL}" root
+
+# Let Captain's see logs
+mkdir -p "/var/log/upstart"
+chgrp adm "/var/log/upstart"
+chmod g+s "/var/log/upstart"
 
 mkdir -p "${LXC_ROOT}"
 chmod 755 "${LXC_ROOT}"

@@ -75,16 +75,13 @@ function run_ship_scripts() {
   fi
 }
 
-function make_admiral() {
-  useradd ${ADMIRAL} -m -d ${ADMIRAL_HOME}
-  adduser ${ADMIRAL} sudo
-  adduser ${ADMIRAL} adm
-  adduser ${ADMIRAL} root
-  test -d ${ADMIRAL_HOME}/.ssh || mkdir -p ${ADMIRAL_HOME}/.ssh; ssh-keygen -t rsa -f "${ADMIRAL_HOME}/.ssh/id_rsa" -q -N "" -C 'admiral of the phleet'
-  mkdir -p ${STARPHLEET_ROOT}
-  chown -R ${ADMIRAL}:${ADMIRAL} ${STARPHLEET_ROOT}
-  chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}
-  info admiral created
+function make_user() {
+  THE_USER="${1}"
+  HOME_DIR="${2}"
+  useradd "${THE_USER}" -m -d "${HOME_DIR}"
+  test -d "${HOME_DIR}/.ssh" || mkdir -p "${HOME_DIR}"/.ssh; ssh-keygen -t rsa -f "${HOME_DIR}/.ssh/id_rsa" -q -N "" -C 'user on the phleet'
+  chown -R "${THE_USER}":"${THE_USER}" "${HOME_DIR}"
+  info "${THE_USER}" created
 }
 
 function mail_log()
