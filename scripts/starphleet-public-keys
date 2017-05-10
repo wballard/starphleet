@@ -35,8 +35,9 @@ cat "${ADMIRALSSH}/id_rsa.pub" >> ${AUTHFILE}
 chmod 600 ${AUTHFILE}
 chown ${ADMIRAL}:${ADMIRAL} ${AUTHFILE}
 
-#grant The Admiral access
-# the auth keys are reset everytime
+# Grant Captain access
+# The captain user has reduced access to the server intended for managing
+# apps. The auth keys are reset everytime
 # this means if any keys have been manually added to the account, they will be overwritten
 # When there are no authkeys in the HQ repo, no ssh access is left around
 CAPTAINSSH="${CAPTAIN_HOME}/.ssh"
