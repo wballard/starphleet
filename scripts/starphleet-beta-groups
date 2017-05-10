@@ -28,6 +28,8 @@ BETA_GROUP_CONFIGS="${BETA_GROUP_CONFIGS:-$BETA_GROUP_CONFIG_DEFAULT_DIR}"
 for BETA_GROUP in $(find "${BETA_GROUP_CONFIGS}" -type f)
 do
   info beta group $(basename ${BETA_GROUP})
+
+  [ "${BETA_GROUP}" = "README.md" ] && continue
   #user authentication style
   BETA_GROUP_CONF="${NGINX_CONF}/beta_groups/$(basename ${BETA_GROUP}).conf"
   echo "  map \$remote_user \$starphleet_beta_$(basename ${BETA_GROUP}) {" >> "${BETA_GROUP_CONF}"
