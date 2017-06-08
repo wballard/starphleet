@@ -57,14 +57,26 @@ if [ -z "${IP_ADDRESS}" ]; then
   exit 1
 fi
 
-test ! -d "${NGINX_CONF}/published" && mkdir -p "${NGINX_CONF}/published"
-test ! -d "${NGINX_CONF}/published_bare" && mkdir -p "${NGINX_CONF}/published_bare"
+mkdir -p "${NGINX_CONF}/published"
+mkdir -p "${NGINX_CONF}/published_bare"
 mkdir -p "${NGINX_CONF}/proxy_for"
 mkdir -p "${NGINX_CONF}/named_servers"
 mkdir -p "${NGINX_CONF}/htpasswd"
 
 [ -f "${NGINX_CONF}/published/crt" ] || cp "${NGINX_CONF}/crt" "${NGINX_CONF}/published/crt"
 [ -f "${NGINX_CONF}/published/key" ] || cp "${NGINX_CONF}/key" "${NGINX_CONF}/published/key"
+
+if [ -n "${REDIRECT_TO_SERVICE}" ]; then
+  trace "setting service redirect for order ${order} to ${REDIRECT_TO_SERVICE}"
+  # redirect service is exlusive of all other settings
+  cat << EOF > "${MOUNT_CONF}"
+location ${public_url}/ {
+  return 301 ${REDIRECT_TO_SERVICE};
+}
+EOF
+  # that's all it does
+  exit
+fi
 
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
@@ -112,8 +124,8 @@ cat << EOF >> "${MOUNT_CONF}"
   # headers go here
   # WebSocket support (nginx 1.4)
   proxy_http_version 1.1;
-  proxy_set_header X-Https \$https;
   proxy_set_header Upgrade \$http_upgrade;
+  proxy_set_header X-Http \$https;
   proxy_set_header Connection "upgrade";
   more_set_headers 'X-Starphleet-Service: ${public_url}';
   more_set_headers 'X-Starphleet-Container: ${container_name}';

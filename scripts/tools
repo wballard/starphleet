@@ -207,6 +207,11 @@ function run_orders()
     REDIRECTTO=${2}
   }
 
+  redirect_to_service () {
+   info redirect_to_service "${1}"
+   REDIRECT_TO_SERVICE=${1}
+  }
+
   redirect_to () {
     # although it is perfectly ok ( it seems ) to redeclare an array when
     # one of the same name exists ( it doesn't seem to do anything ) the
