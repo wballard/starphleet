@@ -18,11 +18,11 @@ AUTHFILE="${ADMIRALSSH}/authorized_keys"
 test -f "${AUTHFILE}" && rm "${AUTHFILE}"
 
 # look for some auth keys in the HQ repo, when found add them all to the ssh auth keys to allow ssh access
-HQAUTHKEYS="${HEADQUARTERS_LOCAL}/authorized_keys"
+ADMIRALAUTHKEYS=${ADMIRALAUTHKEYS:-"${HEADQUARTERS_LOCAL}/authorized_keys"}
 # base touch on auth file to create
 touch ${AUTHFILE}
 #look for public keys pushed on the ship as well as in the headquarters
-for f in $(find "${HQAUTHKEYS}" "${PUBLIC_KEYS}")
+for f in $(find "${ADMIRALAUTHKEYS}" "${PUBLIC_KEYS}" | grep -v '\.git')
 do
   if ssh-keygen -l -f "${f}" > /dev/null; then
     #direct ssh as the admiral
@@ -34,6 +34,34 @@ cat "${ADMIRALSSH}/id_rsa.pub" >> ${AUTHFILE}
 
 chmod 600 ${AUTHFILE}
 chown ${ADMIRAL}:${ADMIRAL} ${AUTHFILE}
+
+# Grant Captain access
+# The captain user has reduced access to the server intended for managing
+# apps. The auth keys are reset everytime
+# this means if any keys have been manually added to the account, they will be overwritten
+# When there are no authkeys in the HQ repo, no ssh access is left around
+CAPTAINSSH="${CAPTAIN_HOME}/.ssh"
+AUTHFILE="${CAPTAINSSH}/authorized_keys"
+test -f "${AUTHFILE}" && rm "${AUTHFILE}"
+
+# look for some auth keys in the HQ repo, when found add them all to the ssh auth keys to allow ssh access
+CAPTAINAUTHKEYS=${CAPTAINAUTHKEYS:-"${HEADQUARTERS_LOCAL}/authorized_keys"}
+# base touch on auth file to create
+touch ${AUTHFILE}
+#look for public keys pushed on the ship as well as in the headquarters
+for f in $(find "${CAPTAINAUTHKEYS}" "${PUBLIC_KEYS}" | grep -v '\.git')
+do
+  if ssh-keygen -l -f "${f}" > /dev/null; then
+    #direct ssh as the admiral
+    cat "${f}" >> ${AUTHFILE}
+    echo '' >> ${AUTHFILE}
+  fi
+done
+cat "${CAPTAINSSH}/id_rsa.pub" >> ${AUTHFILE}
+
+chmod 600 ${AUTHFILE}
+chown ${CAPTAIN}:${CAPTAIN} ${AUTHFILE}
+
 
 #look for SSL keys
 [ -d "${NGINX_CONF}/published" ] || mkdir -p "${NGINX_CONF}/published"

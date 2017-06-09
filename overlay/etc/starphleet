@@ -23,6 +23,8 @@ export NGINX_CONF="${STARPHLEET_ROOT}/nginx"
 export BUILDPACKS="${STARPHLEET_ROOT}/buildpacks"
 export ADMIRAL="admiral"
 export ADMIRAL_HOME="/home/admiral"
+export CAPTAIN="captain"
+export CAPTAIN_HOME="/home/captain"
 # If this file exist the hupper will regen the nginx configs and hup nginx
 export STARPHLEET_NGINX_HUP_TURD="/var/run/starphleet_hup_turd"
 # If this file exist the hupper will 'restart' nginx when done instead of hup
