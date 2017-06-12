@@ -205,8 +205,12 @@ function run_orders()
   }
 
   redirect_to_service () {
-   info redirect_to_service "${1}"
    REDIRECT_TO_SERVICE=${1}
+   if [ -z "${CURRENT_ORDER}" ]; then
+     return
+   fi
+   info redirect_to_service says ${CURRENT_ORDER}/.container
+   touch ${CURRENT_ORDER}/.container
   }
 
   redirect_to () {
