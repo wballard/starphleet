@@ -206,6 +206,9 @@ function run_orders()
 
   redirect_to_service () {
    REDIRECT_TO_SERVICE=${1}
+   # run_orders is called multiple times, and sometimes it doesn't have
+   # all the variables set, so if we don't have the one we need, we don't do
+   # anything
    if [ -z "${CURRENT_ORDER}" ]; then
      return
    fi
