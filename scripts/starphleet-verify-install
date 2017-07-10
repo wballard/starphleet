@@ -6,9 +6,13 @@
 ### those checked out at /var/starphleet/github
 
 run_as_root_or_die
+function green() {
+  echo -e  '\E[32m'"$(date +"%x %X - ")\033[1m$*\033[0m"
+}
+SHOW_DIFF=${SHOW_DIFF-false}
 set -u # blow up if we reference an undeclared(set) variable
-
-[ -d ${STARPHLEET_ROOT}/github ] || die "no github dir, fix it" 1
+STARPHLEET_ROOT=/starphleet
+[ -d ${STARPHLEET_ROOT} ] || die "no github dir, fix it" 1
 
 # first we go ahead and diff everything from the overlay
 
@@ -16,20 +20,21 @@ echo '********************************************************************'
 echo   Validating Overlay
 echo '********************************************************************'
 
-for file in $(find ${STARPHLEET_ROOT}/github/overlay)
+for file in $(find ${STARPHLEET_ROOT}/overlay)
 do
   [ -d ${file} ] && continue
-  FILE_ROOT=${file##${STARPHLEET_ROOT}\/github\/overlay}
-  SOURCE=${STARPHLEET_ROOT}/github/overlay/${FILE_ROOT}
+  FILE_ROOT=${file##${STARPHLEET_ROOT}\/overlay}
+  SOURCE=${STARPHLEET_ROOT}/overlay/${FILE_ROOT}
   DESTINATION=${FILE_ROOT}
-  if [ "${nodetail}" = "true" ]; then
-    if ! diff -q ${SOURCE} ${DESTINATION}; then
-      echo "mismatched ${FILE_ROOT}"
+  DO_THEY_DIFFER="false"
+  if ! diff ${SOURCE} ${DESTINATION} > /dev/null 2>&1; then
+    DO_THEY_DIFFER="true"
+  fi
+  if [ "${DO_THEY_DIFFER}" = "true" ]; then
+    if [ "${SHOW_DIFF}" = "true" ]; then
+      diff ${SOURCE} ${DESTINATION}
     fi
-  else
-    if ! diff  ${SOURCE} ${DESTINATION}; then
-      echo "mismatched ${FILE_ROOT}"
-    fi
+    green "mismatched ${FILE_ROOT}"
   fi
 done
 
@@ -39,30 +44,26 @@ echo '********************************************************************'
 echo
 # then we diff out the executable scripts from the scripts
 # dir, which are installed in /usr/bin
-for file in $(find ${STARPHLEET_ROOT}/github/scripts/)
+for file in $(find ${STARPHLEET_ROOT}/scripts/ ! -name '*.swp' ! -name '*.pyc' ! -name 'starphleet-verify-install')
 do
   # don't want to compare bare directories only
   # the files the contain
   [ -d ${file} ] && continue
-  FILE_ROOT=${file##${STARPHLEET_ROOT}\/github\/scripts}
-  SOURCE=${STARPHLEET_ROOT}/github/scripts${FILE_ROOT}
+  FILE_ROOT=${file##${STARPHLEET_ROOT}\/scripts}
+  SOURCE=${STARPHLEET_ROOT}/scripts${FILE_ROOT}
   DESTINATION=/usr/bin${FILE_ROOT}
-
-  if [ "${nodetail}" = "true" ]; then
-    if ! diff -q ${SOURCE} ${DESTINATION}; then
-      echo "mismatched ${FILE_ROOT}"
+  DO_THEY_DIFFER="false"
+  if ! diff ${SOURCE} ${DESTINATION} > /dev/null 2>&1; then
+    DO_THEY_DIFFER="true"
+  fi
+  if [ "${DO_THEY_DIFFER}" = "true" ]; then
+    if [ "${SHOW_DIFF}" = "true" ]; then
+      diff ${SOURCE} ${DESTINATION}
     fi
-  else
-    if ! diff  ${SOURCE} ${DESTINATION}; then
-      echo "mismatched ${FILE_ROOT}"
-    fi
+    green "mismatched ${FILE_ROOT}"
   fi
 
   if test -L ${DESTINATION}; then
     echo "${DESTINATION} is still a symlink, this is an artifact fix it"
   fi
-
 done
-#cp -R ${SCRIPT_DIR}/../overlay/* /
-#cp -R ${DIR}/../nginx/* ${STARPHLEET_ROOT:-/var/starphleet}/nginx/
-#cp ${SCRIPT_DIR}/* /usr/bin
