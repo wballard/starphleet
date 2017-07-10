@@ -1,0 +1,23 @@
+#! /usr/bin/env bash
+# {"InstanceType":"SharedServices", "Headquarters":"git@github.com:glg/ec2.sharedservices.headquarters.git"}
+set -e
+USER_DATA=${TEST_USER_DATA-$(curl --silent --connect-timeout 15 http://169.254.169.254/latest/user-data/)}
+DEPLOY_REPO_URL=$(echo ${USER_DATA} | jq --raw-output .StarphleetRepo)
+if [ -n "${DEPLOY_REPO_URL}" -a "${DEPLOY_REPO_URL}" != "null" ]; then
+  echo "using StarphleetRepo(${DEPLOY_REPO_URL}) from userdata"
+else
+  echo "no StarphleetRepo in user data, not updating starphleet code"
+  exit 0
+fi
+REPO_URL=$(echo "${DEPLOY_REPO_URL}" | cut -d '#' -f 1)
+REPO_BRANCH=$(echo "${DEPLOY_REPO_URL}" | cut -d '#' -f 2)
+if [ -z "${REPO_URL}" -o -z "${REPO_BRANCH}" ]; then
+  echo "You must provide BOTH a repo URL and Branch as in https://github.com/wballard/starphleet.git#master"
+  echo "not updating starphleet code"
+  exit 1
+fi
+echo "upadting starphleet codebase using repo url: ${REPO_URL} and branch ${REPO_BRANCH}"
+rm -rf /starphleet
+git clone ${REPO_URL} /starphleet
+cd /starphleet && git checkout ${REPO_BRANCH}
+./scripts/perform-overlay
