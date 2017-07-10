@@ -56,13 +56,8 @@ do
   unset SERVICE_GIT_URL
   unset UNPUBLISHED
   unset PUBLISH_FROM
-  unset REDIRECT_TO_SERVICE
   # Slurp the environment from the orders
   run_orders "${order}"
-  if [ -n "${REDIRECT_TO_SERVICE}" ]; then
-    info ${ORDER} is a redirect, nothing to deploy
-    continue
-  fi
   # If the conditions for the security mode set for this container are not
   # met then we will not deploy this container.
   if ! validate_security; then
@@ -151,8 +146,7 @@ do
       warn "Critical Info Missing - Not Deploying Container:  O: ${ORDER} OS: ${ORDERS_SHA} SS:${SERVICE_SHA}"
       continue
     fi
-    #this is done with no-wait since upstart will prevent duplicate starts
-    start --no-wait starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
+    parallel --semaphore --semaphorename starphleet-service-serve-order --jobs ${MAX_CONCURRENT_CONTAINER_BUILDS:-25} start starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
   fi
   unset DEPLOY_REASON
 done

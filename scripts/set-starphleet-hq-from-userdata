@@ -1,0 +1,10 @@
+#! /usr/bin/env bash
+# {"InstanceType":"SharedServices", "Headquarters":"git@github.com:glg/ec2.sharedservices.headquarters.git"}
+USER_DATA=$(curl --silent --connect-timeout 15 http://169.254.169.254/latest/user-data/)
+HQ_URL=$(echo ${USER_DATA} | jq --raw-output .Headquarters)
+if [ -n "${HQ_URL}" -a "${HQ_URL}" != "null" ]; then
+  starphleet-headquarters ${HQ_URL}
+else
+  printf "Unable to locate HQ Url in user data, can't set anything\n"
+fi
+

@@ -36,6 +36,9 @@ fi
 
 #mount this service over a path
 MOUNT_CONF="${NGINX_CONF}/published/${order}.conf"
+# this is where the confs for all the services WITHOUT the 
+# access exclusions will be put
+SECURE_CONF="${NGINX_CONF}/published_secure/${order}.conf"
 MOUNT_CACHED_CONF="${NGINX_CONF}/published/${order}_cached.conf"
 #mount this service over a port
 BARE_CONF="${NGINX_CONF}/published_bare/${order}.conf"
@@ -45,33 +48,8 @@ REDIRECT_CONF="${NGINX_CONF}/published/${order}.redirect"
 PROXY_FOR_CONF="${NGINX_CONF}/proxy_for/${order}.conf"
 SERVER_NAMES_CONF="${NGINX_CONF}/named_servers/${order}.conf"
 
-if [ -r "${CURRENT_ORDERS}/${ORIGINAL_ORDER_NAME}/.starphleetstatus.${container_name}.ip" ]; then
-  IP_ADDRESS=$(cat "${CURRENT_ORDERS}/${ORIGINAL_ORDER_NAME}/.starphleetstatus.${container_name}.ip")
-fi
-if [ -r "${CURRENT_ORDERS}/${ORIGINAL_ORDER_NAME}/.starphleetstatus.${container_name}.port" ]; then
-  PORT=$(cat "${CURRENT_ORDERS}/${ORIGINAL_ORDER_NAME}/.starphleetstatus.${container_name}.port")
-fi
-
-mkdir -p "${NGINX_CONF}/published"
-mkdir -p "${NGINX_CONF}/published_bare"
-mkdir -p "${NGINX_CONF}/proxy_for"
-mkdir -p "${NGINX_CONF}/named_servers"
-mkdir -p "${NGINX_CONF}/htpasswd"
-
-[ -f "${NGINX_CONF}/published/crt" ] || cp "${NGINX_CONF}/crt" "${NGINX_CONF}/published/crt"
-[ -f "${NGINX_CONF}/published/key" ] || cp "${NGINX_CONF}/key" "${NGINX_CONF}/published/key"
-
-if [ -n "${REDIRECT_TO_SERVICE}" ]; then
-  trace "setting service redirect for order ${order} to ${REDIRECT_TO_SERVICE}"
-  # redirect service is exlusive of all other settings
-  cat << EOF > "${MOUNT_CONF}"
-location ${public_url}/ {
-  rewrite ^${public_url}/(.*)$ ${REDIRECT_TO_SERVICE}/\$1 permanent;
-}
-EOF
-  # that's all it does
-  exit
-fi
+IP_ADDRESS=$(cat "${CURRENT_ORDERS}/${ORIGINAL_ORDER_NAME}/.starphleetstatus.${container_name}.ip")
+PORT=$(cat "${CURRENT_ORDERS}/${ORIGINAL_ORDER_NAME}/.starphleetstatus.${container_name}.port")
 
 info publishing to ${IP_ADDRESS}
 
@@ -81,6 +59,16 @@ if [ -z "${IP_ADDRESS}" ]; then
   error "Could not find ip address for container ${container_name} cannot publish"
   exit 1
 fi
+
+mkdir -p "${NGINX_CONF}/published"
+mkdir -p "${NGINX_CONF}/published_bare"
+mkdir -p "${NGINX_CONF}/proxy_for"
+mkdir -p "${NGINX_CONF}/named_servers"
+mkdir -p "${NGINX_CONF}/htpasswd"
+mkdir -p "${NGINX_CONF}/published_secure"
+
+[ -f "${NGINX_CONF}/published/crt" ] || cp "${NGINX_CONF}/crt" "${NGINX_CONF}/published/crt"
+[ -f "${NGINX_CONF}/published/key" ] || cp "${NGINX_CONF}/key" "${NGINX_CONF}/published/key"
 
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
@@ -129,7 +117,6 @@ cat << EOF >> "${MOUNT_CONF}"
   # WebSocket support (nginx 1.4)
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
-  proxy_set_header X-Http \$https;
   proxy_set_header Connection "upgrade";
   more_set_headers 'X-Starphleet-Service: ${public_url}';
   more_set_headers 'X-Starphleet-Container: ${container_name}';
@@ -162,20 +149,21 @@ if [ "${SECURITY_MODE}" = 'ldap' ]; then
   echo "  proxy_set_header ${USER_IDENTITY_HEADER} \$remote_user;" >> "${MOUNT_CONF}"
   echo "  add_header Set-Cookie ${USER_IDENTITY_COOKIE}=\$remote_user;" >> "${MOUNT_CONF}"
 fi
-if [ -z "${DISABLE_AUTO_AUTH}" ]; then
-  if [ "${SECURITY_MODE}" != 'public' ] && ! dev_mode ; then
-    # don't want to ldap authenticate from other containers on the ship
-    # see http://forum.nginx.org/read.php?2,242713,242742#msg-242742
-    # note: this needs an auth_basic that alway fails and has the same name as auth_ldap
-    echo "  satisfy any;" >> "${MOUNT_CONF}"
-    echo "  allow 192.168.0.0/16;" >> "${MOUNT_CONF}"
-    echo "  allow 172.16.0.0/12;" >> "${MOUNT_CONF}"
-    echo "  allow 10.0.0.0/8;" >> "${MOUNT_CONF}"
-  fi
+if [ "${SECURITY_MODE}" != 'public' ] && ! dev_mode ; then
+  # don't want to ldap authenticate from other containers on the ship
+  # see http://forum.nginx.org/read.php?2,242713,242742#msg-242742
+  # note: this needs an auth_basic that alway fails and has the same name as auth_ldap
+  echo "  satisfy any;" >> "${MOUNT_CONF}"
+  echo "  allow 192.168.0.0/16;" >> "${MOUNT_CONF}"
+  echo "  allow 10.0.0.0/8;" >> "${MOUNT_CONF}"
+  echo "  allow 172.16.0.0/12;" >> "${MOUNT_CONF}"
 fi
 
 #closing off the location
 echo '}' >> "${MOUNT_CONF}"
+
+# create a secure conf which doesn't allow anyone to skip auth
+grep -v allow "${MOUNT_CONF}" | grep -v "satisfy any" > "${SECURE_CONF}"
 
 info "published ${container_name}:${PORT} to ${public_url}"
 

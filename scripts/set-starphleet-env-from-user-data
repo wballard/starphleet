@@ -1,0 +1,18 @@
+#! /usr/bin/env bash
+set -e
+set -o pipefail
+# USER_DATA='{"InstanceType":"SharedServices", "Headquarters":"git@github.com:glg/ec2.sharedservices.headquarters.git"}'
+# USER_DATA='{"InstanceType":"SharedServices", "Headquarters":"git@github.com:glg/ec2.sharedservices.headquarters.git", "StarphleetEnvironment":[}}'
+# USER_DATA='{"InstanceType":"SharedServices", "Headquarters":"git@github.com:glg/ec2.sharedservices.headquarters.git", "StarphleetEnvironment":[{"CONCURRENT_CONTAINER_BUILDS":3}]}'
+# USER_DATA='{"InstanceType":"SharedServices", "Headquarters":"git@github.com:glg/ec2.sharedservices.headquarters.git", "StarphleetEnvironment":[{"CONCURRENT_CONTAINER_BUILDS":3, "JEANS_ARE":"blue"}]}'
+
+USER_DATA=$(curl --connect-timeout 15 --silent http://169.254.169.254/latest/user-data/)
+if USER_DATA_ENV=$(echo "${USER_DATA}" | 2>&1 jq --raw-output 'if .StarphleetEnvironment != null then (.StarphleetEnvironment[]|to_entries[]|"export " + .key + "=" + (.value|tostring)) else "" end') ; then
+  if echo "${USER_DATA_ENV}" | grep 'error:' ; then
+    printf "error parsing user data: %s" "${USER_DATA_ENV}"
+  else
+    echo "${USER_DATA_ENV}" > /etc/starphleet.d/user_data_env
+  fi
+else
+  echo "encountered a problem parsing user data environment, nothing set"
+fi

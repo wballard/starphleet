@@ -1,0 +1,42 @@
+#! /usr/bin/env bash
+# vi:ft=sh
+
+# mount things default like this
+#    /dev/xvdb -> /var/lib/lxc
+#    /dev/xvdc -> /var/starphleet
+#    /dev/xvdd -> /var/log/biglogs
+
+source /usr/bin/tools
+
+for drive in "${!EC2_DRIVES[@]}"
+do
+  # our image already has starphleet on it and we're gonna keep it here
+  [ "${EC2_DRIVES[$drive]}" == "/var/starphleet" ] && continue
+  if [ -b "${drive}" ]; then
+    if blkid "${drive}" 2>&1 | grep "ext4"; then
+      info "skipping already formatted device ${drive}"
+      continue
+    else
+      info Setting up ["${drive}"] for [${EC2_DRIVES[$drive]}]
+    fi
+    # Unmount if mounted
+    umount "${drive}" || true
+    # Format the drive
+    mkfs.ext4 "${drive}"
+    # Mount it where it goes
+    mkdir -p "${EC2_DRIVES[$drive]}"
+
+    if [ "${EC2_DRIVES[$drive]}" != "/var/lib/lxc/data" ]; then
+      tune2fs -O ^has_journal "${drive}"
+    fi
+    mount "${drive}" "${EC2_DRIVES[$drive]}"
+    # Strip any mounts using this device from fstab
+    cat /etc/fstab | grep -v "${drive}" > /tmp/fstab.tmp
+    # Re-add our config to fstab
+    #   Note: There are tabs on purpose in here - be careful
+    echo "${drive}  ${EC2_DRIVES[$drive]} auto  defaults,nobootwait,comment=cloudconfig 0 2" >> /tmp/fstab.tmp
+    # Move the tmp file into place
+    mv /tmp/fstab.tmp /etc/fstab
+  fi
+done
+
