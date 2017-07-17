@@ -254,6 +254,14 @@ do
   sed --regexp-extended -i '' -e "s[# headers go here[# headers go here\n  proxy_set_header ${header} \"${SERVICE_HEADERS[$header]}\";[" ${MOUNT_CONF}
 done
 
+# allowing for the addition of headers within the context of orders files, this
+# will get the specified headers into nginx for transmission to the client in
+# the response
+for header in "${!RESPONSE_HEADERS[@]}"
+do
+  info "adding response headers $header: ${RESPONSE_HEADERS[$header]}"
+  sed --regexp-extended -i '' -e "s[# headers for the response go here[# headers for the response go here\n  more_set_headers \"${header}: ${RESPONSE_HEADERS[$header]}\";[" ${MOUNT_CONF}
+done
 
 if [ -n "${PROXY_FOR_NAMES}" ]; then
   info "publishing container ${container_name} using proxy_for: ${PROXY_FOR_NAMES}"

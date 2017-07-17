@@ -242,6 +242,21 @@ function run_orders()
     SERVICE_HEADERS[$HEADER_NAME]="$@"
   }
 
+  add_response_header () {
+   local HEADER_NAME=$1
+   info orders request additional response header "$HEADER_NAME"
+   shift
+   # although it is perfectly ok ( it seems ) to redeclare an array when
+   # one of the same name exists ( it doesn't seem to do anything ) the
+   # desire is to only create one if it's needed, so to do this we use the
+   # lenght of the array as a proxy for existence as bash has no way to  check fo
+   # the existence of an empty array that I can find
+   if [ ${#RESPONSE_HEADERS[@]} -eq 0 ]; then
+     declare -A -g RESPONSE_HEADERS
+   fi
+   RESPONSE_HEADERS[$HEADER_NAME]="$@"
+  }
+
   beta () {
     BETAS[$1]=$2
   }
