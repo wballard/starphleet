@@ -126,6 +126,7 @@ cat << EOF >> "${MOUNT_CONF}"
   proxy_set_header X-Starphleet-Service-Name: ${order};
   proxy_set_header Host \$http_host;
   # headers go here
+  # headers for the response go here
   # WebSocket support (nginx 1.4)
   proxy_http_version 1.1;
   proxy_set_header Upgrade \$http_upgrade;
