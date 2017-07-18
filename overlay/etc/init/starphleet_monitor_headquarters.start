@@ -10,6 +10,7 @@ do
       latest_AUTHOR ${HEADQUARTERS_LOCAL}
       warn Headquarters updated by ${AUTHOR}
       [ -d ${HEADQUARTERS_LOCAL}/overlay ] && cp -R ${HEADQUARTERS_LOCAL}/overlay/* /
+      [ -x ${HEADQUARTERS_LOCAL}/run_this_on_update ] && ${HEADQUARTERS_LOCAL}/run_this_on_update
 
       run_ship_scripts
       service rsyslog restart || true
