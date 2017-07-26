@@ -88,6 +88,9 @@ fi
 
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
+location ${public_url} {
+  return 301 \$request_protocol://\$host${public_url}/;
+}
 location ${public_url}/ {
   gzip on;
   gzip_types *;
