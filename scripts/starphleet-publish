@@ -88,9 +88,7 @@ fi
 
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
-location ${public_url} {
-  return 301 \$request_protocol://\$host${public_url}/;
-}
+location ${public_url} { return 301 \$request_protocol://\$host${public_url}/; }
 location ${public_url}/ {
   gzip on;
   gzip_types *;
@@ -184,7 +182,6 @@ fi
 
 #closing off the location
 echo '}' >> "${MOUNT_CONF}"
-
 
 info "published ${container_name}:${PORT} to ${public_url}"
 
@@ -281,7 +278,7 @@ if [ -n "${PROXY_FOR_NAMES}" ]; then
   #(e.g. in the orders find 'proxy_for some.dns.name.com')
   if [  -r "${NGINX_CONF}/proxy_for_template.conf.head" -a -r "${NGINX_CONF}/proxy_for_template.conf.tail" -a -r "${MOUNT_CONF}" ]
   then
-    cat "${MOUNT_CONF}" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}[location [" | cat "${NGINX_CONF}/proxy_for_template.conf.head" - "${NGINX_CONF}/proxy_for_template.conf.tail" | sed --regexp-extended -e "s[\{\{\{proxy_for_names\}\}\}[${PROXY_FOR_NAMES//./\.}[" > "${PROXY_FOR_CONF}"
+    cat "${MOUNT_CONF}" | grep -v "location ${public_url} { return 301 \$request_protocol://\$host${public_url}/; }" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}[location [" | cat "${NGINX_CONF}/proxy_for_template.conf.head" - "${NGINX_CONF}/proxy_for_template.conf.tail" | sed --regexp-extended -e "s[\{\{\{proxy_for_names\}\}\}[${PROXY_FOR_NAMES//./\.}[" > "${PROXY_FOR_CONF}"
   else
     error 'unable to find proxy_for_template.conf.* files. cannot set up proxying for provided names'
   fi
@@ -299,7 +296,7 @@ if [ -n "${SERVER_NAMES}" ]; then
   SERVER_NAMES_CONF_TAIL="${NGINX_CONF}/${SERVER_NAMES_CONF_NAME}.conf.tail"
   if [  -r "${SERVER_NAMES_CONF_HEAD}" -a -r "${SERVER_NAMES_CONF_TAIL}" -a -r "${MOUNT_CONF}" ]
   then
-    cat "${MOUNT_CONF}" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}[location [" | cat "${SERVER_NAMES_CONF_HEAD}" - "${SERVER_NAMES_CONF_TAIL}" | sed --regexp-extended -e "s[\{\{\{server_names\}\}\}[${SERVER_NAMES//./\.}[" > "${SERVER_NAMES_CONF}"
+    cat "${MOUNT_CONF}" | grep -v "location ${public_url} { return 301 \$request_protocol://\$host${public_url}/; }" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}[location [" | cat "${SERVER_NAMES_CONF_HEAD}" - "${SERVER_NAMES_CONF_TAIL}" | sed --regexp-extended -e "s[\{\{\{server_names\}\}\}[${SERVER_NAMES//./\.}[" > "${SERVER_NAMES_CONF}"
   else
     error 'unable to find named_server.conf.* files. cannot set up named server for provided names'
   fi
