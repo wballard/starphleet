@@ -8,7 +8,6 @@ python
 g++
 make
 pkg-config
-lxc
 man
 python-pip
 nodejs

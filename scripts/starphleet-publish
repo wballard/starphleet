@@ -177,6 +177,9 @@ if [ -z "${DISABLE_AUTO_AUTH}" ]; then
     echo "  allow 192.168.0.0/16;" >> "${MOUNT_CONF}"
     echo "  allow 172.16.0.0/12;" >> "${MOUNT_CONF}"
     echo "  allow 10.0.0.0/8;" >> "${MOUNT_CONF}"
+    # this is required to allow the reaper and the HCs to get to containers that might otherwise
+    # have authentication requirements
+    echo "  allow 127.0.0.0/8;" >> "${MOUNT_CONF}"
   fi
 fi
 
