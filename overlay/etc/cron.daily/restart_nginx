@@ -1,3 +1,0 @@
-#!/bin/sh
-
-/usr/bin/starphleet-restart-nginx
