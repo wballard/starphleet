@@ -1,6 +1,24 @@
-# vim: set ft=sh : #main include file for starphleet scripts
+# vim:ft=sh
+function abspath {
+    if [ -d "${1}" ]; then
+        echo "${1}"
+    elif [ -e "${1}" ]; then
+        echo $(readlink -e "${1}" | xargs dirname)
+    else
+        echo "$1" does not exist! >&2
+        return 127
+    fi
+}
 
-ulimit -n ${MAX_OPEN_FILES} > /dev/null
+
+# handle our docopt validation
+if [ -n "${COMMAND_PATH}" ]; then
+  help="$(grep "^### " "${COMMAND_PATH}" | cut -c 5-)"
+  # again, we want whatever comes out of docopt to be exported
+  set -a
+  eval "$(${DIR}/docopts -h "$help" : "$@")"
+  set +a
+fi
 
 die() { echo $1 ; exit ${2-1} ;}
 
@@ -62,17 +80,6 @@ function get_HASH() {
 
 function autodeploy() {
   export AUTODEPLOY="${1}"
-}
-
-function run_ship_scripts() {
-  if [ -d "${SHIP_SCRIPTS}" ]; then
-    for file in $(find "${SHIP_SCRIPTS}") ; do
-      if [ -x $file ] && [ -f $file ]; then
-        #no crashing allowed for these
-        $file || true
-      fi
-    done
-  fi
 }
 
 function make_user() {

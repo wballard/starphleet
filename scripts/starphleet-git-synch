@@ -1,4 +1,4 @@
-#!/usr/bin/env starphleet-launcher
+#!/usr/bin/env bash
 ### Usage:
 ###    starphleet-git-synch <remote> [<local>]
 ### --help
@@ -8,6 +8,10 @@
 ###
 ### This exits 0 if there were changes, 1 if not, easier
 ### to use in a shell script if this way
+COMMAND_PATH=${BASH_SOURCE[0]}
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PATH="${DIR}":"${PATH}"
+source tools
 
 REMOTE=$(echo "${remote//$'\r'/}" | awk -F '#' '{print $1;}')
 BRANCH=$(echo "${remote//$'\r'/}" | awk -F '#' '{print $2;}')
@@ -20,10 +24,8 @@ trap 'cd "${STARTING_DIRECTORY}"' EXIT
 reclone () {
   cd ..
   rm -rf "${local}"
-  starphleet-git clone -b ${BRANCH} "${REMOTE}" "${local}" || fatal clone error
+  git clone -b ${BRANCH} "${REMOTE}" "${local}" || fatal clone error
 }
-
-dev_mode && [ -d "${local}/.git" ] && exit 1
 
 if [ -d "${local}/.git" ]; then
   info synch ${remote} to ${local}
@@ -36,7 +38,7 @@ if [ -d "${local}/.git" ]; then
     reclone
     exit 0
   else
-    starphleet-git fetch --all &> /dev/null || fatal fetch error
+    git fetch --all &> /dev/null || fatal fetch error
   fi
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
   if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
@@ -48,8 +50,8 @@ if [ -d "${local}/.git" ]; then
   HAS_CHANGES=$(git diff HEAD...origin/${CURRENT_BRANCH} --raw)
   if [ "${HAS_CHANGES}x" != "x" ]; then
     warn new code detected, pulling
-    starphleet-git fetch || fatal error during fetch of latest code
-    starphleet-git reset --hard origin/${CURRENT_BRANCH} || fatal pull error
+    git fetch || fatal error during fetch of latest code
+    git reset --hard origin/${CURRENT_BRANCH} || fatal pull error
     exit 0
   fi
   GIT_STATUS=$(git status)
@@ -67,7 +69,7 @@ if [ -d "${local}/.git" ]; then
   fi
 else
   warn ${local} not found, initial clone needed from "${REMOTE}" to "${local}"
-  starphleet-git clone -b ${BRANCH} "${REMOTE}" "${local}" || fatal clone error
+  git clone -b ${BRANCH} "${REMOTE}" "${local}" || fatal clone error
   exit 0
 fi
 

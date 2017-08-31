@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-dockerize <remote>
+### --help
+###
+### Make sure a git repo, with an option #[branch|tag] is
+### pulled and if there are any new changes, trigger container builds.
+###
+### This exits 0 if there were changes, 1 if not, easier
+### to use in a shell script if this way
+COMMAND_PATH=${BASH_SOURCE[0]}
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PATH="${DIR}":"${PATH}"
+source tools
+
+HEADQUARTERS_REMOTE="${remote}"
+HEADQUARTERS_LOCAL="./var/headquarters"
+
+mkdir -p "${HEADQUARTERS_LOCAL}"
+
+trace checking headquarters ${HEADQUARTERS_REMOTE} for updates
+if [ -n "${HEADQUARTERS_REMOTE}" ]; then
+  #pull down the actual headquarters changes
+  if starphleet-git-synch "${HEADQUARTERS_REMOTE}" "${HEADQUARTERS_LOCAL}"; then
+    latest_AUTHOR ${HEADQUARTERS_LOCAL}
+    warn Headquarters updated by ${AUTHOR}
+    #now, process all orders and overlay them with changed headquarters environment
+    exit 0
+  fi
+  #check all orders, synchronize them, and for any changed ordered repositories
+  #create a docker container, and overlay them with the headquarters environment
+fi
