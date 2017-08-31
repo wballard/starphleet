@@ -24,9 +24,9 @@ if [ -n "${HEADQUARTERS_REMOTE}" ]; then
   if starphleet-git-synch "${HEADQUARTERS_REMOTE}" "${HEADQUARTERS_LOCAL}"; then
     latest_AUTHOR ${HEADQUARTERS_LOCAL}
     warn Headquarters updated by ${AUTHOR}
-    #now, process all orders and overlay them with changed headquarters environment
-    exit 0
+    #there is no special action to take at this location
   fi
   #check all orders, synchronize them, and for any changed ordered repositories
   #create a docker container, and overlay them with the headquarters environment
+  starphleet-dockerize-orders "${HEADQUARTERS_LOCAL}"
 fi

@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-dockerize-orders <local>
+### --help
+###
+### With a local headquarters, find all orders and create Docker containers.
+COMMAND_PATH=${BASH_SOURCE[0]}
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PATH="${DIR}":"${PATH}"
+source tools
+
+HEADQUARTERS_LOCAL=${local}
+get_CURRENT_SHA "${HEADQUARTERS_LOCAL}"
+HEADQUARTERS_SHA="${CURRENT_SHA}"
+
+#auto deploy each ordered service, really need to use grep here
+#find doesn't work out on that / pattern
+for order in $(find "${HEADQUARTERS_LOCAL}" | grep '/orders$' | grep -v '/git' )
+do
+  trace -----------------------
+  info checking ${order}
+  #reset variables
+  source tools
+
+  #run the order as a whole script 
+  #this lets folks get creative in orders files as needed
+  unset SERVICE_GIT_URL
+  unset UNPUBLISHED
+  unset PUBLISH_FROM
+  unset REDIRECT_TO_SERVICE
+  # Slurp the environment from the orders
+  run_orders "${order}"
+  if [ -n "${REDIRECT_TO_SERVICE}" ]; then
+    info ${ORDER} is a redirect, nothing to build
+    continue
+  fi
+
+  # The directory we store our local git copy
+  LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
+
+  if [ -n "${SERVICE_GIT_URL}" ]; then
+    starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}"
+    get_CURRENT_SHA "${LOCAL}"
+    SERVICE_SHA="${CURRENT_SHA}"
+
+    info "Service ${SERVICE_GIT_URL} at ${SERVICE_SHA} with headquarters ${HEADQUARTERS_SHA}"
+
+    info "Checking for existing service container"
+    
+    info "Checking for existing headquarters orders overlay container"
+  fi
+done

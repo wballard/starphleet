@@ -112,80 +112,6 @@ function expose() {
   true
 }
 
-# All the rules that surround the supported security measures
-# for starphleet.  For instance, if a certain security feature
-# has constraints, needs certain settings or files, or needs various
-# conditions to exist they should be tested here.  The environment,
-# when this is called should be "expected" to have everything we need.
-# If, when this is called, we do not have everything we need for a certain
-# security measure something is wrong.
-function validate_security() {
-
-  # In bash, the return values are odd.  Exiting with a Zero
-  # means you didn't have a problem.
-  #
-  # See:  http://glg.link/Ea8zjA
-  TRUE=0;
-  FALSE=1;
-  # SECURITY_MODE is set in the default starphleet config.  If it gets unset
-  # something went wrong so let the user know
-  if ! echo "${SECURITY_MODE}" | egrep 'htpasswd|jwt|ldap|public' > /dev/null; then
-    error "Invalid security mode: [${SECURITY_MODE}]";
-    return ${FALSE};
-  fi
-
-  info Security Mode: ${SECURITY_MODE}
-
-  ################
-  # LDAP Rules
-  ################
-  if [ "${SECURITY_MODE}" = 'ldap' ]; then
-    if [ -z "${LDAP_SERVER}" ]; then
-      error "Must specify LDAP server [${SECURITY_MODE}] ${LDAP_SERVER}"
-      return ${FALSE}
-    fi
-    return ${TRUE}
-  fi
-  ################
-  # JWT Rules
-  ################
-  if [ "${SECURITY_MODE}" = 'jwt' ]; then
-    if [ -z "${JWT_SECRET}" ] || \
-       [ -z "${JWT_COOKIE_DOMAIN}" ] || \
-       [ -z "${JWT_ACCESS_FLAGS}" ] || \
-       [ -z "${JWT_REVOCATION_DIR}" ] || \
-       [ -z "${JWT_COOKIE_NAME}" ] || \
-       [ -z "${JWT_MAX_TOKEN_AGE_IN_SECONDS}" ] || \
-       [ -z "${JWT_EXPIRATION_IN_SECONDS}" ]; then
-       error "All JWT vars not set"
-       return ${FALSE}
-    fi
-    return ${TRUE}
-  fi
-  ################
-  # HTPASSWD Rules
-  ################
-  if [ "${SECURITY_MODE}" = 'htpasswd' ]; then
-    if [ -z "${HTPASSWD}" ]; then
-      error "HTPASSWD not set: ${HTPASSWD}"
-      return ${FALSE}
-    fi
-    return ${TRUE}
-  fi
-  ################
-  # Public Rules
-  ################
-  if [ "${SECURITY_MODE}" = "public" ]; then
-    return ${TRUE}
-  fi
-  ################
-  # Default rule
-  ################
-  # If all else fails our default is to puke
-  error "Critical Error - Never get here!! OMG!"
-  return ${FALSE}
-}
-
 function run_orders()
 {
   autodeploy () {
@@ -222,15 +148,8 @@ function run_orders()
    touch ${CURRENT_ORDER}/.container
   }
 
+  declare -A REDIRECT_TO
   redirect_to () {
-    # although it is perfectly ok ( it seems ) to redeclare an array when
-    # one of the same name exists ( it doesn't seem to do anything ) the
-    # desire is to only create one if it's needed, so to do this we use the
-    # lenght of the array as a proxy for existence as bash has no way to  check fo
-    # the existence of an empty array that I can find
-    if [ ${#REDIRECT_TO[@]} -eq 0 ]; then
-      declare -A -g REDIRECT_TO
-    fi
     REDIRECT_TO[$1]=$2
   }
 
@@ -264,6 +183,8 @@ function run_orders()
    RESPONSE_HEADERS[$HEADER_NAME]="$@"
   }
 
+  #associate array of beta names
+  declare -A BETAS
   beta () {
     BETAS[$1]=$2
   }
