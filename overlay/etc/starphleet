@@ -45,15 +45,15 @@ export STARPHLEET_DNS_ONLINE_STATUS_FILE="/tmp/.starphleet.online"
 export STARPHLEET_AUTHENTIC_TOKEN="CHANGEME"
 # Declare drives we'd setup and where they should mount for starphleet install on EC2
 declare -A EC2_DRIVES
-EC2_DRIVES["/dev/xvdb"]="/var/lib/lxc"
-EC2_DRIVES["/dev/xvdc"]="/var/starphleet"
-EC2_DRIVES["/dev/xvdd"]="/var/log/biglogs"
-EC2_DRIVES["/dev/xvde"]="/var/lib/lxc/data"
+export EC2_DRIVES["/dev/xvdb"]="/var/lib/lxc"
+export EC2_DRIVES["/dev/xvdc"]="/var/starphleet"
+export EC2_DRIVES["/dev/xvdd"]="/var/log/biglogs"
+export EC2_DRIVES["/dev/xvde"]="/var/lib/lxc/data"
 # Support AWS NVME drives
-EC2_DRIVES["/dev/nvme1n1"]="/var/lib/lxc"
-EC2_DRIVES["/dev/nvme2n1"]="/var/starphleet"
-EC2_DRIVES["/dev/nvme3n1"]="/var/log/biglogs"
-EC2_DRIVES["/dev/nvme4n1"]="/var/lib/lxc/data"
+export EC2_DRIVES["/dev/nvme1n1"]="/var/lib/lxc"
+export EC2_DRIVES["/dev/nvme2n1"]="/var/starphleet"
+export EC2_DRIVES["/dev/nvme3n1"]="/var/log/biglogs"
+export EC2_DRIVES["/dev/nvme4n1"]="/var/lib/lxc/data"
 
 ##########################################################
 # DEVMODE
