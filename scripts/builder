@@ -11,6 +11,11 @@ selected_buildpack=
 
 source /usr/bin/tools
 
+# Env Vars needed for buildpack
+export ORDERS_FILE=$orders
+export SERVICE_GIT_URL="${2}"
+export CONTAINER_NAME="${3}"
+
 # start: heroku buildpack hack (some buildpacks create "temp" /app dir)
 sudo bash -c "mkdir -p /app && chown ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} /app"
 # end: heroku buildpack hack

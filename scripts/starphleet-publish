@@ -55,6 +55,14 @@ if [ -r "${CURRENT_ORDERS}/${ORIGINAL_ORDER_NAME}/.starphleetstatus.${container_
   PORT=$(cat "${CURRENT_ORDERS}/${ORIGINAL_ORDER_NAME}/.starphleetstatus.${container_name}.port")
 fi
 
+if [ -r "${STARPHLEET_SHARED_DATA}/${container_name}-endpoint.url" ]; then
+  LAMBDA_API_GATEWAY_URL=$(cat "${STARPHLEET_SHARED_DATA}/${container_name}-endpoint.url")
+fi
+
+if [ -r "${STARPHLEET_SHARED_DATA}/${container_name}-endpoint.url" ]; then
+  LAMBDA_API_GATEWAY_STAGE=$(cat "${STARPHLEET_SHARED_DATA}/${container_name}-endpoint.url")
+fi
+
 mkdir -p "${NGINX_CONF}/published"
 mkdir -p "${NGINX_CONF}/published_bare"
 mkdir -p "${NGINX_CONF}/proxy_for"
@@ -122,14 +130,27 @@ cat << EOF >> "${MOUNT_CONF}"
     set \$sendto \$1;
     rewrite ${public_url}/(.*) /\$sendto/\$1 last;
   }
+EOF
+if [ -z "${LAMBDA_API_GATEWAY_URL}" ] && [ -z "${LAMBDA_API_GATEWAY_STAGE}" ]; then
+cat << EOF >> "${MOUNT_CONF}"
   rewrite ${public_url}/(.*) /\$1 break;
+  proxy_set_header Host \$http_host;
   proxy_pass http://${IP_ADDRESS}:${PORT};
+EOF
+else
+cat << EOF >> "${MOUNT_CONF}"
+  proxy_ssl_session_reuse off;
+  proxy_ssl_server_name on;
+  proxy_set_header Host ${LAMBDA_API_GATEWAY_URL};
+  proxy_pass https://{LAMBDA_API_GATEWAY_URL}/${LAMBDA_API_GATEWAY_STAGE}/;
+EOF
+fi
+cat << EOF >> "${MOUNT_CONF}"
   # cache goes here
   proxy_set_header X-Forwarded-Host \$host;
   proxy_set_header X-Forwarded-Server \$host;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_set_header X-Starphleet-Service-Name: ${order};
-  proxy_set_header Host \$http_host;
   # headers go here
   # headers for the response go here
   # WebSocket support (nginx 1.4)
