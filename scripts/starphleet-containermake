@@ -44,7 +44,9 @@ dev_mode \
 
 #starphleet-base is a create, all orders are a clones to delta0
 cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT} none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT}/buildpacks ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/buildpacks none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT}/private_keys ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/private_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT}/public_keys ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/public_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
 lxc.mount.entry = ${ADMIRAL_HOME} ${CONTAINER_ROOT}/rootfs${ADMIRAL_HOME} none defaults,bind,create=dir 0 0
 EOF
 
@@ -74,16 +76,18 @@ else
   SHIP_NAME=$([ -r /etc/starphleet-name ] && $(echo cat /etc/starphleet-name) || echo $(hostname))
 
   starphleet-lxc-destroy ${CONTAINER_NAME}
+
   if [ -z "${base_container_name}" ]; then
     lxc-create --name "${container_name}" -t ubuntu
     CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
+  elif is_container_storage_on_s3 && [ -n "${BUILD_CONTAINERS}" ]; then
+    lxc-clone -B "dir" -o "${base_container_name}" -n "${container_name}"
   else
-    lxc-clone --snapshot -B overlayfs -o "${base_container_name}" -n "${container_name}"
+    lxc-clone --snapshot -B "overlayfs" -o "${base_container_name}" -n "${container_name}"
     CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
   fi
 
   echo "lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none rbind,rw 0 0" >> ${CONTAINER_CONF}
-
 
   #make a directory where we can mount back to the ship and a config file to mount
   test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}" || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}"
@@ -93,6 +97,7 @@ else
   mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
   [ -f "/hosthome/.starphleet" ] && cp /hosthome/.starphleet "${CONTAINER_OVERLAY}/.starphleet"
   cp /etc/starphleet "${CONTAINER_OVERLAY}/etc/"
+  rm -rf "${CONTAINER_OVERLAY}/etc/starphleet.d" || true
   cp -r /etc/starphleet.d "${CONTAINER_OVERLAY}/etc/"
   cp /usr/bin/starphleet* "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
@@ -101,9 +106,46 @@ else
   cp /usr/bin/cronner "${CONTAINER_OVERLAY}/usr/bin/"
   cp /usr/bin/runner "${CONTAINER_OVERLAY}/usr/bin/"
   cp -R ${STARPHLEET_ROOT}/containers/overlay/* ${CONTAINER_OVERLAY}/
+
+  # Persist the HQ inside the container
+  HQ_DEST="${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/headquarters/"
+  mkdir -p "${HQ_DEST}"
+  rsync -ra --exclude="/git" "${STARPHLEET_ROOT}/headquarters/" "${HQ_DEST}"
   #this is the build script for the container itself
   cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
   chmod +x "${CONTAINER_OVERLAY}/build_script"
+
+  # This code is here as opposed to somewhere else because
+  # we want to compress the container for S3 and/or uncompress it
+  # before all the network setup below
+  if is_container_storage_on_s3; then
+    # If we are expected to build containers and storage is on S3
+    # then we should have a tar.gz of the container on disk or we
+    # haven't made it yet and we should.
+    if [ -n "${BUILD_CONTAINERS}" ] && [ ! -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ]; then
+      # There are some notes about container portability here:
+      # https://stackoverflow.com/a/34194341
+      echo "Archiving container for S3 - ${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz"
+      pushd ${CONTAINER_ROOT}
+      tar --numeric-owner -czvf "${CONTAINER_NAME}.tar.gz" ./*
+      popd
+    fi
+    # The order is important here.  A machine configured to serve & build
+    # containers shouldn't go fetch containers on S3 because the containers
+    # _should_ be generated locally.  Thus, we perform the check for
+    # retreiving containers after the archive above.
+    if [ -n "${SERVE_CONTAINERS}" ] \
+      && [ ! -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ] \
+      && [ ! -d "${CONTAINER_ROOT}" ]; then
+
+      mkdir -p "${CONTAINER_ROOT}"
+      pushd "${CONTAINER_ROOT}"
+      starphleet-s3-get-container "${CONTAINER_NAME}"
+      tar --numeric-owner -xzvf "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz"
+      popd
+
+    fi
+  fi
 
   #start up the container, waiting for the network, and then run the container build script
   lxc-start --name ${CONTAINER_NAME} -d

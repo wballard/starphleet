@@ -38,6 +38,4 @@ else
   starphleet-lxc-destroy "${name}"
   #build a container, this will recycle any existing container, only building
   #when things are 'new', with a default for said URL to be nothing
-  starphleet-containerize "${SERVICE_GIT_URL:--}" "${name}" "${HEADQUARTERS_LOCAL}/${order}" \
-  || (echo 'building failed' > "${STATUS_FILE}" && exit 1)
 fi

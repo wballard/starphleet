@@ -57,17 +57,30 @@ else
     done
   fi
 
+  # At this point we know we have a 'good' container and we'll
+  # want to store it on S3 if configured for that.  It's possible the same
+  # machine that is building a container is also serving it
+  # so we will `|| true` here to not allow the S3 upload process
+  # to prevent us from running a good container
+  if [ -n "${BUILD_CONTAINERS}" ] && is_container_storage_on_s3; then
+    starphleet-s3-put-container "${name}" || true
+  fi
 
-  # At this point the container is active so make it the current container
-  echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
+  if [ -n "${SERVE_CONTAINERS}" ]; then
+    # At this point the container is active so make it the current container
+    echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
 
-  # Update this containers status with 'online'
-  echo 'online' > "${STATUS_FILE}"
+    # Update this containers status with 'online'
+    echo 'online' > "${STATUS_FILE}"
 
-  # Announce HUPS in case someone goes crazy
-  echo "HUP_REQUESTED: ${order} ${name}" | logger
-  # Trigger new publish configs and a hup of nginx
-  starphleet-hup-nginx
-  # For good measure
-  exit 0
+    # Announce HUPS in case someone goes crazy
+    echo "HUP_REQUESTED: ${order} ${name}" | logger
+    # Trigger new publish configs and a hup of nginx
+    starphleet-hup-nginx
+    # For good measure
+    exit 0
+  else
+    info Container no longer needed - Reaping
+    starphleet-reaper "${name}" "${order}" --force
+  fi
 fi

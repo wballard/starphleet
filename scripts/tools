@@ -105,6 +105,14 @@ function expose() {
   true
 }
 
+# In bash, the return values are odd.  Exiting with a Zero
+# means you didn't have a problem.
+#
+# See:  http://glg.link/Ea8zjA
+export TRUE=0;
+export FALSE=1;
+
+
 # All the rules that surround the supported security measures
 # for starphleet.  For instance, if a certain security feature
 # has constraints, needs certain settings or files, or needs various
@@ -114,12 +122,6 @@ function expose() {
 # security measure something is wrong.
 function validate_security() {
 
-  # In bash, the return values are odd.  Exiting with a Zero
-  # means you didn't have a problem.
-  #
-  # See:  http://glg.link/Ea8zjA
-  TRUE=0;
-  FALSE=1;
   # SECURITY_MODE is set in the default starphleet config.  If it gets unset
   # something went wrong so let the user know
   if ! echo "${SECURITY_MODE}" | egrep 'htpasswd|jwt|ldap|public' > /dev/null; then
@@ -310,6 +312,10 @@ function dev_mode() {
   else
     false
   fi
+}
+
+function is_container_storage_on_s3() {
+  return "${FALSE}"
 }
 
 function run_as_root_or_die(){
