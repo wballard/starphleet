@@ -25,3 +25,4 @@ awscli
 iotop
 iftop
 htop
+libyaml-dev
