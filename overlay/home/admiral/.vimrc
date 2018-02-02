@@ -1,0 +1,20 @@
+set backspace=indent,eol,start
+set ignorecase
+set smartcase
+set incsearch
+set hlsearch
+set number
+set ruler
+set nowrap
+set shiftwidth=2
+set tabstop=4
+set expandtab
+set smarttab autoindent
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip
+set nobackup
+set noswapfile
+set encoding=utf-8
+set termencoding=utf-8
+set fileencodings=utf-8,iso-8859-15
+set nobomb
+colorscheme darkblue
