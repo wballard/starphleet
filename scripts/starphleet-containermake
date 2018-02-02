@@ -77,43 +77,59 @@ else
 
   starphleet-lxc-destroy ${CONTAINER_NAME}
 
-  if [ -z "${base_container_name}" ]; then
-    lxc-create --name "${container_name}" -t ubuntu
-    CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
-  elif is_container_storage_on_s3 && [ -n "${BUILD_CONTAINERS}" ]; then
-    lxc-clone -B "dir" -o "${base_container_name}" -n "${container_name}"
-  else
-    lxc-clone --snapshot -B "overlayfs" -o "${base_container_name}" -n "${container_name}"
-    CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
+  # If SERVE_CONTAINERS is _not_ set - we would always want to fall back to
+  # default behavior (behavior before introducing container storage).  This
+  # probably represents a legacy machine or one not configured for container
+  # storage.  Either way, in both cases, we want legacy behavior.
+  #
+  # If, "SERVE_CONTAINERS" is set then we'd ONLY want to continue with
+  # the old code if we 'also' had BUILD_CONTAINERS set.
+  if [ -z ${SERVE_CONTAINERS} ] \
+     || [ -n ${BUILD_CONTAINERS} ]; then
+
+    #####
+    # (Mostly) original code for building containers pre-s3-storage
+    #####
+    if [ -z "${base_container_name}" ]; then
+      lxc-create --name "${container_name}" -t ubuntu
+      CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
+    elif is_container_storage_on_s3 && [ -n "${BUILD_CONTAINERS}" ]; then
+      lxc-clone -B "dir" -o "${base_container_name}" -n "${container_name}"
+      CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
+    else
+      lxc-clone --snapshot -B "overlayfs" -o "${base_container_name}" -n "${container_name}"
+      CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
+    fi
+
+    echo "lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none rbind,rw 0 0" >> ${CONTAINER_CONF}
+
+    #make a directory where we can mount back to the ship and a config file to mount
+    test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}" || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}"
+    test -d "${CONTAINER_OVERLAY}/var/data" || mkdir -p "${CONTAINER_OVERLAY}/var/data"
+    cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/config
+    #copy on the starphleet commands
+    mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
+    [ -f "/hosthome/.starphleet" ] && cp /hosthome/.starphleet "${CONTAINER_OVERLAY}/.starphleet"
+    cp /etc/starphleet "${CONTAINER_OVERLAY}/etc/"
+    rm -rf "${CONTAINER_OVERLAY}/etc/starphleet.d" || true
+    cp -r /etc/starphleet.d "${CONTAINER_OVERLAY}/etc/"
+    cp /usr/bin/starphleet* "${CONTAINER_OVERLAY}/usr/bin/"
+    cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
+    cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
+    cp /usr/bin/builder "${CONTAINER_OVERLAY}/usr/bin/"
+    cp /usr/bin/cronner "${CONTAINER_OVERLAY}/usr/bin/"
+    cp /usr/bin/runner "${CONTAINER_OVERLAY}/usr/bin/"
+    cp -R ${STARPHLEET_ROOT}/containers/overlay/* ${CONTAINER_OVERLAY}/
+
+    # Persist the HQ inside the container
+    HQ_DEST="${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/headquarters/"
+    mkdir -p "${HQ_DEST}"
+    rsync -ra --exclude="/git" "${STARPHLEET_ROOT}/headquarters/" "${HQ_DEST}"
+    #this is the build script for the container itself
+    cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
+    chmod +x "${CONTAINER_OVERLAY}/build_script"
+
   fi
-
-  echo "lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none rbind,rw 0 0" >> ${CONTAINER_CONF}
-
-  #make a directory where we can mount back to the ship and a config file to mount
-  test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}" || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}"
-  test -d "${CONTAINER_OVERLAY}/var/data" || mkdir -p "${CONTAINER_OVERLAY}/var/data"
-  cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/config
-  #copy on the starphleet commands
-  mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
-  [ -f "/hosthome/.starphleet" ] && cp /hosthome/.starphleet "${CONTAINER_OVERLAY}/.starphleet"
-  cp /etc/starphleet "${CONTAINER_OVERLAY}/etc/"
-  rm -rf "${CONTAINER_OVERLAY}/etc/starphleet.d" || true
-  cp -r /etc/starphleet.d "${CONTAINER_OVERLAY}/etc/"
-  cp /usr/bin/starphleet* "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/builder "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/cronner "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/runner "${CONTAINER_OVERLAY}/usr/bin/"
-  cp -R ${STARPHLEET_ROOT}/containers/overlay/* ${CONTAINER_OVERLAY}/
-
-  # Persist the HQ inside the container
-  HQ_DEST="${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/headquarters/"
-  mkdir -p "${HQ_DEST}"
-  rsync -ra --exclude="/git" "${STARPHLEET_ROOT}/headquarters/" "${HQ_DEST}"
-  #this is the build script for the container itself
-  cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
-  chmod +x "${CONTAINER_OVERLAY}/build_script"
 
   # This code is here as opposed to somewhere else because
   # we want to compress the container for S3 and/or uncompress it
@@ -141,6 +157,8 @@ else
       mkdir -p "${CONTAINER_ROOT}"
       pushd "${CONTAINER_ROOT}"
       starphleet-s3-get-container "${CONTAINER_NAME}"
+      # There are some notes about container portability here:
+      # https://stackoverflow.com/a/34194341
       tar --numeric-owner -xzvf "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz"
       popd
 

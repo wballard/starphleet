@@ -9,18 +9,22 @@ run_as_root_or_die
 # Make sure they pass 'something' to search for
 [ -z "${name}" ] && echo Please pass the name of a container && exit 1
 
-aws s3 cp "${S3_PATH_FOR_CONTAINER_STORAGE}/${name}.tar.gz" "/var/lib/lxc/"
+# Because aws cli on our machines is a mixed bag and I really do
+# want a modern version.  It's okay if they aren't consistent for
+# what we are doing so long as the version isn't 10 years old.
+AWS_COMMAND_PATH="/root/.local/bin/aws"
+if [ ! -f "${AWS_COMMAND_PATH}" ]; then
+  # New pip install wanted libyaml so we'll install that before trying
+  # to get the latest AWS cli
+  apt-get update -y
+  apt-get install -y libyaml-dev
+  pip install awscli --upgrade --user
+fi
 
-sudo lxc-clone -KH -B dir -o epistream-jwt-d171215-d030728 -n test
+# These envs are required for the AWS command line
+export AWS_DEFAULT_REGION="${S3_STORAGE_BUCKET_REGION}"
+export AWS_ACCESS_KEY_ID="${S3_STORAGE_AWS_ACCESS_KEY_ID}"
+export AWS_SECRET_ACCESS_KEY="${S3_STORAGE_AWS_SECRET_ACCESS_KEY}"
 
-
-# Check and make sure there's at least one running container
-CONTAINERS=$(lxc-ls -f | grep STOPPED | grep ${service} | awk '{print $1}')
-[ -z "${CONTAINERS}" ] && echo No Stopped Containers && exit 1
-
-# Now figure out which container they want and attach
-echo "Start which instance:"
-select container in $(lxc-ls -f | grep STOPPED | grep ${service} | awk '{print $1}'); do
-  [ ! -z ${container} ] && sudo lxc-start -d -n "${container}"
-  break;
-done
+S3_PATH_FOR_CONTAINER_STORAGE="s3://${S3_STORAGE_BUCKET_NAME}"
+"${AWS_COMMAND_PATH}" s3 cp "${S3_PATH_FOR_CONTAINER_STORAGE}/${name}.tar.gz" .
