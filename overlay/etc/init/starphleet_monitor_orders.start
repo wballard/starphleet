@@ -4,10 +4,7 @@ set +e
 source `which tools`
 sleep "${STARPHLEET_PULSE}"
 
-get_CURRENT_SHA "${HEADQUARTERS_LOCAL}"
 latest_AUTHOR "${HEADQUARTERS_LOCAL}"
-ORDERS_SHA="${CURRENT_SHA}"
-
 
 #track the publish ports
 unset PUBLISH_PORTS
@@ -33,8 +30,10 @@ do
   #use git to determine if the orders have changed since the last publish
   if [ -f "${CURRENT_ORDER}/.orders_sha" ]; then
     DEPLOYED_ORDERS_SHA=$(cat "${CURRENT_ORDER}/.orders_sha")
-    get_VERSION_DIFF ${HEADQUARTERS_LOCAL} ${ORDERS_SHA} ${DEPLOYED_ORDERS_SHA} $(dirname "${order}")
-    [ -n "${VERSION_DIFF}" ] && ORDERS_DIFF="Updated orders"
+    # Get the sha of the last change to a directory
+    ORDERS_SHA=$(git --git-dir "$HEADQUARTERS_LOCAL/.git" --work-tree "$HEADQUARTERS_LOCAL" \
+                     log -n 1 --pretty=format:%h -- $(dirname "${order}"))
+    [ "${DEPLOYED_ORDERS_SHA}" = "${ORDERS_SHA}" ] || ORDERS_DIFF="Updated orders"
   else
     ORDERS_DIFF="New orders"
   fi
