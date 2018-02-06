@@ -81,6 +81,9 @@ apt-get dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::=
 
 apt-get -y install --force-yes $(< "${DIR}/packages")
 
+# Install NVM, Node, Serverless Framework and Lambda Deployer
+starphleet-install-lambda-deployer
+
 
 #put in the system overlay, gets all the files in place
 #for the starphleet jobs

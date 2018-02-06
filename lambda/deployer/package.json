@@ -1,0 +1,23 @@
+{
+  "name": "deployer",
+  "version": "1.0.0",
+  "description": "Helps deploy projects to lambda",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Raul Reynoso",
+  "license": "ISC",
+  "preferGlobal": true,
+  "bin": {
+    "deploy-lambda": "./index.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "commander": "^2.12.2",
+    "express": "^4.16.2",
+    "js-yaml": "^3.10.0",
+    "mustache": "^2.3.0",
+    "serverless": "^1.25.0"
+  }
+}
