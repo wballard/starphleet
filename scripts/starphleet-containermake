@@ -143,7 +143,7 @@ else
       # https://stackoverflow.com/a/34194341
       echo "Archiving container for S3 - ${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz"
       pushd ${CONTAINER_ROOT}
-      tar --numeric-owner -czvf "${CONTAINER_NAME}.tar.gz" ./*
+      tar --numeric-owner -czf "${CONTAINER_NAME}.tar.gz" ./*
       popd
     fi
     # The order is important here.  A machine configured to serve & build
@@ -159,7 +159,7 @@ else
       starphleet-s3-get-container "${CONTAINER_NAME}"
       # There are some notes about container portability here:
       # https://stackoverflow.com/a/34194341
-      tar --numeric-owner -xzvf "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz"
+      tar --numeric-owner -xzf "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz"
       popd
 
     fi
