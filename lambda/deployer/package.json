@@ -10,8 +10,8 @@
   "license": "ISC",
   "preferGlobal": true,
   "bin": {
-    "deploy-lambda": "./index.js"
-  },
+    "deploy-lambda": "./bin/deployer.js"
+  },  
   "dependencies": {
     "body-parser": "^1.18.2",
     "commander": "^2.12.2",
