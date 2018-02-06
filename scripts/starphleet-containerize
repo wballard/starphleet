@@ -107,8 +107,8 @@ then
 fi
 
 trace Calling Builder
-builder ${ORDERS} ${git_url} ${container_name}
-cronner ${orders_dir} ${ORDERS} ${git_url}
+builder ${ORDERS} ${container_name}
+cronner ${orders_dir} ${ORDERS} 
 
 trace Post-prepping container
 [ -x ${orders_dir}/after_containerize ] && sudo ${orders_dir}/after_containerize
