@@ -1,13 +1,13 @@
 #!/usr/bin/env starphleet-launcher
 ### Usage:
-###    starphleet-s3-get-container <name>
+###    starphleet-s3-get-container <containerName>
 ###
 ### Fuzzy match and make attaching to instances easier
 die_on_error
 run_as_root_or_die
 
 # Make sure they pass 'something' to search for
-[ -z "${name}" ] && echo Please pass the name of a container && exit 1
+[ -z "${containerName}" ] && echo Please pass the name of a container && exit 1
 
 # Because aws cli on our machines is a mixed bag and I really do
 # want a modern version.  It's okay if they aren't consistent for
