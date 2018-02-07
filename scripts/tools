@@ -322,7 +322,7 @@ function is_container_storage_on_s3() {
   && [ -n ${S3_STORAGE_AWS_ACCESS_KEY_ID} ] \
   && [ -n ${S3_STORAGE_AWS_SECRET_ACCESS_KEY} ] \
   && [ -n ${S3_STORAGE_BUCKET_REGION} ] \
-  && [ -n ${S3_STORAGE_BUCKET_NAME} ]; then
+  && [ -n ${S3_STORAGE_BUCKET_PATH} ]; then
     return "${TRUE}"
   fi
 

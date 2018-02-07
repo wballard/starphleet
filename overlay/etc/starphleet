@@ -61,7 +61,7 @@ unset BUILD_CONTAINERS
 unset S3_STORAGE_AWS_ACCESS_KEY_ID
 unset S3_STORAGE_AWS_SECRET_ACCESS_KEY
 unset S3_STORAGE_BUCKET_REGION
-unset S3_STORAGE_BUCKET_NAME
+unset S3_STORAGE_BUCKET_PATH
 
 ##########################################################
 # DEVMODE
