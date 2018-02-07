@@ -107,7 +107,7 @@ then
 fi
 
 trace Calling Builder
-builder ${ORDERS} ${container_name}
+builder ${ORDERS} ${container_name} ${HEADQUARTERS_REMOTE}
 cronner ${orders_dir} ${ORDERS} 
 
 trace Post-prepping container
