@@ -138,7 +138,7 @@ cat << EOF >> "${MOUNT_CONF}"
   proxy_ssl_server_name on;
   proxy_set_header Host ${api_gateway_host_name};
   proxy_set_header x-api-key ${api_gateway_key_value};
-  proxy_pass https://{api_gateway_host_name}/dev/;
+  proxy_pass https://${api_gateway_host_name}/dev/;
 EOF
 fi
 cat << EOF >> "${MOUNT_CONF}"
