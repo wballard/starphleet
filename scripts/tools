@@ -330,7 +330,7 @@ function get_APIGATEWAY_ID(){
   local __internal_result_var_name=$1
   local __container_name=$2
   local result=$(aws apigateway get-rest-apis --region us-east-1 | jq ".items" | jq "map(select(.name==\"${__container_name}-dev\"))[0]" | jq '.id')
-  eval "${__internal_result_var_name}='$result'"
+  eval "${__internal_result_var_name}=$result"
 }
 
 # Return the API Gateway Key if it exists, null otherwise
@@ -339,7 +339,7 @@ function get_APIGATEWAY_KEY(){
   local __internal_result_var_name=$1
   local __container_name=$2
   local result=$(aws apigateway --region us-east-1 get-api-keys --include-values |jq ".items"| jq "map(select(.name==\"${__container_name}-dev\"))[0].value")
-  eval "${__internal_result_var_name}='$result'"
+  eval "${__internal_result_var_name}=$result"
 }
 
 # Return the API Gateway HOST if it exists, null otherwise
@@ -350,11 +350,11 @@ function get_APIGATEWAY_HOST(){
 
   get_APIGATEWAY_ID __apiGatewayID $__container_name
 
-  if [ "$__apiGatewayID" != "null" ] && [! -z "$__apiGatewayID"]; then
+  if [ "$__apiGatewayID" != "null" ] && [ ! -z "$__apiGatewayID" ]; then
     local result="${__apiGatewayID}.execute-api.us-east-1.amazonaws.com"
   fi
 
-  eval "${__internal_result_var_name}='$result'"
+  eval "${__internal_result_var_name}=$result"
 }
 
 # environment set up each time we ask for tools
