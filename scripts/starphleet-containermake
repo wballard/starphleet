@@ -114,7 +114,22 @@ EOF
     test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/public_keys" \
       || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/public_keys"
     test -d "${CONTAINER_OVERLAY}/var/data" || mkdir -p "${CONTAINER_OVERLAY}/var/data"
+    # The config used to work by accident thanks to using overlayfs.
+    # We need to cleanup the mounts that persist from the starphleet-base
+    # container since we are using a different FS in some cases.
+
+    # We are removing these lines:
+    #
+    # lxc.mount.entry = /var/starphleet/buildpacks /var/lib/lxc/starphleet-base/rootfs/var/starphleet/buildpacks none bind,r 0 0
+    # lxc.mount.entry = /var/starphleet/private_keys /var/lib/lxc/starphleet-base/rootfs/var/starphleet/private_keys none bind,r 0 0
+    # lxc.mount.entry = /var/starphleet/public_keys /var/lib/lxc/starphleet-base/rootfs/var/starphleet/public_keys none bind,r 0 0
+    # lxc.mount.entry = /home/admiral /home/admiral none defaults,bind,create=dir 0 0
+    # lxc.mount.entry = /var/lib/lxc/data /var/data none rbind,rw 0 0
+    cat "${CONTAINER_ROOT}/config" | egrep -v "mount.*star|mount.*data|mount.*home" > "${CONTAINER_ROOT}/config.tmp"
+    mv "${CONTAINER_ROOT}/config.tmp" "${CONTAINER_ROOT}/config"
+
     cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/config
+
     #copy on the starphleet commands
     mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
     [ -f "/hosthome/.starphleet" ] && cp /hosthome/.starphleet "${CONTAINER_OVERLAY}/.starphleet"
