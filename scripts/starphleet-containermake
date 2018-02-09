@@ -75,8 +75,8 @@ else
   #
   # If, "SERVE_CONTAINERS" is set then we'd ONLY want to continue with
   # the old code if we 'also' had BUILD_CONTAINERS set.
-  if [ -z ${SERVE_CONTAINERS} ] \
-     || [ -n ${BUILD_CONTAINERS} ]; then
+  if [ -z "${SERVE_CONTAINERS}" ] \
+     || [ -n "${BUILD_CONTAINERS}" ]; then
 
     #####
     # (Mostly) original code for building containers pre-s3-storage
