@@ -26,13 +26,15 @@ do
 
   unset ORDERS_DIFF
   unset DEPLOY_REASON
+  unset ORDERS_SHA
+
+  # Get the sha of the last change to a directory
+  ORDERS_SHA=$(git --git-dir "$HEADQUARTERS_LOCAL/.git" --work-tree "$HEADQUARTERS_LOCAL" \
+                   log -n 1 --pretty=format:%h -- $(dirname "${order}"))
 
   #use git to determine if the orders have changed since the last publish
   if [ -f "${CURRENT_ORDER}/.orders_sha" ]; then
     DEPLOYED_ORDERS_SHA=$(cat "${CURRENT_ORDER}/.orders_sha")
-    # Get the sha of the last change to a directory
-    ORDERS_SHA=$(git --git-dir "$HEADQUARTERS_LOCAL/.git" --work-tree "$HEADQUARTERS_LOCAL" \
-                     log -n 1 --pretty=format:%h -- $(dirname "${order}"))
     [ "${DEPLOYED_ORDERS_SHA}" = "${ORDERS_SHA}" ] || ORDERS_DIFF="Updated orders"
   else
     ORDERS_DIFF="New orders"
