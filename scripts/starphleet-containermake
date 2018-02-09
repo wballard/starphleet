@@ -195,8 +195,7 @@ EOF
     # _should_ be generated locally.  Thus, we perform the check for
     # retreiving containers after the archive above.
     if [ -n "${SERVE_CONTAINERS}" ] \
-      && [ ! -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ] \
-      && [ ! -d "${CONTAINER_ROOT}" ]; then
+      && [ ! -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ]; then
 
       info "Pulling container from S3"
       mkdir -p "${CONTAINER_ROOT}"
