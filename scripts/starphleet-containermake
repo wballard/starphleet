@@ -174,7 +174,7 @@ EOF
   # This code is here as opposed to somewhere else because
   # we want to compress the container for S3 and/or uncompress it
   # before all the network setup below
-  if [ -z "${base_container_name}" ] && is_container_storage_on_s3; then
+  if [ -n "${base_container_name}" ] && is_container_storage_on_s3; then
     # If we are expected to build containers and storage is on S3
     # then we should have a tar.gz of the container on disk or we
     # haven't made it yet and we should.
