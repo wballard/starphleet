@@ -318,15 +318,15 @@ function dev_mode() {
 # starphleet instance is storing the containers on S3.
 function is_container_storage_on_s3() {
 
-  if ([ -n ${SERVE_CONTAINERS} ] || [ -n ${BUILD_CONTAINERS} ]) \
-  && [ -n ${S3_STORAGE_AWS_ACCESS_KEY_ID} ] \
-  && [ -n ${S3_STORAGE_AWS_SECRET_ACCESS_KEY} ] \
-  && [ -n ${S3_STORAGE_BUCKET_REGION} ] \
-  && [ -n ${S3_STORAGE_BUCKET_PATH} ]; then
-    return "${TRUE}"
+  if ([ -n "${SERVE_CONTAINERS}" ] || [ -n "${BUILD_CONTAINERS}" ]) \
+  && [ -n "${S3_STORAGE_AWS_ACCESS_KEY_ID}" ] \
+  && [ -n "${S3_STORAGE_AWS_SECRET_ACCESS_KEY}" ] \
+  && [ -n "${S3_STORAGE_BUCKET_REGION}" ] \
+  && [ -n "${S3_STORAGE_BUCKET_PATH}" ]; then
+    return $TRUE
   fi
 
-  return "${FALSE}"
+  return $FALSE
 }
 
 function run_as_root_or_die(){
