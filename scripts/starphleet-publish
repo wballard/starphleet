@@ -125,7 +125,7 @@ cat << EOF >> "${MOUNT_CONF}"
 EOF
 get_APIGATEWAY_HOST api_gateway_host_name $container_name
 
-if [ "${api_gateway_host_name}" == "null" ] || [ -z "{$api_gateway_host_name}"  ]; then
+if [ "${api_gateway_host_name}" == "null" ] || [ -z "${api_gateway_host_name}"  ]; then
 cat << EOF >> "${MOUNT_CONF}"
   rewrite ${public_url}/(.*) /\$1 break;
   proxy_set_header Host \$http_host;
