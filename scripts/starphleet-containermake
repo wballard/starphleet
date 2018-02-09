@@ -42,16 +42,6 @@ dev_mode \
   && STARPHLEET_ROOT_CONTAINER_PERMISSION="rw" \
   || STARPHLEET_ROOT_CONTAINER_PERMISSION="r"
 
-#starphleet-base is a create, all orders are a clones to delta0
-cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = ${STARPHLEET_ROOT}/buildpacks ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/buildpacks none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
-lxc.mount.entry = ${STARPHLEET_ROOT}/private_keys ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/private_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
-lxc.mount.entry = ${STARPHLEET_ROOT}/public_keys ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/public_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
-lxc.mount.entry = ${ADMIRAL_HOME} ${ADMIRAL_HOME} none defaults,bind,create=dir 0 0
-lxc.mount.entry = ${STARPHLEET_SHARED_DATA} /var/data none rbind,rw 0 0
-EOF
-
-trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
 (
 #flocked, parallel container build is a race condition on start
@@ -94,17 +84,26 @@ else
     if [ -z "${base_container_name}" ]; then
       info "Creating base container"
       lxc-create --name "${container_name}" -t ubuntu
-      CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
+      FS_TYPE="rootfs"
     elif is_container_storage_on_s3 && [ -n "${BUILD_CONTAINERS}" ]; then
       info "Creating Container For S3 Storage - Takes longer"
       lxc-clone -B "dir" -o "${base_container_name}" -n "${container_name}"
-      CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
+      FS_TYPE="rootfs"
     else
       info "Creating OverlayFS Container"
       lxc-clone --snapshot -B "overlayfs" -o "${base_container_name}" -n "${container_name}"
-      CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
+      FS_TYPE="delta0"
     fi
+    CONTAINER_OVERLAY="${CONTAINER_ROOT}/${FS_TYPE}"
 
+#starphleet-base is a create, all orders are a clones to delta0
+cat << EOF > ${CONTAINER_CONF}
+lxc.mount.entry = ${STARPHLEET_ROOT}/buildpacks ${CONTAINER_ROOT}/${FS_TYPE}${STARPHLEET_ROOT}/buildpacks none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT}/private_keys ${CONTAINER_ROOT}/${FS_TYPE}${STARPHLEET_ROOT}/private_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT}/public_keys ${CONTAINER_ROOT}/${FS_TYPE}${STARPHLEET_ROOT}/public_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${ADMIRAL_HOME} ${CONTAINER_ROOT}/${FS_TYPE}${ADMIRAL_HOME} none defaults,bind,create=dir 0 0
+lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/${FS_TYPE}/var/data none rbind,rw 0 0
+EOF
 
     #make a directory where we can mount back to the ship and a config file to mount
     info "Building up the file system of new container"
