@@ -58,6 +58,7 @@ do
   unset UNPUBLISHED
   unset PUBLISH_FROM
   unset REDIRECT_TO_SERVICE
+  unset SERVICE_PINNED_TO_CONTAINER
   # Slurp the environment from the orders
   run_orders "${order}"
   if [ -n "${REDIRECT_TO_SERVICE}" ]; then
@@ -152,6 +153,15 @@ do
       warn "Critical Info Missing - Not Deploying Container:  O: ${ORDER} OS: ${ORDERS_SHA} SS:${SERVICE_SHA}"
       continue
     fi
+
+    # This allows the user to pin a service to a specific container
+    # if this server is purely a "serve" starphleet server
+    if is_container_storage_on_s3 \
+       && [ -n "${SERVICE_PINNED_TO_CONTAINER}" ] \
+       && [ -z "${BUILD_CONTAINERS}" ]; then
+      SERVICE_NAME="${SERVICE_PINNED_TO_CONTAINER}"
+    fi
+
     #this is done with no-wait since upstart will prevent duplicate starts
     start --no-wait starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
   fi
