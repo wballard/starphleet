@@ -62,6 +62,7 @@ unset S3_STORAGE_AWS_ACCESS_KEY_ID
 unset S3_STORAGE_AWS_SECRET_ACCESS_KEY
 unset S3_STORAGE_BUCKET_REGION
 unset S3_STORAGE_BUCKET_PATH
+export EXIT_CODE_FOR_FAILED_S3_DOWNLOADS=15
 
 ##########################################################
 # DEVMODE

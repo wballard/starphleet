@@ -97,6 +97,8 @@ else
     CONTAINER_OVERLAY="${CONTAINER_ROOT}/${FS_TYPE}"
 
 #starphleet-base is a create, all orders are a clones to delta0
+# TODO: For code formatting - this would be better as a function
+#       but leaving it here to work through flow
 cat << EOF > ${CONTAINER_CONF}
 lxc.mount.entry = ${STARPHLEET_ROOT}/buildpacks ${CONTAINER_ROOT}/${FS_TYPE}${STARPHLEET_ROOT}/buildpacks none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
 lxc.mount.entry = ${STARPHLEET_ROOT}/private_keys ${CONTAINER_ROOT}/${FS_TYPE}${STARPHLEET_ROOT}/private_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
@@ -200,7 +202,8 @@ EOF
       info "Pulling container from S3"
       mkdir -p "${CONTAINER_ROOT}"
       pushd "${CONTAINER_ROOT}"
-      starphleet-s3-get-container "${CONTAINER_NAME}"
+
+      starphleet-s3-get-container "${CONTAINER_NAME}" || exit ${EXIT_CODE_FOR_FAILED_S3_DOWNLOADS}
 
       # There are some notes about container portability here:
       # https://stackoverflow.com/a/34194341

@@ -57,7 +57,7 @@ else
     done
   fi
 
-  starphleet-s3-put-container ${name}
+  starphleet-s3-put-container for file in $(find . -type f -name orders -maxdepth 2)${name}
 
   # At this point the container is active so make it the current container
   echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
