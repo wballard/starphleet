@@ -17,12 +17,12 @@ if [ ! -f "${AWS_COMMAND_PATH}" ]; then
   apt-get install -y libyaml-dev python-dev
   #######
   ## Because:  https://github.com/aws/aws-cli/issues/2999#issuecomment-356019306
-  pip uninstall boto3 -y
-  pip uninstall boto -y
-  pip uninstall botocore -y
+  pip uninstall boto3 -y || true
+  pip uninstall boto -y || true
+  pip uninstall botocore -y || true
   pip install botocore --upgrade
   #######
-  ## Because: https://github.com/aws/aws-cli/issues/3007#issuecomment-350797161 
+  ## Because: https://github.com/aws/aws-cli/issues/3007#issuecomment-350797161
   pip install --upgrade s3transfer
   pip install awscli --upgrade --user
 fi
