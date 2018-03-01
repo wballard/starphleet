@@ -100,11 +100,11 @@ else
 # TODO: For code formatting - this would be better as a function
 #       but leaving it here to work through flow
 cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = ${STARPHLEET_ROOT}/buildpacks ${CONTAINER_ROOT}/${FS_TYPE}${STARPHLEET_ROOT}/buildpacks none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
-lxc.mount.entry = ${STARPHLEET_ROOT}/private_keys ${CONTAINER_ROOT}/${FS_TYPE}${STARPHLEET_ROOT}/private_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
-lxc.mount.entry = ${STARPHLEET_ROOT}/public_keys ${CONTAINER_ROOT}/${FS_TYPE}${STARPHLEET_ROOT}/public_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
-lxc.mount.entry = ${ADMIRAL_HOME} ${CONTAINER_ROOT}/${FS_TYPE}${ADMIRAL_HOME} none defaults,bind,create=dir 0 0
-lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/${FS_TYPE}/var/data none rbind,rw 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT}/buildpacks ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/buildpacks none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT}/private_keys ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/private_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT}/public_keys ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/public_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${ADMIRAL_HOME} ${CONTAINER_ROOT}/rootfs${ADMIRAL_HOME} none defaults,bind,create=dir 0 0
+lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none rbind,rw 0 0
 EOF
 
     #make a directory where we can mount back to the ship and a config file to mount
