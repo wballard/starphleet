@@ -42,14 +42,16 @@ do
   #   - The container is not failed
   #   - The container is not stopped
   #   - The container is not failed to publish
+  #   - This server is a build only server ("build server" status)
   if [ "${CURRENT_STATUS}" != "" ] &&
      [ "${CURRENT_STATUS}" != "online" ] &&
      [ "${CURRENT_STATUS}" != "stopped" ] &&
      [ "${CURRENT_STATUS}" != "failed" ] &&
+     [ "${CURRENT_STATUS}" != "build server" ] &&
      [ "${CURRENT_STATUS}" != "building failed" ] &&
      [ "${CURRENT_STATUS}" != "publish failed" ] &&
      [ "${force}" != "true" ]; then
-     info "Unable to reap ${name} due to status: ${CURRENT_STATUS}"
+     info "Reaper: Unable to reap ${name} due to status: ${CURRENT_STATUS}"
     continue;
   fi
 
@@ -59,6 +61,7 @@ do
   #   - Force is not enabled
   if ([ "${CURRENT_CONTAINER}" == "${name}" ] ||
      [ "${NGINX_CONTAINER}" == "${name}" ]) &&
+     [ "${CURRENT_STATUS}" != "build server" ] &&
      [ "${force}" != "true" ]; then
      info "Unable to reap ${name} - Active Container ${CURRENT_CONTAINER} - NGINX Pointing at ${NGINX_CONTAINER}"
     continue;

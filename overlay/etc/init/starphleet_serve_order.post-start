@@ -62,6 +62,16 @@ else
   # At this point the container is active so make it the current container
   echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
 
+  # It is important for the active container to still get set above
+  # so that the reaper won't leave around stale containers.  We
+  # now check if this is a build_only server and if yes we will
+  # stop running the container and exit cleanly
+  if is_container_storage_on_s3 && [ -z "${SERVE_CONTAINERS}" ]; then
+    info "Build Only Server - Stopping: ${name}"
+    echo 'build server' > "${STATUS_FILE}"
+    { stop ; exit 0; }
+  fi
+
   # Update this containers status with 'online'
   echo 'online' > "${STATUS_FILE}"
 

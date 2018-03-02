@@ -159,7 +159,9 @@ do
     if is_container_storage_on_s3 \
        && [ -n "${SERVICE_PINNED_TO_CONTAINER}" ] \
        && [ -z "${BUILD_CONTAINERS}" ]; then
+
       SERVICE_NAME="${SERVICE_PINNED_TO_CONTAINER}"
+
     fi
 
     #this is done with no-wait since upstart will prevent duplicate starts

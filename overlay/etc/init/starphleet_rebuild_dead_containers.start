@@ -26,14 +26,17 @@ do
       # We won't rebuild a ship if
       #   - The container had a successful
       #   - This container is building
+      #   - This server is a 'build server'
       if [ -f "${CONTAINER_DIRECTORY}/.container" ] ||
          [ "${CURRENT_STATUS}" == "online" ] ||
          [ "${CURRENT_STATUS}" == "checking" ] ||
+         [ "${CURRENT_STATUS}" == "build server" ] ||
          [ "${CURRENT_STATUS}" == "building" ]; then
          continue;
       fi
 
       BUILD="${CURRENT_STATUS}"
+
     done
 
     if [ -n "${BUILD}" ]; then
