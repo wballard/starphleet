@@ -41,7 +41,7 @@ if is_container_storage_on_s3 \
   info "Pushing ${CONTAINER_NAME} to S3 Bucket Path ${S3_STORAGE_BUCKET_PATH}"
 
   export S3_PATH_FOR_CONTAINER_STORAGE="s3://${S3_STORAGE_BUCKET_PATH}"
-  "${AWS_COMMAND_PATH}" s3 cp "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" "${S3_PATH_FOR_CONTAINER_STORAGE}"
+  "${AWS_COMMAND_PATH}" s3 cp "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" "${S3_PATH_FOR_CONTAINER_STORAGE}/${CONTAINER_NAME}.tar.gz"
 fi
 
 # Because explicit..
