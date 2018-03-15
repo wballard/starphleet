@@ -2,6 +2,12 @@
 # vi:ft=sh
 
 set +e
+
+# Set the local IP
+mkdir -p /etc/starphleet.d
+LOCAL_IP=$(ifconfig eth0 | grep "inet addr" | cut -f2 -d":" | cut -f1 -d" ")
+echo INTERNAL_HOST=\"${LOCAL_IP}\" > /etc/starphleet.d/internal_host
+
 source `which tools`
 mount-block-devices
 move-syslog-to-biglogs
