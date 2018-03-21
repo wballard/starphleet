@@ -6,26 +6,8 @@
 die_on_error
 run_as_root_or_die
 
-# Because aws cli on our machines is a mixed bag and I really do
-# want a modern version.  It's okay if they aren't consistent for
-# what we are doing so long as the version isn't 10 years old.
-AWS_COMMAND_PATH="/root/.local/bin/aws"
-if [ ! -f "${AWS_COMMAND_PATH}" ]; then
-  # New pip install wanted libyaml so we'll install that before trying
-  # to get the latest AWS cli
-  apt-get update -y
-  apt-get install -y libyaml-dev python-dev
-  #######
-  ## Because:  https://github.com/aws/aws-cli/issues/2999#issuecomment-356019306
-  pip uninstall boto3 -y || true
-  pip uninstall boto -y || true
-  pip uninstall botocore -y || true
-  pip install botocore --upgrade
-  #######
-  ## Because: https://github.com/aws/aws-cli/issues/3007#issuecomment-350797161
-  pip install --upgrade s3transfer
-  pip install awscli --upgrade --user
-fi
+# Sets AWS_COMMAND_PATH (and installs a newer version of aws command if needed)
+get_updated_aws_command
 
 # These envs are required for the AWS command line
 export AWS_DEFAULT_REGION="${S3_STORAGE_BUCKET_REGION}"
