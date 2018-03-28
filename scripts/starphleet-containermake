@@ -124,25 +124,31 @@ else
   #  At some point, this check should go away and we should instead have
   #  this be the default behavior (when all machines are upgraded)
   LXC_VERSION="$(dpkg -l | egrep 'ii  lxc ' | awk '{print $3}' | cut -f 1 -d '-')"
-  if [ "${LXC_VERSION}" = "1.0.10" ]; then
-    VERSION_1_0_10_OPTION="-L /dev/stdout"
+  LXC_VERSION_MAJOR=$(echo $LXC_VERSION | cut -f 1 -d '.')
+  LXC_VERSION_MINOR=$(echo $LXC_VERSION | cut -f 2 -d '.')
+  LXC_VERSION_PATCH=$(echo $LXC_VERSION | cut -f 3 -d '.')
+  if [ ${LXC_VERSION_MAJOR} -gt 1 ] \
+     || [ "${LXC_VERSION_MINOR}" -gt 0 ] \
+     || [ "${LXC_VERSION_PATCH}" -gt 9 ] ; then
+
+    LXC_OPT_FOR_STDOUT="-L /dev/stdout"
   fi
 
-  lxc-attach --name ${CONTAINER_NAME} ${VERSION_1_0_10_OPTION} -- bash starphleet-wait-network
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash starphleet-wait-network
   #host file updates
   bridge_ip
-  lxc-attach --name ${CONTAINER_NAME} ${VERSION_1_0_10_OPTION} -- bash -c "echo -e '\n${BRIDGE_IP}  localship' >> /etc/hosts"
-  lxc-attach --name ${CONTAINER_NAME} ${VERSION_1_0_10_OPTION} -- bash -c "printf '\nexport SHIP_NAME=%s\n' ${SHIP_NAME} >> /usr/bin/tools"
-  lxc-attach --name ${CONTAINER_NAME} ${VERSION_1_0_10_OPTION} -- bash -c "echo -e '\n127.0.0.1  $(< /etc/hostname)' >> /etc/hosts"
-  lxc-attach --name ${CONTAINER_NAME} ${VERSION_1_0_10_OPTION} -- bash -c "echo -e '\n127.0.0.1  ${CONTAINER_NAME}' >> /etc/hosts"
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c "echo -e '\n${BRIDGE_IP}  localship' >> /etc/hosts"
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c "printf '\nexport SHIP_NAME=%s\n' ${SHIP_NAME} >> /usr/bin/tools"
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c "echo -e '\n127.0.0.1  $(< /etc/hostname)' >> /etc/hosts"
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c "echo -e '\n127.0.0.1  ${CONTAINER_NAME}' >> /etc/hosts"
 
-  lxc-attach --name ${CONTAINER_NAME} ${VERSION_1_0_10_OPTION} -- bash -c 'chmod 777 /var/log/'
-  lxc-attach --name ${CONTAINER_NAME} ${VERSION_1_0_10_OPTION} -- bash -c 'useradd -s /bin/bash ${ADMIRAL} || true'
-  lxc-attach --name ${CONTAINER_NAME} ${VERSION_1_0_10_OPTION} -- bash -c 'adduser ${ADMIRAL} sudo'
-  lxc-attach --name ${CONTAINER_NAME} ${VERSION_1_0_10_OPTION} -- bash -c 'chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}/.ssh'
-  lxc-attach --name ${CONTAINER_NAME} ${VERSION_1_0_10_OPTION} -- bash -c 'echo -e "\n${ADMIRAL} ALL=NOPASSWD:ALL" >> /etc/sudoers'
-  lxc-attach --name ${CONTAINER_NAME} ${VERSION_1_0_10_OPTION} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'
-  lxc-attach --name ${CONTAINER_NAME} ${VERSION_1_0_10_OPTION} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "source /usr/bin/tools; /build_script"
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'chmod 777 /var/log/'
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'useradd -s /bin/bash ${ADMIRAL} || true'
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'adduser ${ADMIRAL} sudo'
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}/.ssh'
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'echo -e "\n${ADMIRAL} ALL=NOPASSWD:ALL" >> /etc/sudoers'
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "source /usr/bin/tools; /build_script"
 
   if [ "${run}" == "true" ]; then
     info leaving ${CONTAINER_NAME} running
