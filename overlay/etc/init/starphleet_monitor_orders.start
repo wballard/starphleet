@@ -164,7 +164,7 @@ do
 
     fi
     #this is done with no-wait since upstart will prevent duplicate starts
-    parallel --semaphore --semaphorename starphleet-service-serve-order --jobs ${MAX_CONCURRENT_CONTAINER_BUILDS:-25} start starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
+    parallel --semaphore --semaphorename starphleet-service-serve-order --jobs ${MAX_CONCURRENT_CONTAINER_BUILDS:-1} start starphleet_serve_order name="${SERVICE_NAME}" order="${ORDER}"
   fi
   unset DEPLOY_REASON
 done

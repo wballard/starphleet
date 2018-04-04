@@ -8,8 +8,15 @@ unset HEALTHCHECK
 
 ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
 STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
+RETRY_DOWNLOAD_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}.redownload"
 
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
+
+if [ -f "${RETRY_DOWNLOAD_FILE}" ]; then
+  rm "${RETRY_DOWNLOAD_FILE}"
+  sleep "${STARPHLEET_PULSE}"
+  fatal "Exiting for Retry"
+fi
 
 # Deploy all the things
 if [ "${UNPUBLISHED}" == "1" ]; then

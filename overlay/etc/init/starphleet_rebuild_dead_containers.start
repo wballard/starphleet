@@ -14,6 +14,12 @@ do
     continue;
   fi
 
+  if is_container_storage_on_s3; then
+    info "Do not run when container storage is on S3"
+    sleep ${STARPHLEET_PULSE}
+    continue;
+  fi
+
   for CONTAINER_DIRECTORY in $(find "${CURRENT_ORDERS}" -mindepth 1 -type d)
   do
     unset BUILD

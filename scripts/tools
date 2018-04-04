@@ -317,6 +317,7 @@ function get_updated_aws_command {
   if [ ! -f "${AWS_COMMAND_PATH}" ]; then
     (
       flock -n 250
+      set +e
       # New pip install wanted libyaml so we'll install that before trying
       # to get the latest AWS cli
       apt-get update -y
@@ -332,6 +333,7 @@ function get_updated_aws_command {
       pip install --upgrade s3transfer
       pip install awscli --upgrade --user
       rm "${AWS_INSTALL_LOCK_FILE}"
+      set -e
       # Let the caller test if things went okay
       exit 0
     ) 250> "${AWS_INSTALL_LOCK_FILE}"
