@@ -51,6 +51,11 @@ EC2_DRIVES["/dev/xvdb"]="/var/lib/lxc"
 EC2_DRIVES["/dev/xvdc"]="/var/starphleet"
 EC2_DRIVES["/dev/xvdd"]="/var/log/biglogs"
 EC2_DRIVES["/dev/xvde"]="/var/lib/lxc/data"
+# Support AWS NVME drives
+EC2_DRIVES["/dev/nvme1n1"]="/var/lib/lxc"
+EC2_DRIVES["/dev/nvme2n1"]="/var/starphleet"
+EC2_DRIVES["/dev/nvme3n1"]="/var/log/biglogs"
+EC2_DRIVES["/dev/nvme4n1"]="/var/lib/lxc/data"
 
 ##########################################################
 # CONTAINER STORAGE ON S3
