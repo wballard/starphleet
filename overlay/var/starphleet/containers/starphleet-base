@@ -14,6 +14,7 @@ ed
 git
 imagemagick
 iputils-tracepath
+jq
 libcurl4-openssl-dev
 libevent-dev
 libglib2.0-dev
