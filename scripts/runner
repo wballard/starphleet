@@ -25,5 +25,5 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "{{${script}}}: {{start-job}}"
-2>&1 ${tmpscriptpath} | printf "{{${script}}}: %s" "$(cat)"
+2>&1 ${tmpscriptpath} | xargs -L 1 -I {} printf "prefix %s\n" "{}"
 ) 200>/var/lock/${SHASUM}
