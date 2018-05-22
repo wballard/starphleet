@@ -5,7 +5,6 @@ info "building ${name}"
 
 ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
 STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
-RETRY_DOWNLOAD_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}.redownload"
 
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
 
@@ -50,12 +49,12 @@ else
   && [ -n "${SERVE_CONTAINERS}" ] \
   && [ ${CONTAINERIZE_EXIT_CODE} -eq ${EXIT_CODE_FOR_FAILED_S3_DOWNLOADS} ]; then
     info 'Failed due to container not existing in S3 - Trying again'
-    touch "${RETRY_DOWNLOAD_FILE}"
-    exit 0
-  fi
-
-  if [ ${CONTAINERIZE_EXIT_CODE} -ne 0 ]; then
     echo 'Building Failed' > "${STATUS_FILE}"
+    # Least fancy way to trigger a full rebuild but still let us punt on
+    # the pre-start instead of having to send signals further down the
+    # upstart chain.  By removing the orders sha we can totally exit out
+    # and monitor_orders will start us back up next cycle
+    rm "${CURRENT_ORDERS}/${order}/.orders_sha"
     exit 1
   fi
 

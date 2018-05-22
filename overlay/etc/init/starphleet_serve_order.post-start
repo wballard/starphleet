@@ -8,15 +8,9 @@ unset HEALTHCHECK
 
 ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
 STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
-RETRY_DOWNLOAD_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}.redownload"
+LAST_KNOWN_GOOD_CONTAINER="${CURRENT_ORDERS}/${order}/.last_known_good_container"
 
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
-
-if [ -f "${RETRY_DOWNLOAD_FILE}" ]; then
-  rm "${RETRY_DOWNLOAD_FILE}"
-  sleep "${STARPHLEET_PULSE}"
-  fatal "Exiting for Retry"
-fi
 
 # Deploy all the things
 if [ "${UNPUBLISHED}" == "1" ]; then
@@ -57,6 +51,7 @@ else
         #at this point the service has failed to properly start
         warn Service failed to publish "${order}" for container ${name}
         echo 'failed' > "${STATUS_FILE}"
+        rm "${LAST_KNOWN_GOOD_CONTAINER}"
         mail_log
         exit 1
       fi
