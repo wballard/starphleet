@@ -107,6 +107,15 @@ do
         for container in $(echo ${RUNNING}); do
           # Stop the container
           warn Redeploying ${container} - ${FILES_CHANGED}
+          # Now that we persist files in containers we need to shove changes
+          # into the container before we hup it
+          CONTAINER_ROOT=/var/lib/lxc/${container}
+          [ -d "${CONTAINER_ROOT}/delta0" ] \
+            && FS_TYPE="delta0" \
+            || FS_TYPE="rootfs"
+          CONTAINER_OVERLAY="${CONTAINER_ROOT}/${FS_TYPE}"
+          HQ_DEST="${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/headquarters/"
+          rsync -ra "${STARPHLEET_ROOT}/headquarters/${ORDER}/git/" "${HQ_DEST}${ORDER}/git/"
           # This should force the container to respawn
           stop starphleet_serve_order name="${container}"
           # ...but if it doesn't - we'll start it backup anyway
