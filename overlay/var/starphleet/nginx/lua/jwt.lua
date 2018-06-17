@@ -243,7 +243,9 @@ if token
   and jwt_access_flags
   and jwt_access_flags ~= ""
   and bit.band(token.payload.af, jwt_access_flags) == 0 then
-  return ngx.exit(403)
+  local _accessDeniedFlags = token.payload.af .. "," .. jwt_access_flags
+  ngx.req.set_header('X-Starphleet-Access-Denied', _accessDeniedFlags)
+  token = nil
 end
 
 ------------------------------------------------------------------------------
@@ -284,19 +286,19 @@ if (token) then
   return _resetHeaders(token)
 end
 
-  ------------------------------------------------------------------------------
-  -- We get to here if none of the tokens succeeded in being valid.
-  -- Before we redirect the user to the login page we check to see
-  -- if the request was made using the Authorization header.  If it was
-  -- made using the Auth header, this was an API call and we set status
-  -- to 401 letting the API call know it needs to re-authenticate.
-  ------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+-- We get to here if none of the tokens succeeded in being valid.
+-- Before we redirect the user to the login page we check to see
+-- if the request was made using the Authorization header.  If it was
+-- made using the Auth header, this was an API call and we set status
+-- to 401 letting the API call know it needs to re-authenticate.
+------------------------------------------------------------------------------
 if authorizationBearerString ~= "" then
   return ngx.exit(401)
 end
 
-  ------------------------------------------------------------------------------
-  -- If we get here, no condition existed to verify a JWT token sent to us
-  -- and thus, no matter what, we redirect the user to the login page
-  ------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+-- If we get here, no condition existed to verify a JWT token sent to us
+-- and thus, no matter what, we redirect the user to the login page
+------------------------------------------------------------------------------
 _sendUserToLogin()
