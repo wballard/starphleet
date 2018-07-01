@@ -49,7 +49,7 @@ else
   && [ -n "${SERVE_CONTAINERS}" ] \
   && [ ${CONTAINERIZE_EXIT_CODE} -eq ${EXIT_CODE_FOR_FAILED_S3_DOWNLOADS} ]; then
     info 'Failed due to container not existing in S3 - Trying again'
-    echo 'Building Failed' > "${STATUS_FILE}"
+    echo 'building failed' > "${STATUS_FILE}"
     # Least fancy way to trigger a full rebuild but still let us punt on
     # the pre-start instead of having to send signals further down the
     # upstart chain.  By removing the orders sha we can totally exit out
