@@ -52,7 +52,13 @@ else
         warn Service failed to publish "${order}" for container ${name}
         echo 'failed' > "${STATUS_FILE}"
         rm "${LAST_KNOWN_GOOD_CONTAINER}"
-        mail_log
+        if is_container_storage_on_s3; then
+          if [ -n "${BUILD_CONTAINERS}" ] && [ -z "${SERVE_CONTAINERS}" ]; then
+            mail_log
+          fi
+        else
+          mail_log
+        fi
         exit 1
       fi
       sleep 1
