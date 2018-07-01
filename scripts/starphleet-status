@@ -144,10 +144,12 @@ EOF
     info "    order             : ${ORDER}"
     info "    latest status     : ${LATEST_SUCCESSFUL_STATUS}"
     info "    latest active     : ${LATEST_SUCCESSFUL_CONTAINER}"
-    if [ "${LATEST_SUCCESSFUL_CONTAINER}" != "${NGINX_POINTING_AT}" ]; then
-    error "    nginx aimed at    : ${NGINX_POINTING_AT}"
-    else
-    info "    nginx aimed at    : ${NGINX_POINTING_AT}"
+    if is_container_storage_on_s3 && [ -n "${SERVE_CONTAINERS}" ]; then
+      if [ "${LATEST_SUCCESSFUL_CONTAINER}" != "${NGINX_POINTING_AT}" ]; then
+      error "    nginx aimed at    : ${NGINX_POINTING_AT}"
+      else
+      info "    nginx aimed at    : ${NGINX_POINTING_AT}"
+      fi
     fi
     info "    git author        : ${AUTHOR}"
     info "    git sha           : ${CURRENT_SHA}"
