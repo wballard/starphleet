@@ -1,6 +1,6 @@
 #!/usr/bin/env starphleet-launcher
 ### Usage:
-###    starphleet-serve-one-order <service>
+###    starphleet-serve-one-order <service> [<wait>]
 ### --help
 ###
 ### Look through all containers stopped or running and run reaper
@@ -29,6 +29,10 @@ mkdir -p "${CURRENT_ORDER}"
 unset ORDERS_DIFF
 unset DEPLOY_REASON
 unset ORDERS_SHA
+
+[ -n "${wait}" ] \
+  && unset WAIT_ARGUMENT \
+  || WAIT_ARGUMENT="--no-wait"
 
 # Get the sha of the last change to a directory
 ORDERS_SHA=$(git --git-dir "$HEADQUARTERS_LOCAL/.git" --work-tree "$HEADQUARTERS_LOCAL" \
@@ -176,6 +180,6 @@ if [ -n "${DEPLOY_REASON}" ]; then
   fi
   #this is done with no-wait since upstart will prevent duplicate starts
   info "Starting ${ORDER}: ${CONTAINER_NAME}"
-  start --no-wait starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
+  start "${WAIT_ARGUMENT}" starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
 fi
 unset DEPLOY_REASON
