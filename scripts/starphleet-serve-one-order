@@ -178,6 +178,7 @@ if [ -n "${DEPLOY_REASON}" ]; then
     CONTAINER_NAME="${SERVICE_PINNED_TO_CONTAINER}"
 
   fi
+  info Waiting Args: ${WAIT_ARGUMENT}
   #this is done with no-wait since upstart will prevent duplicate starts
   info "Starting ${ORDER}: ${CONTAINER_NAME}"
   start "${WAIT_ARGUMENT}" starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
