@@ -23,6 +23,10 @@ if ! validate_security; then
   exit 1
 fi
 
+if [ -n "${UNPUBLISHED}" ]; then
+  exit 0
+fi
+
 ORIGINAL_ORDER_NAME="${order}"
 
 if [ -n "${publish_path}" ]; then

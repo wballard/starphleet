@@ -14,9 +14,24 @@ run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
 
 # Deploy all the things
 if [ "${UNPUBLISHED}" == "1" ]; then
+  starphleet-s3-put-container ${name}
+
+  # It is important for the active container to still get set above
+  # so that the reaper won't leave around stale containers.  We
+  # now check if this is a build_only server and if yes we will
+  # stop running the container and exit cleanly
+  if is_container_storage_on_s3 && [ -z "${SERVE_CONTAINERS}" ]; then
+    info "Build Only Server - Stopping: ${name}"
+    echo 'build server' > "${STATUS_FILE}"
+    { stop ; exit 0; }
+  fi
+
+  # At this point the container is active so make it the current container
+  echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
   echo 'online' > "${STATUS_FILE}"
   starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
   starphleet-reaper "${name}" "${order}" --force
+
 else
   #status logging, here indicating the healthcheck is about to go
   echo 'checking' > "${STATUS_FILE}"
