@@ -148,6 +148,7 @@ fi
 
 # Allow the command to be told to deploy regardless
 DEPLOY_REASON="${DEPLOY_REASON:-$FORCE_DEPLOY_REASON}"
+SERVICE_PINNED_TO_CONTAINER="${SERVICE_PINNED_TO_CONTAINER:-$FORCE_SERVICE_PINNED_TO_CONTAINER}"
 
 #if there is any reason to start a container -- well, go to it
 if [ -n "${DEPLOY_REASON}" ]; then
