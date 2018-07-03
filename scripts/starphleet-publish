@@ -27,6 +27,12 @@ if [ -n "${UNPUBLISHED}" ]; then
   exit 0
 fi
 
+if is_container_storage_on_s3 \
+   && [ -z "${SERVE_CONTAINERS}" ]; then
+  # If we aren't serving we shouldn't publish
+  exit 0
+fi
+
 ORIGINAL_ORDER_NAME="${order}"
 
 if [ -n "${publish_path}" ]; then
