@@ -7,6 +7,11 @@
 ### version
 run_as_root_or_die
 
+if is_container_storage_on_s3; then
+  warn "Not available when containers stored on S3"
+  exit 0
+fi
+
 # This format is used to mimic a sha
 DATE_TIME=$(date +d%y%m%d-d%H%M%S)
 # Make a fake service name that will behave like a real service name

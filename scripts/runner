@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 app_root="${1}"
 orders="${2}"
-script="${3}"
+scriptsource="${3}"
+script="$(basename ${scriptsource})"
+tmpscriptpath="/tmp/${script}"
 export HOME=${app_root}
 export ORDERS_IN=${app_root}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -9,12 +11,15 @@ source ${DIR}/tools
 
 container_environment ${app_root} ${orders}
 
-get_SHASUM "${script}"
+cp "${scriptsource}" "${tmpscriptpath}"
+chmod +x "${tmpscriptpath}"
+
+get_SHASUM "${tmpscriptpath}"
 (
 #flocked, this will exit right away rather than run
 flock -n 200
 if [ $? -ne 0 ]; then
-  echo "unable to aquire lock to run ${script}"
+  echo "unable to aquire lock to run ${tmpscriptpath}"
   # no error code so cron won't try to email
   exit 0
 fi

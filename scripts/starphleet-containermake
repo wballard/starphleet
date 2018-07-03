@@ -42,13 +42,6 @@ dev_mode \
   && STARPHLEET_ROOT_CONTAINER_PERMISSION="rw" \
   || STARPHLEET_ROOT_CONTAINER_PERMISSION="r"
 
-#starphleet-base is a create, all orders are a clones to delta0
-cat << EOF > ${CONTAINER_CONF}
-lxc.mount.entry = ${STARPHLEET_ROOT} ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT} none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
-lxc.mount.entry = ${ADMIRAL_HOME} ${CONTAINER_ROOT}/rootfs${ADMIRAL_HOME} none defaults,bind,create=dir 0 0
-EOF
-
-trap 'rm -rf ${CONTAINER_CONF}' EXIT
 
 (
 #flocked, parallel container build is a race condition on start
@@ -74,55 +67,189 @@ else
   SHIP_NAME=$([ -r /etc/starphleet-name ] && $(echo cat /etc/starphleet-name) || echo $(hostname))
 
   starphleet-lxc-destroy ${CONTAINER_NAME}
-  if [ -z "${base_container_name}" ]; then
-    lxc-create --name "${container_name}" -t ubuntu
-    CONTAINER_OVERLAY=${CONTAINER_ROOT}/rootfs
-  else
-    lxc-clone --snapshot -B overlayfs -o "${base_container_name}" -n "${container_name}"
-    CONTAINER_OVERLAY=${CONTAINER_ROOT}/delta0
+
+  # On LXC >= 1.0.10 - lxc-attach no longer attaches to STDOUT when run
+  # from upstart.  They changed how pty assignments are handled.
+  # From the new docs:
+  #
+  #     -L, --pty-log file
+  #        Specify a file where the output of lxc-attach will be logged.
+  #
+  #        Important: When a standard file descriptor does not refer to
+  #        a pty output produced on it will not be logged.
+  #
+  #  See more here:  http://glg.link/vQpIdw
+  #
+  #  At some point, this check should go away and we should instead have
+  #  this be the default behavior (when all machines are upgraded)
+  LXC_VERSION="$(dpkg -l | egrep 'ii  lxc ' | awk '{print $3}' | cut -f 1 -d '-')"
+  LXC_VERSION_MAJOR=$(echo $LXC_VERSION | cut -f 1 -d '.')
+  LXC_VERSION_MINOR=$(echo $LXC_VERSION | cut -f 2 -d '.')
+  LXC_VERSION_PATCH=$(echo $LXC_VERSION | cut -f 3 -d '.')
+  if [ ${LXC_VERSION_MAJOR} -gt 1 ] \
+     || [ "${LXC_VERSION_MINOR}" -gt 0 ] \
+     || [ "${LXC_VERSION_PATCH}" -gt 9 ] ; then
+
+    LXC_OPT_FOR_STDOUT="-L /dev/stdout"
   fi
 
-  echo "lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none rbind,rw 0 0" >> ${CONTAINER_CONF}
+  # If SERVE_CONTAINERS is _not_ set - we would always want to fall back to
+  # default behavior (behavior before introducing container storage).  This
+  # probably represents a legacy machine or one not configured for container
+  # storage.  Either way, in both cases, we want legacy behavior.
+  #
+  # If, "SERVE_CONTAINERS" is set then we'd ONLY want to continue with
+  # the old code if we 'also' had BUILD_CONTAINERS set.
+  if [ -z "${SERVE_CONTAINERS}" ] \
+     || [ -n "${BUILD_CONTAINERS}" ]; then
 
+    #####
+    # (Mostly) original code for building containers pre-s3-storage
+    #####
+    if [ -z "${base_container_name}" ]; then
+      info "Creating base container"
+      lxc-create --name "${container_name}" -t ubuntu
+      FS_TYPE="rootfs"
+    elif is_container_storage_on_s3 && [ -n "${BUILD_CONTAINERS}" ]; then
+      info "Creating Container For S3 Storage - Takes longer"
+      lxc-clone -B "dir" -o "${base_container_name}" -n "${container_name}"
+      FS_TYPE="rootfs"
+    else
+      info "Creating OverlayFS Container"
+      lxc-clone --snapshot -B "overlayfs" -o "${base_container_name}" -n "${container_name}"
+      FS_TYPE="delta0"
+    fi
+    CONTAINER_OVERLAY="${CONTAINER_ROOT}/${FS_TYPE}"
 
-  #make a directory where we can mount back to the ship and a config file to mount
-  test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}" || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}"
-  test -d "${CONTAINER_OVERLAY}/var/data" || mkdir -p "${CONTAINER_OVERLAY}/var/data"
-  cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/config
-  #copy on the starphleet commands
-  mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
-  [ -f "/hosthome/.starphleet" ] && cp /hosthome/.starphleet "${CONTAINER_OVERLAY}/.starphleet"
-  cp /etc/starphleet "${CONTAINER_OVERLAY}/etc/"
-  cp -r /etc/starphleet.d "${CONTAINER_OVERLAY}/etc/"
-  cp /usr/bin/starphleet* "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/builder "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/cronner "${CONTAINER_OVERLAY}/usr/bin/"
-  cp /usr/bin/runner "${CONTAINER_OVERLAY}/usr/bin/"
-  cp -R ${STARPHLEET_ROOT}/containers/overlay/* ${CONTAINER_OVERLAY}/
-  #this is the build script for the container itself
-  cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
-  chmod +x "${CONTAINER_OVERLAY}/build_script"
+#starphleet-base is a create, all orders are a clones to delta0
+# TODO: For code formatting - this would be better as a function
+#       but leaving it here to work through flow
+cat << EOF > ${CONTAINER_CONF}
+lxc.mount.entry = ${STARPHLEET_ROOT}/buildpacks ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/buildpacks none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT}/private_keys ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/private_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${STARPHLEET_ROOT}/public_keys ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/public_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
+lxc.mount.entry = ${ADMIRAL_HOME} ${CONTAINER_ROOT}/rootfs${ADMIRAL_HOME} none defaults,bind,create=dir 0 0
+lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none rbind,rw 0 0
+EOF
 
-  #start up the container, waiting for the network, and then run the container build script
-  lxc-start --name ${CONTAINER_NAME} -d
-  starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
-  lxc-attach --name ${CONTAINER_NAME} -- bash starphleet-wait-network
-  #host file updates
+    #make a directory where we can mount back to the ship and a config file to mount
+    info "Building up the file system of new container"
+    test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/buildpacks" \
+      || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/buildpacks"
+    test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/private_keys" \
+      || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/private_keys"
+    test -d "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/public_keys" \
+      || mkdir -p "${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/public_keys"
+    test -d "${CONTAINER_OVERLAY}/var/data" || mkdir -p "${CONTAINER_OVERLAY}/var/data"
+    # The config used to work by accident thanks to using overlayfs.
+    # We need to cleanup the mounts that persist from the starphleet-base
+    # container since we are using a different FS in some cases.
+
+    # We are removing these lines:
+    #
+    # lxc.mount.entry = /var/starphleet/buildpacks /var/lib/lxc/starphleet-base/rootfs/var/starphleet/buildpacks none bind,r 0 0
+    # lxc.mount.entry = /var/starphleet/private_keys /var/lib/lxc/starphleet-base/rootfs/var/starphleet/private_keys none bind,r 0 0
+    # lxc.mount.entry = /var/starphleet/public_keys /var/lib/lxc/starphleet-base/rootfs/var/starphleet/public_keys none bind,r 0 0
+    # lxc.mount.entry = /home/admiral /home/admiral none defaults,bind,create=dir 0 0
+    # lxc.mount.entry = /var/lib/lxc/data /var/data none rbind,rw 0 0
+    cat "${CONTAINER_ROOT}/config" | egrep -v "mount.*star|mount.*data|mount.*home" > "${CONTAINER_ROOT}/config.tmp"
+    mv "${CONTAINER_ROOT}/config.tmp" "${CONTAINER_ROOT}/config"
+
+    cat ${CONTAINER_CONF} >> ${CONTAINER_ROOT}/config
+
+    #copy on the starphleet commands
+    mkdir -p "${CONTAINER_OVERLAY}/usr/bin"
+    [ -f "/hosthome/.starphleet" ] && cp /hosthome/.starphleet "${CONTAINER_OVERLAY}/.starphleet"
+    cp /etc/starphleet "${CONTAINER_OVERLAY}/etc/"
+    rm -rf "${CONTAINER_OVERLAY}/etc/starphleet.d" || true
+    cp -r /etc/starphleet.d "${CONTAINER_OVERLAY}/etc/"
+    cp /usr/bin/starphleet* "${CONTAINER_OVERLAY}/usr/bin/"
+    cp /usr/bin/docopt* "${CONTAINER_OVERLAY}/usr/bin/"
+    cp /usr/bin/tools "${CONTAINER_OVERLAY}/usr/bin/"
+    cp /usr/bin/builder "${CONTAINER_OVERLAY}/usr/bin/"
+    cp /usr/bin/cronner "${CONTAINER_OVERLAY}/usr/bin/"
+    cp /usr/bin/runner "${CONTAINER_OVERLAY}/usr/bin/"
+    cp -R ${STARPHLEET_ROOT}/containers/overlay/* ${CONTAINER_OVERLAY}/
+
+    # Persist the HQ inside the container
+    info "Syncing Headquarters to container"
+    HQ_DEST="${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/headquarters/"
+    mkdir -p "${HQ_DEST}"
+    rsync -ra --exclude="git/" "${STARPHLEET_ROOT}/headquarters/" "${HQ_DEST}"
+    rsync -ra "${STARPHLEET_ROOT}/headquarters/${order}/git/" "${HQ_DEST}${order}/git/"
+    #this is the build script for the container itself
+    info Setting up the build script inside the container
+    cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
+    chmod +x "${CONTAINER_OVERLAY}/build_script"
+    #start up the container, waiting for the network, and then run the container build script
+
+    info "Starting the container"
+    lxc-start --name ${CONTAINER_NAME} -d
+    starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
+    lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash starphleet-wait-network
+
+    #host file updates
+    info "Setting up Network in container"
+    lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'chmod 777 /var/log/'
+    lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'useradd -s /bin/bash ${ADMIRAL} || true'
+    lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'adduser ${ADMIRAL} sudo'
+    lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}/.ssh'
+    lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'echo -e "\n${ADMIRAL} ALL=NOPASSWD:ALL" >> /etc/sudoers'
+    lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'
+    lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "source /usr/bin/tools; /build_script"
+  fi
+
+  # This code is here as opposed to somewhere else because
+  # we want to compress the container for S3 and/or uncompress it
+  # before all the network setup below
+  if [ -n "${base_container_name}" ] && is_container_storage_on_s3; then
+    # If we are expected to build containers and storage is on S3
+    # then we should have a tar.gz of the container on disk or we
+    # haven't made it yet and we should.
+    warn "S3 Container Storage Detected"
+    if [ -n "${BUILD_CONTAINERS}" ] && [ ! -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ]; then
+      info "Stopping container to archive it"
+      lxc-stop --name ${CONTAINER_NAME} || true
+      starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
+      # There are some notes about container portability here:
+      # https://stackoverflow.com/a/34194341
+      info "Archiving container for S3 - ${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz"
+      pushd ${CONTAINER_ROOT}
+      tar --numeric-owner -czf "${CONTAINER_NAME}.tar.gz" ./*
+      popd
+    fi
+    # The order is important here.  A machine configured to serve & build
+    # containers shouldn't go fetch containers on S3 because the containers
+    # _should_ be generated locally.  Thus, we perform the check for
+    # retreiving containers after the archive above.
+    if [ -n "${SERVE_CONTAINERS}" ] \
+      && [ ! -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ]; then
+
+      info "Pulling container from S3"
+      mkdir -p "${CONTAINER_ROOT}"
+      pushd "${CONTAINER_ROOT}"
+
+      starphleet-s3-get-container "${CONTAINER_NAME}" || exit ${EXIT_CODE_FOR_FAILED_S3_DOWNLOADS}
+
+      # There are some notes about container portability here:
+      # https://stackoverflow.com/a/34194341
+      info "Decompressing Container"
+      tar --numeric-owner -xzf "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz"
+      popd
+    fi
+
+    info "Starting container again after S3 Storage Steps"
+    lxc-start --name ${CONTAINER_NAME} -d
+    starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
+    lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash starphleet-wait-network
+  fi
+
+  info "Configuring Network For Container"
   bridge_ip
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n${BRIDGE_IP}  localship' >> /etc/hosts"
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c "printf '\nexport SHIP_NAME=%s\n' ${SHIP_NAME} >> /usr/bin/tools"
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n127.0.0.1  $(< /etc/hostname)' >> /etc/hosts"
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c "echo -e '\n127.0.0.1  ${CONTAINER_NAME}' >> /etc/hosts"
-
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'chmod 777 /var/log/'
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'useradd -s /bin/bash ${ADMIRAL} || true'
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'adduser ${ADMIRAL} sudo'
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}/.ssh'
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${ADMIRAL} ALL=NOPASSWD:ALL" >> /etc/sudoers'
-  lxc-attach --name ${CONTAINER_NAME} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'
-  lxc-attach --name ${CONTAINER_NAME} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "source /usr/bin/tools; /build_script"
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c "echo -e '\n${BRIDGE_IP}  localship' >> /etc/hosts"
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c "printf '\nexport SHIP_NAME=%s\n' ${SHIP_NAME} >> /usr/bin/tools"
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c "echo -e '\n127.0.0.1  $(< /etc/hostname)' >> /etc/hosts"
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c "echo -e '\n127.0.0.1  ${CONTAINER_NAME}' >> /etc/hosts"
 
   if [ "${run}" == "true" ]; then
     info leaving ${CONTAINER_NAME} running

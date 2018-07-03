@@ -107,7 +107,12 @@ EOF
 
     # This grabs the container NGINX is currently configured to point to which
     # is not always the same is what starphleet thinks is the latest container
-    NGINX_POINTING_AT=$(curl --connect-timeout 1 -m 1 -s -XHEAD -H "Authorization: Bearer BadToken" -i "http://localhost/${ORDER}/" | grep -i "X-Starphleet-Container" | cut -f 2 -d " " | tr -dc '[[:print:]]')
+    if is_container_storage_on_s3 \
+       && [ -z "${SERVE_CONTAINERS}" ]; then
+       unset NGINX_POINTING_AT
+    else
+       NGINX_POINTING_AT=$(curl --connect-timeout 1 -m 1 -s -XHEAD -H "Authorization: Bearer BadToken" -i "http://localhost/${ORDER}/" | grep -i "X-Starphleet-Container" | cut -f 2 -d " " | tr -dc '[[:print:]]')
+    fi
 
     # If trouble is set and everything is healthy we skip this one (eg, continue)
     if [ "${trouble}" == "true" ] &&
@@ -139,10 +144,12 @@ EOF
     info "    order             : ${ORDER}"
     info "    latest status     : ${LATEST_SUCCESSFUL_STATUS}"
     info "    latest active     : ${LATEST_SUCCESSFUL_CONTAINER}"
-    if [ "${LATEST_SUCCESSFUL_CONTAINER}" != "${NGINX_POINTING_AT}" ]; then
-    error "    nginx aimed at    : ${NGINX_POINTING_AT}"
-    else
-    info "    nginx aimed at    : ${NGINX_POINTING_AT}"
+    if is_container_storage_on_s3 && [ -n "${SERVE_CONTAINERS}" ]; then
+      if [ "${LATEST_SUCCESSFUL_CONTAINER}" != "${NGINX_POINTING_AT}" ]; then
+      error "    nginx aimed at    : ${NGINX_POINTING_AT}"
+      else
+      info "    nginx aimed at    : ${NGINX_POINTING_AT}"
+      fi
     fi
     info "    git author        : ${AUTHOR}"
     info "    git sha           : ${CURRENT_SHA}"
