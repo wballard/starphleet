@@ -105,6 +105,14 @@ function expose() {
   true
 }
 
+# In bash, the return values are odd.  Exiting with a Zero
+# means you didn't have a problem.
+#
+# See:  http://glg.link/Ea8zjA
+export TRUE=0;
+export FALSE=1;
+
+
 # All the rules that surround the supported security measures
 # for starphleet.  For instance, if a certain security feature
 # has constraints, needs certain settings or files, or needs various
@@ -114,12 +122,6 @@ function expose() {
 # security measure something is wrong.
 function validate_security() {
 
-  # In bash, the return values are odd.  Exiting with a Zero
-  # means you didn't have a problem.
-  #
-  # See:  http://glg.link/Ea8zjA
-  TRUE=0;
-  FALSE=1;
   # SECURITY_MODE is set in the default starphleet config.  If it gets unset
   # something went wrong so let the user know
   if ! echo "${SECURITY_MODE}" | egrep 'htpasswd|jwt|ldap|public' > /dev/null; then
@@ -304,12 +306,61 @@ function container_environment() {
   export PATH=${PATH}:/usr/local/bin
 }
 
+# Handle all the buggy details of installing a modern
+# version of the aws cli command
+function get_updated_aws_command {
+  AWS_INSTALL_LOCK_FILE="/var/lock/aws_command_install"
+  # Because aws cli on our machines is a mixed bag and I really do
+  # want a modern version.  It's okay if they aren't consistent for
+  # what we are doing so long as the version isn't 10 years old.
+  export AWS_COMMAND_PATH="/root/.local/bin/aws"
+  if [ ! -f "${AWS_COMMAND_PATH}" ]; then
+    (
+      flock -n 250
+      set +e
+      # New pip install wanted libyaml so we'll install that before trying
+      # to get the latest AWS cli
+      apt-get update -y
+      apt-get install -y libyaml-dev python-dev
+      #######
+      ## Because:  https://github.com/aws/aws-cli/issues/2999#issuecomment-356019306
+      pip uninstall boto3 -y
+      pip uninstall boto -y
+      pip uninstall botocore -y
+      pip install botocore --upgrade
+      #######
+      ## Because: https://github.com/aws/aws-cli/issues/3007#issuecomment-350797161
+      pip install --upgrade s3transfer
+      pip install awscli --upgrade --user
+      rm "${AWS_INSTALL_LOCK_FILE}"
+      set -e
+      # Let the caller test if things went okay
+      exit 0
+    ) 250> "${AWS_INSTALL_LOCK_FILE}"
+  fi
+}
+
 function dev_mode() {
   if [ -n "${DEVMODE_ENABLED}" ]; then
     true
   else
     false
   fi
+}
+
+# Provide a way for scripts to easily detect if this
+# starphleet instance is storing the containers on S3.
+function is_container_storage_on_s3() {
+
+  if ([ -n "${SERVE_CONTAINERS}" ] || [ -n "${BUILD_CONTAINERS}" ]) \
+  && [ -n "${S3_STORAGE_AWS_ACCESS_KEY_ID}" ] \
+  && [ -n "${S3_STORAGE_AWS_SECRET_ACCESS_KEY}" ] \
+  && [ -n "${S3_STORAGE_BUCKET_REGION}" ] \
+  && [ -n "${S3_STORAGE_BUCKET_PATH}" ]; then
+    return $TRUE
+  fi
+
+  return $FALSE
 }
 
 function run_as_root_or_die(){
