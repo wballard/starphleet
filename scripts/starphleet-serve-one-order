@@ -181,6 +181,6 @@ if [ -n "${DEPLOY_REASON}" ]; then
   info Waiting Args: ${WAIT_ARGUMENT}
   #this is done with no-wait since upstart will prevent duplicate starts
   info "Starting ${ORDER}: ${CONTAINER_NAME}"
-  start "${WAIT_ARGUMENT}" starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
+  start ${WAIT_ARGUMENT} starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
 fi
 unset DEPLOY_REASON
