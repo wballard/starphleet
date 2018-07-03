@@ -6,7 +6,7 @@
 ### Kill off every running service for an order except the current service
 
 # Reap any containers
-for name in $(lxc-ls | grep --extended-regexp -e "^${order}-([a-f0-9]){7}-([a-f0-9]){7}" | grep --invert-match "${current_service_name}")
+for name in $(lxc-ls | grep --extended-regexp -e "^${order}-[a-f0-9]+-[a-f0-9]+" | grep --invert-match "${current_service_name}")
 do
 
   STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
@@ -89,7 +89,7 @@ done
 # So, check if any status files are left over and if there isn't a container
 # running for them we clean them up
 # Clean up any stale status files
-for CONTAINER_STATUS_FILE in $(find "${CURRENT_ORDERS}/${order}/" -type f -name ".starphleetstatus*" | grep --extended-regexp -e ".*-([a-f0-9]){7}$" | grep -v "${current_service_name}")
+for CONTAINER_STATUS_FILE in $(find "${CURRENT_ORDERS}/${order}/" -type f -name ".starphleetstatus*" | grep --extended-regexp -e ".*-[a-f0-9]+$" | grep -v "${current_service_name}")
 do
     # Yoink just the container name off the status file
     container_name=$(basename "${CONTAINER_STATUS_FILE}" | sed -e 's/.starphleetstatus.//')
