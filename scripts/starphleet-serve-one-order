@@ -143,7 +143,11 @@ if [ -n "${DEVMODE_UNBIND_GIT_DIR}" ] && dev_mode ; then
   [ ! -f "${LAST_RUN_FILE}" ] && touch "${LAST_RUN_FILE}" && DEPLOY_REASON="First Deploy"
 fi
 
+# Git Repo Change
 [ -n "${SERVICE_GIT_URL}" ] && starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}" && DEPLOY_REASON="Git Repo Changed"
+
+# Allow the command to be told to deploy regardless
+DEPLOY_REASON="${DEPLOY_REASON:-$FORCE_DEPLOY_REASON}"
 
 #if there is any reason to start a container -- well, go to it
 if [ -n "${DEPLOY_REASON}" ]; then
