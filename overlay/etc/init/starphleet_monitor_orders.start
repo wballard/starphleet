@@ -16,5 +16,5 @@ for order in $(find "${HEADQUARTERS_LOCAL}" | grep '/orders$' | grep -v '/git' )
 do
   source `which tools`
   SERVICE_NAME=$(echo "${order}" | sed -e 's[/orders$[[' | sed -e "s[${HEADQUARTERS_LOCAL}/\?[[")
-  parallel --semaphore --semaphorename starphleet-service-serve-order --jobs ${MAX_CONCURRENT_CONTAINER_BUILDS:-5} starphleet-serve-one-order "${SERVICE_NAME}" "wait"
+  parallel --ungroup --semaphore --semaphorename starphleet-service-serve-order --jobs ${MAX_CONCURRENT_CONTAINER_BUILDS:-5} starphleet-serve-one-order "${SERVICE_NAME}" "wait"
 done
