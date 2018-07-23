@@ -42,8 +42,7 @@ else
   CONTAINERIZE_EXIT_CODE=$?
   # If we are a serve-only server, it's possible containermake will fail
   # because the container does not yet exist in S3.  We want to keep trying
-  # to get it indefinitely.  We accomplish that by letting the process
-  # fail further downstream and use the mechanics in upstart to respawn
+  # to get it indefinitely.
   if is_container_storage_on_s3 \
   && [ -z "${BUILD_CONTAINERS}" ] \
   && [ -n "${SERVE_CONTAINERS}" ] \
