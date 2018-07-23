@@ -17,7 +17,10 @@ if [ -z "${REPO_URL}" -o -z "${REPO_BRANCH}" ]; then
   exit 1
 fi
 echo "upadting starphleet codebase using repo url: ${REPO_URL} and branch ${REPO_BRANCH}"
-rm -rf /starphleet
-git clone ${REPO_URL} /starphleet
-cd /starphleet && git checkout ${REPO_BRANCH}
-./scripts/perform-overlay
+# Set -e above so this might fail sometimes on a new machine, thus || true
+rm -rf /starphleet || true
+# Adjusting slightly to prep a machine that doesn't already have
+# the skelleton of Starphleet
+git clone -b "${REPO_BRANCH}" "${REPO_URL}" /starphleet
+cp /starphleet/scripts/starphleet-launcher /usr/bin
+/starphleet/scripts/perform-overlay
