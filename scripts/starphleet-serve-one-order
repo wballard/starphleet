@@ -186,6 +186,10 @@ if [ -n "${DEPLOY_REASON}" ]; then
   info Waiting Args: ${WAIT_ARGUMENT}
   #this is done with no-wait since upstart will prevent duplicate starts
   info "Starting ${ORDER}: ${CONTAINER_NAME}"
-  start ${WAIT_ARGUMENT} starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
+  if [ -n "${WAIT_ARGUMENT}" ]; then
+    parallel --semaphore --semaphorename starphleet-service-serve-order --jobs ${MAX_CONCURRENT_CONTAINER_BUILDS:-25} start ${WAIT_ARGUMENT} starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
+  else
+    start starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
+  fi
 fi
 unset DEPLOY_REASON
