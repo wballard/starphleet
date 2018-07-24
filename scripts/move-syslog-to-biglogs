@@ -9,6 +9,7 @@ if [ -d /var/log/biglogs ] && [ ! -L /var/log/syslog ]; then
   # so might tweak this if I ever run across the bug.
   stop rsyslog || true
   [ -f /var/log/syslog ] && mv /var/log/syslog /var/log/biglogs/syslog
+  [ -f /var/log/syslog ] && rm /var/log/*syslog*
   [ -f /var/log/biglogs/syslog ] && [ ! -L /var/log/syslog ] && ln -s /var/log/biglogs/syslog /var/log/syslog
   touch /var/log/biglogs/syslog
   chown syslog:adm /var/log/syslog
