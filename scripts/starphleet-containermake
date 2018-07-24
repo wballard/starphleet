@@ -172,11 +172,17 @@ EOF
     cp -R ${STARPHLEET_ROOT}/containers/overlay/* ${CONTAINER_OVERLAY}/
 
     # Persist the HQ inside the container
-    info "Syncing Headquarters to container"
-    HQ_DEST="${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/headquarters/"
-    mkdir -p "${HQ_DEST}"
-    rsync -ra --exclude="git/" "${STARPHLEET_ROOT}/headquarters/" "${HQ_DEST}"
-    rsync -ra "${STARPHLEET_ROOT}/headquarters/${order}/git/" "${HQ_DEST}${order}/git/"
+    # but only if the HQ dir exists and
+    # the order name is set.  If we're making
+    # the base container these things might not
+    # be around yet so we can skip the HQ sync
+    if [ -d "${STARPHLEET_ROOT}/headquarters" ] && [ -n "${order}" ]; then
+      info "Syncing Headquarters to container"
+      HQ_DEST="${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/headquarters/"
+      mkdir -p "${HQ_DEST}"
+      rsync -ra --exclude="git/" "${STARPHLEET_ROOT}/headquarters/" "${HQ_DEST}"
+      rsync -ra "${STARPHLEET_ROOT}/headquarters/${order}/git/" "${HQ_DEST}${order}/git/"
+    fi
     #this is the build script for the container itself
     info Setting up the build script inside the container
     cp "${build_script}" "${CONTAINER_OVERLAY}/build_script"
