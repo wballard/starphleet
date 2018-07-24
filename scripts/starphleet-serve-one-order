@@ -179,7 +179,6 @@ if [ -n "${DEPLOY_REASON}" ]; then
     CONTAINER_NAME="${SERVICE_PINNED_TO_CONTAINER}"
 
   fi
-  info Waiting Args: ${NO_WAIT_ARGUMENT}
   info "Starting ${ORDER}: ${CONTAINER_NAME}"
   if [ -n "${wait}" ]; then
     parallel --semaphore --semaphorename starphleet-service-serve-order --jobs ${MAX_CONCURRENT_CONTAINER_BUILDS:-25} start starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
