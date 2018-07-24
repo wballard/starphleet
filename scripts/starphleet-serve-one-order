@@ -30,10 +30,6 @@ unset ORDERS_DIFF
 unset DEPLOY_REASON
 unset ORDERS_SHA
 
-[ -n "${wait}" ] \
-  && unset WAIT_ARGUMENT \
-  || WAIT_ARGUMENT="--no-wait"
-
 # Get the sha of the last change to a directory
 ORDERS_SHA=$(git --git-dir "$HEADQUARTERS_LOCAL/.git" --work-tree "$HEADQUARTERS_LOCAL" \
                  log -n 1 --pretty=format:%h -- $(dirname "${order}"))
@@ -183,13 +179,12 @@ if [ -n "${DEPLOY_REASON}" ]; then
     CONTAINER_NAME="${SERVICE_PINNED_TO_CONTAINER}"
 
   fi
-  info Waiting Args: ${WAIT_ARGUMENT}
-  #this is done with no-wait since upstart will prevent duplicate starts
+  info Waiting Args: ${NO_WAIT_ARGUMENT}
   info "Starting ${ORDER}: ${CONTAINER_NAME}"
-  if [ -n "${WAIT_ARGUMENT}" ]; then
-    parallel --semaphore --semaphorename starphleet-service-serve-order --jobs ${MAX_CONCURRENT_CONTAINER_BUILDS:-25} start ${WAIT_ARGUMENT} starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
+  if [ -n "${wait}" ]; then
+    parallel --semaphore --semaphorename starphleet-service-serve-order --jobs ${MAX_CONCURRENT_CONTAINER_BUILDS:-25} start starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
   else
-    start starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
+    start --no-wait starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
   fi
 fi
 unset DEPLOY_REASON
