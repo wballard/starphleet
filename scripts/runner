@@ -24,7 +24,6 @@ if [ $? -ne 0 ]; then
   exit 0
 fi
 
-echo "{{start-job}}" | logger --stderr -t "{{${script}}}"
-
-2>&1 ${tmpscriptpath} | logger --stderr -t "{{${script}}}"
+echo "{{${script}}}: {{start-job}}"
+2>&1 ${tmpscriptpath} | xargs -L 1 -d '\n' -I {} printf "{{${script}}}: %s\n" "{}"
 ) 200>/var/lock/${SHASUM}
