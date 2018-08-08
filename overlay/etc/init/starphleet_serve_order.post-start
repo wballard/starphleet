@@ -55,10 +55,14 @@ else
         # Logs are redunant ish but help quickly see what happened when
         # reviewing logs on the command line
         info Healthcheck passed for container ${name}
-        # Here we start a upstart 'watchdog' for services that have
-        # a healthcheck
-        start --no-wait starphleet_orders_healthcheck name="${name}" order="${order}"
-        info "Started healthchecker for ${order} on container ${name}"
+        if ! is_container_storage_on_s3 \
+          || (is_container_storage_on_s3 && [ -n "${SERVE_CONTAINERS}" ]); then
+          # Here we start a upstart 'watchdog' for services that have
+          # a healthcheck
+          start --no-wait starphleet_orders_healthcheck name="${name}" order="${order}"
+          info "Started healthchecker for ${order} on container ${name}"
+
+        fi
         # Dump out of our check loop
         break
       fi
