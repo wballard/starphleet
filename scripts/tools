@@ -321,7 +321,7 @@ function get_updated_aws_command {
       # New pip install wanted libyaml so we'll install that before trying
       # to get the latest AWS cli
       apt-get update -y
-      apt-get install -y libyaml-dev python-dev
+      apt-get install -y libyaml-dev python-dev python-docutils
       #######
       ## Because:  https://github.com/aws/aws-cli/issues/2999#issuecomment-356019306
       pip uninstall boto3 -y
