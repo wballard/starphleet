@@ -176,6 +176,7 @@ if [ -n "${DEPLOY_REASON}" ]; then
   && [ -n "${SERVICE_PINNED_TO_CONTAINER}" ]; then
     if [ -z "${BUILD_CONTAINERS}" ] \
     || [ -f "/var/lib/lxc/${SERVICE_PINNED_TO_CONTAINER}.serve_only_override" ]; then
+      warn Overriding CONTAINER_NAME with "${SERVICE_PINNED_TO_CONTAINER}"
       CONTAINER_NAME="${SERVICE_PINNED_TO_CONTAINER}"
     fi
   fi
