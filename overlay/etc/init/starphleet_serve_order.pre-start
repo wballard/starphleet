@@ -63,10 +63,6 @@ else
   && [ ${CONTAINERIZE_EXIT_CODE} -gt 0 ]; then
     info 'Container Failed To Build'
     echo 'building failed' > "${STATUS_FILE}"
-    # Least fancy way to trigger a full rebuild but still let us punt on
-    # the pre-start instead of having to send signals further down the
-    # upstart chain.  By removing the orders sha we can totally exit out
-    # and monitor_orders will start us back up next cycle.
     exit 1
   fi
 

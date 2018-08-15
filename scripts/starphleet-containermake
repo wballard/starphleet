@@ -213,7 +213,9 @@ EOF
     # then we should have a tar.gz of the container on disk or we
     # haven't made it yet and we should.
     warn "S3 Container Storage Detected"
-    if [ -n "${BUILD_CONTAINERS}" ] && [ ! -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ]; then
+    if [ -n "${BUILD_CONTAINERS}" ] \
+    && [ ! -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ] \
+    && [ ! -f "${CONTAINER_ROOT}/serve_only_override" ] ]; then
       info "Stopping container to archive it"
       lxc-stop --name ${CONTAINER_NAME} || true
       starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
