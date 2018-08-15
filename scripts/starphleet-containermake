@@ -30,6 +30,10 @@ if dev_mode ;then
   [ -z ${order} ] && LOCK_FILE=${CONTAINER_NAME} || LOCK_FILE=${order}
 fi
 
+if [ ! -f "${CONTAINER_ROOT}/serve_only_override" ]; then
+  unset BUILD_CONTAINERS
+fi
+
 #configuration, this is the place to mount directories on the host computer
 #into the container
 #note: this takes effect after the initial create, which generates the
@@ -214,8 +218,7 @@ EOF
     # haven't made it yet and we should.
     warn "S3 Container Storage Detected"
     if [ -n "${BUILD_CONTAINERS}" ] \
-    && [ ! -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ] \
-    && [ ! -f "${CONTAINER_ROOT}/serve_only_override" ] ]; then
+    && [ ! -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ]; then
       info "Stopping container to archive it"
       lxc-stop --name ${CONTAINER_NAME} || true
       starphleet-lxc-wait ${CONTAINER_NAME} STOPPED
