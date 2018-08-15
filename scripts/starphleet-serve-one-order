@@ -143,8 +143,8 @@ fi
 [ -n "${SERVICE_GIT_URL}" ] && starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}" && DEPLOY_REASON="Git Repo Changed"
 
 # Allow the command to be told to deploy regardless
-DEPLOY_REASON="${DEPLOY_REASON:-$FORCE_DEPLOY_REASON}"
-SERVICE_PINNED_TO_CONTAINER="${SERVICE_PINNED_TO_CONTAINER:-$FORCE_SERVICE_PINNED_TO_CONTAINER}"
+DEPLOY_REASON="${FORCE_DEPLOY_REASON:-$DEPLOY_REASON}"
+SERVICE_PINNED_TO_CONTAINER="${FORCE_SERVICE_PINNED_TO_CONTAINER:-$SERVICE_PINNED_TO_CONTAINER}"
 
 #if there is any reason to start a container -- well, go to it
 if [ -n "${DEPLOY_REASON}" ]; then
@@ -173,12 +173,13 @@ if [ -n "${DEPLOY_REASON}" ]; then
   # This allows the user to pin a service to a specific container
   # if this server is purely a "serve" starphleet server
   if is_container_storage_on_s3 \
-     && [ -n "${SERVICE_PINNED_TO_CONTAINER}" ] \
-     && [ -z "${BUILD_CONTAINERS}" ]; then
-
-    CONTAINER_NAME="${SERVICE_PINNED_TO_CONTAINER}"
-
+  && [ -n "${SERVICE_PINNED_TO_CONTAINER}" ]; then
+    if [ -z "${BUILD_CONTAINERS}" ] \
+    || [ -f "/var/lib/lxc/${SERVICE_PINNED_TO_CONTAINER}.serve_only_override"]
+      CONTAINER_NAME="${SERVICE_PINNED_TO_CONTAINER}"
+    fi
   fi
+
   info "Starting ${ORDER}: ${CONTAINER_NAME}"
   if [ -n "${wait}" ]; then
     parallel --semaphore --semaphorename starphleet-service-serve-order --jobs ${MAX_CONCURRENT_CONTAINER_BUILDS:-25} start starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
