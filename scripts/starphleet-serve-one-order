@@ -175,7 +175,7 @@ if [ -n "${DEPLOY_REASON}" ]; then
   if is_container_storage_on_s3 \
   && [ -n "${SERVICE_PINNED_TO_CONTAINER}" ]; then
     if [ -z "${BUILD_CONTAINERS}" ] \
-    || [ -f "/var/lib/lxc/${SERVICE_PINNED_TO_CONTAINER}.serve_only_override"]; then
+    || [ -f "/var/lib/lxc/${SERVICE_PINNED_TO_CONTAINER}.serve_only_override" ]; then
       CONTAINER_NAME="${SERVICE_PINNED_TO_CONTAINER}"
     fi
   fi
