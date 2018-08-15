@@ -70,8 +70,6 @@ else
   # load the ship name as configured in /etc/starphleet-name or, just use the sucky hostname
   SHIP_NAME=$([ -r /etc/starphleet-name ] && $(echo cat /etc/starphleet-name) || echo $(hostname))
 
-  starphleet-lxc-destroy ${CONTAINER_NAME}
-
   # On LXC >= 1.0.10 - lxc-attach no longer attaches to STDOUT when run
   # from upstart.  They changed how pty assignments are handled.
   # From the new docs:
