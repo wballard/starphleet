@@ -30,7 +30,7 @@ if dev_mode ;then
   [ -z ${order} ] && LOCK_FILE=${CONTAINER_NAME} || LOCK_FILE=${order}
 fi
 
-if [ -f "${CONTAINER_ROOT}/serve_only_override" ]; then
+if [ -f "${CONTAINER_ROOT}.serve_only_override" ]; then
   unset BUILD_CONTAINERS
 fi
 
