@@ -17,8 +17,9 @@ export AWS_SECRET_ACCESS_KEY="${S3_STORAGE_AWS_SECRET_ACCESS_KEY}"
 CONTAINER_NAME="${containerName}"
 CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
 if is_container_storage_on_s3 \
-  && [ -n "${BUILD_CONTAINERS}" ] \
-  && [ -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ]; then
+&& [ -n "${BUILD_CONTAINERS}" ] \
+&& [ -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ] \
+&& [ ! -f "${CONTAINER_ROOT}.serve_only_override"]; then
 
   info "Pushing ${CONTAINER_NAME} to S3 Bucket Path ${S3_STORAGE_BUCKET_PATH}"
 
