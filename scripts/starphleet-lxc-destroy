@@ -21,7 +21,10 @@ done
 # Destroy command from LXC sometimes misses getting rid of its
 # trash so lets help just in case.
 lxc_container_path="/var/lib/lxc/${container_name}"
+
 [ -n "${container_name}" ] \
   && [ -d "${lxc_container_path}" ] \
   && rm -rf "${lxc_container_path}" \
   || true
+
+rm /var/lib/lxc/${container_name}.serve_only_override || true
