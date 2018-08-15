@@ -38,6 +38,38 @@ else
   starphleet-lxc-destroy "${name}"
   #build a container, this will recycle any existing container, only building
   #when things are 'new', with a default for said URL to be nothing
-  starphleet-containerize "${SERVICE_GIT_URL:--}" "${name}" "${HEADQUARTERS_LOCAL}/${order}" \
-  || (echo 'building failed' > "${STATUS_FILE}" && exit 1)
+  starphleet-containerize "${SERVICE_GIT_URL:--}" "${name}" "${HEADQUARTERS_LOCAL}/${order}"
+  CONTAINERIZE_EXIT_CODE=$?
+  # If we are a serve-only server, it's possible containermake will fail
+  # because the container does not yet exist in S3.  We want to keep trying
+  # to get it indefinitely.
+  if is_container_storage_on_s3 \
+  && [ -z "${BUILD_CONTAINERS}" ] \
+  && [ -n "${SERVE_CONTAINERS}" ] \
+  && [ ${CONTAINERIZE_EXIT_CODE} -eq ${EXIT_CODE_FOR_FAILED_S3_DOWNLOADS} ]; then
+    info 'Failed due to container not existing in S3 - Trying again'
+    echo 'building failed' > "${STATUS_FILE}"
+    # Least fancy way to trigger a full rebuild but still let us punt on
+    # the pre-start instead of having to send signals further down the
+    # upstart chain.  By removing the orders sha we can totally exit out
+    # and monitor_orders will start us back up next cycle
+    rm "${CURRENT_ORDERS}/${order}/.orders_sha"
+    exit 1
+  fi
+
+  # Container Failed to Build on Build Server?
+  if is_container_storage_on_s3 \
+  && [ -n "${BUILD_CONTAINERS}" ] \
+  && [ ${CONTAINERIZE_EXIT_CODE} -gt 0 ]; then
+    info 'Container Failed To Build'
+    echo 'building failed' > "${STATUS_FILE}"
+    # Least fancy way to trigger a full rebuild but still let us punt on
+    # the pre-start instead of having to send signals further down the
+    # upstart chain.  By removing the orders sha we can totally exit out
+    # and monitor_orders will start us back up next cycle.
+    exit 1
+  fi
+
+
+  exit 0
 fi

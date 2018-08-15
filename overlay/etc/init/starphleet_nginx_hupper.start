@@ -59,7 +59,6 @@ do
             warn Fallback failed to container "${name}" - Attempting Soft Deploy
             rm "${CONTAINER_FILE}"
             rm "${CURRENT_ORDERS}/${order}/.last_known_good_container"
-            starphleet-retry-deploy "${order}"
             continue;
           fi
         fi

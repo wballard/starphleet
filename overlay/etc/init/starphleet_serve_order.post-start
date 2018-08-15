@@ -8,18 +8,34 @@ unset HEALTHCHECK
 
 ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
 STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
+LAST_KNOWN_GOOD_CONTAINER="${CURRENT_ORDERS}/${order}/.last_known_good_container"
 
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
 
 # Deploy all the things
 if [ "${UNPUBLISHED}" == "1" ]; then
+  starphleet-s3-put-container ${name}
+
+  # It is important for the active container to still get set above
+  # so that the reaper won't leave around stale containers.  We
+  # now check if this is a build_only server and if yes we will
+  # stop running the container and exit cleanly
+  if is_container_storage_on_s3 && [ -z "${SERVE_CONTAINERS}" ]; then
+    info "Build Only Server - Stopping: ${name}"
+    echo 'build server' > "${STATUS_FILE}"
+    { stop ; exit 0; }
+  fi
+
+  # At this point the container is active so make it the current container
+  echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
   echo 'online' > "${STATUS_FILE}"
   starphleet-expose "${name}" "${HEADQUARTERS_LOCAL}/${order}/orders"
   starphleet-reaper "${name}" "${order}" --force
+
 else
   #status logging, here indicating the healthcheck is about to go
   echo 'checking' > "${STATUS_FILE}"
-  lxc-ls --fancy "${name}" | tail -1 | awk '{ print $3; }' > "${STATUS_FILE}.ip"
+  lxc-info -n "${name}" -i | awk '{print $2}' > "${STATUS_FILE}.ip"
   echo "${PORT}" > "${STATUS_FILE}.port"
 
   ######################
@@ -39,10 +55,14 @@ else
         # Logs are redunant ish but help quickly see what happened when
         # reviewing logs on the command line
         info Healthcheck passed for container ${name}
-        # Here we start a upstart 'watchdog' for services that have
-        # a healthcheck
-        start --no-wait starphleet_orders_healthcheck name="${name}" order="${order}"
-        info "Started healthchecker for ${order} on container ${name}"
+        if ! is_container_storage_on_s3 \
+          || (is_container_storage_on_s3 && [ -n "${SERVE_CONTAINERS}" ]); then
+          # Here we start a upstart 'watchdog' for services that have
+          # a healthcheck
+          start --no-wait starphleet_orders_healthcheck name="${name}" order="${order}"
+          info "Started healthchecker for ${order} on container ${name}"
+
+        fi
         # Dump out of our check loop
         break
       fi
@@ -50,16 +70,34 @@ else
         #at this point the service has failed to properly start
         warn Service failed to publish "${order}" for container ${name}
         echo 'failed' > "${STATUS_FILE}"
-        mail_log
+        rm "${LAST_KNOWN_GOOD_CONTAINER}"
+        if is_container_storage_on_s3; then
+          if [ -n "${BUILD_CONTAINERS}" ] && [ -z "${SERVE_CONTAINERS}" ]; then
+            mail_log
+          fi
+        else
+          mail_log
+        fi
         exit 1
       fi
       sleep 1
     done
   fi
 
+  starphleet-s3-put-container ${name}
 
   # At this point the container is active so make it the current container
   echo "${name}" > "${CURRENT_ORDERS}/${order}/.container"
+
+  # It is important for the active container to still get set above
+  # so that the reaper won't leave around stale containers.  We
+  # now check if this is a build_only server and if yes we will
+  # stop running the container and exit cleanly
+  if is_container_storage_on_s3 && [ -z "${SERVE_CONTAINERS}" ]; then
+    info "Build Only Server - Stopping: ${name}"
+    echo 'build server' > "${STATUS_FILE}"
+    { stop ; exit 0; }
+  fi
 
   # Update this containers status with 'online'
   echo 'online' > "${STATUS_FILE}"
