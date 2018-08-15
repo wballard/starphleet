@@ -31,6 +31,7 @@ if dev_mode ;then
 fi
 
 if [ -f "${CONTAINER_ROOT}.serve_only_override" ]; then
+  warn Unsetting BUILD_CONTAINERS due to override
   unset BUILD_CONTAINERS
 fi
 
