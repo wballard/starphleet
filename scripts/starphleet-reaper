@@ -78,6 +78,7 @@ do
   info "Removing Logs for ${name}"
   rm /var/log/upstart/starphleet_serve_order-${name}* || true
   rm /var/log/upstart/starphleet_orders_healthcheck-${name}* || true
+  rm /var/lib/lxc/${name}.serve_only_override || true
   info "reaper has reaped ${name}"
 done
 
