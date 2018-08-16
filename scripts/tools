@@ -314,7 +314,8 @@ function get_updated_aws_command {
   # want a modern version.  It's okay if they aren't consistent for
   # what we are doing so long as the version isn't 10 years old.
   export AWS_COMMAND_PATH="/root/.local/bin/aws"
-  if [ ! -f "${AWS_COMMAND_PATH}" ]; then
+  if [ ! -f "${AWS_COMMAND_PATH}" ] \
+  || ! $AWS_COMMAND_PATH --version; then
     (
       flock -n 250
       set +e
@@ -327,11 +328,15 @@ function get_updated_aws_command {
       pip uninstall boto3 -y
       pip uninstall boto -y
       pip uninstall botocore -y
-      pip install botocore --upgrade
+      # Fix bug caused by apt/ubuntu
+      rm -rf /usr/local/lib/python2.7/dist-packages/botocore-*.dist-info
+      pip install botocore --force-reinstall --upgrade
       #######
       ## Because: https://github.com/aws/aws-cli/issues/3007#issuecomment-350797161
       pip install --upgrade s3transfer
       pip install awscli --upgrade --user
+      rm -rf /tmp/pip_build_root/PyYAML
+      pip install awscli --force-reinstall --upgrade
       rm "${AWS_INSTALL_LOCK_FILE}"
       set -e
       # Let the caller test if things went okay
