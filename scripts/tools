@@ -313,7 +313,7 @@ function get_updated_aws_command {
   # Because aws cli on our machines is a mixed bag and I really do
   # want a modern version.  It's okay if they aren't consistent for
   # what we are doing so long as the version isn't 10 years old.
-  export AWS_COMMAND_PATH="/root/.local/bin/aws"
+  export AWS_COMMAND_PATH="/usr/local/bin/aws"
   if [ ! -f "${AWS_COMMAND_PATH}" ] \
   || ! $AWS_COMMAND_PATH --version; then
     (
@@ -334,7 +334,6 @@ function get_updated_aws_command {
       #######
       ## Because: https://github.com/aws/aws-cli/issues/3007#issuecomment-350797161
       pip install --upgrade s3transfer
-      pip install awscli --upgrade --user
       rm -rf /tmp/pip_build_root/PyYAML
       pip install awscli --force-reinstall --upgrade
       rm "${AWS_INSTALL_LOCK_FILE}"
