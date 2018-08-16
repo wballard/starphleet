@@ -315,7 +315,7 @@ function get_updated_aws_command {
   # what we are doing so long as the version isn't 10 years old.
   export AWS_COMMAND_PATH="/usr/local/bin/aws"
   if [ ! -f "${AWS_COMMAND_PATH}" ] \
-  || ! $AWS_COMMAND_PATH --version; then
+  || ! $AWS_COMMAND_PATH --version > /dev/null; then
     (
       flock -n 250
       set +e
