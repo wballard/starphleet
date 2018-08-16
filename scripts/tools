@@ -316,12 +316,14 @@ function get_updated_aws_command {
   export AWS_COMMAND_PATH="/usr/local/bin/aws"
 
   # Test if we need to upgrade aws cli
+  unset UPGRADE
   if $AWS_COMMAND_PATH --version 2>&1 | grep 'aws-cli/1.11'; then
-    sudo apt-get remove -y awscli
+    UPGRADE=true
   fi
 
   if [ ! -f "${AWS_COMMAND_PATH}" ] \
-  || ! $AWS_COMMAND_PATH --version > /dev/null; then
+  || ! $AWS_COMMAND_PATH --version 2>&1 > /dev/null \
+  || [ -n "${UPGRADE}" ]; then
     (
       flock -n 250
       set +e
