@@ -1,0 +1,191 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-serve-one-order <service> [<wait>]
+### --help
+###
+### Look through all containers stopped or running and run reaper
+### against any missing a current set of orders
+die_on_error
+run_as_root_or_die
+
+trace -----------------------
+info checking ${service}
+#reset variables
+source `which tools`
+
+latest_AUTHOR "${HEADQUARTERS_LOCAL}"
+
+#track the publish ports
+unset PUBLISH_PORTS
+declare -a PUBLISH_PORTS
+
+export order="${HEADQUARTERS_LOCAL}/${service}/orders"
+ORDER=$(echo "${order}" | sed -e 's[/orders$[[' | sed -e "s[${HEADQUARTERS_LOCAL}/\?[[")
+#make a place for the orders to be managed while running, this is separate
+#from the order files in the headquarters
+CURRENT_ORDER="${CURRENT_ORDERS}/${ORDER}"
+mkdir -p "${CURRENT_ORDER}"
+
+unset ORDERS_DIFF
+unset DEPLOY_REASON
+unset ORDERS_SHA
+
+# Get the sha of the last change to a directory
+ORDERS_SHA=$(git --git-dir "$HEADQUARTERS_LOCAL/.git" --work-tree "$HEADQUARTERS_LOCAL" \
+                 log -n 1 --pretty=format:%h -- $(dirname "${order}"))
+
+#use git to determine if the orders have changed since the last publish
+if [ -f "${CURRENT_ORDER}/.orders_sha" ]; then
+  DEPLOYED_ORDERS_SHA=$(cat "${CURRENT_ORDER}/.orders_sha")
+  [ "${DEPLOYED_ORDERS_SHA}" = "${ORDERS_SHA}" ] || ORDERS_DIFF="Updated orders"
+else
+  ORDERS_DIFF="New orders"
+fi
+
+[ -n "${ORDERS_DIFF}" ] && DEPLOY_REASON="${ORDERS_DIFF}"
+
+# k, so.  in this scope we don't actually care about the betas BUT
+# we do want it to be an associative array... if we DO NOT explicitly
+# make it associative it will implicitly be created as indexed, if you
+# try to index an indexed (non associative array) with an index like
+# pants-3322 bash will try to perform the arithmetic operation that
+# statement seems to indicate (since indexed arrays expect numeric indicies)
+# pants - 3322 will result in an invalid index and blow chunks.
+# thus we explicitly declare BETAS
+declare -A BETAS
+declare -A REDIRECT_TO
+#run the order as a whole script with the autodeploy function defined above
+#this lets folks get creative in orders files as needed
+unset SERVICE_GIT_URL
+unset UNPUBLISHED
+unset PUBLISH_FROM
+unset REDIRECT_TO_SERVICE
+unset SERVICE_PINNED_TO_CONTAINER
+# Slurp the environment from the orders
+run_orders "${order}"
+if [ -n "${REDIRECT_TO_SERVICE}" ]; then
+  info ${ORDER} is a redirect, nothing to deploy
+  exit 1
+fi
+# If the conditions for the security mode set for this container are not
+# met then we will not deploy this container.
+if ! validate_security; then
+  error "Not Deploying ${order} - Security Not Setup Correctly"
+  exit 1
+fi
+
+
+# The directory we store our local git copy
+LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
+
+
+if [ -n "${DEVMODE_UNBIND_GIT_DIR}" ] && dev_mode ; then
+  # The 'LAST_RUN_FILE' is created each run for a container.  We use this files
+  # modified time to determine if anything 'new' has been created/changed
+  # since our last deployment of a container
+  LAST_RUN_FILE="/tmp/.${ORDER}-starphleet_last_run"
+  ############################################
+  # Modified Dev Mode
+  ############################################
+  # Let starphleet be the build system
+  if [ -f "${LAST_RUN_FILE}" ]; then
+    warn Unbind Mode Detected
+    # **************************************
+    # File Change Detection
+    # **************************************
+    # Only check for changed files if the they specified to unbind the git dir
+    RUNNING=$(lxc-ls -f | grep RUNNING | grep --extended-regexp -e "^${ORDER}-([a-f0-9]){7}-([a-f0-9]){7}"  | cut -f1 -d" ")
+    # Define a temp file to check for changed files
+    CHANGED_FILES_FILE="/tmp/${ORDER}.starphleet.newfiles"
+    # Exclude git and node_modules directory which heavily improves performance.
+    EXCLUDES='-not ( -path *node_modules* -prune ) -and -not ( -path *.git* -prune ) -type f'
+    # Look for a changed file in the directory - punt after the first one
+    [ -d "${LOCAL}" ] && find "${LOCAL}" ${EXCLUDES} -newer "${LAST_RUN_FILE}" -print -quit > "${CHANGED_FILES_FILE}"
+    # Slurp in those files
+    FILES_CHANGED=$(cat ${CHANGED_FILES_FILE})
+    # If there were any changed files
+    if [ -n "${FILES_CHANGED}" ]; then
+      # Go through any running containers (albiet, there should only be one)
+      for container in $(echo ${RUNNING}); do
+        # Stop the container
+        warn Redeploying ${container} - ${FILES_CHANGED}
+        # Now that we persist files in containers we need to shove changes
+        # into the container before we hup it
+        CONTAINER_ROOT=/var/lib/lxc/${container}
+        [ -d "${CONTAINER_ROOT}/delta0" ] \
+          && FS_TYPE="delta0" \
+          || FS_TYPE="rootfs"
+        CONTAINER_OVERLAY="${CONTAINER_ROOT}/${FS_TYPE}"
+        HQ_DEST="${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/headquarters/"
+        rsync -ra "${STARPHLEET_ROOT}/headquarters/${ORDER}/git/" "${HQ_DEST}${ORDER}/git/"
+        # This should force the container to respawn
+        stop starphleet_serve_order name="${container}"
+        # ...but if it doesn't - we'll start it backup anyway
+        start --no-wait starphleet_serve_order name="${container}" order="${ORDER}"
+      done
+      # rebuild all-the-things
+      touch "${LAST_RUN_FILE}"
+      # Cleanup
+      rm ${CHANGED_FILES_FILE}
+      # Cleanup
+      unset DEVMODE_UNBIND_GIT_DIR
+      unset FILES_CHANGED
+      unset CHANGED_FILES_FILE
+      unset RUNNING
+    fi
+  fi
+  # If the file doesn't exist this would be our first deploy.  We need to get the container
+  # started so we'll go ahead and flag the container for start
+  [ ! -f "${LAST_RUN_FILE}" ] && touch "${LAST_RUN_FILE}" && DEPLOY_REASON="First Deploy"
+fi
+
+# Git Repo Change
+[ -n "${SERVICE_GIT_URL}" ] && starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}" && DEPLOY_REASON="Git Repo Changed"
+
+# Allow the command to be told to deploy regardless
+DEPLOY_REASON="${FORCE_DEPLOY_REASON:-$DEPLOY_REASON}"
+SERVICE_PINNED_TO_CONTAINER="${FORCE_SERVICE_PINNED_TO_CONTAINER:-$SERVICE_PINNED_TO_CONTAINER}"
+
+#if there is any reason to start a container -- well, go to it
+if [ -n "${DEPLOY_REASON}" ]; then
+  warn "${DEPLOY_REASON}"
+  echo ${ORDERS_SHA} > "${CURRENT_ORDER}/.orders_sha"
+  # Unpublished containers may not have a service sha
+  # so set a default just-in-case so these containers
+  # deploy even if they don't have an 'autodeploy'
+  [ -n "${UNPUBLISHED}" ] && SERVICE_SHA="d000000"
+  if [ -d "${LOCAL}" ]; then
+    get_CURRENT_SHA "${LOCAL}"
+    SERVICE_SHA="${CURRENT_SHA}"
+  fi
+  #sha for both the service and the orders asking for it, changing either
+  #of these starts up a new container that will run in parallel with prior
+  #versions
+  if [ -n "${ORDER}" ] && [ -n "${ORDERS_SHA}" ] && [ -n "${SERVICE_SHA}" ]; then
+    dev_mode \
+      && CONTAINER_NAME="${ORDER}-$(date +d%y%m%d-d%H%M%S)" \
+      || CONTAINER_NAME="${ORDER}-${ORDERS_SHA}-${SERVICE_SHA}"
+  else
+    warn "Critical Info Missing - Not Deploying Container:  O: ${ORDER} OS: ${ORDERS_SHA} SS:${SERVICE_SHA}"
+    exit 1
+  fi
+
+  # This allows the user to pin a service to a specific container
+  # if this server is purely a "serve" starphleet server
+  if is_container_storage_on_s3 \
+  && [ -n "${SERVICE_PINNED_TO_CONTAINER}" ]; then
+    if [ -z "${BUILD_CONTAINERS}" ] \
+    || [ -f "/var/lib/lxc/${SERVICE_PINNED_TO_CONTAINER}.serve_only_override" ]; then
+      warn Overriding CONTAINER_NAME with "${SERVICE_PINNED_TO_CONTAINER}"
+      CONTAINER_NAME="${SERVICE_PINNED_TO_CONTAINER}"
+    fi
+  fi
+
+  info "Starting ${ORDER}: ${CONTAINER_NAME}"
+  if [ -n "${wait}" ]; then
+    parallel --semaphore --semaphorename starphleet-service-serve-order --jobs ${MAX_CONCURRENT_CONTAINER_BUILDS:-25} start starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
+  else
+    start --no-wait starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
+  fi
+fi
+unset DEPLOY_REASON

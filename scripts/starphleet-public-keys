@@ -41,6 +41,7 @@ chown ${ADMIRAL}:${ADMIRAL} ${AUTHFILE}
 # this means if any keys have been manually added to the account, they will be overwritten
 # When there are no authkeys in the HQ repo, no ssh access is left around
 CAPTAINSSH="${CAPTAIN_HOME}/.ssh"
+mkdir -p ${CAPTAINSSH}
 AUTHFILE="${CAPTAINSSH}/authorized_keys"
 test -f "${AUTHFILE}" && rm "${AUTHFILE}"
 

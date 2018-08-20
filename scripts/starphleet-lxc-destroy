@@ -16,5 +16,13 @@ starphleet-lxc-stop "${container_name}"
 while lxc-ls | grep "^${container_name}$"; do
   info destroying ${container_name}
   lxc-destroy --name "${container_name}" 2>&1
-  sleep 1
 done
+
+# Destroy command from LXC sometimes misses getting rid of its
+# trash so lets help just in case.
+lxc_container_path="/var/lib/lxc/${container_name}"
+
+[ -n "${container_name}" ] \
+  && [ -d "${lxc_container_path}" ] \
+  && rm -rf "${lxc_container_path}" \
+  || true

@@ -23,6 +23,16 @@ if ! validate_security; then
   exit 1
 fi
 
+if [ -n "${UNPUBLISHED}" ]; then
+  exit 0
+fi
+
+if is_container_storage_on_s3 \
+   && [ -z "${SERVE_CONTAINERS}" ]; then
+  # If we aren't serving we shouldn't publish
+  exit 0
+fi
+
 ORIGINAL_ORDER_NAME="${order}"
 
 if [ -n "${publish_path}" ]; then
@@ -36,6 +46,9 @@ fi
 
 #mount this service over a path
 MOUNT_CONF="${NGINX_CONF}/published/${order}.conf"
+# this is where the confs for all the services WITHOUT the 
+# access exclusions will be put
+SECURE_CONF="${NGINX_CONF}/published_secure/${order}.conf"
 MOUNT_CACHED_CONF="${NGINX_CONF}/published/${order}_cached.conf"
 #mount this service over a port
 BARE_CONF="${NGINX_CONF}/published_bare/${order}.conf"
@@ -57,6 +70,7 @@ mkdir -p "${NGINX_CONF}/published_bare"
 mkdir -p "${NGINX_CONF}/proxy_for"
 mkdir -p "${NGINX_CONF}/named_servers"
 mkdir -p "${NGINX_CONF}/htpasswd"
+mkdir -p "${NGINX_CONF}/published_secure"
 
 [ -f "${NGINX_CONF}/published/crt" ] || cp "${NGINX_CONF}/crt" "${NGINX_CONF}/published/crt"
 [ -f "${NGINX_CONF}/published/key" ] || cp "${NGINX_CONF}/key" "${NGINX_CONF}/published/key"
@@ -84,6 +98,7 @@ fi
 
 #basic publication at an url mount point
 cat << EOF > "${MOUNT_CONF}"
+location ${public_url} { return 301 \$request_protocol://\$host${public_url}/\$is_args\$args; }
 location ${public_url}/ {
   gzip on;
   gzip_types *;
@@ -276,7 +291,7 @@ if [ -n "${PROXY_FOR_NAMES}" ]; then
   #(e.g. in the orders find 'proxy_for some.dns.name.com')
   if [  -r "${NGINX_CONF}/proxy_for_template.conf.head" -a -r "${NGINX_CONF}/proxy_for_template.conf.tail" -a -r "${MOUNT_CONF}" ]
   then
-    cat "${MOUNT_CONF}" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}[location [" | cat "${NGINX_CONF}/proxy_for_template.conf.head" - "${NGINX_CONF}/proxy_for_template.conf.tail" | sed --regexp-extended -e "s[\{\{\{proxy_for_names\}\}\}[${PROXY_FOR_NAMES//./\.}[" > "${PROXY_FOR_CONF}"
+    cat "${MOUNT_CONF}" | grep -v "location ${public_url} { return 301 \$request_protocol://\$host${public_url}/\$is_args\$args; }" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}[location [" | cat "${NGINX_CONF}/proxy_for_template.conf.head" - "${NGINX_CONF}/proxy_for_template.conf.tail" | sed --regexp-extended -e "s[\{\{\{proxy_for_names\}\}\}[${PROXY_FOR_NAMES//./\.}[" > "${PROXY_FOR_CONF}"
   else
     error 'unable to find proxy_for_template.conf.* files. cannot set up proxying for provided names'
   fi
@@ -294,7 +309,7 @@ if [ -n "${SERVER_NAMES}" ]; then
   SERVER_NAMES_CONF_TAIL="${NGINX_CONF}/${SERVER_NAMES_CONF_NAME}.conf.tail"
   if [  -r "${SERVER_NAMES_CONF_HEAD}" -a -r "${SERVER_NAMES_CONF_TAIL}" -a -r "${MOUNT_CONF}" ]
   then
-    cat "${MOUNT_CONF}" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}[location [" | cat "${SERVER_NAMES_CONF_HEAD}" - "${SERVER_NAMES_CONF_TAIL}" | sed --regexp-extended -e "s[\{\{\{server_names\}\}\}[${SERVER_NAMES//./\.}[" > "${SERVER_NAMES_CONF}"
+    cat "${MOUNT_CONF}" | grep -v "location ${public_url} { return 301 \$request_protocol://\$host${public_url}/\$is_args\$args; }" | sed -r -e 's[rewrite .*$[[' -e "s[location ${public_url}[location [" | cat "${SERVER_NAMES_CONF_HEAD}" - "${SERVER_NAMES_CONF_TAIL}" | sed --regexp-extended -e "s[\{\{\{server_names\}\}\}[${SERVER_NAMES//./\.}[" > "${SERVER_NAMES_CONF}"
   else
     error 'unable to find named_server.conf.* files. cannot set up named server for provided names'
   fi
@@ -302,5 +317,8 @@ fi
 
 # generate a cached configuration
 if [ -n "${ADD_CACHED_LOCATION}" ]; then
-	cat "${MOUNT_CONF}" | sed -r -e "s[rewrite .*\$[rewrite ${public_url}_cached/(.*) /\$1 break;[" -e "s[location ${public_url}/[location ${public_url}_cached/ [" | sed -e "s[# cache goes here[add_header X-Cache-Status \$upstream_cache_status;\n  proxy_cache aggressive_zone;\n  proxy_cache_lock on;\n  proxy_cache_methods GET HEAD POST;\n  proxy_ignore_headers Expires Cache-Control;\n  proxy_cache_lock_timeout 1d;\n  proxy_cache_use_stale updating error timeout;\n  proxy_cache_valid 200 2h;\n  proxy_buffering on;\n  proxy_cache_key \$scheme\$proxy_host\$uri\$is_args\$args\$http_method;[" > "${MOUNT_CACHED_CONF}"
+	cat "${MOUNT_CONF}" | grep -v "location ${public_url} { return 301 \$request_protocol://\$host${public_url}/\$is_args\$args; }" | sed -r -e "s[rewrite .*\$[rewrite ${public_url}_cached/(.*) /\$1 break;[" -e "s[location ${public_url}/[location ${public_url}_cached/ [" | sed -e "s[# cache goes here[add_header X-Cache-Status \$upstream_cache_status;\n  proxy_cache aggressive_zone;\n  proxy_cache_lock on;\n  proxy_cache_methods GET HEAD POST;\n  proxy_ignore_headers Expires Cache-Control;\n  proxy_cache_lock_timeout 1d;\n  proxy_cache_use_stale updating error timeout;\n  proxy_cache_valid 200 2h;\n  proxy_buffering on;\n  proxy_cache_key \$scheme\$proxy_host\$uri\$is_args\$args\$http_method;[" > "${MOUNT_CACHED_CONF}"
 fi
+
+# create a secure conf which doesn't allow anyone to skip auth
+grep -v allow "${MOUNT_CONF}" | grep -v "satisfy any" > "${SECURE_CONF}"

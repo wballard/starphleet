@@ -19,7 +19,7 @@ do
       echo 'MAILTO=""' >> "${HOME}/sh_at"
       started="true"
     fi
-    echo "${SH_AT}" runner "${app_root}" "${orders}" "${file} 2>&1 | logger -t '$(basename ${orders_dir})'" >> "${HOME}/sh_at"
+    echo "${SH_AT}" runner "${app_root}" "${orders}" "${file} 2>&1 | logger -t '{{$(basename ${orders_dir})}}'" >> "${HOME}/sh_at"
   fi
 done
 if [ -f "${HOME}/sh_at" ]; then

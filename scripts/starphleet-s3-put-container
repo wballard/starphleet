@@ -1,0 +1,34 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-s3-put-container <containerName>
+###
+### Fuzzy match and make attaching to instances easier
+die_on_error
+run_as_root_or_die
+
+# Sets AWS_COMMAND_PATH (and installs a newer version of aws command if needed)
+get_updated_aws_command
+
+# These envs are required for the AWS command line
+export AWS_DEFAULT_REGION="${S3_STORAGE_BUCKET_REGION}"
+export AWS_ACCESS_KEY_ID="${S3_STORAGE_AWS_ACCESS_KEY_ID}"
+export AWS_SECRET_ACCESS_KEY="${S3_STORAGE_AWS_SECRET_ACCESS_KEY}"
+
+CONTAINER_NAME="${containerName}"
+CONTAINER_ROOT=/var/lib/lxc/${CONTAINER_NAME}
+if is_container_storage_on_s3 \
+&& [ -n "${BUILD_CONTAINERS}" ] \
+&& [ -f "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" ] \
+&& [ ! -f "${CONTAINER_ROOT}.serve_only_override" ]; then
+
+  info "Pushing ${CONTAINER_NAME} to S3 Bucket Path ${S3_STORAGE_BUCKET_PATH}"
+
+  export S3_PATH_FOR_CONTAINER_STORAGE="s3://${S3_STORAGE_BUCKET_PATH}"
+  "${AWS_COMMAND_PATH}" s3 cp "${CONTAINER_ROOT}/${CONTAINER_NAME}.tar.gz" "${S3_PATH_FOR_CONTAINER_STORAGE}/${CONTAINER_NAME}.tar.gz"
+fi
+
+# Because explicit..
+exit 0
+
+
+   
