@@ -1,7 +1,5 @@
-#!/usr/bin/env bash
-
 sudo apt-get -y update
-sudo apt-get install -y --force-yes $(cat << FFF
+sudo apt-get install -y --assume-yes $(cat << FFF
 autoconf
 awscli
 bind9-host
@@ -27,18 +25,17 @@ libmysqlclient-dev
 libpq-dev
 libsqlite3-dev
 libssl-dev
-libssl0.9.8
+libssl1.0.0
 libxml2-dev
 libxslt-dev
 mercurial
 mysql-client
 netcat-openbsd
-openjdk-6-jdk
-openjdk-6-jre-headless
 openssh-client
 openssh-server
+default-jdk-headless
 python-dev
-ruby1.9.1-dev
+ruby
 socat
 sqlite3
 telnet
