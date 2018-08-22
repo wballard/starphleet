@@ -104,11 +104,11 @@ else
       FS_TYPE="rootfs"
     elif is_container_storage_on_s3 && [ -n "${BUILD_CONTAINERS}" ]; then
       info "Creating Container For S3 Storage - Takes longer"
-      lxc-clone -B "dir" -o "${base_container_name}" -n "${container_name}"
+      lxc-copy -B "dir" --name "${base_container_name}" --newname "${container_name}"
       FS_TYPE="rootfs"
     else
       info "Creating OverlayFS Container"
-      lxc-clone --snapshot -B "overlayfs" -o "${base_container_name}" -n "${container_name}"
+      lxc-copy --snapshot -B "overlayfs" --name "${base_container_name}" --newname "${container_name}"
       FS_TYPE="delta0"
     fi
     CONTAINER_OVERLAY="${CONTAINER_ROOT}/${FS_TYPE}"
