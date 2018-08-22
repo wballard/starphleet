@@ -1,4 +1,5 @@
 #! /usr/bin/env bash
+# source ami: ami-759bc50a
 cd /
 sudo git clone https://github.com/wballard/starphleet.git
 cd /starphleet 
@@ -6,6 +7,7 @@ sudo git checkout sixteen-oh-four
 sudo cp ./scripts/starphleet-launcher /usr/bin
 
 sudo apt-get update
+sudo apt-get install --assume-yes python
 sudo apt-get install --assume-yes lxc
 sudo apt-get install --assume-yes lxc1
 sudo apt-get install --assume-yes parallel
