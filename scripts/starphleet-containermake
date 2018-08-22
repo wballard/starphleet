@@ -83,7 +83,9 @@ else
   #
   #  See more here:  http://glg.link/vQpIdw
   #
-  LXC_OPT_FOR_STDOUT="-L /dev/stdout"
+  # now that we're trying to install things during startup of the instances.... this causes failure
+  # so I'm gonna take it out for a bit and test
+  # LXC_OPT_FOR_STDOUT="-L /dev/stdout"
 
   # If SERVE_CONTAINERS is _not_ set - we would always want to fall back to
   # default behavior (behavior before introducing container storage).  This
