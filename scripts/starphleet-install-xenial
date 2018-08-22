@@ -1,0 +1,19 @@
+#! /usr/bin/env bash
+cd /
+sudo git clone https://github.com/wballard/starphleet.git
+cd /starphleet 
+sudo git checkout sixteen-oh-four
+sudo cp ./scripts/starphleet-launcher /usr/bin
+
+sudo apt-get update
+sudo apt-get install --assume-yes lxc
+sudo apt-get install --assume-yes lxc1
+sudo apt-get install --assume-yes parallel
+sudo apt-get install --assume-yes upstart
+sudo apt-get install --assume-yes upstart-sysv
+sudo apt-get install --assume-yes sysvinit-utils
+sudo apt-get install --assume-yes cgroupfs-mount
+sudo cp /usr/share/sysvinit/inittab /etc/inittab
+sudo update-initramfs -u
+#reboot
+start lxc-net
