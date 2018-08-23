@@ -190,7 +190,3 @@ EOF
 starphleet-buildpacks
 
 starphleet-cleanup
-
-# Start starphleet
-start starphleet
-announce *Welcome to Starphleet*
