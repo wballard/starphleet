@@ -6,7 +6,7 @@
 ### Kill off every running service for an order except the current service
 
 # Reap any containers
-for name in $(lxc-ls | grep --extended-regexp -e "^${order}-[a-f0-9]+-[a-f0-9]+" | grep --invert-match "${current_service_name}")
+for name in $(lxc-ls -1 | grep --extended-regexp -e "^${order}-[a-f0-9]+-[a-f0-9]+" | grep --invert-match "${current_service_name}")
 do
 
   STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
@@ -96,7 +96,7 @@ do
     container_name=$(basename "${CONTAINER_STATUS_FILE}" | sed -e 's/.starphleetstatus.//')
 
     # Check if there's a container associated with this status file
-    check=$(lxc-ls | grep "${container_name}")
+    check=$(lxc-ls -1 | grep "${container_name}")
 
     info "Checking if status file stale: ${CONTAINER_STATUS_FILE}"
 
