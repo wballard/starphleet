@@ -10,12 +10,12 @@ run_as_root_or_die
 [ -z "${service}" ] && echo Please pass the name of a container && exit 1
 
 # Check and make sure there's at least one running container
-CONTAINERS=$(lxc-ls | grep ${service} | awk '{print $1}')
+CONTAINERS=$(lxc-ls -1 | grep ${service} | awk '{print $1}')
 [ -z "${CONTAINERS}" ] && echo No Running Containers && exit 1
 
 # Now figure out which container they want and attach
 echo "Connect to which instance:"
-select container in $(lxc-ls | grep ${service} | awk '{print $1}'); do
+select container in $(lxc-ls -1 | grep ${service} | awk '{print $1}'); do
   [ ! -z ${container} ] && sudo lxc-attach -n "${container}" -- su - ubuntu
   break;
 done
