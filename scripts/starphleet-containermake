@@ -63,7 +63,7 @@ else
   flock 200
 fi
 
-if lxc-ls | grep "^${container_name}$"; then
+if lxc-ls -1 | grep "^${container_name}$"; then
   info container exists
   exit 0
 else
