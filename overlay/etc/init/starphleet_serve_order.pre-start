@@ -63,9 +63,9 @@ else
   && [ ${CONTAINERIZE_EXIT_CODE} -gt 0 ]; then
     info 'Container Failed To Build'
     echo 'building failed' > "${STATUS_FILE}"
+    mail_log
     exit 1
   fi
-
 
   exit 0
 fi
