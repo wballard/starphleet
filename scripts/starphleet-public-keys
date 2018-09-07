@@ -30,7 +30,6 @@ do
     echo '' >> ${AUTHFILE}
   fi
 done
-cat "${ADMIRALSSH}/id_rsa.pub" >> ${AUTHFILE}
 
 chmod 600 ${AUTHFILE}
 chown ${ADMIRAL}:${ADMIRAL} ${AUTHFILE}
