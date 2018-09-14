@@ -18,8 +18,8 @@ if [ -z ${CONTAINER_IP} ] || [ -z ${CONTAINER_PORT} ]; then
   exit 1
 fi
 
-get_APIGATEWAY_HOST API_GATEWAY_HOST $name
-get_APIGATEWAY_KEY API_GATEWAY_KEY_VALUE $name
+get_APIGATEWAY_HOST __API_GATEWAY_HOST $name
+get_APIGATEWAY_KEY __API_GATEWAY_KEY_VALUE $name
 
 if [ ! -z "${__API_GATEWAY_HOST}" ] && [ ! -z "${__API_GATEWAY_KEY_VALUE}" ]; then
   TEST_GET="https://${__API_GATEWAY_HOST}/dev${URL}"
