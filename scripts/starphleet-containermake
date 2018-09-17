@@ -184,7 +184,10 @@ EOF
       HQ_DEST="${CONTAINER_OVERLAY}${STARPHLEET_ROOT}/headquarters/"
       mkdir -p "${HQ_DEST}"
       rsync -ra --exclude="git/" "${STARPHLEET_ROOT}/headquarters/" "${HQ_DEST}"
-      rsync -ra "${STARPHLEET_ROOT}/headquarters/${order}/git/" "${HQ_DEST}${order}/git/"
+      # Unpublished containers might not deploy code.
+      if [ -d "${STARPHLEET_ROOT}/headquarters/${order}/git/" ]; then
+        rsync -ra "${STARPHLEET_ROOT}/headquarters/${order}/git/" "${HQ_DEST}${order}/git/"
+      fi
     fi
     #this is the build script for the container itself
     info Setting up the build script inside the container
