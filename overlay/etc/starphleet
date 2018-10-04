@@ -97,3 +97,10 @@ unset JWT_EXPIRATION_IN_SECONDS
 unset JWT_MAX_TOKEN_AGE_IN_SECONDS
 # HTPASSWD Needs
 unset HTPASSWD
+
+##########################################################
+# Secrets Service In AWS
+##########################################################
+unset AWS_SECRETS_DEFAULT_REGION
+unset AWS_SECRETS_AWS_ACCESS_KEY_ID
+unset AWS_SECRETS_AWS_SECRET_ACCESS_KEY
