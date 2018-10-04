@@ -44,8 +44,35 @@ sqlite3
 telnet
 zlib1g-dev
 bsdmainutils
+groff
+libyaml-dev
+python-dev
+python-docutils
+python-pip
 FFF
 )
+
+
+## This is a working set of steps as of Oct 1, 2018 to get a modern
+## version of the AWS Cli running on Ubuntu 14.04.  Every few months
+## the endzone moves and upstream complications add complexity to the
+## process.  As such, it's possible this will need more adjustments
+## at a later date.  This may be removable when support for Ubuntu 14.04
+## is deprecated.
+set +e
+## Because:  https://github.com/aws/aws-cli/issues/2999#issuecomment-356019306
+sudo pip uninstall boto3 -y
+sudo pip uninstall boto -y
+sudo pip uninstall botocore -y
+# Fix bug caused by apt/ubuntu
+sudo rm -rf /usr/local/lib/python2.7/dist-packages/botocore-*.dist-info
+sudo pip install botocore --force-reinstall --upgrade
+#######
+## Because: https://github.com/aws/aws-cli/issues/3007#issuecomment-350797161
+sudo pip install --upgrade s3transfer
+sudo rm -rf /tmp/pip_build_root/PyYAML
+sudo pip install awscli --force-reinstall --upgrade
+set -e
 
 #ruby superstition
 export HOME=/

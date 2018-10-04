@@ -360,6 +360,52 @@ function dev_mode() {
   fi
 }
 
+function secrets() {
+  # Not necessary but more readable
+  KEY_NAME_IN_AWS_SECRETS="${1}"
+  KEY_NAME_IN_THE_VALUE_OF_THE_SECRET="${2}"
+  # Our default behavior should be to not run outside a container.  Orders
+  # files are evaluated constantly by Starphleet and there is no reason to
+  # add additional burden or calls to a secrets service until we actually need
+  # the secrets - which, is when the orders file is run within a container
+  if [ -z "${ORDERS_NAME}" ]; then
+    echo Running Outside Container
+    return
+  fi
+
+  # If we don't have an aws command we have nothing.
+  # TODO: Do we need a version check here?  We need to check if
+  #       the default aws command from Ubuntu 14.04LTS supports
+  #       secrets.  We will never support anything older than
+  #       Ubuntu 14.04
+  if ! which aws > /dev/null; then
+    echo Missing Requirements
+    return
+  fi
+
+  # Our Default Should be developmentkeys
+  KEY_PREFIX="${AWS_SECRETS_AWS_DEFAULT_REGION}/developmentkeys/"
+
+  # ...but, some list of conditions lead us towards production keys
+  # TODO: The list?
+  if [ "${NODE_ENV}" == "production" ]; then
+    KEY_PREFIX="${AWS_SECRETS_AWS_DEFAULT_REGION}/productionkeys/"
+  fi
+
+  # Get the key
+  #  - redirect stderr since aws cli is whining lately - but, we keep errors just-in-case
+  #  - parse with python (jq isn't modern by default in old Ubuntu)
+  #  - Return 'something' on failure
+  AWS_DEFAULT_REGION="${AWS_SECRETS_AWS_DEFAULT_REGION}" \
+  AWS_ACCESS_KEY_ID="${AWS_SECRETS_AWS_ACCESS_KEY_ID}" \
+  AWS_SECRET_ACCESS_KEY="${AWS_SECRETS_AWS_SECRET_ACCESS_KEY}" \
+  eval aws secretsmanager get-secret-value --secret-id "${KEY_PREFIX}${KEY_NAME_IN_AWS_SECRETS}" \
+    2> /tmp/.$$.aws_secrets_error.log \
+    | python -c 'import sys, json; print json.loads(json.load(sys.stdin)["SecretString"])["'${KEY_NAME_IN_THE_VALUE_OF_THE_SECRET}'"]' \
+    || echo "AWS Command Broke"
+
+}
+
 # Provide a way for scripts to easily detect if this
 # starphleet instance is storing the containers on S3.
 function is_container_storage_on_s3() {
