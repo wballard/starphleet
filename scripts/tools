@@ -384,19 +384,19 @@ function secrets() {
   fi
 
   # Our Default Should be developmentkeys
-  KEY_PREFIX="${AWS_DEFAULT_REGION}/developmentkeys/"
+  KEY_PREFIX="${AWS_SECRETS_AWS_DEFAULT_REGION}/developmentkeys/"
 
   # ...but, some list of conditions lead us towards production keys
   # TODO: The list?
   if [ "${NODE_ENV}" == "production" ]; then
-    KEY_PREFIX="${AWS_DEFAULT_REGION}/productionkeys/"
+    KEY_PREFIX="${AWS_SECRETS_AWS_DEFAULT_REGION}/productionkeys/"
   fi
 
   # Get the key
   #  - redirect stderr since aws cli is whining lately - but, we keep errors just-in-case
   #  - parse with python (jq isn't modern by default in old Ubuntu)
   #  - Return 'something' on failure
-  AWS_DEFAULT_REGION="${AWS_SECRETS_DEFAULT_REGION}" \
+  AWS_DEFAULT_REGION="${AWS_SECRETS_AWS_DEFAULT_REGION}" \
   AWS_ACCESS_KEY_ID="${AWS_SECRETS_AWS_ACCESS_KEY_ID}" \
   AWS_SECRET_ACCESS_KEY="${AWS_SECRETS_AWS_SECRET_ACCESS_KEY}" \
   eval aws secretsmanager get-secret-value --secret-id "${KEY_PREFIX}${KEY_NAME_IN_AWS_SECRETS}" \
