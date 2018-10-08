@@ -360,10 +360,28 @@ function dev_mode() {
   fi
 }
 
+# Usage - fromJson "somejsonstring" "somekey"
+function fromJson() {
+    python -c \
+"import json
+import sys
+
+json_string, json_key = sys.argv[1:]
+try:
+    print json.loads(json_string)[json_key]
+except Exception:
+    print \"This isn't json!\"" \
+    "${1}" "${2}"
+}
+
+function getRegionFromInstanceMetadata() {
+    AZ=$(curl http://169.254.169.254/latest/meta-data/placement/availability-zone)
+    echo ${AZ::-1}
+}
+
 function secrets() {
   # Not necessary but more readable
   KEY_NAME_IN_AWS_SECRETS="${1}"
-  KEY_NAME_IN_THE_VALUE_OF_THE_SECRET="${2}"
   # Our default behavior should be to not run outside a container.  Orders
   # files are evaluated constantly by Starphleet and there is no reason to
   # add additional burden or calls to a secrets service until we actually need
@@ -383,27 +401,36 @@ function secrets() {
     return
   fi
 
+  AWS_DEFAULT_REGION="$(aws configure get region)"
+
+  # If we failed to get the region from the previous call or
+  # it came back blank for some reason, fetch the instance metadata
+  # from AWS' own instance metadata service directly.
+  if [ $? -ne 1 ] || [ -z "$AWS_DEFAULT_REGION" ]; then
+    AWS_DEFAULT_REGION="$(getRegionFromInstanceMetadata)"
+  fi
+
   # Our Default Should be developmentkeys
-  KEY_PREFIX="${AWS_SECRETS_AWS_DEFAULT_REGION}/developmentkeys/"
+  KEY_PREFIX="${AWS_DEFAULT_REGION}/developmentkeys/"
 
   # ...but, some list of conditions lead us towards production keys
   # TODO: The list?
   if [ "${NODE_ENV}" == "production" ]; then
-    KEY_PREFIX="${AWS_SECRETS_AWS_DEFAULT_REGION}/productionkeys/"
+    KEY_PREFIX="${AWS_DEFAULT_REGION}/productionkeys/"
   fi
 
   # Get the key
   #  - redirect stderr since aws cli is whining lately - but, we keep errors just-in-case
   #  - parse with python (jq isn't modern by default in old Ubuntu)
   #  - Return 'something' on failure
-  AWS_DEFAULT_REGION="${AWS_SECRETS_AWS_DEFAULT_REGION}" \
-  AWS_ACCESS_KEY_ID="${AWS_SECRETS_AWS_ACCESS_KEY_ID}" \
-  AWS_SECRET_ACCESS_KEY="${AWS_SECRETS_AWS_SECRET_ACCESS_KEY}" \
-  eval aws secretsmanager get-secret-value --secret-id "${KEY_PREFIX}${KEY_NAME_IN_AWS_SECRETS}" \
-    2> /tmp/.$$.aws_secrets_error.log \
-    | python -c 'import sys, json; print json.loads(json.load(sys.stdin)["SecretString"])["'${KEY_NAME_IN_THE_VALUE_OF_THE_SECRET}'"]' \
-    || echo "AWS Command Broke"
+  # echo "Test thing"
+  # echo "$(echo $AWS_DEFAULT_REGION)"
 
+  RAW_SECRET=$(AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION}" aws secretsmanager get-secret-value --secret-id "${KEY_PREFIX}${KEY_NAME_IN_AWS_SECRETS}")
+  fromJson "$RAW_SECRET" SecretString
+    # 2> /tmp/.$$.aws_secrets_error.log \
+    # | python -c 'import sys, json; print json.load(sys.stdin)["SecretString"]' \
+    # || echo "AWS Command Broke"
 }
 
 # Provide a way for scripts to easily detect if this
