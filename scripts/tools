@@ -420,17 +420,8 @@ function secrets() {
   fi
 
   # Get the key
-  #  - redirect stderr since aws cli is whining lately - but, we keep errors just-in-case
-  #  - parse with python (jq isn't modern by default in old Ubuntu)
-  #  - Return 'something' on failure
-  # echo "Test thing"
-  # echo "$(echo $AWS_DEFAULT_REGION)"
-
   RAW_SECRET=$(AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION}" aws secretsmanager get-secret-value --secret-id "${KEY_PREFIX}${KEY_NAME_IN_AWS_SECRETS}")
   fromJson "$RAW_SECRET" SecretString
-    # 2> /tmp/.$$.aws_secrets_error.log \
-    # | python -c 'import sys, json; print json.load(sys.stdin)["SecretString"]' \
-    # || echo "AWS Command Broke"
 }
 
 # Provide a way for scripts to easily detect if this
