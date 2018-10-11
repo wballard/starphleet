@@ -375,7 +375,7 @@ except Exception:
 }
 
 function getRegionFromInstanceMetadata() {
-    AZ=$(curl --connect-timeout 2 http://169.254.169.254/latest/meta-data/placement/availability-zone)
+    AZ=$(curl --connect-timeout 10 http://169.254.169.254/latest/meta-data/placement/availability-zone)
     echo ${AZ::-1}
 }
 
@@ -387,7 +387,7 @@ function secrets() {
   # add additional burden or calls to a secrets service until we actually need
   # the secrets - which, is when the orders file is run within a container
   if [ -z "${ORDERS_NAME}" ]; then
-    echo Running Outside Container
+    (>&2 echo "Running Outside Container")
     return
   fi
 
@@ -397,7 +397,7 @@ function secrets() {
   #       secrets.  We will never support anything older than
   #       Ubuntu 14.04
   if ! which aws > /dev/null; then
-    echo Missing Requirements
+    (>&2 echo "Missing Requirements")
     return
   fi
 
