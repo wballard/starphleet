@@ -181,6 +181,7 @@ captain ALL=(ALL) NOPASSWD: /usr/bin/starphleet-retry-deploy
 captain ALL=(ALL) NOPASSWD: /usr/bin/starphleet-start
 captain ALL=(ALL) NOPASSWD: /usr/bin/starphleet-stop
 captain ALL=(ALL) NOPASSWD: /usr/bin/starphleet-status
+captain ALL=(ALL) NOPASSWD: /usr/bin/starphleet-serve-one-order
 captain ALL=(ALL) NOPASSWD: /usr/bin/tail
 captain ALL=(ALL) NOPASSWD: /usr/bin/lxc-ls
 Defaults env_keep="SSH_AUTH_SOCK"
