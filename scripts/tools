@@ -360,6 +360,70 @@ function dev_mode() {
   fi
 }
 
+# Usage - fromJson "somejsonstring" "somekey"
+function fromJson() {
+    python -c \
+"import json
+import sys
+
+json_string, json_key = sys.argv[1:]
+try:
+    print json.loads(json_string)[json_key]
+except Exception:
+    print >> sys.stderr, \"This isn't json!\"" \
+    "${1}" "${2}"
+}
+
+function getRegionFromInstanceMetadata() {
+    AZ=$(curl --connect-timeout 10 http://169.254.169.254/latest/meta-data/placement/availability-zone)
+    echo ${AZ::-1}
+}
+
+function secrets() {
+  # Not necessary but more readable
+  KEY_NAME_IN_AWS_SECRETS="${1}"
+  # Our default behavior should be to not run outside a container.  Orders
+  # files are evaluated constantly by Starphleet and there is no reason to
+  # add additional burden or calls to a secrets service until we actually need
+  # the secrets - which, is when the orders file is run within a container
+  if [ -z "${ORDERS_NAME}" ]; then
+    (>&2 echo "Running Outside Container")
+    return
+  fi
+
+  # If we don't have an aws command we have nothing.
+  # TODO: Do we need a version check here?  We need to check if
+  #       the default aws command from Ubuntu 14.04LTS supports
+  #       secrets.  We will never support anything older than
+  #       Ubuntu 14.04
+  if ! which aws > /dev/null; then
+    (>&2 echo "Missing Requirements")
+    return
+  fi
+
+  AWS_DEFAULT_REGION="$(aws configure get region)"
+
+  # If we failed to get the region from the previous call or
+  # it came back blank for some reason, fetch the instance metadata
+  # from AWS' own instance metadata service directly.
+  if [ $? -ne 1 ] || [ -z "$AWS_DEFAULT_REGION" ]; then
+    AWS_DEFAULT_REGION="$(getRegionFromInstanceMetadata)"
+  fi
+
+  # Our Default Should be developmentkeys
+  KEY_PREFIX="${AWS_DEFAULT_REGION}/developmentkeys/"
+
+  # ...but, some list of conditions lead us towards production keys
+  # TODO: The list?
+  if [ "${NODE_ENV}" == "production" ]; then
+    KEY_PREFIX="${AWS_DEFAULT_REGION}/productionkeys/"
+  fi
+
+  # Get the key
+  RAW_SECRET=$(AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION}" aws secretsmanager get-secret-value --secret-id "${KEY_PREFIX}${KEY_NAME_IN_AWS_SECRETS}")
+  fromJson "$RAW_SECRET" SecretString
+}
+
 # Provide a way for scripts to easily detect if this
 # starphleet instance is storing the containers on S3.
 function is_container_storage_on_s3() {
