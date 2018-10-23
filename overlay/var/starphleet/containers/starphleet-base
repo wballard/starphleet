@@ -3,7 +3,6 @@
 sudo apt-get -y update
 sudo apt-get install -y --force-yes $(cat << FFF
 autoconf
-awscli
 bind9-host
 bison
 build-essential
