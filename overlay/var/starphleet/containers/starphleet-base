@@ -51,8 +51,6 @@ python-pip
 FFF
 )
 
-sudo apt-get remove awscli --assume-yes
-
 ## This is a working set of steps as of Nov 1, 2018 to get a modern
 ## version of the AWS Cli running on Ubuntu 14.04.  Every few months
 ## the endzone moves and upstream complications add complexity to the
@@ -61,6 +59,7 @@ sudo apt-get remove awscli --assume-yes
 ## is deprecated.
 set +e
 ## Because:  https://github.com/aws/aws-cli/issues/2999#issuecomment-356019306
+sudo apt-get remove awscli --assume-yes
 sudo pip uninstall boto3 -y
 sudo pip uninstall boto -y
 sudo pip uninstall botocore -y
