@@ -374,11 +374,6 @@ except Exception:
     "${1}" "${2}"
 }
 
-function getRegionFromInstanceMetadata() {
-    AZ=$(curl -s --connect-timeout 10 http://169.254.169.254/latest/meta-data/placement/availability-zone)
-    echo ${AZ::-1}
-}
-
 function secrets() {
   # Not necessary but more readable
   KEY_NAME_IN_AWS_SECRETS="${1}"
@@ -407,7 +402,7 @@ function secrets() {
   # it came back blank for some reason, fetch the instance metadata
   # from AWS' own instance metadata service directly.
   if [ $? -ne 1 ] || [ -z "$AWS_DEFAULT_REGION" ]; then
-    AWS_DEFAULT_REGION="$(getRegionFromInstanceMetadata)"
+    AWS_DEFAULT_REGION=${STARPHLEET_EC2_REGION::-1}
   fi
 
   # Our Default Should be developmentkeys
