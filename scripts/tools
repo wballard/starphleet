@@ -375,8 +375,12 @@ except Exception:
 }
 
 function getRegionFromInstanceMetadata() {
-    AZ=$(curl -s --connect-timeout 10 http://169.254.169.254/latest/meta-data/placement/availability-zone)
-    echo ${AZ::-1}
+  if [ -z "$AWS_DEFAULT_REGION" ]; then
+    AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+    export AWS_DEFAULT_REGION=${AZ::-1}
+  fi
+
+  echo $AWS_DEFAULT_REGION
 }
 
 function secrets() {
