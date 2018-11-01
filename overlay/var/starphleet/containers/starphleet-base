@@ -15,7 +15,6 @@ imagemagick
 iputils-tracepath
 libcurl4-openssl-dev
 libevent-dev
-libffi-dev
 libglib2.0-dev
 libjpeg-dev
 libjpeg62
