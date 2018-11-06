@@ -73,6 +73,9 @@ sudo rm -rf /tmp/pip_build_root/PyYAML
 sudo pip install awscli --force-reinstall --upgrade
 set -e
 
+sudo aws s3 cp s3://glg-deployment-packages/secrets /usr/bin/secrets
+sudo chmod +x /usr/bin/secrets
+
 #ruby superstition
 export HOME=/
 sudo gem install bundler
