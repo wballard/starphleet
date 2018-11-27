@@ -1,0 +1,11 @@
+#!/bin/bash
+
+while [ 1 ]
+do
+  source `which tools`
+  trace killing nginx workers that hang when shutting down
+  starphleet-nginx-kill-shutting-down-workers
+  # we'll wait 5 minutes, and fall through allowing our respawn
+  # to start us up again
+  sleep 300
+done
