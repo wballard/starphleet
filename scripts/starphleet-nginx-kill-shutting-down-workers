@@ -1,0 +1,14 @@
+#!/usr/bin/env starphleet-launcher
+### Usage:
+###    starphleet-nginx-kill-shutting down workers
+### --help
+###
+### Kill nginx workers that hang in shutting down state for longer than the EXECUTION_TIME_THRESHOLD
+###
+
+die_on_error
+run_as_root_or_die
+
+EXECUTION_TIME_THRESHOLD=10
+
+ps -axo pid,etime,command  | awk  '/[w]orker process is shutting down/ { print  $0  }' | awk -v EXECUTION_TIME_THRESHOLD="$EXECUTION_TIME_THRESHOLD" '{ n=split($2, parts, ":");  if(n > 2 || (n==2 && parts[1]>EXECUTION_TIME_THRESHOLD)){ print  $0 " "  parts[1]" > " EXECUTION_TIME_THRESHOLD }} ' | xargs sudo kill -9
