@@ -16,7 +16,7 @@ set-starphleet-env-from-user-data
 # We don't need a base container on ships that only "serve" containers from s3.
 if is_container_storage_on_s3 \
   && [ -z "${BUILD_CONTAINERS}" ] \
-  && [ -n "${SERVE_CONTAINERS}"]; then
+  && [ -n "${SERVE_CONTAINERS}" ]; then
   exit 0
 fi
 (sudo lxc-ls | grep starphleet-base) || sudo starphleet-build-base-container
