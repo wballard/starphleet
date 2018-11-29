@@ -19,7 +19,7 @@ if [ -z ${CONTAINER_IP} ] || [ -z ${CONTAINER_PORT} ]; then
 fi
 
 TEST_GET="http://${CONTAINER_IP}:${CONTAINER_PORT}${URL}"
-TEST_COMMAND="curl -X GET --connect-timeout ${HEALTHCHECK_TIMEOUT} -o /dev/null -s -w %{response_code} ${TEST_GET}"
+TEST_COMMAND="curl -X GET --connect-timeout ${HEALTHCHECK_TIMEOUT} -m ${HEALTHCHECK_TIMEOUT} -o /dev/null -s -w %{response_code} ${TEST_GET}"
 RESULT=`${TEST_COMMAND}`
 if [ ${RESULT} == "200" ] \
 || [ ${RESULT} == "301" ] \
