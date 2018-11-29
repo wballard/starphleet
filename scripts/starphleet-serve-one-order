@@ -66,9 +66,14 @@ function secrets() {
   :
 }
 
+function fromJson() {
+  :
+}
+
 run_orders "${order}"
 
 unset secrets
+unset fromJson
 
 if [ -n "${REDIRECT_TO_SERVICE}" ]; then
   info ${ORDER} is a redirect, nothing to deploy

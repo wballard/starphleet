@@ -14,9 +14,14 @@ function secrets() {
   :
 }
 
+function fromJson() {
+  :
+}
+
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
 
 unset secrets
+unset fromJson
 
 # Deploy all the things
 if [ "${UNPUBLISHED}" == "1" ]; then
