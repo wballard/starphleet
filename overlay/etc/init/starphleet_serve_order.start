@@ -3,7 +3,20 @@ source `which tools`
 
 info "starting ${name}"
 ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
+
+function secrets() {
+  :
+}
+
+function fromJson() {
+  :
+}
+
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
+
+unset secrets
+unset fromJson
+
 STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
 
 if [ "${UNPUBLISHED}" == "1" ]; then
