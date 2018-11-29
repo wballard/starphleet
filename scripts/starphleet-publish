@@ -16,7 +16,14 @@ declare -A BETAS
 
 # declare for redirects
 declare -A REDIRECT_TO
+
+function secrets() {
+  :
+}
+
 run_orders "${orders_file}"
+
+unset secrets
 
 if ! validate_security; then
   error "Not Publishing ${order} - Security Not Setup Correctly"
