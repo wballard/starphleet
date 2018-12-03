@@ -6,18 +6,7 @@ info "building ${name}"
 ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
 STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
 
-function secrets() {
-  :
-}
-
-function fromJson() {
-  :
-}
-
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
-
-unset secrets
-unset fromJson
 
 #pre stop if the service demands it
 if [ "${STOP_BEFORE_AUTODEPLOY}" == "1" ]; then
