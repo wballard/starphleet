@@ -10,7 +10,18 @@ ORDER_LOCAL="${HEADQUARTERS_LOCAL}/${order}/git"
 STATUS_FILE="${CURRENT_ORDERS}/${order}/.starphleetstatus.${name}"
 LAST_KNOWN_GOOD_CONTAINER="${CURRENT_ORDERS}/${order}/.last_known_good_container"
 
+function secrets() {
+  :
+}
+
+function fromJson() {
+  :
+}
+
 run_orders "${HEADQUARTERS_LOCAL}/${order}/orders"
+
+unset secrets
+unset fromJson
 
 # Deploy all the things
 if [ "${UNPUBLISHED}" == "1" ]; then

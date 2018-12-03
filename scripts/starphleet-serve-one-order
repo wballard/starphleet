@@ -62,7 +62,19 @@ unset PUBLISH_FROM
 unset REDIRECT_TO_SERVICE
 unset SERVICE_PINNED_TO_CONTAINER
 # Slurp the environment from the orders
+function secrets() {
+  :
+}
+
+function fromJson() {
+  :
+}
+
 run_orders "${order}"
+
+unset secrets
+unset fromJson
+
 if [ -n "${REDIRECT_TO_SERVICE}" ]; then
   info ${ORDER} is a redirect, nothing to deploy
   exit 1
