@@ -183,6 +183,16 @@ function validate_security() {
 
 function run_orders()
 {
+  if [ -z "${ORDERS_NAME}" ]; then
+    function secrets() {
+      :
+    }
+
+    function fromJson() {
+      :
+    }
+  fi
+
   autodeploy () {
     info autodeploy from "${1}"
     [ -n "${AUTODEPLOY}" ] && echo "${1}" > "${AUTODEPLOY}"
