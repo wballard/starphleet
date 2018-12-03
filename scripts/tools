@@ -184,11 +184,11 @@ function validate_security() {
 function run_orders()
 {
   if [ -z "${ORDERS_NAME}" ]; then
-    function secrets() {
+    secrets() {
       :
     }
 
-    function fromJson() {
+    fromJson() {
       :
     }
   fi
