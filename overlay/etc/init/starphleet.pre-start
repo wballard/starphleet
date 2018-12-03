@@ -11,6 +11,14 @@ echo INTERNAL_HOST=\"${LOCAL_IP}\" > /etc/starphleet.d/internal_host
 source `which tools`
 mount-block-devices
 move-syslog-to-biglogs
-(sudo lxc-ls | grep starphleet-base) || sudo starphleet-build-base-container
 set-starphleet-hq-from-userdata
 set-starphleet-env-from-user-data
+# We just set the environment, so we need to load it again
+source `which tools`
+# We don't need a base container on ships that only "serve" containers from s3.
+if is_container_storage_on_s3 \
+  && [ -z "${BUILD_CONTAINERS}" ] \
+  && [ -n "${SERVE_CONTAINERS}" ]; then
+  exit 0
+fi
+(sudo lxc-ls | grep starphleet-base) || sudo starphleet-build-base-container
