@@ -183,6 +183,11 @@ function validate_security() {
 
 function run_orders()
 {
+  # These two commands only exist inside the container.
+  # they are not built into starphleet, and instead, are
+  # pulled from S3.  We don't want them to error if the
+  # orders file is sourced when the commands don't exist
+  # ...for example, on the host machine.
   if [ -z "${ORDERS_NAME}" ]; then
     secrets() {
       :
