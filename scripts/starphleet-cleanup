@@ -5,8 +5,6 @@
 ###
 ### Call this to toss all starphleet state on shutdown
 
-exit 0
-
 test -d "${STARPHLEET_ROOT}/node_modules" && rm -rf "${STARPHLEET_ROOT}/node_modules"
 test -d ${STARPHLEET_TMP} && rm -rf ${STARPHLEET_TMP}/*
 test -d "${STARPHLEET_TMP}" && rm -rf "${STARPHLEET_TMP}/*"
