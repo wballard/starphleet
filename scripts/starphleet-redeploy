@@ -8,7 +8,7 @@
 run_as_root_or_die
 
 starphleet-reaper zzzzzzzzz "${order}" --force
-! dev_mode && rm -rf ${HEADQUARTERS_LOCAL}/${order}/git
-rm -rf ${CURRENT_ORDERS}/${order}/git
+! dev_mode && rm -rf "${HEADQUARTERS_LOCAL}/${order}/git"
+rm -rf "${CURRENT_ORDERS}/${order}/git"
 # Force a redeploy of unpublished orders which don't include GIT repos
 rm "${CURRENT_ORDERS}/${order}/.orders_sha"
