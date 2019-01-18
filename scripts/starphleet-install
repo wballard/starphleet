@@ -51,7 +51,7 @@ do
     cat /etc/fstab | grep -v "${drive}" > /tmp/fstab.tmp
     # Re-add our config to fstab
     #   Note: There are tabs on purpose in here - be careful
-    echo "${drive}	${EC2_DRIVES[$drive]}	auto	defaults,nobootwait,comment=cloudconfig	0	2" >> /tmp/fstab.tmp
+    echo "${drive}	${EC2_DRIVES[$drive]}	auto	defaults,comment=cloudconfig	0	2" >> /tmp/fstab.tmp
     # Move the tmp file into place
     mv /tmp/fstab.tmp /etc/fstab
   fi
