@@ -256,6 +256,11 @@ EOF
     starphleet-lxc-wait ${CONTAINER_NAME} RUNNING
     lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash starphleet-wait-network
   fi
+  
+  # Since all containers are built in one region at the moment, the region environment variables are stuck.
+  # Re-sourcing orers so correct variables are set when running in a new region.
+  info "Re-sourcing orders for accurate environment variables"
+  lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c starphleet-source-orders
 
   info "Configuring Network For Container"
   bridge_ip
