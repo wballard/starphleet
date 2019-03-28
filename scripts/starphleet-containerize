@@ -56,19 +56,6 @@ cat << 'EOF' >> ${CONTAINER_BUILD_SCRIPT}
 trace Downloading latest secrets binary
 sudo aws s3 cp s3://glg-deployment-packages/secrets /usr/bin/secrets --region us-east-1
 sudo chmod +x /usr/bin/secrets
-
-# Usage - fromJson "somejsonstring" "somekey"
-function fromJson() {
-    python -c \
-"import json
-import sys
-json_string, json_key = sys.argv[1:]
-try:
-    print json.loads(json_string)[json_key]
-except Exception:
-    print >> sys.stderr, \"This isn't json!\"" \
-    "${1}" "${2}"
-}
 EOF
 
 #now -- this is escaped, lots of variables included from this script
