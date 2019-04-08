@@ -60,19 +60,14 @@ end
 ------------------------------------------------------------------------------
 -- @function _sendUserToLogin()
 --
--- Build the appropriate URL based on the calling service' "auth_site"
--- setting.  Then redirect the user to the "auth_site".  This function
--- will be called anywhere a JWT token fails to meet the criteria to
--- allow the user to proceed
+-- Send the user to the configure auth site
 ------------------------------------------------------------------------------
 local _sendUserToLogin = function()
-  local redirectUrl = ngx.var.request_uri
-  redirectUrl = _replace(redirectUrl, ngx.var.public_url, jwt_auth_site)
   ngx.req.set_header('X-Starphleet-JWT-Secret', jwt_secret);
   ngx.req.set_header('X-Starphleet-Redirect', "true");
   ngx.req.set_header('X-Starphleet-OriginalUrl', ngx.var.request_uri);
   ngx.req.set_header('X-Starphleet-Authentic', ngx.var.authentic_token);
-  return ngx.exec(redirectUrl)
+  return ngx.exec(jwt_auth_site .. "/")
 end
 
 ------------------------------------------------------------------------------
