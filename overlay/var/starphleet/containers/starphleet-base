@@ -49,4 +49,4 @@ FFF
 
 #ruby superstition
 export HOME=/
-sudo gem install bundler
+sudo gem install bundler -v 1.16.5
