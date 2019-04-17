@@ -60,7 +60,7 @@ end
 ------------------------------------------------------------------------------
 -- @function _sendUserToLogin()
 --
--- Send the user to the configure auth site
+-- Send the user to the configured auth site
 ------------------------------------------------------------------------------
 local _sendUserToLogin = function()
   ngx.req.set_header('X-Starphleet-JWT-Secret', jwt_secret);
