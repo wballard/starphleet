@@ -5,7 +5,8 @@ set +e
 
 # Set the local IP
 mkdir -p /etc/starphleet.d
-LOCAL_IP=$(ifconfig eth0 | grep "inet addr" | cut -f2 -d":" | cut -f1 -d" ")
+IFACE=$(netstat -rn | egrep '^0.0' | awk '{print $8}')
+LOCAL_IP=$(ifconfig "${IFACE}" | grep "inet " | cut -f2 -d":" | cut -f1 -d" ")
 echo INTERNAL_HOST=\"${LOCAL_IP}\" > /etc/starphleet.d/internal_host
 
 source `which tools`
