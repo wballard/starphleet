@@ -13,6 +13,7 @@ local jwt_revocation_dir = ngx.var.jwt_revocation_dir
 local jwt_max_token_age_in_seconds = tonumber(ngx.var.jwt_max_token_age_in_seconds)
 local jwt_expiration_in_seconds = tonumber(ngx.var.jwt_expiration_in_seconds)
 local headers = ngx.req.get_headers()
+local jwt_auth_required = ngx.var.jwt_auth_required
 
 -- *****************************************************************************
 -- * Guards
@@ -247,6 +248,16 @@ if token
   ngx.req.set_header('X-Starphleet-Access-Denied', _accessDeniedFlags)
   token = nil
 end
+
+------------------------------------------------------------------------------
+-- acr claim and auth required:
+-- If auth is required and the acr claim is missing or not equal to 1 (authed)
+-- then set header
+------------------------------------------------------------------------------
+if token and jwt_auth_required and (!token.payload.acr or token.payload.acr !== 1) then
+  ngx.req.set_header('X-Starphleet-Auth-Required', jwt_auth_required)
+  token = nil
+end  
 
 ------------------------------------------------------------------------------
 -- If the above process results in a valid token then we set the cookie
