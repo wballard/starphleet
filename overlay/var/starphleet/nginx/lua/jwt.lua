@@ -234,6 +234,20 @@ elseif _isValidToken(verified_cookie_token) then
 end
 
 ------------------------------------------------------------------------------
+-- acr claim and auth required:
+-- If auth is required and the acr claim is missing or not equal to 1 (authed)
+-- then set header
+------------------------------------------------------------------------------
+if token and jwt_auth_required and (!token.payload.acr or token.payload.acr !== 1) then
+  ngx.req.set_header('X-Starphleet-Auth-Required', jwt_auth_required)
+  token = nil
+end
+
+if !token and jwt_auth_required then
+  ngx.req.set_header('X-Starphleet-Auth-Required', "true")
+end  
+
+------------------------------------------------------------------------------
 -- Access Flags:
 -- If the valid token contains 'af' (access flags) we will limit
 -- the response at a service level based on these flags.
@@ -246,16 +260,6 @@ if token
   and bit.band(token.payload.af, jwt_access_flags) == 0 then
   local _accessDeniedFlags = token.payload.af .. "," .. jwt_access_flags
   ngx.req.set_header('X-Starphleet-Access-Denied', _accessDeniedFlags)
-  token = nil
-end
-
-------------------------------------------------------------------------------
--- acr claim and auth required:
--- If auth is required and the acr claim is missing or not equal to 1 (authed)
--- then set header
-------------------------------------------------------------------------------
-if token and jwt_auth_required and (!token.payload.acr or token.payload.acr !== 1) then
-  ngx.req.set_header('X-Starphleet-Auth-Required', jwt_auth_required)
   token = nil
 end  
 
