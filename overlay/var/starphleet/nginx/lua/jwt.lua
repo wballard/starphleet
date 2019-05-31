@@ -238,7 +238,7 @@ end
 -- If auth is required and the acr claim is missing or not equal to 1 (authed)
 -- then set header
 ------------------------------------------------------------------------------
-if token and jwt_auth_required and (not token.payload.acr or token.payload.acr ~= 1) then
+if token and jwt_auth_required and (not token.payload.acr) then
   ngx.req.set_header('X-Starphleet-Auth-Required', jwt_auth_required)
   token = nil
 end
