@@ -240,7 +240,7 @@ end
 ------------------------------------------------------------------------------
 if jwt_auth_required then
   if not token then
-    ngx.req.set_header('X-Starphleet-Auth-Required', "true")
+    ngx.req.set_header('X-Starphleet-Auth-Required', jwt_auth_required)
   elseif token and (not token.payload.acr) then
     ngx.req.set_header('X-Starphleet-Auth-Required', jwt_auth_required)
     token = nil
