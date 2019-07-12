@@ -5,6 +5,7 @@ do
   source `which tools`
   trace checking headquarters ${HEADQUARTERS_REMOTE} for updates
   if [ -n "${HEADQUARTERS_REMOTE}" ]; then
+
     #pull down the actual headquarters changes
     if starphleet-git-synch "${HEADQUARTERS_REMOTE}" "${HEADQUARTERS_LOCAL}"; then
       latest_AUTHOR ${HEADQUARTERS_LOCAL}
@@ -17,6 +18,7 @@ do
       service postfix reload || true
       starphleet-hup-nginx
     fi
+    sleep 3
   fi
   # we'll wait a bit, and fall through allowing our respawn
   # to start us up again
