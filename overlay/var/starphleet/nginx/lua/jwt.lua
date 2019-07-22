@@ -239,10 +239,8 @@ end
 -- If auth is required and the acr claim is missing set header.
 ------------------------------------------------------------------------------
 if jwt_auth_required then
-  if not token then
-    ngx.req.set_header('X-Starphleet-Auth-Required', jwt_auth_required)
-  elseif token and (not token.payload.acr) then
-    ngx.req.set_header('X-Starphleet-Auth-Required', jwt_auth_required)
+  ngx.req.set_header('X-Starphleet-Auth-Required', jwt_auth_required)
+  if token and token.payload and not token.payload.acr then
     token = nil
   end
 end
@@ -261,7 +259,7 @@ if token
   local _accessDeniedFlags = token.payload.af .. "," .. jwt_access_flags
   ngx.req.set_header('X-Starphleet-Access-Denied', _accessDeniedFlags)
   token = nil
-end  
+end
 
 ------------------------------------------------------------------------------
 -- If the above process results in a valid token then we set the cookie
