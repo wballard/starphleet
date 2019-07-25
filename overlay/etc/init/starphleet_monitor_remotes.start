@@ -17,5 +17,6 @@ do
     #run the order as a whole script with the autodeploy function defined above
     #this lets folks get creative in orders files as needed
     bash "${remote}" || true
+    sleep "${STARPHLEET_LOOP_SLEEP_SECONDS}"
   done
 done
