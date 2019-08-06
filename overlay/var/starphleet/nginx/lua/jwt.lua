@@ -13,7 +13,6 @@ local jwt_revocation_dir = ngx.var.jwt_revocation_dir
 local jwt_max_token_age_in_seconds = tonumber(ngx.var.jwt_max_token_age_in_seconds)
 local jwt_expiration_in_seconds = tonumber(ngx.var.jwt_expiration_in_seconds)
 local headers = ngx.req.get_headers()
-local jwt_auth_required = ngx.var.jwt_auth_required
 
 -- *****************************************************************************
 -- * Guards
@@ -225,18 +224,6 @@ elseif _isValidToken(verified_url_token) then
 elseif _isValidToken(verified_cookie_token) then
   if not _isJwtTokenIdentityChanging(verified_url_token, verified_cookie_token) then
     token = verified_cookie_token
-  end
-end
-
-------------------------------------------------------------------------------
--- acr claim and auth required:
--- if auth requred and no token set the header.
--- If auth is required and the acr claim is missing set header.
-------------------------------------------------------------------------------
-if jwt_auth_required then
-  ngx.req.set_header('X-Starphleet-Auth-Required', jwt_auth_required)
-  if token and token.payload and not token.payload.acr then
-    token = nil
   end
 end
 
