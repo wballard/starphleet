@@ -122,14 +122,33 @@ cat << EOF >> "${MOUNT_CONF}"
     set \$sendto \$1;
     rewrite ${public_url}/(.*) /\$sendto/\$1 last;
   }
+EOF
+get_APIGATEWAY_HOST api_gateway_host_name $container_name
+
+if [ "${api_gateway_host_name}" == "null" ] || [ -z "${api_gateway_host_name}"  ]; then
+cat << EOF >> "${MOUNT_CONF}"
   rewrite ${public_url}/(.*) /\$1 break;
+  proxy_set_header Host \$http_host;
   proxy_pass http://${IP_ADDRESS}:${PORT};
+  more_set_headers 'X-Starphleet-Api-Gateway: false'; 
+EOF
+else
+get_APIGATEWAY_KEY api_gateway_key_value $container_name
+cat << EOF >> "${MOUNT_CONF}"
+  proxy_ssl_session_reuse off;
+  proxy_ssl_server_name on;
+  proxy_set_header Host ${api_gateway_host_name};
+  proxy_set_header x-api-key ${api_gateway_key_value};
+  proxy_pass https://${api_gateway_host_name}/dev/;
+  more_set_headers 'X-Starphleet-Api-Gateway: true';  
+EOF
+fi
+cat << EOF >> "${MOUNT_CONF}"
   # cache goes here
   proxy_set_header X-Forwarded-Host \$host;
   proxy_set_header X-Forwarded-Server \$host;
   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
   proxy_set_header X-Starphleet-Service-Name: ${order};
-  proxy_set_header Host \$http_host;
   # headers go here
   # headers for the response go here
   # WebSocket support (nginx 1.4)

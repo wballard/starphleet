@@ -11,6 +11,12 @@ selected_buildpack=
 
 source /usr/bin/tools
 
+# Env Vars needed for buildpack
+export ORDERS_FILE=$orders
+export CONTAINER_NAME=$(cat /etc/hostname)
+export HEADQUARTERS_REMOTE
+export AWS_ACCOUNT_NUMBER=$(curl --connect-timeout 5 http://169.254.169.254/latest/meta-data/iam/info |  python -c "import sys, json; print json.load(sys.stdin)['InstanceProfileArn']" | awk -F ":" '{print $5}')
+ 
 # start: heroku buildpack hack (some buildpacks create "temp" /app dir)
 sudo bash -c "mkdir -p /app && chown ${STARPHLEET_APP_USER}:${STARPHLEET_APP_USER} /app"
 # end: heroku buildpack hack
