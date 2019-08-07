@@ -383,13 +383,13 @@ json_string, json_key = sys.argv[1:]
 try:
     obj = json.loads(json_string)
 except Exception:
-    print >> sys.stderr, \"fromJson({}): Invalid JSON -- {}\".format(\"$0\", json_string)
+    print >> sys.stderr, \"fromJson({}): This isn't json!\".format(\"$0\")
     sys.exit(0)
 
 try:
     value = obj[json_key]
 except Exception:
-    print >> sys.stderr, \"fromJson({}): error reading key ({}) from json ({})\".format(\"$0\", json_key, json_string)
+    print >> sys.stderr, \"fromJson({}): error reading key ({}) from json\".format(\"$0\", json_key)
     sys.exit(0)
 
 print value" \
