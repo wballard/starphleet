@@ -85,7 +85,7 @@ else
   #
   #  At some point, this check should go away and we should instead have
   #  this be the default behavior (when all machines are upgraded)
-  LXC_VERSION="$(dpkg -l | egrep 'ii  lxc ' | awk '{print $3}' | cut -f 1 -d '-')"
+  LXC_VERSION="$(dpkg -l | egrep '[hi]i  lxc ' | awk '{print $3}' | cut -f 1 -d '-')"
   LXC_VERSION_MAJOR=$(echo $LXC_VERSION | cut -f 1 -d '.')
   LXC_VERSION_MINOR=$(echo $LXC_VERSION | cut -f 2 -d '.')
   LXC_VERSION_PATCH=$(echo $LXC_VERSION | cut -f 3 -d '.')
