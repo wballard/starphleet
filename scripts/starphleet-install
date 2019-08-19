@@ -139,7 +139,3 @@ starphleet-buildpacks
 #${DIR}/starphleet-build-base-container
 
 starphleet-cleanup
-
-# Start starphleet
-start starphleet
-announce *Welcome to Starphleet*
