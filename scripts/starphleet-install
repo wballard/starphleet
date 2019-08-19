@@ -82,11 +82,14 @@ hostname "${SHIP}"
 echo "${SHIP}" > /etc/hostname
 echo "127.0.0.1 ${SHIP} localhost" > /etc/hosts
 
-pushd ${STARPHLEET_ROOT:-/var/starphleet}/nginx
-set -e
-make
-set +e
-popd
+NGINX_DIR="${STARPHLEET_ROOT:-/var/starphleet}/nginx"
+if [ ! -f "${NGINX_DIR}"/nginx ]; then
+  pushd "${NGINX_DIR}"
+  set -e
+  make
+  set +e
+  popd
+fi
 
 # We will be using bash. period
 rm /bin/sh
