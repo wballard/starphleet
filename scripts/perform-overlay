@@ -14,4 +14,6 @@ cp -R ${DIR}/../nginx/* ${STARPHLEET_ROOT:-/var/starphleet}/nginx/
 cp ${SCRIPT_DIR}/* /usr/bin
 # our HQ can have it's own overlay, in an attempt to assure that nothing goes
 # totally sideways we'll perform that overlay as well if available
-[ -d "${HEADQUARTERS_LOCAL}/overlay" ] && cp -R ${HEADQUARTERS_LOCAL}/overlay/* /
+if [ -d "${HEADQUARTERS_LOCAL}/overlay" ]; then
+  cp -R ${HEADQUARTERS_LOCAL}/overlay/* /
+fi
