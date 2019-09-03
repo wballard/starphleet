@@ -358,7 +358,7 @@ function get_updated_aws_command {
       ## Because: https://github.com/aws/aws-cli/issues/3007#issuecomment-350797161
       pip install --upgrade s3transfer
       rm -rf /tmp/pip_build_root/PyYAML
-      pip install awscli --force-reinstall --upgrade
+      pip install awscli --force-reinstall --upgrade --ignore-installed
       rm "${AWS_INSTALL_LOCK_FILE}"
       set -e
       # Let the caller test if things went okay
