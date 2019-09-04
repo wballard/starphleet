@@ -87,8 +87,6 @@ else
   if [[ "$(lxc --version)" =~ ^1 ]]; then
     LXC_OPT_FOR_STDOUT="-L /dev/stdout"
   else
-    echo "###### phred"
-    ls -l /dev/stdout
     LXC_OPT_FOR_STDOUT="-o /dev/stdout"
   fi
 
