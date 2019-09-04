@@ -12,5 +12,6 @@ source `which tools`
 mount-block-devices
 move-syslog-to-biglogs
 (sudo lxc-ls -1 | grep starphleet-base) || sudo starphleet-build-base-container
-set-starphleet-hq-from-userdata
-set-starphleet-env-from-user-data
+# NOTE (phd): Pull these from Azure?
+# set-starphleet-hq-from-userdata
+# set-starphleet-env-from-user-data

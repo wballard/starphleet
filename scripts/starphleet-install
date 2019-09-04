@@ -101,10 +101,14 @@ echo 24576 > /sys/module/nf_conntrack/parameters/hashsize
 # Machine specific configs
 mkdir -p /etc/starphleet.d
 
+# NOTE (phd): DOwe need this for Azure?
+#
+# Azure metadata service: curl -H Metadata:true "http://169.254.169.254/metadata/instance"
+#
 # If starphleet is deployed in a EC2 environment we append the region configuration
 # to the global starphleet config
-STARPHLEET_EC2_REGION=$(curl --connect-timeout 1 -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
-[ ! -z "${STARPHLEET_EC2_REGION}" ] && echo "export STARPHLEET_EC2_REGION=\"${STARPHLEET_EC2_REGION}\"" > /etc/starphleet.d/starphleet_ec2_region
+# STARPHLEET_EC2_REGION=$(curl --connect-timeout 1 -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+# [ ! -z "${STARPHLEET_EC2_REGION}" ] && echo "export STARPHLEET_EC2_REGION=\"${STARPHLEET_EC2_REGION}\"" > /etc/starphleet.d/starphleet_ec2_region
 
 #source again, yep -- now the environment is in place
 source ${DIR}/tools
