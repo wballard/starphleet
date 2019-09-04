@@ -84,7 +84,12 @@ else
   #
   #  See more here:  http://glg.link/vQpIdw
   #
-  LXC_OPT_FOR_STDOUT="-L /dev/stdout"
+  if [[ "$(lxc --version)" =~ ^1 ]]; then
+    LXC_OPT_FOR_STDOUT="-L /dev/stdout"
+  else
+    LXC_OPT_FOR_STDOUT=''
+  fi
+
 
   # If SERVE_CONTAINERS is _not_ set - we would always want to fall back to
   # default behavior (behavior before introducing container storage).  This
