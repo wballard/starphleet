@@ -14,6 +14,7 @@ eval "$(${DIR}/docopts -h "$help" -V "$version" : "$@")"
 trace "$(basename "$(test -L "$0" && readlink "$0" || echo "$0")") : $*"
 
 set -e
+set -x
 test -f "${build_script}"
 
 [ -d /var/lib/lxc/data ] || mkdir -p /var/lib/lxc/data
