@@ -54,8 +54,8 @@ EOF
 #Downloads the latest secrets binary
 cat << 'EOF' >> ${CONTAINER_BUILD_SCRIPT}
 trace Downloading latest secrets binary
-sudo aws s3 cp s3://glg-deployment-packages/secrets /usr/bin/secrets --region us-east-1
-sudo chmod +x /usr/bin/secrets
+sudo -E aws s3 cp s3://glg-deployment-packages/secrets /usr/bin/secrets --region us-east-1 || true
+[ -f "/usr/bin/secrets" ] && sudo chmod +x /usr/bin/secrets
 EOF
 
 #now -- this is escaped, lots of variables included from this script
