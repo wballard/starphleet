@@ -131,7 +131,6 @@ cat << EOF > ${CONTAINER_CONF}
 lxc.mount.entry = ${STARPHLEET_ROOT}/buildpacks ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/buildpacks none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
 lxc.mount.entry = ${STARPHLEET_ROOT}/private_keys ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/private_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
 lxc.mount.entry = ${STARPHLEET_ROOT}/public_keys ${CONTAINER_ROOT}/rootfs${STARPHLEET_ROOT}/public_keys none bind,${STARPHLEET_ROOT_CONTAINER_PERMISSION} 0 0
-lxc.mount.entry = ${ADMIRAL_HOME} ${CONTAINER_ROOT}/rootfs${ADMIRAL_HOME} none defaults,bind,create=dir 0 0
 lxc.mount.entry = ${STARPHLEET_SHARED_DATA} ${CONTAINER_ROOT}/rootfs/var/data none rbind,rw 0 0
 EOF
 
@@ -203,9 +202,6 @@ EOF
     #host file updates
     info "Setting up Network in container"
     lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'chmod 777 /var/log/'
-    lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'useradd -s /bin/bash ${ADMIRAL} || true'
-    lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'adduser ${ADMIRAL} sudo'
-    lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'chown -R ${ADMIRAL}:${ADMIRAL} ${ADMIRAL_HOME}/.ssh'
     lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'echo -e "\n${ADMIRAL} ALL=NOPASSWD:ALL" >> /etc/sudoers'
     lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- bash -c 'echo -e "\n${STARPHLEET_APP_USER} ALL=NOPASSWD:ALL" >> /etc/sudoers'
     lxc-attach --name ${CONTAINER_NAME} ${LXC_OPT_FOR_STDOUT} -- sudo -H -u ${STARPHLEET_APP_USER} bash -c "source /usr/bin/tools; /build_script"
