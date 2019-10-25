@@ -76,6 +76,8 @@ set -e
 sudo aws s3 cp s3://glg-deployment-packages/secrets /usr/bin/secrets && echo "...Success"
 sudo chmod +x /usr/bin/secrets
 
+sudo sh -c 'echo RSYSLOGD_OPTIONS=\"-x\" > /etc/default/rsyslog'
+
 ## ruby superstition
 export HOME=/
 sudo gem install bundler -v 1.16.5
