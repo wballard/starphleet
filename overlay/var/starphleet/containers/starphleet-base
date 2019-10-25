@@ -41,6 +41,7 @@ ruby1.9.1-dev
 socat
 sqlite3
 telnet
+rsyslog
 zlib1g-dev
 bsdmainutils
 groff
