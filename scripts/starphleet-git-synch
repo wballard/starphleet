@@ -8,7 +8,6 @@
 ###
 ### This exits 0 if there were changes, 1 if not, easier
 ### to use in a shell script if this way
-
 REMOTE=$(echo "${remote//$'\r'/}" | awk -F '#' '{print $1;}')
 BRANCH=$(echo "${remote//$'\r'/}" | awk -F '#' '{print $2;}')
 BRANCH="${BRANCH:-master}"
@@ -32,12 +31,18 @@ if [ -d "${local}/.git" ]; then
   ORIGIN_URL=$(git config remote.origin.url)
   #make sure we have the correct repository and branch
   if [ "${ORIGIN_URL}" != "${REMOTE}" ]; then
+    # FDT: This should not need to be addressed
+    # Info: Local HQ repo, diffrent from remote, so clone remote
     warn repository url differs, reclone needed
     reclone
     exit 0
   else
+    # FDT: Likely has to call git_sha_api
+    # Info: Local HQ same as remote, so fetch updates
     starphleet-git fetch --all &> /dev/null || fatal fetch error
   fi
+  # FDT: This block does not need changing
+  # Info: Local HQ repo correct, branch different from requested, reclone HQ with proper branch checked out
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
   if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
     warn specified branch changed, checking out ${BRANCH}
@@ -45,6 +50,10 @@ if [ -d "${local}/.git" ]; then
     exit 0
   fi
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
+  # Info: This section would only apply to non-reclones
+  # Info: Check if the remote repo has changes we don't have locally
+  # FDT: Since git_sha_api would have already provided the sha we need, here we just need to clone
+  #      the repo with the proper sha (so new clone method is needed)
   HAS_CHANGES=$(git diff HEAD...origin/${CURRENT_BRANCH} --raw)
   if [ "${HAS_CHANGES}x" != "x" ]; then
     warn new code detected, pulling
@@ -55,17 +64,20 @@ if [ -d "${local}/.git" ]; then
   GIT_STATUS=$(git status)
   remote_pattern="Your branch is (.*) of (.*) by ([0-9]*) commit"
   diverge_pattern="Your branch and (.*) have diverged"
+  # FDT: Should not be affected
   if [[ ${GIT_STATUS} =~ "${remote_pattern}" ]]; then
     warn this clone is not current, reclone needed
     reclone
     exit 0
   fi
+  # FDT: Should not be affected
   if [[ ${GIT_STATUS} =~ "${diverge_pattern}" ]]; then
     warn this clone is diverged, reclone needed
     reclone
     exit 0
   fi
 else
+  # FDT: Should not be affected
   warn ${local} not found, initial clone needed from "${REMOTE}" to "${local}"
   starphleet-git clone -b ${BRANCH} "${REMOTE}" "${local}" || fatal clone error
   exit 0
