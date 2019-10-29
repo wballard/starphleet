@@ -8,6 +8,7 @@
 ###
 ### This exits 0 if there were changes, 1 if not, easier
 ### to use in a shell script if this way
+
 REMOTE=$(echo "${remote//$'\r'/}" | awk -F '#' '{print $1;}')
 BRANCH=$(echo "${remote//$'\r'/}" | awk -F '#' '{print $2;}')
 BRANCH="${BRANCH:-master}"
@@ -16,6 +17,8 @@ local="${local:-$(basename ${REMOTE})}"
 STARTING_DIRECTORY=$(pwd)
 trap 'cd "${STARTING_DIRECTORY}"' EXIT
 
+# Info: exit 0 the case for this script means, that the repo has changed, or was updated
+
 reclone () {
   cd ..
   rm -rf "${local}"
@@ -23,6 +26,7 @@ reclone () {
 }
 
 dev_mode && [ -d "${local}/.git" ] && exit 1
+
 
 if [ -d "${local}/.git" ]; then
   info synch ${remote} to ${local}
