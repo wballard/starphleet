@@ -20,6 +20,7 @@ unset PUBLISH_PORTS
 declare -a PUBLISH_PORTS
 
 export order="${HEADQUARTERS_LOCAL}/${service}/orders"
+# Info: this seems to be just saying ORDER=$service but i could be wrong
 ORDER=$(echo "${order}" | sed -e 's[/orders$[[' | sed -e "s[${HEADQUARTERS_LOCAL}/\?[[")
 #make a place for the orders to be managed while running, this is separate
 #from the order files in the headquarters
@@ -78,7 +79,7 @@ fi
 # The directory we store our local git copy
 LOCAL="${HEADQUARTERS_LOCAL}/${ORDER}/git"
 
-
+# FDT: skipping dev_mode for now
 if [ -n "${DEVMODE_UNBIND_GIT_DIR}" ] && dev_mode ; then
   # The 'LAST_RUN_FILE' is created each run for a container.  We use this files
   # modified time to determine if anything 'new' has been created/changed
@@ -139,6 +140,7 @@ if [ -n "${DEVMODE_UNBIND_GIT_DIR}" ] && dev_mode ; then
   [ ! -f "${LAST_RUN_FILE}" ] && touch "${LAST_RUN_FILE}" && DEPLOY_REASON="First Deploy"
 fi
 
+# FDT: if starphleet-git-sync is fixed, no issues here
 # Git Repo Change
 [ -n "${SERVICE_GIT_URL}" ] && starphleet-git-synch "${SERVICE_GIT_URL}" "${LOCAL}" && DEPLOY_REASON="Git Repo Changed"
 
