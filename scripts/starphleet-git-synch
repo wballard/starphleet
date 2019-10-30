@@ -40,11 +40,8 @@ if [ -d "${local}/.git" ]; then
     warn repository url differs, reclone needed
     reclone
     exit 0
-  else
-    # FDT: Likely has to call git_sha_api
-    # Info: Local HQ same as remote, so fetch updates
-    starphleet-git fetch --all &> /dev/null || fatal fetch error
   fi
+
   # FDT: This block does not need changing
   # Info: Local HQ repo correct, branch different from requested, reclone HQ with proper branch checked out
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
@@ -53,6 +50,50 @@ if [ -d "${local}/.git" ]; then
     reclone
     exit 0
   fi
+
+  #Stats: starting withi 53337 events
+  #* No Repo "not found, initial clone needed from"
+    #- clone 614
+  #* Have Repo
+    #* Different Remote "repository url differs, reclone needed"
+      #- clone 1
+    #* Same Remote
+      #- fetch 52723
+      #* Different Branch "specified branch changed, checking out"
+        #- clone 3
+      #* Out of Date "new code detected, pulling"
+        #- fetch 122
+        #- reset
+      #* Not current "this clone is not current, reclone needed"
+        #- clone 0
+      #* Divergent "this clone is diverged, reclone needed"
+        #- clone 0
+  #fatal error 0
+  #no update 52598
+
+  # Extract ORG/USER and REPO from $REMOTE
+  read -r GIT_ORG GIT_REPO <<<$(echo $REMOTE | awk -F "[#/:]" '{gsub(/[.]git$/, "", $(NF)); print $(NF-1),$(NF)}')
+
+  # TODO: using api.github.com with devships gives one only 60 requests per second, so disabling this for now
+  exit 1
+
+  # TODO: replace with our service
+  # TODO: handle null LATEST_REMOTE_SHA
+
+  # Pull latest sha from api.github.com (placeholder for our git_sha_api)
+  API_URL="https://api.github.com/repos/${GIT_ORG}/${GIT_REPO}/branches/${CURRENT_BRANCH}"
+  warn "API_URL $API_URL"
+  LATEST_REMOTE_SHA="$(curl -sS "${API_URL}" | jq -r ".commit.sha")"
+  LATEST_LOCAL_SHA="$(git rev-parse HEAD)"
+  if [[ "${LATEST_REMOTE_SHA}" != "${LATEST_LOCAL_SHA}" ]]; then
+    warn "LATEST_REMOTE_SHA and LATEST_LOCAL_SHA are different ($LATEST_REMOTE_SHA, $LATEST_LOCAL_SHA)"
+    #starphleet-git fetch --all &> /dev/null || fatal fetch error
+    exit 1
+  else
+    warn "LATEST_REMOTE_SHA and LATEST_LOCAL_SHA are the same"
+    exit 1
+  fi
+
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
   # Info: This section would only apply to non-reclones
   # Info: Check if the remote repo has changes we don't have locally
