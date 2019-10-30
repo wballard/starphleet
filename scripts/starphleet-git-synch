@@ -29,7 +29,8 @@ shouldNotContinueBecauseNoChangesInGitCache () {
   if [ -z ${STARPHLEET_GITHUB_CACHE} ] \
   || [ ! -d "${local}" ]
   then
-    return ${TRUE}
+    # Continue to the original behavior
+    return ${FALSE}
   fi
   pushd "${local}" > /dev/null
   local_sha=$(git rev-parse --verify HEAD)
