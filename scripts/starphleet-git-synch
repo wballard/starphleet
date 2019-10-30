@@ -23,6 +23,25 @@ reclone () {
   starphleet-git clone -b ${BRANCH} "${REMOTE}" "${local}" || fatal clone error
 }
 
+shouldContinueBasedOnGithubCache () {
+  # If no cache api or local directory,
+  # there's nothing to check
+  if [ -z STARPHLEET_GITHUB_CACHE ] \
+  || [ ! -d "${local}" ]
+  then
+    return ${TRUE}
+  fi
+  pushd "${local}" > /dev/null
+  local_sha=$(git rev-parse --verify HEAD)
+  cache_sha=$(curl -X POST "${STARPHLEET_GITHUB_CACHE}" -d '{
+    "repo":"'${REMOTE}'",
+    "branch":"'${BRANCH}'"
+  }')
+  [ "${local_sha}" = "${cache_sha}"]
+}
+
+shouldContinueBasedOnGithubCache && exit 1
+
 dev_mode && [ -d "${local}/.git" ] && exit 1
 
 if [ -d "${local}/.git" ]; then
