@@ -17,7 +17,7 @@ local="${local:-$(basename ${REMOTE})}"
 STARTING_DIRECTORY=$(pwd)
 trap 'cd "${STARTING_DIRECTORY}"' EXIT
 
-# Info: exit 0 the case for this script means, that the repo has changed, or was updated
+# Info: exit 0 in this script means, that the repo has changed, or was updated
 
 reclone () {
   cd ..
@@ -26,7 +26,6 @@ reclone () {
 }
 
 dev_mode && [ -d "${local}/.git" ] && exit 1
-
 
 if [ -d "${local}/.git" ]; then
   info synch ${remote} to ${local}
@@ -87,9 +86,6 @@ if [ -d "${local}/.git" ]; then
   fi
 
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
-  # Info: This section would only apply to non-reclones
-  # Info: Check if the remote repo has changes we don't have locally
-  #      the repo with the proper sha (so new clone method is needed)
   HAS_CHANGES=$(git diff HEAD...origin/${CURRENT_BRANCH} --raw)
   if [ "${HAS_CHANGES}x" != "x" ]; then
     warn new code detected, pulling
