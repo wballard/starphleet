@@ -51,64 +51,41 @@ if [ -d "${local}/.git" ]; then
     exit 0
   fi
 
-  #Stats: starting withi 53337 events
-  #* No Repo "not found, initial clone needed from"
-    #- clone 614
-  #* Have Repo
-    #* Different Remote "repository url differs, reclone needed"
-      #- clone 1
-    #* Same Remote
-      #- fetch 52723
-      #* Different Branch "specified branch changed, checking out"
-        #- clone 3
-      #* Out of Date "new code detected, pulling"
-        #- fetch 122
-        #- reset
-      #* Not current "this clone is not current, reclone needed"
-        #- clone 0
-      #* Divergent "this clone is diverged, reclone needed"
-        #- clone 0
-  #fatal error 0
-  #no update 52598
-
-  function curl_cache {
-    # TODO: testing only
-    local ROOT="/tmp/curl_cache"
-    local DURATION_IN_SECONDS="${1:-60}"
-    local URL="${2}"
-    mkdir -p "${ROOT}"
-    local CACHE="${ROOT}/$(echo -n ${URL} | sha256sum | cut -f1 -d' ')"
-    find "${CACHE}" -type f -not -newermt "-${DURATION_IN_SECONDS} seconds" -delete 2>&1 > /dev/null || true
-    if [[ ! -f "${CACHE}" ]]; then
-      curl -sS "${URL}" 2> /dev/null 1> "${CACHE}"
-    fi
-    cat "${CACHE}"
-  }
-
   # Extract ORG/USER and REPO from $REMOTE
-  read -r GIT_ORG GIT_REPO <<<$(echo $REMOTE | awk -F "[#/:]" '{gsub(/[.]git$/, "", $(NF)); print $(NF-1),$(NF)}')
+  read -r GIT_ORG GIT_REPO <<< $(echo $REMOTE | awk -F "[#/:]" '{gsub(/[.]git$/, "", $(NF)); print $(NF-1),$(NF)}')
 
-  # TODO: using api.github.com with devships gives one only 60 requests per second, so disabling this for now
-  #exit 1
+  if [[ -n "${GLG_DEPLOYCACHE_URL:-}" ]]; then
+    # deploycache route
+    read -r DEPLOYCACHE_STATUS_CODE DEPLOYCACHE_RESPONSE <<< $(
+      curl -sSG -w '\n%{http_code}' \
+        --data-urlencode "owner=${GIT_ORG}" \
+        --data-urlencode "repo=${GIT_REPO}" \
+        --data-urlencode "branch=${BRANCH}" \
+        "${GLG_DEPLOYCACHE_URL}" \
+        2> /dev/null \
+        | awk 'BEGIN{ RS = "" ; FS = "\n" }{printf "%s ", $NF; NF--; print}'
+      )
 
-  # TODO: replace with our service
-  # TODO: handle null LATEST_REMOTE_SHA
-
-  # Pull latest sha from api.github.com (placeholder for our git_sha_api)
-  API_URL="https://api.github.com/repos/${GIT_ORG}/${GIT_REPO}/branches/${CURRENT_BRANCH}"
-  #LATEST_REMOTE_SHA="$(curl -sS "${API_URL}" | (jq -r ".commit.sha" 2> /dev/null || echo -n "null"))"
-  LATEST_REMOTE_SHA="$(curl_cache 180 "${API_URL}" | (jq -r ".commit.sha" 2> /dev/null || echo -n "null"))"
-  if [[ "${LATEST_REMOTE_SHA}" = "null" ]]; then
-    warn "Could not obtain LATEST_REMOTE_SHA"
-    exit 1
-  fi
-  LATEST_LOCAL_SHA="$(git rev-parse HEAD)"
-  if [[ "${LATEST_REMOTE_SHA}" != "${LATEST_LOCAL_SHA}" ]]; then
-    warn "LATEST_REMOTE_SHA and LATEST_LOCAL_SHA are different ($LATEST_REMOTE_SHA, $LATEST_LOCAL_SHA)"
-    starphleet-git fetch --all &> /dev/null || fatal fetch error
+    if [[ "${DEPLOYCACHE_STATUS_CODE}" != "200" ]]; then
+      warn "deploycache status code: ${DEPLOYCACHE_STATUS_CODE}"
+      exit 1
+    else
+      LATEST_REMOTE_SHA="$(echo "\"${DEPLOYCACHE_RESPONSE}\"" | (jq -r "." 2> /dev/null || echo -n "null"))"
+    fi
+    if [[ "${LATEST_REMOTE_SHA}" = "null" ]]; then
+      warn "could not obtain LATEST_REMOTE_SHA"
+      exit 1
+    fi
+    LATEST_LOCAL_SHA="$(git rev-parse HEAD)"
+    if [[ "${LATEST_REMOTE_SHA}" != "${LATEST_LOCAL_SHA}" ]]; then
+      warn "LATEST_REMOTE_SHA and LATEST_LOCAL_SHA are different ($LATEST_REMOTE_SHA, $LATEST_LOCAL_SHA)"
+      starphleet-git fetch --all &> /dev/null || fatal fetch error
+    else
+      exit 1
+    fi
   else
-    warn "LATEST_REMOTE_SHA and LATEST_LOCAL_SHA are the same"
-    exit 1
+    # non-deploycache route
+    starphleet-git fetch --all &> /dev/null || fatal fetch error
   fi
 
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
