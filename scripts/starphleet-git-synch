@@ -48,10 +48,10 @@ if [ -d "${local}/.git" ]; then
     exit 0
   fi
 
-  # Extract ORG/USER and REPO from $REMOTE
-  read -r GIT_ORG GIT_REPO <<< $(echo $REMOTE | awk -F "[#/:]" '{gsub(/[.]git$/, "", $(NF)); print $(NF-1),$(NF)}')
-
   if [[ -n "${GLG_DEPLOYCACHE_URL:-}" ]]; then
+    # Extract ORG/USER and REPO from $REMOTE
+    read -r GIT_ORG GIT_REPO <<< $(echo $REMOTE | awk -F "[#/:]" '{gsub(/[.]git$/, "", $(NF)); print $(NF-1),$(NF)}')
+
     # deploycache route
     read -r DEPLOYCACHE_STATUS_CODE DEPLOYCACHE_RESPONSE <<< $(
       curl -sSG -w '\n%{http_code}' \
@@ -62,28 +62,34 @@ if [ -d "${local}/.git" ]; then
         2> /dev/null \
         | awk 'BEGIN{ RS = "" ; FS = "\n" }{printf "%s ", $NF; NF--; print}'
       )
+    # explanation of awk: row separator no longer \n, field seperator is \n,
+    # print last field, followed by all other fields.
+    #   {"status": "error", "message": "Cannot read property 'headers' of undefined"}
+    #   500
+    # turns into:
+    #   500 {"status": "error", "message": "Cannot read property 'headers' of undefined"}
 
     if [[ "${DEPLOYCACHE_STATUS_CODE}" != "200" ]]; then
+      # if we don't get a successful response from deploycache we don't update
       warn "deploycache status code: ${DEPLOYCACHE_STATUS_CODE}"
       exit 1
     else
+      # make sure that jq can process what was returned
       LATEST_REMOTE_SHA="$(echo "\"${DEPLOYCACHE_RESPONSE}\"" | (jq -r "." 2> /dev/null || echo -n "null"))"
     fi
     if [[ "${LATEST_REMOTE_SHA}" = "null" ]]; then
+      # parsing failure will result is no update
       warn "could not obtain LATEST_REMOTE_SHA"
       exit 1
     fi
     LATEST_LOCAL_SHA="$(git rev-parse HEAD)"
-    if [[ "${LATEST_REMOTE_SHA}" != "${LATEST_LOCAL_SHA}" ]]; then
-      warn "LATEST_REMOTE_SHA and LATEST_LOCAL_SHA are different ($LATEST_REMOTE_SHA, $LATEST_LOCAL_SHA)"
-      starphleet-git fetch --all &> /dev/null || fatal fetch error
-    else
+    if [[ "${LATEST_REMOTE_SHA}" = "${LATEST_LOCAL_SHA}" ]]; then
+      # if the sha is still the same as current, no update
       exit 1
     fi
-  else
-    # non-deploycache route
-    starphleet-git fetch --all &> /dev/null || fatal fetch error
+    warn "LATEST_REMOTE_SHA and LATEST_LOCAL_SHA are different ($LATEST_REMOTE_SHA, $LATEST_LOCAL_SHA)"
   fi
+  starphleet-git fetch --all &> /dev/null || fatal fetch error
 
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
   HAS_CHANGES=$(git diff HEAD...origin/${CURRENT_BRANCH} --raw)
