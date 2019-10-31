@@ -6,7 +6,6 @@ do
   trace checking headquarters ${HEADQUARTERS_REMOTE} for updates
   if [ -n "${HEADQUARTERS_REMOTE}" ]; then
     #pull down the actual headquarters changes
-    # FDT: If starphleet-git-sync is fixed by using git_sha_api, then this resolves this job
     if starphleet-git-synch "${HEADQUARTERS_REMOTE}" "${HEADQUARTERS_LOCAL}"; then
       latest_AUTHOR ${HEADQUARTERS_LOCAL}
       warn Headquarters updated by ${AUTHOR}
