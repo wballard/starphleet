@@ -57,7 +57,7 @@ if [ -d "${local}/.git" ]; then
       curl -sSG -w '\n%{http_code}' \
         --data-urlencode "owner=${GIT_ORG}" \
         --data-urlencode "repo=${GIT_REPO}" \
-        --data-urlencode "branch=${BRANCH}" \
+        --data-urlencode "name=${BRANCH}" \
         "${GLG_DEPLOYCACHE_URL}" \
         2> /dev/null \
         | awk 'BEGIN{ RS = "" ; FS = "\n" }{printf "%s ", $NF; NF--; print}'
