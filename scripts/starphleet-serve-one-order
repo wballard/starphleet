@@ -183,8 +183,8 @@ if [ -n "${DEPLOY_REASON}" ]; then
 
   info "Starting ${ORDER}: ${CONTAINER_NAME}"
   if [ -n "${wait}" ]; then
-    mkdir -p "${HOME}/.parallel"
-    touch "${HOME}/.parallel/will-cite"
+    mkdir -p "/tmp/.parallel"
+    touch "/tmp/.parallel/will-cite"
     parallel --semaphore --semaphorename starphleet-service-serve-order --jobs ${MAX_CONCURRENT_CONTAINER_BUILDS:-25} start starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
   else
     start --no-wait starphleet_serve_order name="${CONTAINER_NAME}" order="${ORDER}"
