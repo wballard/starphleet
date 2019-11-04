@@ -14,6 +14,7 @@ declare -a PUBLISH_PORTS
 #find doesn't work out on that / pattern
 for order in $(find "${HEADQUARTERS_LOCAL}" | grep '/orders$' | grep -v '/git' )
 do
+  source `which tools`
   SERVICE_NAME=$(echo "${order}" | sed -e 's[/orders$[[' | sed -e "s[${HEADQUARTERS_LOCAL}/\?[[")
   starphleet-serve-one-order "${SERVICE_NAME}" "wait"
   sleep "${STARPHLEET_LOOP_SLEEP_SECONDS}"
