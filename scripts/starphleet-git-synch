@@ -67,7 +67,6 @@ if [ -d "${local}/.git" ]; then
         --data-urlencode "name=${BRANCH}" \
         "${DEPLOYCACHE_URL}" \
         2> /dev/null \
-        | head -n 1 \
         | awk 'BEGIN{ RS = "" ; FS = "\n" }{printf "%s ", $NF; NF--; print}'
       )
 
@@ -77,7 +76,7 @@ if [ -d "${local}/.git" ]; then
       exit 1
     else
       # make sure that the line contains a 40 character SHA, otherwise assign null
-      LATEST_REMOTE_SHA="$(echo -n "${DEPLOYCACHE_RESPONSE}" | awk '{if ($1 ~ /[a-fA-F0-9]{40}/) { print $1 } else { print "null" }}')"
+      LATEST_REMOTE_SHA="$(echo -n "${DEPLOYCACHE_RESPONSE}" | head -n 1 | awk '{if ($1 ~ /[a-fA-F0-9]{40}/) { print $1 } else { print "null" }}')"
     fi
     if [[ "${LATEST_REMOTE_SHA}" = "null" ]]; then
       # parsing failure will result in no update
