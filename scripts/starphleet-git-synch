@@ -17,6 +17,8 @@ local="${local:-$(basename ${REMOTE})}"
 STARTING_DIRECTORY=$(pwd)
 trap 'cd "${STARTING_DIRECTORY}"' EXIT
 
+# Info: exit 0 in this script means, that the repo has changed, or was updated
+
 reclone () {
   cd ..
   rm -rf "${local}"
@@ -32,18 +34,64 @@ if [ -d "${local}/.git" ]; then
   ORIGIN_URL=$(git config remote.origin.url)
   #make sure we have the correct repository and branch
   if [ "${ORIGIN_URL}" != "${REMOTE}" ]; then
+    # Info: Local HQ repo, diffrent from remote, so clone remote
     warn repository url differs, reclone needed
     reclone
     exit 0
-  else
-    starphleet-git fetch --all &> /dev/null || fatal fetch error
   fi
+
+  # Info: Local HQ repo correct, branch different from requested, reclone HQ with proper branch checked out
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
   if [ "${BRANCH}" != "${CURRENT_BRANCH}" ]; then
     warn specified branch changed, checking out ${BRANCH}
     reclone
     exit 0
   fi
+
+  if [[ -n "${DEPLOYCACHE_URL}" ]]; then
+    # Extract ORG/USER and REPO from $REMOTE
+    read -r GIT_ORG GIT_REPO <<< $(awk -F "[/:]" '{gsub(/[.]git$/, "", $(NF)); print $(NF-1),$(NF)}' <<< "${REMOTE}")
+
+    # deploycache route
+    #
+    # explanation of awk: row separator no longer \n, field seperator is \n,
+    # print last field, followed by all other fields.
+    #   {"status": "error", "message": "Cannot read property 'headers' of undefined"}
+    #   500
+    # turns into:
+    #   500 {"status": "error", "message": "Cannot read property 'headers' of undefined"}
+    read -r DEPLOYCACHE_STATUS_CODE DEPLOYCACHE_RESPONSE <<< $(
+      curl --silent --show-error --get --write-out '\n%{http_code}' \
+        --data-urlencode "owner=${GIT_ORG}" \
+        --data-urlencode "repo=${GIT_REPO}" \
+        --data-urlencode "name=${BRANCH}" \
+        "${DEPLOYCACHE_URL}" \
+        2> /dev/null \
+        | awk 'BEGIN{ RS = "" ; FS = "\n" }{printf "%s ", $NF; NF--; print}'
+      )
+
+    if [[ "${DEPLOYCACHE_STATUS_CODE}" != "200" ]]; then
+      # if we don't get a successful response from deploycache we don't update
+      warn "deploycache status code: ${DEPLOYCACHE_STATUS_CODE}"
+      exit 1
+    else
+      # make sure that the line contains a 40 character SHA, otherwise assign null
+      LATEST_REMOTE_SHA="$(echo -n "${DEPLOYCACHE_RESPONSE}" | head -n 1 | awk '{if ($1 ~ /[a-fA-F0-9]{40}/) { print $1 } else { print "null" }}')"
+    fi
+    if [[ "${LATEST_REMOTE_SHA}" = "null" ]]; then
+      # parsing failure will result in no update
+      warn "could not obtain LATEST_REMOTE_SHA"
+      exit 1
+    fi
+    LATEST_LOCAL_SHA="$(git rev-parse HEAD)"
+    if [[ "${LATEST_REMOTE_SHA}" = "${LATEST_LOCAL_SHA}" ]]; then
+      # if the sha is still the same as current, no update
+      exit 1
+    fi
+    warn "LATEST_REMOTE_SHA and LATEST_LOCAL_SHA are different ($LATEST_REMOTE_SHA, $LATEST_LOCAL_SHA)"
+  fi
+  starphleet-git fetch --all &> /dev/null || fatal fetch error
+
   CURRENT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
   HAS_CHANGES=$(git diff HEAD...origin/${CURRENT_BRANCH} --raw)
   if [ "${HAS_CHANGES}x" != "x" ]; then
