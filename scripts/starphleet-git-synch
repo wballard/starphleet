@@ -48,9 +48,9 @@ if [ -d "${local}/.git" ]; then
     exit 0
   fi
 
-  if [[ -n "${GLG_DEPLOYCACHE_URL}" ]]; then
+  if [[ -n "${DEPLOYCACHE_URL}" ]]; then
     # Extract ORG/USER and REPO from $REMOTE
-    read -r GIT_ORG GIT_REPO <<< $(awk -F "[#/:]" '{gsub(/[.]git$/, "", $(NF)); print $(NF-1),$(NF)}' <<< "${REMOTE}")
+    read -r GIT_ORG GIT_REPO <<< $(awk -F "[/:]" '{gsub(/[.]git$/, "", $(NF)); print $(NF-1),$(NF)}' <<< "${REMOTE}")
 
     # deploycache route
     #
@@ -65,8 +65,9 @@ if [ -d "${local}/.git" ]; then
         --data-urlencode "owner=${GIT_ORG}" \
         --data-urlencode "repo=${GIT_REPO}" \
         --data-urlencode "name=${BRANCH}" \
-        "${GLG_DEPLOYCACHE_URL}" \
+        "${DEPLOYCACHE_URL}" \
         2> /dev/null \
+        | head -n 1 \
         | awk 'BEGIN{ RS = "" ; FS = "\n" }{printf "%s ", $NF; NF--; print}'
       )
 
@@ -75,11 +76,11 @@ if [ -d "${local}/.git" ]; then
       warn "deploycache status code: ${DEPLOYCACHE_STATUS_CODE}"
       exit 1
     else
-      # make sure that jq can process what was returned
-      LATEST_REMOTE_SHA="$(echo "\"${DEPLOYCACHE_RESPONSE}\"" | (jq -r "." 2> /dev/null || echo -n "null"))"
+      # make sure that the line contains a 40 character SHA, otherwise assign null
+      LATEST_REMOTE_SHA="$(echo -n "${DEPLOYCACHE_RESPONSE}" | awk '{if ($1 ~ /[a-fA-F0-9]{40}/) { print $1 } else { print "null" }}')"
     fi
     if [[ "${LATEST_REMOTE_SHA}" = "null" ]]; then
-      # parsing failure will result is no update
+      # parsing failure will result in no update
       warn "could not obtain LATEST_REMOTE_SHA"
       exit 1
     fi

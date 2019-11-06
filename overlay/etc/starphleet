@@ -99,4 +99,4 @@ unset JWT_MAX_TOKEN_AGE_IN_SECONDS
 # HTPASSWD Needs
 unset HTPASSWD
 # deploycache server to prevent us from spamming GitHub
-unset GLG_DEPLOYCACHE_URL
+unset DEPLOYCACHE_URL
