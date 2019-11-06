@@ -99,4 +99,4 @@ unset JWT_MAX_TOKEN_AGE_IN_SECONDS
 # HTPASSWD Needs
 unset HTPASSWD
 # deploycache server to prevent us from spamming GitHub
-export GLG_DEPLOYCACHE_URL="https://deploycache-internal.glgresearch.com/deploycache/sha"
+unset GLG_DEPLOYCACHE_URL
