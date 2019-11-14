@@ -21,4 +21,6 @@ if is_container_storage_on_s3 \
   && [ -n "${SERVE_CONTAINERS}" ]; then
   exit 0
 fi
+# Pick up our system config changes now that starphleet is installed.
+sudo sysctl --system
 (sudo lxc-ls | grep starphleet-base) || sudo starphleet-build-base-container
