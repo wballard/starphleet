@@ -11,6 +11,7 @@ echo INTERNAL_HOST=\"${LOCAL_IP}\" > /etc/starphleet.d/internal_host
 source `which tools`
 mount-block-devices
 move-syslog-to-biglogs
+sysctl --system
 (sudo lxc-ls -1 | grep starphleet-base) || sudo starphleet-build-base-container
 set-starphleet-hq-from-userdata
 set-starphleet-env-from-user-data
