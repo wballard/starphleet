@@ -84,10 +84,10 @@ else
   #
   #  See more here:  http://glg.link/vQpIdw
   #
-  if [[ "$(lxc --version)" =~ ^1 ]]; then
-    LXC_OPT_FOR_STDOUT="-L /dev/stdout"
-  else
+  if [[ "$(lxc-attach --version)" =~ ^1 ]]; then
     LXC_OPT_FOR_STDOUT="-o /dev/stdout"
+  else
+    LXC_OPT_FOR_STDOUT="-L /dev/stdout"
   fi
 
 
