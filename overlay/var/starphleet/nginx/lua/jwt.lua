@@ -285,13 +285,17 @@ if (token) then
   jwtCookieString = jwtCookieString .. '; Path=/'
   jwtCookieString = jwtCookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
 
-  local userCookieString = ""
-  userCookieString = userCookieString .. (token.payload.un and 'starphleet_user' .. "=" .. token.payload.un or '')
-  userCookieString = userCookieString .. (jwt_cookie_domain and '; Domain=' .. jwt_cookie_domain or '')
-  userCookieString = userCookieString .. '; Path=/'
-  userCookieString = userCookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
-
-  ngx.header['Set-Cookie'] = {jwtCookieString, userCookieString}
+  if token and token.payload and token.payload.un and token.payload.un ~= "" then
+    local userCookieString = ""
+    userCookieString = userCookieString .. (token.payload.un and 'starphleet_user' .. "=" .. token.payload.un or '')
+    userCookieString = userCookieString .. (jwt_cookie_domain and '; Domain=' .. jwt_cookie_domain or '')
+    userCookieString = userCookieString .. '; Path=/'
+    userCookieString = userCookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
+    ngx.header['Set-Cookie'] = {jwtCookieString, userCookieString}
+  else
+    ngx.header['Set-Cookie'] = jwtCookieString
+  end
+  
 
   if redirect then
     return ngx.redirect(redirect)
