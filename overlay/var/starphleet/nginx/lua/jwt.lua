@@ -279,12 +279,19 @@ if (token) then
   -- manipulations.  Dynamically build a cookie string to assign
   -- the JWT session token to the request
   ------------------------------------------------------------------------------
-  local cookieString = ""
-  cookieString = cookieString .. (signedJwtToken and jwt_cookie_name .. "=" .. signedJwtToken or '')
-  cookieString = cookieString .. (jwt_cookie_domain and '; Domain=' .. jwt_cookie_domain or '')
-  cookieString = cookieString .. '; Path=/'
-  cookieString = cookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
-  ngx.header['Set-Cookie'] = cookieString
+  local jwtCookieString = ""
+  jwtCookieString = jwtCookieString .. (signedJwtToken and jwt_cookie_name .. "=" .. signedJwtToken or '')
+  jwtCookieString = jwtCookieString .. (jwt_cookie_domain and '; Domain=' .. jwt_cookie_domain or '')
+  jwtCookieString = jwtCookieString .. '; Path=/'
+  jwtCookieString = jwtCookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
+
+  local userCookieString = ""
+  userCookieString = userCookieString .. (token.payload.un and 'starphleet_user' .. "=" .. token.payload.un or '')
+  userCookieString = userCookieString .. (jwt_cookie_domain and '; Domain=' .. jwt_cookie_domain or '')
+  userCookieString = userCookieString .. '; Path=/'
+  userCookieString = userCookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
+
+  ngx.header['Set-Cookie'] = {jwtCookieString, userCookieString}
 
   if redirect then
     return ngx.redirect(redirect)
