@@ -13,6 +13,7 @@ local jwt_revocation_dir = ngx.var.jwt_revocation_dir
 local jwt_max_token_age_in_seconds = tonumber(ngx.var.jwt_max_token_age_in_seconds)
 local jwt_expiration_in_seconds = tonumber(ngx.var.jwt_expiration_in_seconds)
 local headers = ngx.req.get_headers()
+local jwt_auth_required = ngx.var.jwt_auth_required
 
 -- *****************************************************************************
 -- * Guards
@@ -60,19 +61,14 @@ end
 ------------------------------------------------------------------------------
 -- @function _sendUserToLogin()
 --
--- Build the appropriate URL based on the calling service' "auth_site"
--- setting.  Then redirect the user to the "auth_site".  This function
--- will be called anywhere a JWT token fails to meet the criteria to
--- allow the user to proceed
+-- Send the user to the configured auth site
 ------------------------------------------------------------------------------
 local _sendUserToLogin = function()
-  local redirectUrl = ngx.var.request_uri
-  redirectUrl = _replace(redirectUrl, ngx.var.public_url, jwt_auth_site)
   ngx.req.set_header('X-Starphleet-JWT-Secret', jwt_secret);
   ngx.req.set_header('X-Starphleet-Redirect', "true");
   ngx.req.set_header('X-Starphleet-OriginalUrl', ngx.var.request_uri);
   ngx.req.set_header('X-Starphleet-Authentic', ngx.var.authentic_token);
-  return ngx.exec(redirectUrl)
+  return ngx.exec(jwt_auth_site .. "/")
 end
 
 ------------------------------------------------------------------------------
@@ -233,6 +229,18 @@ elseif _isValidToken(verified_cookie_token) then
 end
 
 ------------------------------------------------------------------------------
+-- acr claim and auth required:
+-- if auth requred and no token set the header.
+-- If auth is required and the acr claim is missing set header.
+------------------------------------------------------------------------------
+if jwt_auth_required and jwt_auth_required ~= "" then
+  ngx.req.set_header('X-Starphleet-Auth-Required', jwt_auth_required)
+  if token and token.payload and not token.payload.acr then
+    token = nil
+  end
+ end
+
+------------------------------------------------------------------------------
 -- Access Flags:
 -- If the valid token contains 'af' (access flags) we will limit
 -- the response at a service level based on these flags.
@@ -271,12 +279,23 @@ if (token) then
   -- manipulations.  Dynamically build a cookie string to assign
   -- the JWT session token to the request
   ------------------------------------------------------------------------------
-  local cookieString = ""
-  cookieString = cookieString .. (signedJwtToken and jwt_cookie_name .. "=" .. signedJwtToken or '')
-  cookieString = cookieString .. (jwt_cookie_domain and '; Domain=' .. jwt_cookie_domain or '')
-  cookieString = cookieString .. '; Path=/'
-  cookieString = cookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
-  ngx.header['Set-Cookie'] = cookieString
+  local jwtCookieString = ""
+  jwtCookieString = jwtCookieString .. (signedJwtToken and jwt_cookie_name .. "=" .. signedJwtToken or '')
+  jwtCookieString = jwtCookieString .. (jwt_cookie_domain and '; Domain=' .. jwt_cookie_domain or '')
+  jwtCookieString = jwtCookieString .. '; Path=/'
+  jwtCookieString = jwtCookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
+
+  if token and token.payload and token.payload.un and token.payload.un ~= "" then
+    local userCookieString = ""
+    userCookieString = userCookieString .. (token.payload.un and 'starphleet_user' .. "=" .. token.payload.un or '')
+    userCookieString = userCookieString .. (jwt_cookie_domain and '; Domain=' .. jwt_cookie_domain or '')
+    userCookieString = userCookieString .. '; Path=/'
+    userCookieString = userCookieString .. (jwt_expiration_in_seconds and '; Expires=' .. ngx.cookie_time(token.payload.exp) or '')
+    ngx.header['Set-Cookie'] = {jwtCookieString, userCookieString}
+  else
+    ngx.header['Set-Cookie'] = jwtCookieString
+  end
+  
 
   if redirect then
     return ngx.redirect(redirect)
