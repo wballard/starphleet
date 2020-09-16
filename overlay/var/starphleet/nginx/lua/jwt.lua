@@ -455,7 +455,7 @@ if (token) then
       -- Create a new jwt token
       ------------------------------------------------------------------------------
       token.header.alg = "RS256"
-      local signedJwtToken = jwt:sign(jwt_private_key, { payload=token.payload, header=token.header } )
+      local signedJwtToken = jwt:sign(session_private_key, { payload=token.payload, header=token.header } )
 
       ------------------------------------------------------------------------------
       -- LUA does not support string appends OR ternary operations
