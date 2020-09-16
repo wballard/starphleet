@@ -207,7 +207,7 @@ end
 ------------------------------------------------------------------------------
 function _legacy()
   legacy = true
-  ngx.log(ngx.ERR, "Old Session Token at URL: " .. ngx.var.request_uri)
+  -- ngx.log(ngx.ERR, "Old Session Token at URL: " .. ngx.var.request_uri)
 end
 
 ------------------------------------------------------------------------------
