@@ -140,7 +140,10 @@ local _resetHeaders = function(token)
   -- If the "un" claim exists in the valid JWT token we will
   -- set the jwt_auth_header which mimics the behavior of the
   -- other authentication methods
-  if token.payload.un and type(token.payload.un) == "string" then
+  if token.payload.un and
+     type(token.payload.un) == "string" and
+     user_identity_cookie and
+     user_identity_cookie ~= "" then
     -- If the un field is set we'll also set the user_identity_cookie
     -- so that traditional betas will work with JWT
     local cookieString = ""
