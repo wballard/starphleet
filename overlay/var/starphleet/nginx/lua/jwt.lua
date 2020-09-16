@@ -420,7 +420,7 @@ if (token) then
     ------------------------------------------------------------------------------
     -- Below we write the HS256 enabled cookie if we have enough information
     ------------------------------------------------------------------------------
-    if jwt_secret ~= "" then
+    if jwt_secret and jwt_secret ~= "" then
       -- Adding static entries to cookie name during transition to new sign type
       -- because we will support writing two cookies for the transition period
       local cookie_name = "jwt"
@@ -447,7 +447,7 @@ if (token) then
     ------------------------------------------------------------------------------
     -- Below we write the RS256 enabled cookie if we have enough information
     ------------------------------------------------------------------------------
-    if jwt_private_key ~= "" then
+    if session_private_key and session_private_key ~= "" then
       -- Adding static entries to cookie name during transition to new sign type
       -- because we will support writing two cookies for the transition period
       local cookie_name = "_session"
