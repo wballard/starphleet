@@ -141,16 +141,18 @@ local _resetHeaders = function(token)
   -- set the jwt_auth_header which mimics the behavior of the
   -- other authentication methods
   if token.payload.un and
-     type(token.payload.un) == "string" and
-     user_identity_cookie and
-     user_identity_cookie ~= "" then
+     type(token.payload.un) == "string" then
     -- If the un field is set we'll also set the user_identity_cookie
     -- so that traditional betas will work with JWT
-    local cookieString = ""
-    cookieString = cookieString .. user_identity_cookie .. "=" .. token.payload.un
-    cookieString = cookieString .. (jwt_cookie_domain and '; Domain=' .. jwt_cookie_domain or '')
-    cookieString = cookieString .. '; Path=/'
-    table.insert(_setCookie, cookieString)
+    if user_identity_cookie and
+       user_identity_cookie ~= "" then
+      local cookieString = ""
+      cookieString = cookieString .. user_identity_cookie .. "=" .. token.payload.un
+      cookieString = cookieString .. (jwt_cookie_domain and '; Domain=' .. jwt_cookie_domain or '')
+      cookieString = cookieString .. '; Path=/'
+      table.insert(_setCookie, cookieString)
+    end
+    -- This sets the auth header for legacy starphleet
     ngx.req.set_header(jwt_auth_header, token.payload.un)
   end
 end
