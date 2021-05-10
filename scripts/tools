@@ -326,13 +326,14 @@ function container_environment() {
 function get_updated_aws_command {
   AWS_INSTALL_LOCK_FILE="/var/lock/aws_command_install"
   # Because aws cli on our machines is a mixed bag and I really do
-  # want a modern version.  It's okay if they aren't consistent for
-  # what we are doing so long as the version isn't 10 years old.
+  # want anything above version 1.  It's okay if they aren't consistent for
+  # what we are doing so long as the version isn't 1.
   export AWS_COMMAND_PATH="/usr/local/bin/aws"
 
   # Test if we need to upgrade aws cli
   unset UPGRADE
-  if $AWS_COMMAND_PATH --version 2>&1 | grep 'aws-cli/1.11'; then
+  # any version of AWS CLI 1 will fail us
+  if $AWS_COMMAND_PATH --version 2>&1 | grep 'aws-cli/1'; then
     UPGRADE=true
   fi
 
@@ -342,23 +343,14 @@ function get_updated_aws_command {
     (
       flock -n 250
       set +e
-      # New pip install wanted libyaml so we'll install that before trying
-      # to get the latest AWS cli
-      apt-get update -y
-      apt-get install -y libyaml-dev python-dev python-docutils python-pip
+      # Need to be able to unzip the install
+      sudo apt-get update -y
+      sudo apt-get install -y unzip
       #######
-      ## Because:  https://github.com/aws/aws-cli/issues/2999#issuecomment-356019306
-      pip uninstall boto3 -y
-      pip uninstall boto -y
-      pip uninstall botocore -y
-      # Fix bug caused by apt/ubuntu
-      rm -rf /usr/local/lib/python2.7/dist-packages/botocore-*.dist-info
-      pip install botocore --force-reinstall --upgrade
+      sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      sudo unzip awscliv2.zip
+      sudo ./aws/install
       #######
-      ## Because: https://github.com/aws/aws-cli/issues/3007#issuecomment-350797161
-      pip install --upgrade s3transfer
-      rm -rf /tmp/pip_build_root/PyYAML
-      pip install awscli --force-reinstall --upgrade
       rm "${AWS_INSTALL_LOCK_FILE}"
       set -e
       # Let the caller test if things went okay
