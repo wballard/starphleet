@@ -17,5 +17,8 @@ export AWS_SECRET_ACCESS_KEY="${S3_STORAGE_AWS_SECRET_ACCESS_KEY}"
 get_updated_aws_command
 
 S3_PATH_FOR_CONTAINER_STORAGE="s3://${S3_STORAGE_BUCKET_PATH}"
-"${AWS_COMMAND_PATH}" s3 cp "${S3_PATH_FOR_CONTAINER_STORAGE}/${containerName}.tar.gz" . \
+# Specify region here because orders files can unset variables...
+# I also want to be explicit, as any parameter in the CLI will override
+# any other profiles or environment variables.
+"${AWS_COMMAND_PATH}" s3 cp --region "${S3_STORAGE_BUCKET_REGION}" "${S3_PATH_FOR_CONTAINER_STORAGE}/${containerName}.tar.gz" . \
   || exit ${EXIT_CODE_FOR_FAILED_S3_DOWNLOADS}
