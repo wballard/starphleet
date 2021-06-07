@@ -52,6 +52,27 @@ function get_VERSION_DIFF() {
   export VERSION_DIFF=$(git --git-dir ${1}/.git --work-tree ${1} diff ${2} ${3} ${4})
 }
 
+# For a given script, determine which others it sources either directly or
+# indirectly through other scripts and print the names of each of them to
+# stdout, one per line.  Takes an additional argument which is the value
+# to substitute for any references to the variable $HEADQUARTERS_LOCAL
+# in the source commands in the script.
+# Suitable for calling like this:
+# for dependency in $(get_script_dependencies my_script $HEADQUARTERS_LOCAL)
+function get_script_dependencies() {
+  script_file=$1
+  working_headquarters_local=$2
+  deps=$(perl -ne ' if ( m#^source\s+(\S*)$# ) { my $fname = $1 ; if ($fname =~ m#"([^"]+)"$#) { $fname = $1}; print $fname,"\n"; }' ${script_file} | sed 's[${HEADQUARTERS_LOCAL}['${working_headquarters_local}'[')
+  for f in $deps
+  do
+    if [ -f $f ]
+    then
+      echo $f
+      get_script_dependencies $f $working_headquarters_local
+    fi
+  done
+}
+
 function get_SHASUM() {
   export SHASUM=$(sha1sum "${1}" | awk '{ print substr($1,1,7); }')
 }
