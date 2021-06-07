@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+### Usage:
+###    starphleet-source-orders
+###
+### Used to source the orders in a container
+
+# Why is this line needed?
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Source the tools that allow you to run_orders
+source `which tools`
+
+# Apply orders
+run_orders "${HEADQUARTERS_LOCAL}/${ORDERS_NAME}/orders"
