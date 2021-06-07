@@ -381,9 +381,18 @@ function fromJson() {
 import sys
 json_string, json_key = sys.argv[1:]
 try:
-    print json.loads(json_string)[json_key]
+    obj = json.loads(json_string)
 except Exception:
-    print >> sys.stderr, \"This isn't json!\"" \
+    print >> sys.stderr, \"fromJson({}): This isn't json!\".format(\"$0\")
+    sys.exit(0)
+
+try:
+    value = obj[json_key]
+except Exception:
+    print >> sys.stderr, \"fromJson({}): error reading key ({}) from json\".format(\"$0\", json_key)
+    sys.exit(0)
+
+print value" \
     "${1}" "${2}"
 }
 
