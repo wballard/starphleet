@@ -34,7 +34,21 @@ do
   if [ -f "${CURRENT_ORDER}/.orders_sha" ]; then
     DEPLOYED_ORDERS_SHA=$(cat "${CURRENT_ORDER}/.orders_sha")
     get_VERSION_DIFF ${HEADQUARTERS_LOCAL} ${ORDERS_SHA} ${DEPLOYED_ORDERS_SHA} $(dirname "${order}")
-    [ -n "${VERSION_DIFF}" ] && ORDERS_DIFF="Updated orders"
+    if [ -n "${VERSION_DIFF}" ]; then
+      ORDERS_DIFF="Updated orders"
+    else
+      # Also check for any other files on which this orders file is dependent
+      # (via the source command) and see if they have changed since the last publish of
+      # THIS orders file.
+      for dependency in $(get_script_dependencies ${order} ${HEADQUARTERS_LOCAL})
+      do
+        get_VERSION_DIFF ${HEADQUARTERS_LOCAL} ${ORDERS_SHA} ${DEPLOYED_ORDERS_SHA} ${dependency})
+        if [ -n "${VERSION_DIFF}" ]; then
+          ORDERS_DIFF="Updated orders dependency: ${dependency}"
+          break
+        fi
+      done
+    fi
   else
     ORDERS_DIFF="New orders"
   fi
